@@ -1,0 +1,32 @@
+<!--- TEMPLATENAME: tooltip.isml --->
+<iscomment>
+	displays tooltip 
+
+	Parameter:
+	content_id	 	:  id of the tooltip content
+	show_tooltipimg :  whether to show the tooltip image or not
+ </iscomment>
+<div  class="tooltip">
+	<isif condition="${empty(pdict.show_tooltipimg)}">
+		<img class="tooltip_icon" alt="" src="${URLUtils.staticURL('images/tablet/info_icon.png')}" />
+	</isif>
+	<script>
+	$(".ui-dialog-tooltip-close").click(function() {
+		$(".tooltip-body").hide();
+	});
+	</script>
+	<div class="tooltip-body" style="display:none">
+		<span class="ui-dialog-tooltip-close" href="javascript:;" style="float:right; margin:0;">close</span>
+		<div class="tooltipcontainer">
+			<iscomment><!-- Please make all the tooltips like this --> </iscomment>
+			<div class="tooltipcontent">
+				<iscontentasset aid="${pdict.content_id}"/>
+			</div>
+		</div>
+	</div>
+</div>
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,14 @@
+.payment_cards .floatleft .contentasset {
+    margin-top: -22px;
+}
+
+.delivery_link_std, .delivery_link_express, .delivery_link_store_collection{float:left; padding:0 10px 0 50px; width:462px;}
+.collect_from_uk{clear:both;}
+
+.shippingmethods .radio label{
+	margin-top:-25px;
+	padding-left:65px;
+}
+.shippingmethods .returns_info {
+	padding-left:32px;
+}

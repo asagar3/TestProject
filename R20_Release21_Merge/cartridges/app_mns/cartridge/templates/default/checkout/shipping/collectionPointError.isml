@@ -1,0 +1,14 @@
+<input type="hidden" value="${pdict.errorCode}" id="errorCode"/>
+<isset name="errorCode" value="${pdict.errorCode}" scope="page"/>
+
+<isif condition="${errorCode==0}">
+	<br/>
+	<div class="collPointsError"  float="left" style="display: inline-block;">
+		<span class="errorIcon"></span>
+		<div class="errorclient" style="display: inline;">
+			${Resource.msg('forms.cp.error.noresults','forms',null)}
+		</div>
+	</div>
+<iselse>
+		<input type="hidden" value="${Resource.msg(errorCode,'checkout',null)}" id="errorMessage"/>
+</isif>

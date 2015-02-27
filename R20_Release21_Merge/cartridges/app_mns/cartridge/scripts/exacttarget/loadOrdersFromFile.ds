@@ -1,0 +1,31 @@
+/**
+* @input filename : String
+* @output ordersList : dw.util.List
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.order );
+importPackage( dw.util );
+
+function execute( pdict : PipelineDictionary ) : Number {
+
+	var filename : String = pdict.filename;
+	var fileIn : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR+ "exacttarget"+ File.SEPARATOR+filename);
+	var fileReader : FileReader = new FileReader(fileIn);
+	
+	var ordersList : ArrayList =  new ArrayList();
+	
+	for each (var line : String in fileReader.getLines()){
+		Logger.debug( "MNS READ FILE : " + line);
+		var order : Order = OrderMgr.getOrder(line.trim());
+		ordersList.add(order);
+	}
+	fileReader.close();
+	
+	if (ordersList.length > 0){
+			pdict.ordersList = ordersList;
+			Logger.debug("MNS DEBUG : The ordersList size to export is " + ordersList.size());
+		}
+	
+   return PIPELET_NEXT;
+}

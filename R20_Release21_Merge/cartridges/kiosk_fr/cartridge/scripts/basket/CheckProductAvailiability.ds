@@ -1,0 +1,35 @@
+/**
+*  @input Product : dw.catalog.Product
+*  @input orderedQuantity : Number
+*/
+importPackage( dw.system );
+importPackage( dw.catalog ); 
+
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	try{
+		var product:Product = pdict.Product ;	
+		var avm:ProductAvailabilityModel = product.availabilityModel ;
+		var orderedQuantity:Number = pdict.orderedQuantity ;
+		
+		var stockStatus:Boolean = avm.inStock ;	
+		var isStockAvailableForPurchase:Boolean = false ;
+		
+		if(stockStatus && (avm.inventoryRecord == null ||avm.inventoryRecord.ATS.value == 0 )){//  This is added so as to allow product purchanse in test env as well
+			isStockAvailableForPurchase = true ;
+		}else {
+			if(avm.inventoryRecord != null && orderedQuantity <= avm.inventoryRecord.ATS.value){		
+					isStockAvailableForPurchase = true ;				 	
+			}		
+		}
+		
+		if(!isStockAvailableForPurchase){
+			return PIPELET_ERROR ;
+		}
+	} catch (e){
+		Logger.error("Error while checking the product availablity"+e.message);
+	}
+	
+	return  PIPELET_NEXT;
+}

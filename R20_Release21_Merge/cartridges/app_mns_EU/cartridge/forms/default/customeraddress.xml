@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+	<field formid="addressid" label="forms.customeraddress.addressid.label" type="string" mandatory="false" binding="ID" missing-error="forms.customeraddress.addressid.missing-error" value-error="forms.customeraddress.addressid.value-error"/>
+	<field formid="title" label="profile.title" type="string" mandatory="true" binding="title"  />			
+	<field formid="firstname" label="profile.firstname" type="string" mandatory="true" binding="firstName" max-length="20" missing-error="forms.customeraddress.firstname.missing-error"/>
+	<field formid="lastname" label="profile.lastname" type="string" mandatory="true" binding="lastName" max-length="30"	missing-error="forms.customeraddress.lastname.missing-error"/>
+	<field formid="address1" label="forms.address1" type="string" mandatory="true" binding="address1" max-length="35" missing-error="forms.addresserror"/>
+	<field formid="address2" label="forms.address2" type="string" mandatory="false" binding="address2" max-length="35"/>
+	<field formid="address3" label="forms.address3" type="string" mandatory="false" binding="custom.address3" max-length="35" range-error="forms.address.field.invalid" />
+	<!-- Praveen:Changes made for CR105-->
+	<field formid="postBox" label="forms.postBox" type="string" mandatory="false" binding="postBox" min-length="2" max-length="35" missing-error="forms.address.city.missing"  />
+	<field formid="city" label="forms.city" type="string" mandatory="true" binding="city" max-length="35" missing-error="forms.address.city.missing" range-error="forms.address.field.invalid" />
+	<!-- use global state list -->
+	<include formid="states" name="states" max-length="35" />
+	<field formid="zip" label="forms.zippostalcode" type="string" mandatory="true" min-length="4" max-length="8" regexp="^([\w\s]{4,8})(-\w{4})?$" binding="postalCode" missing-error="forms.errorzip" range-error="forms.address.field.invalid" parse-error="forms.address.field.invalid" />
+		
+		
+	<!-- Commenting the country list because we are using a country text box.-->
+	<iscomment>		
+	<field formid="country" label="forms.country" type="string" mandatory="true" binding="countryCode"
+		missing-error="forms.customeraddress.country.missing-error">
+		<options>
+			<option optionid="FR" 	label="country.france" 	value="FR"/>
+			<!--  <option optionid="" 	label="forms.select"	value=""/>
+			
+			<option optionid="US" 	label="country.unitedstates"	value="US"/>
+			<option optionid="DE" 	label="country.germany" 	value="DE"/>
+			<option optionid="CA" 	label="country.canada" 	value="CA"/>-->
+		</options>	
+	</field>
+	</iscomment>
+	
+	<field formid="streetName" label="forms.streetName" type="string" mandatory="true" binding="custom.streetName" max-length="29" missing-error="forms.addresserror"  />
+	<field formid="residence" label="forms.residence" type="string" mandatory="false" binding="custom.residence" max-length="29" missing-error="forms.addresserror"  />
+	<field formid="alternateContactNumber" label="forms.alternateContactNumber" type="string" mandatory="false" binding="custom.alternateContactNumber" max-length="15" missing-error="forms.addresserror"  />	
+	<field formid="country" label="forms.country" type="string" mandatory="true" binding="countryCode" max-length="10"/>	
+	<!--<field formid="country" label="forms.country" type="string" mandatory="false" binding="countryCode" value="FR"/>-->
+	
+	<!-- phone is mandatory for shipping addresses -->
+	<field formid="phone" label="profile.phone" type="string" mandatory="true" binding="phone" max-length="15" missing-error="forms.address.phone.missing" range-error="forms.address.field.invalid" />
+	
+	<!-- all possible actions performed on an address -->
+	<action formid="cancel" valid-form="false"/>
+	<action formid="remove" valid-form="false"/>
+	<action formid="confirm" valid-form="true"/>
+	<action formid="create" valid-form="true"/>
+</form>

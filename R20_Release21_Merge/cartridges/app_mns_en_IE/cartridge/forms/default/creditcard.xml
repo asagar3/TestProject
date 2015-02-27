@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+
+    <!-- field for credit card type -->
+    <field formid="type" label="creditcard.type" type="string" mandatory="true" binding="creditCardType"
+        missing-error="creditcard.typemissing">
+        <options optionid-binding="cardType" value-binding="cardType" label-binding="name"/>
+    </field>
+
+	<!-- field for credit card number -->
+    <field formid="number" label="creditcard.number" type="string" mandatory="true" masked="4"
+	    binding="creditCardNumber"
+	    missing-error="creditcard.numbermissingerror" value-error="creditcard.numbervalueerror" max-length="19" default=""/>
+	    
+	<!-- field for issue number -->
+	<iscomment>[QC 262] | Issue Number should not be present. | Naveen Kumar
+		<field formid="issueNumber" label="creditcard.issuenumber" type="string" mandatory="true" max-length="4"/>
+	</iscomment>
+	<iscomment>Praveen: Qc defect 760, Title removed from card details section</iscomment>
+
+	<!-- field for credit card expiration month -->
+    <field formid="month" label="forms.month" type="integer" mandatory="true" binding="creditCardExpirationMonth"
+      	missing-error="creditcard.monthmissingerror"  max-length="2">
+      
+    </field>
+
+	<!-- 
+		field for credit card expiration year; 
+		a value error (credit card is expired is only displayed for this field) 
+	-->
+    <field formid="year" label="forms.year" type="integer" mandatory="true" binding="creditCardExpirationYear"
+      	missing-error="creditcard.yearmissingerror" max-length="4"></field>
+    <!-- Form Fields for Start date in credit card -->
+    
+    <field formid="ccValidFromMonth" label="forms.creditCardValidFromMonth" type="integer" mandatory="false" max-length="2"
+	    binding="creditCardValidFromMonth"
+	    missing-error="creditcard.numbermissingerror" value-error="creditcard.numbervalueerror" />
+	    
+    <field formid="ccValidFromYear" label="forms.creditCardValidFromYear" type="integer" mandatory="false"  max-length="4"
+    binding="creditCardValidFromYear"
+    missing-error="creditcard.numbermissingerror" value-error="creditcard.numbervalueerror" />
+    
+	<!-- END -->
+	
+	
+	<!-- field for credit card owner -->
+	<!--handled APOSTROPHE in card name field as per QC defect 1729. GRAVE ACCENT(u0060) and ACUTE ACCENT(u00B4) are not considered.-->
+    <field formid="owner" label="creditcard.ownerlabel" type="string" mandatory="true" max-length="40" binding="creditCardHolder"  parse-error="creditcard.ownervalueerror" missing-error="creditcard.ownermissingerror" regexp="^[\u0041-\u005A\u0061-\u007A\u00C0-\u00FF\u002C\u002D\u0020\u0027]+$"/>
+
+	<!-- field for credit card security code -->
+    <field formid="cvn" label="creditcard.cvnlabel" type="string" mandatory="true" masked="0"
+     	missing-error="creditcard.cvnmissingerror" value-error="creditcard.cvnrangeerror" max-length="4" min-length="3" regexp="^[0-9]{3,4}"/>
+ 
+	<!-- optional flags -->
+	<field formid="saveCard" label="creditcard.savecard" type="boolean" mandatory="false" default-value="false" />
+
+	<!-- confirm action to save the card details -->
+    <action formid="confirm" valid-form="true"/>
+
+</form>

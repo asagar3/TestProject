@@ -1,0 +1,19 @@
+/**
+ * Grab Order Number from http GET arguments and export as OrderNo on pipeline dictionary
+ *
+ * @output OrderNo : String
+ * @output KlarnaError : String
+ */
+importPackage( dw.system );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var orderNo = request.httpParameters["id"][0];
+	if(orderNo == undefined) {
+		args.KlarnaError = "No OrderID specified";
+		return PIPELET_ERROR;
+	}
+	
+	args.OrderNo = orderNo;
+	return PIPELET_NEXT;
+}

@@ -1,0 +1,36 @@
+<isinclude template="tablet/util/modules"/>
+<p class="linetxt">${Resource.msg('paymentinstrumentlist.deletecardconfirm','account',null)}</p>
+<div class="separator">&nbsp;</div>
+<isset name="confirmDeletion" value="false" scope="pdict"/>
+<div class="button_wrapper_deletecard">
+			<div class="floatright btn-green-flat">
+						<button value="Confirm" name="Confirm" type="submit" class="confirmdeletion">
+							<span class="arrow-btn">${Resource.msg('delete.confirm','account',null)}</span>
+						</button>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="floatleft btn-grey-flat">
+						<button value="Cancel" name="Cancel" type="submit" class="canceldeletion link_button" id="cancelBtn">
+							<span>${Resource.msg('delete.cancel','account',null)}</span>
+						</button>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+	
+
+<script type="text/javascript">
+	jQuery(".confirmdeletion").click(function(){
+		var deleteButton = "${pdict.CurrentHttpParameterMap.cardID}";
+		$("#"+deleteButton).click();
+		
+		//alert("accepted: "+inputButton.id);							
+	});	
+
+	jQuery(".canceldeletion").click(function(){
+		app.dialog.close();							
+	});	
+	
+	 
+	
+</script>

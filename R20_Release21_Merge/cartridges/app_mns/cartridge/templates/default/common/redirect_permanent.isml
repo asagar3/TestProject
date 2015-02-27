@@ -1,0 +1,14 @@
+<!--- ISREDIRECT must be before ISCACHE, because ISREDIRECT clears the response created so fare --->
+<isredirect location="${pdict.Location}" permanent="true">
+
+<!--- a page with a meta refresh in case the browser doesn't follow the redirect --->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Redirect</title>
+<meta http-equiv="refresh" content="2;url=${pdict.Location}">
+<meta http-equiv="Robots" content="noindex, nofollow" />
+</head>
+<body>
+The page has been moved permanently to <a href="${pdict.Location}">${pdict.RedirectURL}</a>
+</body>
+</html>

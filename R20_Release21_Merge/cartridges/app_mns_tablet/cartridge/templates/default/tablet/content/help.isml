@@ -1,0 +1,301 @@
+<isdecorate template="tablet/content/pt_helppage">
+<isinclude template="tablet/util/modules"/>
+<div class="helpmainContentWrapper" id="hp-maincolumn">
+
+</div>
+<div id="scSymbol"></div>
+<iscontentasset aid="account-footer"/>
+
+<script>
+function loadMainColumn(sectionId,questionId,loadonready) {
+	var lhnfaqId = "@"+sectionId;
+	if(sectionId != null && sectionId != "") {
+		var submitURL = "${URLUtils.http('Page-Include')}";
+		jQuery.ajax({
+		  	type: "POST",
+		   	url: submitURL,
+		   	data: {"cid": sectionId},
+		   	dataType: 'html',
+		  	success: function(data){
+	   		   	jQuery("#hp-maincolumn").empty().html(data);	
+	   		   	jQuery(".faqsection").attr("id",sectionId);  
+	   		   	jQuery(".faqsection div.helpAccordion").each(function(index, element){
+						var divIDString = sectionId + "-" + oThis.doubleDigit(index+1);
+						$(this).attr("id", divIDString );
+						$(this).attr("name", divIDString );
+				});
+	   		   	var getDashBoardName = jQuery("#hp-maincolumn").find(".dashBorder").find("h3.faqHead").text();
+	   		   	jQuery("#main").find(".help-tablet-title:first span").text(getDashBoardName);
+	   			jQ("#hp-maincolumn").append("<div class='clear'></div>");
+	   		   	jQ("#hp-maincolumn").append($("<div/>").addClass('backBtn btn-grey-flat  padding0 registrationback').append($("<a/>").html("<span class='btn-back'></span><span>${StringUtils.format(Resource.msg('help.backbuttontext','components',null))}</span>").attr({'id':'hp-backBtn', 'href':'Page-HelpPageShow?secId=faq-00-00'}).bind('click', function(){
+	   		   		//jQ("#hp-maincolumn").hide();
+	   		   		//jQ(".helpTopics").show();
+	   		   		
+	   		   	})))
+	   		   	
+	   		   if(questionId != null && questionId != ""){		   		   
+	   			   showAnswer(questionId);
+	   		   }
+	   		   if(loadonready) {
+		   		   if(questionId != null && questionId != "") {
+	   		   		selectLeftHandNavigation(questionId);
+	   		   		
+		   		   }else {
+		   			selectLeftHandNavigation(lhnfaqId);
+		   		   }
+		   		   
+	   		   }
+	   		   
+	   		jQ(questionId).find("div.content").show();
+	   		   
+	   		    //4470 : help page fix
+	   		    /*var faqAccordion = jQ('.faqsection .helpAccordion:visible');
+	 			if(faqAccordion.length)
+	 			{
+	 				faqAccordion.eq(6-1).find('h3').trigger('click');
+	 			}*/
+	 			//4470 : help page fix
+		   	},
+		   	failure: function(data) {
+		   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+		   	}
+		});
+	}
+}
+function showAnswer(questionId) {
+	 $(questionId + " div").slideDown();
+	 $(questionId).find("span").removeClass("plus").addClass("minus").html("minus");
+	 $(questionId).addClass("showContent");
+	 window.location.href=questionId;	
+}
+function selectLeftHandNavigation(faqId){
+	if (typeof faqId == "string" ){						
+
+		// need to target the left hand nav specifically
+		var lhnId = faqId.replace("faq", "lhn");
+		
+		// left hand nav ids have a maximum character length of 10
+		
+		lhnId = lhnId.replace("@" , "#");
+		
+		var sectionIDArray = lhnId.split("-");
+		var splitcategoryId = sectionIDArray[0];
+		splitcategoryId = splitcategoryId + "-" +  sectionIDArray[1];
+		var splitsubCategoryId = sectionIDArray[2];
+		var splitfaqId = sectionIDArray[3];
+		
+		_this = splitcategoryId;
+	
+	} else if (typeof faqId == "object" ){			
+		_this = faqId.currentTarget;
+	}
+		
+	if ($(_this).parent().hasClass("active")){
+		$(_this).parent().removeClass("active");
+		$(_this).parent().siblings().removeClass("active");	
+		
+		// clear on list element
+		$(_this).removeClass("open").addClass("closed");
+		//$(_this).next(".content").slideUp();
+		$(_this).next().find("li").removeClass("selected");
+		
+	} else {
+	
+		// sort out open and close methods across all panels	
+		// reset all other panels	
+		$(_this).parent().siblings().each(function(){		
+			if ($(this).hasClass("active") && $(this).attr("id") != "div-00"){
+				//$(this).find(".content").slideUp();
+				$(this).find("li").removeClass("selected");
+				$(this).removeClass("active");
+				$(this).find("h3").removeClass("open").addClass("closed");
+			}
+		});
+		if(faqId != "@faq-00-00") {
+			$(_this).parent().addClass("active").find("ul").slideDown("slow", function(){
+				$(this).find("li.selected a").trigger("click");
+			});
+			//$(_this).next(".content").slideDown();
+			$(_this).addClass("open").removeClass("closed");
+		}	
+	};
+		
+	
+	
+	// panel has now been opened now open links if applicable
+	
+	var lhnLinkID = splitcategoryId + "-" + splitsubCategoryId;
+	var actualFaqID = splitcategoryId + "-" + splitsubCategoryId  + "-" + splitfaqId;
+
+
+	if (lhnLinkID.length == 7){		
+		// option for cat only
+	}
+	
+	if (lhnLinkID.length == 10){
+		// option for cat and sub cat only	
+		$(lhnLinkID).parent().addClass("selected");
+	}
+	
+	if (lhnLinkID.length == 13){
+		// option for cat, sub cat and link			
+	}
+	
+};
+
+jQuery(document).ready(function() {
+	var sectionId = "faq-00-00";
+	if(null != "${pdict.CurrentHttpParameterMap.secId}" && "${pdict.CurrentHttpParameterMap.secId}" != "" && "${pdict.CurrentHttpParameterMap.secId}" != "null"){
+		sectionId = "${pdict.CurrentHttpParameterMap.secId}";
+	} else if (null != "${pdict.sectionID}" && "${pdict.sectionID}" != "" && "${pdict.sectionID}" != "null"){
+		sectionId = "${pdict.sectionID}";
+	}
+	var questionId = "${pdict.CurrentHttpParameterMap.quesId}";
+	loadMainColumn(sectionId,questionId,true);
+	
+	
+	// added for tablet help page new vds.
+	$(".helpAccordion").append("<span class='bg'></span>");
+	$(".helpAccordion").append("<em></em>");
+	var helpText = $("#div-00").text();
+	$(".helpTopics").parent().prepend("<div class='help-tablet-title'><span class='ms_header_account_login'></span></div>");
+	$(".helpTopics").prepend("<div class='help-text'></div>");
+	$(".ms_header_account_login").text(helpText);
+	
+
+	jQ("#scSymbol").html("${StringUtils.format(Resource.msg('help.headingtext','components',null))}");
+	var getSPChar = jQ("#scSymbol").html();
+	$(".help-text").html(getSPChar);
+	
+	$(".navgroup li a").click(function(){
+		var attrHref = $(this).attr("href");
+		var attrCid = attrHref.substring(1, attrHref.length);
+		loadMainColumn(attrCid,questionId,false);
+		//loadMainColumn(attrCid,questionId,true);
+		jQ(".helpTopics").hide();
+		jQ("#hp-maincolumn").show();
+	});
+
+	$("#homepage").click(function(){
+		var attrHref = $(this).attr("href");
+		var attrCid = attrHref.substring(1, attrHref.length);
+		loadMainColumn(attrCid,null,true);
+	});
+	
+	$(".dashNav a").live("click",function(){
+		var attrHref = $(this).attr("href");
+		var hashindex = attrHref.lastIndexOf('#');
+		loadMainColumn(attrHref.substring(hashindex+1),null,false);
+		selectLeftHandNavigation(attrHref);
+	});
+	
+	$("#hp-backBtn").live("click", function(e){
+		e.preventDefault();
+		jQ(".helpTopics").show();
+		jQ("#hp-maincolumn").hide();
+	});
+	
+	$(".sideFaqs li a").click(function(){
+		var attrHref = $(this).attr("href");
+		var attrCid = attrHref.substring(1, attrHref.length-3);		
+		var questionId = attrHref.substring(1, attrHref.length);
+		loadMainColumn(attrCid,attrHref,false);		 
+	});
+	
+	
+
+	$(".sizelink").live("click",function(e){
+		// add size chart dialog container div if its not added yet
+		// only added once
+		if (jQuery("#sizeChartDialog").length == 0) {
+			jQuery("<div/>").attr("id", "sizeChartDialog").appendTo(document.body);
+		}
+		var sizeChartTitle = "${StringUtils.format(Resource.msg('product.sizecharttitle','product',null))}";
+		app.createDialog({id: 'sizeChartDialog', options: {
+	    	height: 'auto',
+	    	width: 660,
+	    	zIndex: 100005, /*QC 327 */
+	    	title: sizeChartTitle
+		}});
+		
+		jQuery('#sizeChartDialog').dialog('open');
+		jQuery('#sizeChartDialog').parent().addClass("sizeChartShade");
+		 /* for all dialogue boxes - set to center in both orientations - Shahzad */
+		 var popupW = jQuery('#sizeChartDialog').width();	 
+		 jQuery('#sizeChartDialog').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%"});
+		 /* end */ 
+		jQuery('.ui-dialog-content .contentasset').html(""); // Refresh the earlier content
+		// make the server call to load the size chart html
+		jQuery("#sizeChartDialog").load(this.href);
+		
+		return false;
+	});
+
+	$(".contactusLink").live("click",function(e){
+		// add contactus dialog container div if its not added yet
+		// only added once
+		if (jQuery("#contactUsDialog").length == 0) {
+			jQuery("<div/>").attr("id", "contactUsDialog").appendTo(document.body);
+		}else {
+			jQuery("#contactUsDialog").empty();
+		}
+		var contactUsTitle = "${StringUtils.format(Resource.msg('global.contactus','locale',null))}";
+		app.createDialog({id: 'contactUsDialog', options: {
+	    	height: 'auto',
+	    	width: 540,
+	    	zIndex: 100005, 
+	    	title: contactUsTitle
+		}});
+		jQuery("#contactUsDialog").load(this.href); 
+		jQuery('#contactUsDialog').dialog('option', 'title', contactUsTitle);	
+		jQuery('#contactUsDialog').dialog('open');
+		  /* for all dialogue boxes - set to center in both orientations - Shahzad */
+		 var popupW = jQuery('#contactUsDialog').width();	 
+		 jQuery('#contactUsDialog').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%", "top": "10%"});
+		 /* end */ 
+		 
+		//jQuery('.ui-dialog-content .contentasset').html(""); // Refresh the earlier content
+		// make the server call to load the contactus form
+		jQuery("#contactUsDialog").load(this.href);
+		
+		return false;
+	});
+	
+	jQ("#hp-maincolumn").hide();
+	jQ(".contentasset .navgroup").find('ul').slideUp('fast');
+	
+	jQ(".contentasset .navgroup").on('click', function(){
+		
+		if ($(this).hasClass("active")){
+			jQ(this).find('ul').slideUp('fast');
+			$(this).find("li").removeClass("selected");
+			$(this).removeClass("active");
+			$(this).find("h3").removeClass("open").addClass("closed");	
+			
+		} else {
+			
+			jQ(this).siblings().each(function(i,item){
+				jQ(this).find('ul').slideUp('fast');
+				$(this).find("li").removeClass("selected");
+				$(this).removeClass("active");
+				$(this).find("h3").removeClass("open").addClass("closed");
+			});
+			
+			jQ(this).find('ul').slideDown('fast');
+			$(this).find("li").addClass("selected");
+			$(this).addClass("active");
+			$(this).find("h3").removeClass("open").addClass("closed");	
+		}
+		
+	});
+	
+
+	jQ(".contentasset").find(".helpAccordion:last-child").find("h3").css("border","none")
+	jQ(".contentasset .account_footer").find(".inner_content li").css({"paddingRight":"5px","marginLeft":"5px" }  )
+	
+ 
+	 
+	 
+});
+</script>
+</isdecorate>

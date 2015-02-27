@@ -1,0 +1,320 @@
+#header a.logo{margin:10px 0 0;}
+#header a.logo img{width:140px; display:block;}
+#header_checkout a.logo{margin:10px 0 0 5px;}
+.city input {
+    /*width: 214px;*/ 	
+}
+.lastname input, .firstname input{
+    /*width: 143px;*/
+}
+.address1 input, .address2 input, .postcode_fr input, .zip input {
+    /*width: 214px;*/
+}
+.streetname input, .postbox input, .residence input, .phone input, .alternatecontactnumber input, .doorCode input, .email input, .confirmEmail input, .altphone input, .change_email_section input.passwordvalidation {
+    /*width: 214px;*/
+}
+.account_wrapper .registration .title {
+    margin-bottom: 12px;
+    margin-top: 20px;
+}
+
+.account_wrapper .lastname input, .account_wrapper .firstname input {
+ /*   width: 143px;*/
+}
+.account_wrapper .email input, .account_wrapper .password input, .account_wrapper .email input, .account_wrapper .confirmpassword input, .account_wrapper .confirmemail input, .account_wrapper .createanaccount .password input {
+    /*width: 214px;*/
+}
+.btn-grey-flat .link_button .no-icon {
+    margin: 0 0 0 -8px;
+    padding: 0 25px 0 25px;
+}
+.addressoptions div.label{
+background: none;
+}
+.shippingmethods .shippingmethod{
+	position: relative;
+	}
+#shippingmethodform .formfieldtooltip .tooltip_icon{margin:2px 0 0;}
+.checkout #shippingmethodform .formfieldtooltip{/*float:left;*/}
+.checkout #shippingmethodform label{/*line-height:20px; max-width:250px; width:auto; padding:0 0 0 0;  float:left; clear:none;*/}
+.shippingmethods input[type="radio"]{float:left; margin:5px 0 0 !important;}
+
+.checkout #addressform .collapsibleArea #shippingmethodform {margin-left:0px;}
+
+.MasterCardSecure{
+margin: -4px 0 0 10px;
+ display: inline;
+ float: right;
+}
+.MasterCardSecure .formfieldtooltip{
+display: block;
+float: left;
+margin-top:0;
+}
+.MasterCardSecure .formfieldtooltip .tooltip_icon {
+    margin: 0 0 0 2px;
+}
+.text-label{
+font-size: 14px;
+color: #a9a9a9;
+}
+.account_wrapper .lastname input, .account_wrapper .firstname input, .lastname input, .firstname input {/*width: 143px !important;*/}
+ 
+.account_wrapper .checkorder input.emailnum{width:196px !important}
+.title select{/*width:auto; color:#666;*/}
+.account_wrapper .registration .title {margin-bottom: 12px;}
+.state select.selectbox{font-size: 14px;/*width: auto;*/color:#666;}
+.city input, .edit_address_form .contactNum input, .edit_address_form .alternatecontactnumber input, .streetname input, .postbox input, .residence input, .phone input, .alternatecontactnumber input, .doorCode input, .email input, .confirmEmail input, .altphone input, .change_email_section input.passwordvalidation {width: 214px;}
+/*.ui-dialog .formfield {height: auto; margin: 0 0px 6px 0px}*/
+/*.checkout .formfield, .accountoverview .formfield {margin: 0 0 6px;}*/
+.account_wrapper .username input, .account_wrapper .password input {width: 214px;}
+@media only screen and (max-width: 1023px) and (min-width: 768px){
+	.account_wrapper .username input, .account_wrapper .password input {width: 180px;}
+}
+
+.delivery_instructions .textbox {
+    width: 220px;
+    height: 70px;
+}
+.homeDelivery .delivery_instructions{/*padding:0 20px;*/}
+.secure3d .formactions{
+margin-top: 20px;
+}
+.secure3d h2{
+font-size: 17px !important;
+color: #595959  !important;
+line-height: 46px  !important;
+}
+.faqBox{border: 1px solid #E4E4E4; }
+.faqBox .faqheader{background:#efefef; padding: 10px; margin: 1px;}
+.faqBox h5{font-size: 17px; line-height: 17px; color:#595959 !important; background:url("../images/icon_toggle_plus_minus_v.png") right 0 no-repeat; cursor:pointer; padding-right: 35px;}
+.faqBox h5.open{background:url("../images/icon_toggle_plus_minus_v.png") right -32px no-repeat;} 
+.faqBox .faqBoxContent{margin:1px; display:none; }
+.faqBox p{font-weight:normal; font-size:14px;color:#666666;padding:15px 20px;}
+.shadowRight{background:url("../images/rightBox-shadow.jpg") 0 0 repeat-x; width: 319px; height: 11px;}
+.payerauth{
+background:url("../images/sh_border_bg.gif") repeat-y left;
+}
+.payerauth .top{
+background:url("../images/sh_border_top.gif") no-repeat left top;
+}
+.payerauth .btm{
+background:url("../images/sh_border_btm.gif") no-repeat left bottom;
+padding: 60px 0 5px 100px;
+}
+
+.norequire .labeltext{
+	margin-right: 10px;
+	}
+.addressoptions .checkbox input{
+	display: none;
+	}
+
+.activeBtn span.grey, .activeBtn a.grey,.activeBtn span.grey, .activeBtn a.grey,{background-position:left -70px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+.activeBtn span.grey input, .activeBtn a.grey span, .activeBtn a.grey span{background-position:right -101px; color:#ffffff;/*font-weight:bold;*/ text-decoration:none !important;   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);}
+
+.activeBtn a.expandable-btn{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:left -70px !important;
+text-decoration:none;
+}
+.smallBtn:hover a.expandable-btn{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:left -70px;
+text-decoration:none;
+}
+.smallBtn:hover a.expandable-btn span{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:right -101px; text-decoration:none;
+color:#fff;
+}
+.activeBtn a.expandable-btn span{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:right -101px; text-decoration:none;
+color:#fff;
+}
+.addressoptions .actions {
+    margin: 5px 70px 15px 0;
+}
+.addressoptions .floatLeft {
+	float:left;
+}
+.title .errorIcon, .state .errorIcon {
+    padding: 4px 10px 6px 18px;
+}
+.successIcon{padding-top:4px;}
+.title .successIcon, .state .successIcon {padding-top:8px;}
+
+.registrationform .firstname.formfield{
+	padding-bottom: 5px;
+	}
+.createanaccount .firstname.formfield{
+	padding-bottom: 0;
+	}
+	
+.payment_cards .contentasset{
+    display: inline;
+}
+.payment_cards img{
+    vertical-align: middle;
+}
+.editaddress select, .creditcardform select { color:#666; font-size:14px}
+
+
+
+.account_wrapper .checkorder form .email .label {
+    width: auto !important;
+    padding-left: 0px;
+}
+.checkorder div.errorclient {
+    width: auto !important
+}
+.account_wrapper .logingeneral .checkorder {
+    margin: 3px 0 0;
+    padding: 25px 45px;
+}
+
+.emailsignup .tnc-header{
+font-size:14px;
+}
+ select {
+    /*font-size: 1.1em;
+    height: 24px;
+    line-height: 24px;
+    padding: 2px;*/   
+}
+
+
+
+.payment_cards .contentasset {
+    display: inline;
+}
+
+.payment_cards .floatleft {
+    width: 280px;
+    display: inline;
+}
+.payment_cards .floatleft .contentasset {
+    display: inline;
+    float: right;
+    text-align: right;
+}
+
+
+.MasterCardSecure .tooltiplink {
+    text-decoration: none !important;
+    margin-top: 0px;
+}
+  
+.hiddenradio{
+	visibility: hidden; /* add address field title issue */
+	}
+.sendtofriend input.textinput {
+    width: 222px; /* add address field title issue - RS-1323672 */
+}
+.account_wrapper select {
+    color: #666 !important;
+    font-size:14px;
+}
+.accountoverview .dwContent .payment_cards .contentasset {
+    float: none;
+}
+
+.mainerror-wrapperIr{float:left; color:#FF0000; font:14px arial; margin:0 0 20px;}
+.mainerror-wrapperIr .middle{background:none; border:2px solid #e11f27; border-width:0 2px; padding:12px 40px 1px;}
+.mainerror-wrapperIr .middle .errorcontent{background:url(../images/error_main_icon.jpg) no-repeat 0 4px; padding:0 0 10px 35px; display:block;}
+.mainerror-wrapperIr div.mwtop{display:block; height:5px; background:url(../images/flexi-m-tl.gif) no-repeat 0 0;}
+.mainerror-wrapperIr div.mwtop div{background:url(../images/flexi-m-tr.gif) no-repeat right 0; padding:0 5px;}
+.mainerror-wrapperIr div.mwtop div div{background:url(../images/flexi-m-hori.gif) repeat-x 0 0; padding:0; width:599px;}
+.mainerror-wrapperIr div.mwtop div, .mainerror-wrapperIr div.mwbot div{display:block; height:5px;}
+.mainerror-wrapperIr div.mwbot{display:block; height:5px; background:url(../images/flexi-m-bl.gif) no-repeat 0 bottom;}
+.mainerror-wrapperIr div.mwbot div{background:url(../images/flexi-m-br.gif) no-repeat right 0; padding:0 5px;}
+.mainerror-wrapperIr div.mwbot div div{background:url(../images/flexi-m-hori.gif) repeat-x 0 bottom; padding:0; width:599px;}
+ 
+.cartfooter .cartOptions h3, .cartfooter .cartTotal h3{color:#000; font:normal 16px/20px arial; padding:0 0 15px; margin:0 0 20px; border-bottom:1px dotted #a0a0a0; background:none;}
+.cartfooter .top_section{color:#333; margin:0 0 15px;}
+/*.cartfooter .top_section li{padding:0; margin:0 0 10px;}
+.cartfooter .top_section li.standard{background:none;}
+.cartfooter .top_section li.standard span{background:url(../images/standard_cart_icon.png) no-repeat 10px 0; padding:0 0 0 55px;}
+.cartfooter .top_section li.store_collection span{background:url(../images/store-collection.gif) no-repeat 10px 1px; padding:0 0 0 55px;}*/
+.cartfooter .contentasset{font:14px arial;}
+.formfieldtooltip .tooltip small{color:#034181; font:14px arial;}
+.formfieldtooltip .tooltip small:hover{text-decoration:underline;}
+.cartfooter .cartTotal h3{font:bold 14px/20px arial; text-align:right;}
+.cartfooter .rightsection{float:none; margin:0; width:auto;}
+.cartfooter .ordershippingdiscount{color:#000 !important;}
+.cartfooter .ordertotals td{padding:0 0 5px;}
+.cartfooter .ordertotals td.last{width:59px;}
+.collapse{/*background: none repeat scroll 0 0 #EFEFEF;
+    border: 1px solid #B9B9B9;
+    color: #666666;
+    min-height: 60px;
+    padding: 0;
+    z-index: 1;*/}
+.collapse .iRadio{float:left; margin:20px 0 0 10px; padding:5px 40px 5px 0;}
+.collapse .storeCol{background:url(../images/store-collection.gif) no-repeat right center;}
+.collapse .homeDel{background:url(../images/standard_cart_icon.png) no-repeat right center;}
+#homeDelivery, #storeCollection{/*background:none; border:0!important; z-index:1;*/}
+.collapse h5{/*background:none; border:0;*/} 
+.collapse h5.grey_block_header span{border:0; padding-top:17px;}
+.collapsibleArea .under_shadow_dark{position:static;}
+.collapseContent{/*background:url(../images/under_shadow_dark.png) no-repeat 0 bottom; padding:0 0 9px;*/}
+.collapsibleArea .storeListDiv, .collapsibleArea .homeDelivery{display:none;}
+.collapsibleArea .storeListDiv, .collapsibleArea .homeDelivery{/*padding:20px 30px; font:12px arial; border:1px solid #B9B9B9; border-width:0 1px 1px; overflow: hidden;*/}
+.collapsibleArea .noBorder{border-bottom:0;}
+
+.collapsibleArea .storeContent{}
+.collapsibleArea p{margin:0 0 15px;}
+
+.collapsibleArea .sAddress{width:100%; float:left; margin-bottom:50px;}
+
+.checkout .collapsibleArea label, .collapsibleArea .addressoptions div.label, .checkout .collapsibleArea .label{/*width:180px; padding-right:20px; margin:0;*/}
+.checkout .collapsibleArea label .labeltext{margin-right:0;}
+.checkout .collapsibleArea .requiredindicator{margin:0 -11px 0 0;}
+.checkout .staticmsg{padding-left:192px;}
+
+.collapsibleArea .shippingmethods .shipping-method-001 .value, .collapsibleArea .shippingmethods .shipping-method-002 .value{width:auto;}
+.collapsibleArea .shippingmethods .tooltip1{right:0; left:auto;}
+.collapsibleArea h2{font:bold 14px arial; margin:0 0 5px;}
+.collapsibleArea h4{margin:0 0 5px; padding:0; font:bold 14px arial; color:#333; background:none;}
+.collapsibleArea .storeAddress{margin:0 0 15px 10px; width:220px; float:left;}
+
+.collapsibleArea .sTiming{float:right; width:300px; margin:0 10px 0 0;}
+.collapsibleArea .sTiming ul{margin:0 0 10px;}
+.collapsibleArea .slectedStoreDetails{margin:0 0 12px;}
+
+.checkout .collapsibleArea .giftmessagetext .giftmessagecaption,
+.checkout .collapsibleArea .giftmessagetext .value{/*margin:0;*/}
+.checkout .collapsibleArea .giftmessagetext{/*padding:0 0 0 180px !important; margin:0 0 12px;*/}
+.checkout .collapsibleArea .storeListDiv .giftmessagetext{padding:0 !important;} 
+.checkout .collapsibleArea .giftmessage{margin:0; padding:0 0 12px;}
+.checkout .collapsibleArea .giftmessagetext textarea{/*width:220px; padding:1px; height:70px;*/}
+.checkout .collapsibleArea .mMessage{padding:0 0 0 190px; font-size:14px;}
+
+.checkout #addressform .collapsibleArea .label{/*flost:left; width:160px;*/}
+/*.checkout #addressform .collapsibleArea .label span{display:block; text-align:right;}*/
+.checkout #addressform .collapsibleArea .giftmessage .label{/*width:160px !important;*/}
+.checkout #addressform .collapsibleArea .giftmessagetext{/*float:left; padding:0;*/}
+.checkout #addressform .collapsibleArea .giftmessagetext textarea{/*width:330px;*/}
+.checkout #addressform .collapsibleArea .formfieldtooltip{/*float:left;*/}
+	
+.orderconfirmation .thankyoumessage{width:auto;}
+.thankyoumessage .print{margin:0px 0 0;}
+.orderconfirmation .thankyoumessage p{margin:0 75px 0 0;}
+.orderconfirmation .thankyoumessage h2{margin:0 0 20px;}
+.addressoptions .floatNone{float:none !important;}
+
+#header a.logo img{width:172px;}
+
+@media only screen and (max-width: 1023px) and (min-width: 768px){
+	#header a.logo img{width:140px;}
+}
+@media only screen and (max-width: 1279px) and (min-width: 1024px){
+	#header a.logo img{width:160px;}
+}
+.checkout .giftmessagetext .giftmessagecaption, .checkout .deliveryinstructiontext .deliveryinstructioncaption{
+	margin-left: 0;
+}
+.checkout .giftmessagetext .value, .checkout .deliveryinstructiontext .value{
+	margin-left: 0;
+}

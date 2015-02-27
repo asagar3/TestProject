@@ -1,0 +1,146 @@
+<div>
+<iscomment>INT-263 oformby: Rich Relevance: Recommend Product (Horizontal)</iscomment>
+<iscomment>This isml renders the RichRelevance recommendations. It is being called through an Ajax call (RichRelevance-GetProductItems) after the PDP is being loaded. This template is similar to "recommendationitems" but tags are changed for horizontal orientation</iscomment>
+<iscontent type="text/html" charset="UTF-8"/>
+<iscache type="relative" hour="24" varyby="price_promotion" />
+<isinclude template="util/modules"/>
+<iscomment>maxRecommendedPrds_Horizontal - added to the system objects</iscomment>
+<isset name="rrProdUrl" value="${pdict.CurrentHttpParameterMap.rrProdUrl.stringValue}" scope="page" />
+<isset name="productSearchHit" value="${pdict.ProductSearchHit}" scope="pdict" />
+<isset name="mainProduct" value="${pdict.productSearchHit.product}" scope="pdict"/>
+<isif condition="${pdict.mainProduct.ID!=null}">			
+	<isset name="Product" value="${pdict.mainProduct}" scope="pdict"/>
+	<isset name="pName" value="${pdict.Product.name}" scope="page"/>
+	<li>
+		<div class="analytics captureproductid"><isprint value="${pdict.Product.ID}"/></div>
+		<div class="image recommendation_image">
+			<a href="" title="{pName}" class="rrlink">
+				<isif condition="${!empty(pdict.Product.getImage('catlanding',0))}">
+					<isscript>
+					var verticalrecommendationwidth : Integer = dw.system.Site.getCurrent().preferences.custom.ImageWidthVerticalRecommendation;
+					var verticalrecommendationheight : Integer = dw.system.Site.getCurrent().preferences.custom.ImageHeightVerticalRecommendation;
+					var scene7ImageUrl : String = pdict.Product.getImage('catlanding',0).URL+ '?' + dw.system.Site.getCurrent().preferences.custom.s7Preset + 'wid='+verticalrecommendationwidth+'&hei='+verticalrecommendationheight;
+					</isscript>
+					<img src="${scene7ImageUrl}" alt="${pdict.Product.getImage('catlanding',0).alt}" title="${pdict.Product.name}"/>
+				<iselse/>
+					<img src="${URLUtils.staticURL('/images/noimagesmall.png')}" alt="${pName}" title="${pName}"/>
+				</isif>
+			</a>
+		</div><!-- END: recommendation_image -->
+		<div class="name">
+			<iscomment>Omniture KPI3 Issues,6038571</iscomment>
+			<iscomment>INT-564 oformby # shorten product name length to 30</iscomment>
+			<a href="" title="${pName}" onclick="setOmniVarForUpsell(this, '${pdict.Product.custom.tNumber}');" class="rrlink">
+				<isif condition="${pName.length > 30}">
+					<isprint value="${pName.substring(0,30) + '...'}"/>
+				<iselse/>
+					<isprint value="${pName}">
+				</isif>
+			</a>
+		</div><!-- END: name -->
+					
+		<!-------------------------------- Start Pricing -------------------------------->
+		<iscomment> Christina: Original format from pricing is not aligned with the requirements for new Recommendations appearance which needs to be same as .com site. INT-154</iscomment>
+		<iscomment>
+		<isinclude template="product/components/pricing.isml"/>
+		</iscomment>
+					
+		<!-- START PRICING -->
+		<isset name="isPriceRange" value="${false}" scope="page"/>					
+		<isif condition="${pdict.Product.master}">					
+			<isset name="isPriceRange" value="${pdict.productSearchHit.isPriceRange()}" scope="page"/>
+		</isif>
+		<isset name="hasVariants" value="false" scope="page"/>					
+		<div class="pricing">
+			<div class="rr2_price">
+				<iscomment>For Product master without a price range get the pricing from firstRepresentedProduct </iscomment>
+				<isif condition="${pdict.Product.master && pdict.Product.variationModel.variants.size() > 0 && !isPriceRange }">
+					<isset name="hasVariants" value="true" scope="page"/>
+					<iscomment>Preserve current product instance</iscomment>
+					<isset name="OrgProduct" value="${pdict.Product}" scope="pdict"/>
+					<isset name="Product" value="${pdict.OrgProduct.variationModel.variants[0]}" scope="pdict"/>
+					<iscomment>Loop added to check if the variant picked is in stock or not- Chetan</iscomment>
+					<isloop items="${pdict.OrgProduct.variationModel.getVariants()}" var="varProduct">
+						<isif condition="${varProduct.availabilityModel.inStock && varProduct.priceModel.price.available}">
+						<isset name="Product" value="${varProduct}" scope="pdict"/>
+						<isbreak/>
+						</isif>
+					</isloop>
+				<iselse>
+				</isif>
+							
+				<isif condition="${isPriceRange }">
+					<isset name="maxListPrice" value="${pdict.Product.priceModel.getMaxPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+					<isset name="minListPrice" value="${pdict.Product.priceModel.getMinPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+					<isset name="maxPrice" value="${pdict.productSearchHit.maxPrice}" scope="page"/>
+					<isset name="minPrice" value="${pdict.productSearchHit.minPrice}" scope="page"/>
+					<isif condition="${minListPrice.equals(minPrice) && maxListPrice.equals(maxPrice)}">
+						<div><isprint value="${minPrice}"/> - <isprint value="${maxPrice}"/></div>
+					<iselse>						
+						<div class="discountprice">
+						<div class="salesprice">							
+							<isprint value="${minPrice}"/> - <isprint value="${maxPrice}"/>
+						</div>
+						<div class="standardprice">
+							<isif condition="${!minListPrice.equals(maxListPrice)}">
+								<isprint value="${minListPrice}"/>-<isprint value="${maxListPrice}"/> 
+							<iselse>
+								<isprint value="${minListPrice}"/> 
+							</isif>
+						</div>
+						</div>
+					</isif>
+				<iselse>
+					<iscomment>
+						Regular pricing through price model of the product. If the product is an option product,
+						we have to initialize the product price model with the option model.
+					</iscomment>
+					<isset name="PriceModel" value="${pdict.Product.getPriceModel()}" scope="page"/>				
+					<iscomment>
+						Check whether the product has price in the sale pricebook. If so, then
+						display two prices: crossed-out standard price and sales price.
+					</iscomment>
+					<isset name="StandardPrice" value="${PriceModel.getPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+					<isset name="SalesPrice" value="${PriceModel.getPrice()}" scope="page"/>
+					<isset name="ShowStandardPrice" value="${StandardPrice.available && SalesPrice.available && StandardPrice.compareTo(SalesPrice) == 1}" scope="page"/>
+					<isif condition="${ShowStandardPrice}">
+						<div class="discountprice">							
+							<div class="salesprice"><isprint value="${SalesPrice}"/></div>
+							<isif condition="${StandardPrice.valueOrNull != null}">
+								<div class="standardprice">
+								<isprint value="${StandardPrice}"/><iselse>${Resource.msg('pricing.noprice','product',null)}
+								</div>
+						  	</isif>
+						</div>
+					<iselse>
+						<div class="salesprice"><isprint value="${SalesPrice}"/></div>
+					</isif>
+				</isif>		
+				<isif condition="${hasVariants == 'true'}">
+			 		<isif condition="${!empty(pdict.OrgProduct)}">
+						<iscomment>Restore current product instance</iscomment>
+						<isset name="Product" value="${pdict.OrgProduct}" scope="pdict"/>
+						<isset name="OrgProduct" value="${null}" scope="page"/>
+					</isif>
+				</isif> 
+			</div>
+		</div>
+		<!-- END PRICING -->
+				
+		<!-------------------------------- insert bv bazzarvoice rating code recommendation------------->
+		
+		<isscript>
+			var IsBazaarVoiceEnabled:Boolean= dw.system.Site.getCurrent().getCustomPreferenceValue("IsBazaarVoiceEnabled");
+		</isscript>
+		<isif condition="${IsBazaarVoiceEnabled}">
+			<iscomment>Christina: changed the Prodcut to get from the loop the rec var.</iscomment>
+			<isset name="Product" value="${pdict.mainProduct}" scope="page"/>
+			<isinclude template="bazaarvoice/RatingSection"/>
+			<div class="cl"></div> 
+		</isif>  
+		<!------------------------------ end  bv bazzarvoice rating code ------------------------------->
+	</li>
+	<iscomment>Restore the Product instance</iscomment>
+	<isset name="Product" value="${pdict.mainProduct}" scope="pdict"/>
+</isif>
+</div>

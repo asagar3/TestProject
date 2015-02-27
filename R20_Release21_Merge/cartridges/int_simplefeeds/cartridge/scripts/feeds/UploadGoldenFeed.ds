@@ -1,0 +1,169 @@
+/**
+ * Upload a local file to a WebDAV or SFTP folder.
+ *
+ * @input Files : dw.util.ArrayList  mandatory, names of the local files to upload, relative to the Impex share, src folder
+ * @input RemoteFolderURL : String  mandatory, URL to WebDAV or SFTP folder, e.g. "https://www.myserver.com/folder/", "sftp://sftp.myserver.com:22/folder/"
+ *- @input RemoteFile : String  mandatory, File inside RemoteFolderURL, e.g. "feed.xml"
+ * @input RemoteLogin : String  optional, login for Basic Authentication or Digest Autentication
+ * @input RemotePassword : String  optional, password for Basic Authentication or Digest Autentication
+ * @output errorStep : String , will be used in error email
+ */
+
+importPackage( dw.io );
+importPackage( dw.net );
+importPackage( dw.system );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var uploadFeedStartDate : Date = new Date(); 
+	// read parameters
+	var fileNamesArray : dw.util.ArrayList = args.Files;
+	var remoteFolderURL : String = args.RemoteFolderURL;
+	//var remoteFile : String = args.RemoteFile;
+ 	var remoteLogin : String = args.RemoteLogin;
+ 	var remotePassword : String = args.RemotePassword;
+	var result : boolean;
+    // check parameters
+    if ( empty( fileNamesArray ) )
+    {
+    	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Parameter Files name array is empty" );
+    	return PIPELET_ERROR;
+    }
+
+    if ( empty( remoteFolderURL ) )
+    {
+    	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Parameter RemoteFolderURL empty" );
+    	return PIPELET_ERROR;
+    }
+	/*
+    if ( empty( remoteFile ) )
+    {
+    	Logger.getLogger("UploadFeed").error( "UploadFeed: Parameter RemoteFile empty" );
+    	return PIPELET_ERROR;
+    }*/
+
+    Logger.getLogger("UploadFeed").error( "UploadFeed: " +
+    	"Files Name Array: " + fileNamesArray + ", " +
+    	"RemoteFolderURL: " + remoteFolderURL + ", " +
+    	//"RemoteFile: " + remoteFile + ", " +
+    	"RemoteLogin: " + ( !empty( remoteLogin ) ? remoteLogin : "(empty)" ) + ", " +
+    	"RemotePassword: " + ( !empty( remotePassword ) ? "(provided)" : "(empty)" ) );
+
+	// locate file
+	for(var i = 0; i< fileNamesArray.length ; i++){
+		var file : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + fileNamesArray[i] );
+	
+		if ( !file.exists() )
+		{
+	    	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: File " + file.fullPath + " does not exist.");
+	    	return PIPELET_ERROR;
+		}
+	
+		result = uploadFileSFTP( file, remoteFolderURL, file.name, remoteLogin, remotePassword );
+		if ( !result ){
+			break;	
+		}
+	}
+	
+	if ( !result )
+	{
+		args.errorStep="SFTP Upload";
+		return PIPELET_ERROR;
+	}
+	var uploadFeedEndDate : Date = new Date(); 
+	var timeTaken : Number = uploadFeedEndDate.getTime()-uploadFeedStartDate.getTime();
+	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Time taken " +	timeTaken);	
+	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Time taken " +	timeTaken);	
+	
+	return PIPELET_NEXT;
+}
+
+function uploadFileSFTP( file : File, remoteFolderURL : String, remoteFile : String, remoteLogin : String, remotePassword : String ) : boolean
+{
+    // for SFTP remoteLogin and remotePassword are required
+    if ( empty( remoteLogin ) )
+    {
+    	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Parameter RemoteLogin empty (required for SFTP)" );
+    	return false;
+    }
+
+    if ( empty( remotePassword ) )
+    {
+    	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Parameter RemotePassword empty (required for SFTP)" );
+    	return false;
+    }
+
+    // parse URL, e.g. "sftp://sftp.myserver.com:22/folder/"
+	var params : Array = /^sftp:\/\/([^\/:]+)(?::(\d+))?(\/(?:.*\/)?)$/.exec( remoteFolderURL );
+
+	if ( params == null || params.length != 4 )
+	{
+    	Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL );
+    	return null;
+	}
+
+	var host : String = params[1];
+	var port : Number = null;
+	// params[2] is undefined if there was no port provided
+	if ( params[2] != undefined )
+	{
+		port = new Number( params[2] );
+	}
+	//var path : String = params[3];
+	var path : String = params[3];
+	
+	// connect
+	var sftpClient : SFTPClient = new SFTPClient();
+	var result : boolean;
+	
+	try
+	{
+		if ( port != null )
+		{
+			result = sftpClient.connect( host, port, remoteLogin, remotePassword );
+		}
+		else
+		{
+			// use default port
+			result = sftpClient.connect( host, remoteLogin, remotePassword );
+		}
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Error while connecting to " +
+			host + ( ( port != null ) ? ( ":" + port ) : "" ) + ": " + ex.message );		
+		return false;
+	}
+
+	if ( !result )
+	{
+		Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Error while connecting to " +
+			host + ( ( port != null ) ? ( ":" + port ) : "" ) + ": " + sftpClient.errorMessage );		
+		return false;
+	}
+
+	// upload
+	//var tmpRemoteFile : String = remoteFile + ".tmp";
+	
+	try
+	{
+		result = sftpClient.putBinary( path + remoteFile, file );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Error while uploading " + 
+			path + remoteFile + ": " + ex.message );		
+		return false;
+	}
+
+	if ( !result )
+	{
+		Logger.getLogger("UploadGoldenFeedFeed").error( "UploadGoldenFeedFeed: Error while uploading " + 
+			path + remoteFile + ": " + sftpClient.errorMessage );		
+		return false;
+	}
+	
+	sftpClient.disconnect();
+	
+    return true;
+}

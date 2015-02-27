@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+	<field formid="state" label="forms.state" type="string" mandatory="true" binding="stateCode" missing-error="forms.address.state.missing" value-error="forms.address.field.invalid">
+		<options>
+			
+			<option optionid="" 	label="forms.select.county" 		value=""/>
+			
+			<!-- regular US states -->
+		
+			<option optionid="Carlow" 	label="state.ie.Carlow" 		value="Carlow"/>	
+			<option optionid="Cavan" 	label="state.ie.Cavan" 		value="Cavan"/>
+			<option optionid="Clare" 	label="state.ie.Clare" 		value="Clare"/>
+			<option optionid="Cork" 	label="state.ie.Cork" 		value="Cork"/>
+			<option optionid="County Dublin"	label="state.ie.Dublin" 		value="County Dublin"/>
+			<option optionid="Donegal" 	label="state.ie.Donegal" 	value="Donegal"/>
+			<option optionid="Dublin 1" 	label="state.ie.Dublin1" 		value="Dublin 1"/>
+			<option optionid="Dublin 2" 	label="state.ie.Dublin2" 		value="Dublin 2"/>
+			<option optionid="Dublin 3" 	label="state.ie.Dublin3" 	value="Dublin 3"/>
+			<option optionid="Dublin 4" 	label="state.ie.Dublin4" 		value="Dublin 4"/>
+			<option optionid="Dublin 5" 	label="state.ie.Dublin5" 	value="Dublin 5"/>
+			<option optionid="Dublin 6" 	label="state.ie.Dublin6" 		value="Dublin 6"/>
+			<option optionid="Dublin 6W" 	label="state.ie.Dublin6W" 			value="Dublin 6W"/>
+			<option optionid="Dublin 7" 	label="state.ie.Dublin7" 		value="Dublin 7"/>
+			<option optionid="Dublin 8" 	label="state.ie.Dublin8" 		value="Dublin 8"/>
+			<option optionid="Dublin 9" 	label="state.ie.Dublin9" 			value="Dublin 9"/>
+			<option optionid="Dublin 10" 	label="state.ie.Dublin10" 		value="Dublin 10"/>
+			<option optionid="Dublin 11" 	label="state.ie.Dublin11" 			value="Dublin 11"/>
+			<option optionid="Dublin 12"	label="state.ie.Dublin12" 		value="Dublin 12"/>
+			<option optionid="Dublin 13"	label="state.ie.Dublin13" 		value="Dublin 13"/>
+			<option optionid="Dublin 14"	label="state.ie.Dublin14" 			value="Dublin 14"/>
+			<option optionid="Dublin 15"	label="state.ie.Dublin15" 		value="Dublin 15"/>
+			<option optionid="Dublin 16"	label="state.ie.Dublin16" 		value="Dublin 16"/>
+			<option optionid="Dublin 17"	label="state.ie.Dublin17" 		value="Dublin 17"/>
+			<option optionid="Dublin 18"	label="state.ie.Dublin18" 			value="Dublin 18"/>
+			<option optionid="Dublin 20"	label="state.ie.Dublin20" 		value="Dublin 20"/>
+			<option optionid="Dublin 22"	label="state.ie.Dublin22"	value="Dublin 22"/>
+			<option optionid="Dublin 24"	label="state.ie.Dublin24" 		value="Dublin 24"/>
+			<option optionid="Galway"	label="state.ie.Galway" 		value="Galway"/>
+			<option optionid="Kerry"	label="state.ie.Kerry" 	value="Kerry"/>
+			<option optionid="Kildare"	label="state.ie.Kildare" 		value="Kildare"/>
+			<option optionid="Kilkenny"	label="state.ie.Kilkenny" 		value="Kilkenny"/>
+			<option optionid="Laois"	label="state.ie.Laois" 		value="Laois"/>
+			<option optionid="Leitrim"	label="state.ie.Leitrim" 		value="Leitrim"/>
+			<option optionid="Limerick"	label="state.ie.Limerick" 	value="Limerick"/>
+			<option optionid="Longford"	label="state.ie.Longford" 		value="Longford"/>
+			<option optionid="Louth"	label="state.ie.Louth" 		value="Louth"/>
+			<option optionid="Mayo"	label="state.ie.Mayo" 		value="Mayo"/>
+			<option optionid="Meath"	label="state.ie.Meath" 	value="Meath"/>
+			<option optionid="Monaghan"	label="state.ie.Monaghan" 	value="Monaghan"/>
+			<option optionid="Offaly"	label="state.ie.Offaly" 			value="Offaly"/>
+			<option optionid="Roscommon"	label="state.ie.Roscommon" 		value="Roscommon"/>
+			<option optionid="Sligo"	label="state.ie.Sligo" 		value="Sligo"/>
+			<option optionid="Tipperary"	label="state.ie.Tipperary" 	value="Tipperary"/>
+			<option optionid="Waterford"	label="state.ie.Waterford" 	value="Waterford"/>
+			<option optionid="Westmeath"	label="state.ie.Westmeath" 	value="Westmeath"/>
+			<option optionid="Wexford"	label="state.ie.Wexford" 	value="Wexford"/>
+			<option optionid="Wicklow"	label="state.ie.Wicklow" 	value="Wicklow"/>
+			
+		</options>	
+	</field>
+</form>

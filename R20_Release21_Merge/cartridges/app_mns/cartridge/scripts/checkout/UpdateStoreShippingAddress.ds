@@ -1,0 +1,24 @@
+/**
+ * Update the given shipping address and copies the user name 
+ * stored in the given billing address for delivery type store collection.
+ *
+ * @input BillingAddress : dw.order.OrderAddress The address to update.
+ * @input ShippingAddress : dw.order.OrderAddress The address to update.
+ */
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.web );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var billingAddress : OrderAddress = pdict.BillingAddress;
+	var shippingAddress : OrderAddress = pdict.ShippingAddress;
+	
+	// copy the address details
+	
+	shippingAddress.setFirstName( billingAddress.firstName );
+	shippingAddress.setLastName( billingAddress.lastName );
+	shippingAddress.setTitle( billingAddress.title );
+	Logger.error("Inside UpdateStoreShippingAddress.ds updating the shipping address first name--"+ shippingAddress.getFirstName());
+    return PIPELET_NEXT;
+}

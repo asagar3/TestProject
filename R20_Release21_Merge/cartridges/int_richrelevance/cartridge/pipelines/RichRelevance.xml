@@ -1,0 +1,803 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?demandware-pipeline version="2.0"?>
+
+<pipeline type="view">
+  <branch basename="Custom_Export_Catalog">
+    <segment>
+      <node>
+        <start-node call-mode="private" name="Custom_Export_Catalog" secure="false"/>
+        <node-display x="0" y="0"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="RichRelevance/InitialiseRRExport.ds"/>
+          <config-property key="Timeout" value="3600"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="Message" key="Message"/>
+          <key-binding alias="xsw" key="Outxsw"/>
+          <key-binding alias="FileName" key="FileName"/>
+          <key-binding alias="XmlStreamWriter" key="XmlStreamWriter"/>
+          <key-binding alias="fileName" key="fileName"/>
+          <key-binding alias="filePath" key="filePath"/>
+          <key-binding alias="xmlFile" key="xmlFile"/>
+          <key-binding alias="RemoteFileName" key="RemoteFileName"/>
+          <key-binding alias="File" key="File"/>
+          <key-binding alias="RemotePath" key="RemotePath"/>
+          <key-binding alias="Enabled" key="Enabled"/>
+          <key-binding alias="XmlFile" key="XmlFile"/>
+          <key-binding alias="RemoteFile" key="RemoteFile"/>
+          <key-binding alias="RemoteFilePath" key="RemoteFilePath"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b2" source-connector="error">
+          <transition target-connector="in2"/>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="1" y="0"/>
+            </node>
+            <transition target-connector="in1" target-path="../b3.1"/>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <call-node start-name-ref="RichRelevance-WriteXMLForProduct"/>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="RichRelevance/WriteXMLForCategories.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="XmlStreamWriter" key="XmlStreamWriter"/>
+          <key-binding alias="FileName" key="FileName"/>
+          <key-binding alias="Message" key="Message"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b3" source-connector="error">
+          <transition target-connector="in1"/>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="1" y="0"/>
+            </node>
+            <transition target-connector="in1" target-path="../b5.1"/>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="RichRelevance/CloseRRExport.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="XmlStreamWriter" key="XmlStreamWriter"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b4" source-connector="error">
+          <transition target-connector="in1" target-path="./b5.2">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+              <bend-point relative-to="target" x="-1" y="0"/>
+            </transition-display>
+          </transition>
+        </branch>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="RichRelevance/ExportCatalogZipAndFTPUpload.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="xsw" key="xsw"/>
+          <key-binding alias="Message" key="Message"/>
+          <key-binding alias="XmlFile" key="XmlFile"/>
+          <key-binding alias="RemotePath" key="RemotePath"/>
+          <key-binding alias="FileName" key="FileName"/>
+          <key-binding alias="ArchiveFolder" key="ArchiveFolder"/>
+          <key-binding alias="File" key="File"/>
+          <key-binding alias="RemoteFileName" key="RemoteFileName"/>
+          <key-binding alias="RemoteFilePath" key="RemoteFilePath"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b5" source-connector="error">
+          <transition target-connector="in2">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+              <bend-point relative-to="target" x="-1" y="0"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="1" y="-1"/>
+            </node>
+            <transition target-connector="in1" target-path="./+1"/>
+          </segment>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="0" y="1"/>
+            </node>
+            <transition target-connector="in1" target-path="../b6.1"/>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="int_simplefeeds:feeds/ArchiveFeed.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="Task['archive-folder'].toString()" key="LocalArchiveFolder"/>
+          <key-binding alias="LocalFile" key="LocalFile"/>
+          <key-binding alias="File" key="File"/>
+          <key-binding alias="Message" key="StatusMessage"/>
+          <key-binding alias="&quot;RichRelevance/Archive/Success/&quot;" key="ArchiveFolder"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b6" source-connector="error">
+          <transition target-connector="in1"/>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="1" y="0"/>
+            </node>
+            <simple-transition>
+              <transition-display>
+                <bend-point relative-to="source" x="0" y="1"/>
+              </transition-display>
+            </simple-transition>
+            <node>
+              <call-node start-name-ref="RichRelevance-ExportFailure_Mail"/>
+              <node-display x="0" y="1"/>
+            </node>
+            <simple-transition>
+              <transition-display>
+                <bend-point relative-to="source" x="0" y="1"/>
+              </transition-display>
+            </simple-transition>
+            <node>
+              <end-node name="Failure"/>
+              <node-display x="0" y="1"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <end-node name="FeedExported"/>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="ExportFailure_Mail">
+    <segment>
+      <node>
+        <start-node call-mode="private" name="ExportFailure_Mail" secure="false"/>
+        <node-display x="3" y="0"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Assign" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <key-binding alias="true" key="From_0"/>
+          <key-binding alias="InstanceReqd" key="To_0"/>
+          <key-binding alias="&quot;RichRelevance_CatalogueFeed_Export_Failed&quot;" key="From_1"/>
+          <key-binding alias="EmailFlow" key="To_1"/>
+          <key-binding alias="new dw.util.HashMap()" key="From_2"/>
+          <key-binding alias="MailParams" key="To_2"/>
+          <key-binding alias="null" key="From_4"/>
+          <key-binding alias="null" key="To_4"/>
+          <key-binding alias="null" key="From_5"/>
+          <key-binding alias="null" key="To_5"/>
+          <key-binding alias="null" key="From_6"/>
+          <key-binding alias="null" key="To_6"/>
+          <key-binding alias="null" key="From_7"/>
+          <key-binding alias="null" key="To_7"/>
+          <key-binding alias="null" key="From_8"/>
+          <key-binding alias="null" key="To_8"/>
+          <key-binding alias="null" key="From_9"/>
+          <key-binding alias="null" key="To_9"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Assign" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <key-binding alias="null" key="From_6"/>
+          <key-binding alias="null" key="To_6"/>
+          <key-binding alias="null" key="From_7"/>
+          <key-binding alias="null" key="To_7"/>
+          <key-binding alias="null" key="From_8"/>
+          <key-binding alias="null" key="To_8"/>
+          <key-binding alias="null" key="To_9"/>
+          <key-binding alias="" key="From_3"/>
+          <key-binding alias="MailParams.put(&quot;ErrorMessage&quot;,Message)" key="From_9"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <call-node start-name-ref="Email-SendMail"/>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <end-node name="mailSent"/>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="GetProductItems">
+    <segment>
+      <node>
+        <start-node name="GetProductItems" secure="false"/>
+        <node-display x="6" y="0"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="product/getproductids.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="CurrentHttpParameterMap.pids.stringValue" key="pids"/>
+          <key-binding alias="productIdsArray" key="productIdsArray"/>
+          <key-binding alias="CurrentHttpParameterMap.hint1.stringValue" key="hint1"/>
+          <key-binding alias="CurrentHttpParameterMap.hint2.stringValue" key="hint2"/>
+          <key-binding alias="CurrentHttpParameterMap.strategyMessage.stringValue" key="strategyMessage"/>
+          <key-binding alias="strategyMessageOutput" key="strategyMessageOutput"/>
+          <key-binding alias="CurrentHttpParameterMap.param.value" key="inputJSON"/>
+          <key-binding alias="productMap" key="productMap"/>
+          <key-binding alias="CurrentHttpParameterMap.perspective.value" key="inputPerspective"/>
+          <key-binding alias="perspective" key="perspective"/>
+          <key-binding alias="perspectiveOutput" key="perspectiveOutput"/>
+          <key-binding alias="CurrentHttpParameterMap.orientation.value" key="inputOrientation"/>
+          <key-binding alias="orientationOutput" key="orientationOutput"/>
+          <key-binding alias="CurrentHttpParameterMap.placement.value" key="inputPlacement"/>
+          <key-binding alias="placementOutput" key="placementOutput"/>
+          <key-binding alias="CurrentHttpParameterMap.remotePlacement.value" key="remotePlacement"/>
+          <key-binding alias="remotePlacementOutput" key="remotePlacementOutput"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <interaction-node transaction-required="false">
+          <template buffered="true" dynamic="true" name="&quot;recommendations/&quot;+remotePlacementOutput"/>
+        </interaction-node>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="_ANONYMOUS_BRANCH_4">
+    <segment>
+      <node>
+        <text-node>
+          <description>INT-263 oformby: added descision node to decide which template to serve up dependation on placementOutput it using the matching template file (&quot;recommendation/&quot; is added before the value to complete the path)</description>
+        </text-node>
+        <node-display width="2" x="7" y="0"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="getJSON">
+    <segment>
+      <node>
+        <start-node name="getJSON" secure="false"/>
+        <node-display x="12" y="0"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="product/getJSON.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="CurrentHttpParameterMap.param.value" key="inputJSON"/>
+          <key-binding alias="outputValue" key="outputValue"/>
+        </pipelet-node>
+        <node-display x="0" y="2"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <interaction-node transaction-required="false">
+          <template buffered="true" dynamic="false" name="json/jsontest3"/>
+        </interaction-node>
+        <node-display x="0" y="2"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="ProductABTest">
+    <segment>
+      <node>
+        <start-node name="ProductABTest" secure="false"/>
+        <node-display x="14" y="0"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="ABCTest" pipelet-set-identifier="bc_api">
+          <config-property key="Mode" value="Session"/>
+          <config-property key="ABCTestName" value="RichRelevance"/>
+          <config-property key="Branch1Name" value="RR"/>
+          <config-property key="Branch1Percentage" value="50"/>
+          <config-property key="Branch2Name" value="DW"/>
+          <config-property key="Branch2Percentage" value="50"/>
+          <config-property key="RestName" value="Rest"/>
+          <key-binding alias="rrABtest" key="BranchName"/>
+          <key-binding alias="TestName" key="TestName"/>
+          <key-binding alias="null" key="Branch3Percentage"/>
+          <key-binding alias="null" key="Branch4Percentage"/>
+          <key-binding alias="null" key="Branch5Percentage"/>
+          <key-binding alias="null" key="Branch6Percentage"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <call-node start-name-ref="Product-GetProduct"/>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Assign" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <key-binding alias="CurrentHttpParameterMap.pt.stringValue" key="From_0"/>
+          <key-binding alias="PlacementType" key="To_0"/>
+          <key-binding alias="null" key="From_1"/>
+          <key-binding alias="null" key="To_1"/>
+          <key-binding alias="null" key="From_2"/>
+          <key-binding alias="null" key="To_2"/>
+          <key-binding alias="null" key="From_3"/>
+          <key-binding alias="null" key="To_3"/>
+          <key-binding alias="null" key="From_4"/>
+          <key-binding alias="null" key="To_4"/>
+          <key-binding alias="null" key="From_5"/>
+          <key-binding alias="null" key="To_5"/>
+          <key-binding alias="null" key="From_6"/>
+          <key-binding alias="null" key="To_6"/>
+          <key-binding alias="null" key="From_7"/>
+          <key-binding alias="null" key="To_7"/>
+          <key-binding alias="null" key="From_8"/>
+          <key-binding alias="null" key="To_8"/>
+          <key-binding alias="null" key="From_9"/>
+          <key-binding alias="null" key="To_9"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <interaction-node transaction-required="false">
+          <template buffered="true" dynamic="false" name="RichRelevance/r3_abproduct"/>
+        </interaction-node>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="IncludeCommon">
+    <segment>
+      <node>
+        <start-node name="IncludeCommon" secure="false"/>
+        <node-display x="16" y="0"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="target" x="0" y="-1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <interaction-node transaction-required="false">
+          <template buffered="true" dynamic="false" name="RichRelevance/r3_common"/>
+        </interaction-node>
+        <node-display x="0" y="2"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="GetRemoteInclude">
+    <segment>
+      <node>
+        <start-node name="GetRemoteInclude" secure="false"/>
+        <node-display x="6" y="4"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="target" x="0" y="-1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Search" pipelet-set-identifier="bc_api">
+          <config-property key="SearchProduct" value="true"/>
+          <config-property key="SearchContent" value="false"/>
+          <config-property key="DisallowOfflineCategory" value="true"/>
+          <config-property key="RecursiveCategorySearch" value="true"/>
+          <config-property key="RecursiveFolderSearch" value="true"/>
+          <key-binding alias="CurrentHttpParameterMap.key.stringValue" key="SearchPhrase"/>
+          <key-binding alias="ProductSearchModel" key="ProductSearchModel"/>
+          <key-binding alias="null" key="SortBy1"/>
+          <key-binding alias="null" key="SortBy3"/>
+          <key-binding alias="null" key="SortBy2"/>
+          <key-binding alias="null" key="SortBy1Direction"/>
+          <key-binding alias="null" key="SortBy2Direction"/>
+          <key-binding alias="null" key="SortBy3Direction"/>
+          <key-binding alias="null" key="PriceMax"/>
+          <key-binding alias="null" key="PriceMin"/>
+          <key-binding alias="null" key="RefineBy1Name"/>
+          <key-binding alias="null" key="RefineBy1Phrase"/>
+          <key-binding alias="null" key="RefineBy1Min"/>
+          <key-binding alias="null" key="RefineBy1Max"/>
+          <key-binding alias="null" key="RefineBy2Name"/>
+          <key-binding alias="null" key="RefineBy2Phrase"/>
+          <key-binding alias="null" key="RefineBy2Min"/>
+          <key-binding alias="null" key="RefineBy2Max"/>
+          <key-binding alias="null" key="RefineBy3Name"/>
+          <key-binding alias="null" key="RefineBy3Phrase"/>
+          <key-binding alias="null" key="RefineBy3Min"/>
+          <key-binding alias="null" key="RefineBy3Max"/>
+          <key-binding alias="null" key="RefineBy4Name"/>
+          <key-binding alias="null" key="RefineBy4Phrase"/>
+          <key-binding alias="null" key="RefineBy4Min"/>
+          <key-binding alias="null" key="RefineBy4Max"/>
+          <key-binding alias="null" key="RefineBy5Name"/>
+          <key-binding alias="null" key="RefineBy5Phrase"/>
+          <key-binding alias="null" key="RefineBy5Min"/>
+          <key-binding alias="null" key="RefineBy5Max"/>
+          <key-binding alias="null" key="FolderID"/>
+          <key-binding alias="null" key="ContentID"/>
+          <key-binding alias="null" key="ContentSearchModel"/>
+          <key-binding alias="null" key="RefineByNamePrefix"/>
+          <key-binding alias="null" key="RefineByPhrasePrefix"/>
+          <key-binding alias="null" key="RefineByMinPrefix"/>
+          <key-binding alias="null" key="RefineByMaxPrefix"/>
+          <key-binding alias="true" key="OrderableProductsOnly"/>
+          <key-binding alias="null" key="SortingRuleID"/>
+          <key-binding alias="null" key="PromotionID"/>
+          <key-binding alias="null" key="PromotionProductType"/>
+          <key-binding alias="&quot;root&quot;" key="CategoryID"/>
+        </pipelet-node>
+        <node-display x="0" y="2"/>
+      </node>
+      <transition target-connector="in" target-path="./+1">
+        <transition-display>
+          <bend-point relative-to="target" x="0" y="-1"/>
+        </transition-display>
+      </transition>
+    </segment>
+    <segment>
+      <node>
+        <loop-node element-key="ProductSearchHit" iterator-key="ProductSearchModel.productSearchHits"/>
+        <node-display x="0" y="2"/>
+        <branch basename="b2" source-connector="do">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="0" y="1"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <decision-node condition-key="!ProductSearchHit.product.productSet" condition-operator="expr"/>
+              <node-display x="0" y="1"/>
+              <branch basename="b2" source-connector="yes">
+                <transition target-connector="in">
+                  <transition-display>
+                    <bend-point relative-to="source" x="0" y="1"/>
+                  </transition-display>
+                </transition>
+                <segment>
+                  <node>
+                    <interaction-node transaction-required="false">
+                      <template buffered="true" dynamic="true" name="&quot;recommendations/&quot;+CurrentHttpParameterMap.placementOutput.stringValue"/>
+                    </interaction-node>
+                    <node-display x="0" y="1"/>
+                  </node>
+                </segment>
+              </branch>
+            </node>
+            <transition target-connector="loop" target-path="..">
+              <transition-display>
+                <bend-point relative-to="source" x="1" y="0"/>
+                <bend-point relative-to="source" x="1" y="-1"/>
+                <bend-point relative-to="source" x="-1" y="-1"/>
+                <bend-point relative-to="target" x="-1" y="0"/>
+              </transition-display>
+            </transition>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="1" y="0"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <stop-node/>
+        <node-display orientation="horizontal" x="1" y="0"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="WriteXMLForProduct">
+    <segment>
+      <node>
+        <start-node call-mode="private" name="WriteXMLForProduct" secure="false"/>
+        <node-display x="0" y="10"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="SetRequestLocale" pipelet-set-identifier="bc_api">
+          <key-binding alias="dw.system.Site.getCurrent().getCustomPreferenceValue(&quot;rrDefaultLocale&quot;)" key="LocaleID"/>
+        </pipelet-node>
+        <node-display x="0" y="2"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Search" pipelet-set-identifier="bc_api">
+          <config-property key="SearchProduct" value="true"/>
+          <config-property key="SearchContent" value="false"/>
+          <config-property key="DisallowOfflineCategory" value="true"/>
+          <config-property key="RecursiveCategorySearch" value="true"/>
+          <config-property key="RecursiveFolderSearch" value="true"/>
+          <key-binding alias="null" key="SearchPhrase"/>
+          <key-binding alias="ProductSearchModel" key="ProductSearchModel"/>
+          <key-binding alias="null" key="SortBy1"/>
+          <key-binding alias="null" key="SortBy3"/>
+          <key-binding alias="null" key="SortBy2"/>
+          <key-binding alias="null" key="SortBy1Direction"/>
+          <key-binding alias="null" key="SortBy2Direction"/>
+          <key-binding alias="null" key="SortBy3Direction"/>
+          <key-binding alias="null" key="PriceMax"/>
+          <key-binding alias="null" key="PriceMin"/>
+          <key-binding alias="null" key="RefineBy1Name"/>
+          <key-binding alias="null" key="RefineBy1Min"/>
+          <key-binding alias="null" key="RefineBy1Max"/>
+          <key-binding alias="null" key="RefineBy2Name"/>
+          <key-binding alias="null" key="RefineBy2Phrase"/>
+          <key-binding alias="null" key="RefineBy2Min"/>
+          <key-binding alias="null" key="RefineBy2Max"/>
+          <key-binding alias="null" key="RefineBy3Name"/>
+          <key-binding alias="null" key="RefineBy3Phrase"/>
+          <key-binding alias="null" key="RefineBy3Min"/>
+          <key-binding alias="null" key="RefineBy3Max"/>
+          <key-binding alias="null" key="RefineBy4Name"/>
+          <key-binding alias="null" key="RefineBy4Phrase"/>
+          <key-binding alias="null" key="RefineBy4Min"/>
+          <key-binding alias="null" key="RefineBy4Max"/>
+          <key-binding alias="null" key="RefineBy5Name"/>
+          <key-binding alias="null" key="RefineBy5Phrase"/>
+          <key-binding alias="null" key="RefineBy5Min"/>
+          <key-binding alias="null" key="RefineBy5Max"/>
+          <key-binding alias="&quot;root&quot;" key="CategoryID"/>
+          <key-binding alias="null" key="FolderID"/>
+          <key-binding alias="null" key="ContentID"/>
+          <key-binding alias="null" key="ContentSearchModel"/>
+          <key-binding alias="null" key="RefineByNamePrefix"/>
+          <key-binding alias="null" key="RefineByPhrasePrefix"/>
+          <key-binding alias="null" key="RefineByMinPrefix"/>
+          <key-binding alias="null" key="RefineByMaxPrefix"/>
+          <key-binding alias="false" key="OrderableProductsOnly"/>
+          <key-binding alias="null" key="SortingRuleID"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <transition target-connector="in" target-path="./+1">
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </transition>
+    </segment>
+    <segment>
+      <node>
+        <loop-node element-key="product" iterator-key="ProductSearchModel.products"/>
+        <node-display x="0" y="1"/>
+        <branch basename="b2" source-connector="do">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="0" y="1"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <decision-node condition-key="product.online &amp;&amp; product.searchable &amp;&amp; !product.variant &amp;&amp; !product.productSet" condition-operator="expr"/>
+              <node-display x="0" y="1"/>
+              <branch basename="b2" source-connector="yes">
+                <transition target-connector="in">
+                  <transition-display>
+                    <bend-point relative-to="source" x="0" y="1"/>
+                  </transition-display>
+                </transition>
+                <segment>
+                  <node>
+                    <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+                      <config-property key="Transactional" value="false"/>
+                      <config-property key="OnError" value="PIPELET_ERROR"/>
+                      <config-property key="ScriptFile" value="RichRelevance/WriteXMLProduct.ds"/>
+                      <config-property key="Timeout" value="3600"/>
+                      <key-binding alias="null" key="ScriptLog"/>
+                      <key-binding alias="xsw" key="Inxsw"/>
+                      <key-binding alias="Message" key="Message"/>
+                      <key-binding alias="xsw" key="Outxsw"/>
+                      <key-binding alias="dwlocales" key="dwlocales"/>
+                      <key-binding alias="Count" key="localeCount"/>
+                      <key-binding alias="Count" key="Count"/>
+                      <key-binding alias="dwlocaleSize" key="dwLocaleLeSize"/>
+                      <key-binding alias="dwlocaleSize" key="dwlocaleSize"/>
+                      <key-binding alias="mapProductByLocale" key="mapProductByLocale"/>
+                      <key-binding alias="product" key="Product"/>
+                      <key-binding alias="XMLStreamWriter" key="XMLStreamWriter"/>
+                      <key-binding alias="XmlStreamWriter" key="XmlStreamWriter"/>
+                    </pipelet-node>
+                    <node-display x="0" y="1"/>
+                    <branch basename="b2" source-connector="error">
+                      <transition target-connector="in">
+                        <transition-display>
+                          <bend-point relative-to="source" x="1" y="0"/>
+                        </transition-display>
+                      </transition>
+                      <segment>
+                        <node>
+                          <call-node start-name-ref="RichRelevance-ExportFailure_Mail"/>
+                          <node-display orientation="horizontal" x="1" y="0"/>
+                        </node>
+                        <simple-transition>
+                          <transition-display>
+                            <bend-point relative-to="source" x="1" y="0"/>
+                          </transition-display>
+                        </simple-transition>
+                        <node>
+                          <end-node/>
+                          <node-display orientation="horizontal" x="1" y="0"/>
+                        </node>
+                      </segment>
+                    </branch>
+                  </node>
+                  <transition target-connector="in1" target-path="../+1"/>
+                </segment>
+              </branch>
+            </node>
+            <transition target-connector="in1" target-path="./+1"/>
+          </segment>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="1" y="0"/>
+            </node>
+            <transition target-connector="loop" target-path=".."/>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="1" y="0"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <end-node name="success"/>
+        <node-display orientation="horizontal" x="1" y="0"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="_ANONYMOUS_BRANCH_10">
+    <segment>
+      <node>
+        <decision-node condition-key="dw.system.Site.current.ID.equals(&quot;FranceSite&quot;)" condition-operator="expr"/>
+        <node-display x="1" y="10"/>
+        <branch basename="b2" source-connector="yes">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="0" y="1"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <pipelet-node pipelet-name="SetRequestLocale" pipelet-set-identifier="bc_api">
+                <key-binding alias="&quot;en_FR&quot;" key="LocaleID"/>
+              </pipelet-node>
+              <node-display x="0" y="1"/>
+            </node>
+            <transition target-connector="in1" target-path="../b4.2"/>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition/>
+      <node>
+        <decision-node condition-key="dw.system.Site.current.ID.equals(&quot;IrelandSite&quot;)" condition-operator="expr"/>
+        <node-display x="1" y="0"/>
+        <branch basename="b3" source-connector="yes">
+          <transition target-connector="in"/>
+          <segment>
+            <node>
+              <pipelet-node pipelet-name="SetRequestLocale" pipelet-set-identifier="bc_api">
+                <key-binding alias="&quot;en_IE&quot;" key="LocaleID"/>
+              </pipelet-node>
+              <node-display x="0" y="1"/>
+            </node>
+            <transition target-connector="in1" target-path="../b4.2"/>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition/>
+      <node>
+        <decision-node condition-key="dw.system.Site.current.ID.equals(&quot;EUSite&quot;)" condition-operator="expr"/>
+        <node-display x="1" y="0"/>
+        <branch basename="b4" source-connector="yes">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="0" y="1"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <pipelet-node pipelet-name="SetRequestLocale" pipelet-set-identifier="bc_api">
+                <key-binding alias="&quot;en_DE&quot;" key="LocaleID"/>
+              </pipelet-node>
+              <node-display x="0" y="1"/>
+            </node>
+            <transition target-connector="in1" target-path="./+1"/>
+          </segment>
+          <segment>
+            <node>
+              <join-node/>
+              <node-display x="-1" y="1"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+    </segment>
+  </branch>
+</pipeline>

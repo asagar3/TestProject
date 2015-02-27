@@ -1,0 +1,42 @@
+/**
+
+* @input Shipment : dw.order.Shipment 
+* @input ShippingAddressForm : dw.web.FormGroup
+* @input BillingAddressForm : dw.web.FormGroup
+* @output result : Boolean
+*/
+importPackage( dw.system );
+importPackage( dw.web );
+
+function execute( args : PipelineDictionary ) : Number
+{
+  var result : Boolean = false;
+  var addressFields : FormGroup = args.ShippingAddressForm.addressFields;
+  
+  var fn=addressFields.firstName.value;
+  var ln=addressFields.lastName.value;
+  var a1=addressFields.address1.value;
+  var city=addressFields.city.value;
+  var zip=addressFields.zip.value;
+  var country=addressFields.country.value;
+  var phone=addressFields.phone.value;
+  var title=addressFields.title.value;
+  
+  
+  if( !empty(addressFields.firstName.value)  &&
+     !empty(addressFields.lastName.value) &&
+      !empty(addressFields.address1.value)  &&
+      !empty(addressFields.city.value) &&
+      !empty(addressFields.zip.value) &&
+     !empty(addressFields.country.value) &&
+      !empty(addressFields.phone.value) &&
+      !empty(addressFields.title.value)
+  ){
+  	
+  result = true;
+  }
+  
+  
+  args.result = result;
+   return PIPELET_NEXT;
+}

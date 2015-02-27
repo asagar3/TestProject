@@ -1,0 +1,241 @@
+importPackage(dw.system);
+importPackage(dw.util);
+importPackage(dw.object);
+
+importScript("util/WebserviceCredentials.ds");
+
+/**
+ * This object wraps webservice configurations and provides additional functionality
+ * @constructor
+ */
+function WebserviceConfiguration(serviceName : String) {
+	this.serviceName = serviceName;
+	var customObject = null;
+	try {	
+		customObject  = CustomObjectMgr.getCustomObject('WebserviceConfiguration', serviceName);
+		
+		// rebuild custom object structure, encapsulating custom object but is compatible to old version, where this.object was the configuration custom obejct
+		this.object = new Object();
+		this.object.custom = new Object();
+		
+		for (var propertyKey in customObject.custom) {
+			this.object.custom[propertyKey] = customObject.custom[propertyKey];
+		}
+		var object = this.object;
+			
+	} catch (exception) {
+		var errout = "WebserviceConfiguration.ds: Webservice configuration (custom object) for service '" + serviceName + "' does not exist! (";
+		for( var msg in exception ) {
+			errout += msg + ": " + exception[msg] + ", ";
+		}
+		Logger.error(errout.replace(/, $/, ')'),exception);
+		throw exception;
+	}
+	
+	if(empty(this.object)) {
+		var errout = "WebserviceConfiguration.ds: Webservice configuration (custom object) for service '" + serviceName + "' does not exist! (";
+		throw errout;
+	}
+	
+	var target = this.object.custom.targetEnvironment;
+		
+	var credentials : CustomObject = CustomObjectMgr.getCustomObject("WebserviceCredentials", this.object.custom.targetEnvironment); 
+	this.credentials = new WebserviceCredentials(credentials);
+	
+	// calculate locking status
+	this.locked = false;
+	this.disabled = false;
+	this.lockingItems = new ArrayList().iterator();
+	
+	if (!empty(this.object) && !empty(this.object.custom.serviceEnableLocking) && this.object.custom.serviceEnableLocking) {
+		var calendarNow : Calendar = Site.getCalendar();
+		var dateNow : Date = calendarNow.getTime();
+		var now = dateNow.getTime();
+		
+		// fetch configuration for this call
+		if (!empty(this.object.custom.usableFrom)
+			&& !empty(this.object.custom.usableTo)
+			&& (this.object.custom.usableFrom.getTime() > now
+				|| this.object.custom.usableTo.getTime() < now)) {
+			this.disabled = true;
+		} else {
+			try {
+				// get all lock-items that are valid (= number of failed tries in the timerange)
+				this.lockingItems = CustomObjectMgr.queryCustomObjects('WebserviceLocked', 'custom.serviceName = {0} AND custom.validTo >= {1}', 'custom.serviceName asc',  serviceName, dateNow);
+				// if sufficient tries are made, this call will not executed
+				if (this.lockingItems.getCount() >= this.object.custom.maximumAttempts) {
+					this.locked = true;
+				}
+			} catch (exception) {
+				var errout = "WebserviceConfiguration.ds: Could query webservice locks for service '" + serviceName + "'! (";
+				for( var msg in exception ) {
+					errout += msg + ": " + exception[msg] + ", ";
+				}
+				Logger.error(errout.replace(/, $/, ')'), exception);
+			}
+		}
+	}
+}
+
+WebserviceConfiguration.prototype = {
+	/**
+	*	Determies if the call to a servcie can be made
+	* @returns {Boolean}
+	*/
+	
+	isLocked : function() {
+		return this.locked;
+	},
+	
+	
+	/**
+	*	Converts the service name to a readable format
+	*	@returns {String}
+	*/
+	provideDisplayName : function() {
+		// calculate nice display name
+		var displayName = this.serviceName.replace(/([A-Z])([a-z])/g, " $1$2");
+		displayName = displayName.replace(/([a-z])([A-Z])/g, "$1 $2");
+		displayName = displayName.substr(0,1).toUpperCase() + displayName.substr(1);
+		return displayName;
+	},
+	/**
+	*	Gets the Number of currently active lock items
+	*	@returns {Number}
+	*/
+	getLockItemCount : function() {
+		return this.lockingItems.asList().size();
+	},
+	/**
+	*	Gets the targetenvironment
+	*	@returns {String}
+	*/
+	getTargetRole : function() {
+		return this.object.custom.targetEnvironment.split('-')[1];
+	},
+	/**
+	*	Gets the targetenvironment
+	*	@returns {String}
+	*/
+	getTargetSystem : function() {
+		return this.object.custom.targetEnvironment.split('-')[0];
+	},
+	
+	/**
+	*	shows if this service is currently enabled to use
+	*	@returns {Boolean}
+	*/
+	isDisabled : function() {
+		return this.disabled;
+	},
+	/**
+	*	convenience method, if a service is enabled and not locked - this returns true
+	*	@returns {Boolean}
+	*/
+	isActive : function() {
+		return !this.locked && !this.disabled;
+	},
+	
+	/**
+	*	Gets the timeout in ms
+	*	@returns {Number}
+	*/
+	getTimeout : function() {
+		return this.object.custom.timeout;
+	},
+
+	/**
+	*	Gets number of maximum active lock items
+	*	@returns {Number}
+	*/	
+	getMaxAttempts : function() {
+		return this.object.custom.maximumAttempts;
+	},
+	/**
+	*	Returns the time in ms on how long a lockitem will be active
+	*	@returns {Number}
+	*/		
+	getLockingTime : function() {
+		return this.object.custom.lockedFor;
+	},
+	/**
+	*	Returns the beginning of a enabled timerage
+	*	@returns {Date}
+	*/	
+	getUsableFrom : function() {
+		return this.object.custom.usableFrom;
+	},
+	/**
+	*	Returns the edm of a enabled timerage
+	*	@returns {Date}
+	*/	
+	getUsableTo : function() {
+		return this.object.custom.usableTo;
+	},
+
+	/**
+	*	returns if the communication will be locked
+	*	@returns {Boolean}
+	*/
+	isFullCommunicationLogEnabled : function() {
+		var value : Boolean = false;
+		if (!empty(this.object) && !empty(this.object.custom.logSoap)) {
+			value = this.object.custom.logSoap;
+		}
+		return value;
+	},
+
+	/**
+	*	returns the currently used credentials
+	*	@returns {WebserviceCredentials}
+	*/
+	getCredentials : function() {
+		return this.credentials;
+	},
+	
+	
+	/**
+	*	returns if the minimized communication will be locked
+	*	@returns {Boolean}
+	*/
+	isHeaderLogEnabled : function() {
+		var value : Boolean = false;
+		if (!empty(this.object) && !empty(this.object.custom.logStatus)) {
+			value = this.object.custom.logStatus;
+		}
+		
+		return value;
+	},
+	
+	/**
+	*	Locks the service after several failed tries	
+	*	@param {Number} error the error code
+	*		0 ... unknownhost
+	*		1 ... sockettimeout
+	*		2 ... internal server error
+	*		3 ... backend system unavailable
+	**/
+	markServiceUnavailable : function(error : Number, requestId : String) {
+		try {
+			if (!empty(this.object)
+				&& !empty(this.object.custom.serviceEnableLocking) && this.object.custom.serviceEnableLocking) {
+				//add item into the lock table
+				var lockItem : CustomObject = CustomObjectMgr.createCustomObject('WebserviceLocked', this.serviceName + '_' + error + '_' + UUIDUtils.createUUID());
+				
+				lockItem.custom.validTo = new Date(Site.getCalendar().getTime().getTime() + this.object.custom.lockedFor);
+				lockItem.custom.serviceName = this.serviceName;
+				lockItem.custom.errorCause = error;
+				if (!empty(requestId)) {
+					lockItem.custom.requestID = requestId;
+				}
+			}
+		} catch (exception) {
+			var errout : String = "WebserviceConfiguration.ds: Could not create new service lock for service '" + this.serviceName + "'! (";
+			for (var msg in exception) {
+				errout += msg + ": " + exception[msg] + ", ";
+			}
+			Logger.error(errout.replace(/, $/, ')'), exception);
+		}
+	}
+	
+}

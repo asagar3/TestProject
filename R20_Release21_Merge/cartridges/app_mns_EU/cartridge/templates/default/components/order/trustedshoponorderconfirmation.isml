@@ -1,0 +1,59 @@
+<iscomment> 
+Sheshu - INT-277 : Trusted shops for DE sites
+Displays Trusted Shop details, with Trusted Shop and Image and the Register Button 
+on clicking the Register Button, user is opened with a new Window opening a trusted site. 
+Five different manadatory elements are sent to the Trusted Shop when user clicks on the Register button.
+- Character Set 
+- Shop ID 
+- Customer E-mail 
+- Purchase Amount 
+- Currency 
+When User click on the Image, user is navigated to Trusted Shop Site in new Window. In this case, 
+only Shop ID is send to the Trusted Shop.
+</iscomment>
+
+<isset name="Order" value="${pdict.order}" scope="page"/>
+
+<isif condition="${Order.totalGrossPrice.available}">
+ 	<isset name="orderTotalValue" value="${Order.totalGrossPrice.value}" scope="page"/>
+<iselse/>
+	<isset name="orderTotalValue" value="${Order.getAdjustedMerchandizeTotalPrice(true).add(Order.giftCertificateTotalPrice).value}" scope="page"/>
+</isif>
+
+<isif condition="${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).language == 'en'}">
+			<isset name="trsutedShopId" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('trustedShopID_enDE')}" scope="page"/>
+<iselseif condition="${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).language == 'de'}" >
+		<isset name="trsutedShopId" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('trustedShopID_deDE')}" scope="page"/>
+</isif>
+	
+<div id="divTrustedShop">
+	<div class="divTrustedShopLeft">
+		<!--TODO src="${URLUtils.staticURL('/images/trustedShop.png')}" -->
+		<form name="formSiegel" method="post" action="${dw.system.Site.getCurrent().getCustomPreferenceValue('trustedformSiegelAction')}"	target="_blank">
+			<input name="shop_id" type="hidden" value="${trsutedShopId}"/>
+			<button type="submit" class="trustedShopLogo" border="0" title="${Resource.msg('trustedShop.imageTitle','components',null)}"></button>
+		</form>
+	 </div>
+	
+	<div class="divTrustedShopRight">
+		<form id="formTShops" name="formTShops" method="post" action="${dw.system.Site.getCurrent().getCustomPreferenceValue('trustedformTShopsAction')}" target="_blank">
+			<input name="_charset_" type="hidden" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('trustedShopCharacterSet')}"/> 
+			<input	name="shop_id" type="hidden" value="${trsutedShopId}"/> 
+			<input	name="email" type="hidden" value="${Order.customerEmail}"/>
+			<input	name="amount" type="hidden" value="${orderTotalValue}"/>
+			<input	name="curr" type="hidden" value="${Order.currencyCode}"/> 
+			<input	name="paymentType" type="hidden" value="-"/>
+			<input  name="kdnr" type="hidden" value="-"/> 
+			<input	name="ordernr" type="hidden" value="-"/>
+			<p class="trustedShopText">${Resource.msg('trustedShop.registrationtext','components',null)}</p>
+		    <br/>
+			<br/> 
+			<div class="floatleft btn-grey-flat padding0">
+					<button type="submit" id="btnProtect" name="btnProtect" class="btnProtect" value="${Resource.msg('trustedShop.button','components',null)}" >
+					<span>${Resource.msg('trustedShop.button','components',null)}</span></button>
+			</div>
+		</form>
+	</div>
+	<div class="cl"></div>
+</div>
+	

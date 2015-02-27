@@ -1,0 +1,90 @@
+<isdecorate template="checkout/pt_checkout">
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<div class="checkout secure3d">
+<h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('checkout.pagetitle.3dsecure','checkout',null)}</strong></span></h5>
+	<img class="under_shadow_dark" alt="" src="${URLUtils.staticURL('themes/demandwarestore/images/under_shadow_dark.png')}"/>
+<h2>${Resource.msg('checkout.3dsecurebankdetails','checkout',null)}</h2>
+<div class="payerauth">
+<div class="top">
+	<div class="btm">
+	<div class="processing">
+		  
+	</div>
+	<div class="message">
+	
+	</div>
+	<iframe  name="PAFrame" width="400" height="400" src="" frameborder="0" scrolling="no" title="${Resource.msg('checkout.iframe.title','checkout',null)}">${Resource.msg('checkout.iframe.text','checkout',null)}</iframe>
+	<form action="${pdict.AcsURL}" name="PAInfoForm" target="PAFrame" method="POST">	
+		<div>
+			<input type="hidden" name="PaReq" value="${pdict.PAReq}"/>	
+			<input type="hidden" name="TermUrl" value="${URLUtils.httpsContinue()}"/>
+			<input type="hidden" name="MD" value="${pdict.CurrentSession.sessionID}"/>
+		</div>
+	</form> 
+	
+	<script type="text/javascript">
+	<!--  
+		var loaded = false;
+	
+		function load()  {  
+		       
+			document.PAInfoForm.submit();
+			loaded = true;
+			
+		}
+		load();
+		jQuery(document).ready(function() {
+			
+			if(!$("#dialogcontainer").get(0)){
+				jQuery(document.body).append("<div id=\"dialogcontainer\"></div>");
+			}
+		
+		dlg1 = $(window.parent.document.getElementById("dialogcontainer"));
+		dlg1 = dlg1.dialog({
+			minWidth:513,
+			minHeight:220,
+			autoOpen: false,
+			title: pleaseWaitText,
+			zIndex:90210,
+			resizable:false,
+			modal:true,
+			dialogClass:'pleaseWaitDialog',
+			closeText:'close',
+			close: function(ev, ui) { $(this).remove(); },
+			stack:true,
+			closeOnEscape: false,
+		   	open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); } // Hides close button 
+		});
+		 jQuery.ajax({
+				
+				dataType: "html",
+				//TODO - this url needs to be made dynamic MattS 7.June 2011
+				url		: "${URLUtils.url('COBilling-GetImage')}",
+				cache	: true,
+										
+				success: function(response, textStatus) {
+					
+						jQuery('#dialogcontainer').html(response);
+					    
+															
+				},
+
+				error: function(request, textStatus, error) {
+					if (textStatus === "parsererror") {								
+						
+					}
+				}
+			});		
+				
+		});	
+		
+	//--></script>
+</div> </div></div>  
+<div class="formactions">
+  <div class="floatleft btn-grey-flat">
+    <div class="link_button"> <a class="back-icon" href="${URLUtils.url('COBilling-Start')}"><span>Back</span></a> </div>
+  </div>
+  <div class="clear"><!-- FLOAT CLEAR --></div>
+</div>
+</div>
+</isdecorate>

@@ -1,0 +1,31 @@
+/**
+* @input  requestJSONObject : String
+* @output requestProduct : Object 
+*
+*/
+importPackage( dw.system );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+try {
+		var reqObject : Object = JSON.parse(pdict.requestJSONObject);
+		var requestProduct = new Object();
+		
+		if(reqObject == null){
+			throw new Error("GetProductDetails: Request is null ") ;				
+		}		
+		
+		var productId:String = reqObject.productId ;		
+		if (empty(productId)){
+			throw new Error("GetProductDetails: productId null ") ;						
+		}
+		
+		requestProduct.productId = productId ;
+		pdict.requestProduct = requestProduct ;
+	}catch(e){
+		Logger.error("GetProductDetails: error:::"+e.message) ;
+		return PIPELET_ERROR ;		
+	}
+
+   return PIPELET_NEXT;
+}

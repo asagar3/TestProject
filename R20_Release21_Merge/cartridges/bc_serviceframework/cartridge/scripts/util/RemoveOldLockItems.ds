@@ -1,0 +1,17 @@
+/**
+*	Removes	inactive Lockitems 
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var dateNow = new Date();
+	var lockItems : CustomObject = CustomObjectMgr.queryCustomObjects('WebserviceLocked', 'custom.validTo < {0}', 'custom.serviceName asc', dateNow);
+	for each (var lockItem in lockItems) {
+		CustomObjectMgr.remove(lockItem);		
+	}
+		
+    return PIPELET_NEXT;
+}

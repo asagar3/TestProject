@@ -1,0 +1,170 @@
+<input type="hidden" value="${JSON.stringify(pdict.customObject)}" id="collectionPointJson"/> 
+<input type="hidden" value="${pdict.errorCode}" id="errorCode"/>
+<isset name="errorCode" value="${pdict.errorCode}" scope="page"/>
+
+<isif condition="${errorCode==0}">
+
+	<div class="reSearch">
+		<img src="http://maps.gpsvisualizer.com/google_maps/icons/google/red.png" alt="Map pin" />
+	  	<p>${Resource.msg('singleshipping.collectionPointMap.amendSearch','checkout',null)} <a href="#" onClick="javascript:$('.ui-icon-closethick').trigger('click')">${Resource.msg('singleshipping.collectionPointMap.clickHere','checkout',null)}</a> </p> 
+	  	
+	  	<!-- <button onclick="getCollectionPoints();" >search again</button><br> -->
+	</div>
+	<h1>${Resource.msg('singleshipping.collectionPointMap.search','checkout',null)}</h1>
+	<div id="side_bar">
+		<!-- Data entered through JavaScript -->
+	</div>
+	<div id="map">
+		<!-- Map displayed through JavaScript -->
+	</div>
+	<input type="hidden" name="fieldname" id="selectedMarker" />  
+			  
+	<script>
+		var json = document.getElementById('collectionPointJson').value;
+		var locations = JSON.parse(json); //jQuery.parseJSON(json);
+		var side_bar_html = ""; 
+		var gmarkers = [];
+		
+		var infowindow = new google.maps.InfoWindow();
+		var bounds = new google.maps.LatLngBounds();
+		var marker, i;			
+		var map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 13,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+		});
+	
+		for (i = 0; i < locations.collectionPoints.length; i++) { 
+			var cp_data = locations.collectionPoints[i];
+			
+			
+			
+			
+
+			
+			var pos = new google.maps.LatLng(cp_data.latitude, cp_data.longitude);
+			  bounds.extend(pos);
+		      marker = new google.maps.Marker({
+		          position: pos,
+		          map: map 
+		      });
+				
+		      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+		  	    return function() {
+		  	    	var cp = locations.collectionPoints[i];
+
+		    	     infowindow.setContent(
+		  	    		  '<div class="collectionPopup"><p class="address">' + '<strong>' + cp.lgAdr1 + '</strong>'
+		  	    		  + cp.lgAdr2 + '<br />'
+		  	    		  + cp.lgAdr3 
+		  	    		  + cp.lgAdr4 + '<br />'
+		  	    		  + cp.ville + '&nbsp;' + cp.CP + '<br />'
+		  	    		  // + cp.pays + '<br />'
+		  	    		  // + cp.localisation1 + '<br />'
+		  	    		  // + cp.localisation2
+		  	    		  + '</p>'
+		  	    		  + '<h3>'+ "${Resource.msg('collectionpoints.openingtimes','checkout',null)}" + ' </h3>'
+						  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.monday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Lundi0,cp.horaires_Lundi1) +/* ','+cp.horaires_Lundi2 + '-' + cp.horaires_Lundi3 + */ '</p>'
+		  	    		  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.tuesday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Mardi0,cp.horaires_Mardi1) + /* ','+cp.horaires_Mardi2 + '-' + cp.horaires_Mardi3 + */ '</p>'
+		  	    		  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.wednesday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Mercredi0,cp.horaires_Mercredi1) + /* ','+cp.horaires_Mercredi2 + '-' + cp.horaires_Mercredi3 + */ '</p>'
+		  	    		  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.thursday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Jeudi0,cp.horaires_Jeudi1) + /* ','+cp.horaires_Jeudi2 + '-' + cp.horaires_Jeudi3 + */ '</p>'
+		  	    		  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.friday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Vendredi0,cp.horaires_Vendredi1) + /* ','+cp.horaires_Vendredi2 + '-' + cp.horaires_Vendredi3 + */ '</p>'
+		  	    		  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.saturday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Samedi0,cp.horaires_Samedi1) + /* ','+cp.horaires_Samedi2 + '-' + cp.horaires_Samedi3 + */ '</p>'
+		  	    		  + '<p><span class="day"> ${Resource.msg("collectionpoints.day.sunday","checkout",null)} </span>'+ checkOpeningTimes(cp.horaires_Dimanche0,cp.horaires_Dimanche1) + /* ','+cp.horaires_Dimanche2 + '-' + cp.horaires_Dimanche3 + */ '</p>'
+		  	              + '<span class="floatright btn-green-flat">'
+		  	              + '<button class="selectBtn" onClick="javascript:selectCPFromMap()">${Resource.msg("collectionpoints.select","checkout",null)}  ></button>' 
+		  	              + '</span></div>'); //locations[i][0], locations[i][6] test+i
+		  	       
+		  	            // infowindow.setContent("test "+i);
+							infowindow.open(map, marker);
+							//Cufon.refresh();
+							
+							$('.locationDetails').removeClass('selected');
+			    			$('#marker'+i).addClass('selected');
+			  				var markerPos = $('#marker'+i).position().top;
+			  				//Commented out for INT:1216
+							//$('#side_bar').animate({ scrollTop: markerPos - 100 });
+							
+							
+			  
+		  	        
+		    	    	//set selected value
+		      	    		document.getElementById('selectedMarker').value = cp.num; //number locations[i][2];
+
+		  	    }
+		  	  })(marker, i));
+		  	  map.fitBounds(bounds);
+			  
+			  gmarkers.push(marker);
+			  var distanceFixed = (cp_data.distance/1000).toFixed(1);
+			  side_bar_html += '<a class="locationDetails" id="marker'+i+'" href="javascript:triggerSideBar(' + (gmarkers.length-1) + ')">'
+			  + '<img src="http://maps.gpsvisualizer.com/google_maps/icons/google/red.png" alt="Map pin" />'
+			  + '<address>'
+			  + '<span class="title">' + cp_data.lgAdr1 + '</span>' 
+			  + cp_data.lgAdr2 +  '<br />'
+			  + cp_data.lgAdr3 +  '<br />'  
+			  + cp_data.lgAdr4  
+			  + cp_data.ville + '&nbsp;'+ cp_data.CP + '<br>'
+			  + distanceFixed + ' km'
+			  + '</address>'
+			  + '<span class="floatright btn-green-flat">' 
+			  + 	'<button onClick="javascript:triggerSideBar(' + (gmarkers.length-1) + ')">${Resource.msg("collectionpoints.choose","checkout",null)} ></button>' 
+			  + '</span>' 
+			  + '</a>'; //TODO change this method to get the selected one
+			  
+			
+
+		}
+			
+
+		
+		document.getElementById("side_bar").innerHTML = side_bar_html;
+		function triggerSideBar(i) {
+			if (!$('#marker' + i).hasClass('selected')) { 
+				  google.maps.event.trigger(gmarkers[i], "click");				 
+				  $('.locationDetails').removeClass('selected');
+				  $('#marker'+i).addClass('selected');
+			};
+	
+
+			  
+			 
+		}
+
+		
+		function checkOpeningTimes(open,close)
+		{
+			var html = "";
+			if (open == "00:00" && close == "00:00")
+				{
+					html = "${Resource.msg("collectionpoints.day.closed","checkout",null)}";
+				}
+			else
+				{
+					html = open + '<span>-</span>' + close;
+				}
+			return html;
+		}
+
+     
+
+	function selectCPFromMap() {
+			var value = document.getElementById('selectedMarker').value;
+			
+		 	 
+
+			$("#dialog").dialog( "close" );
+		 	 
+		 	for (i = 0; i < locations.collectionPoints.length; i++) { 
+		 		var cp = locations.collectionPoints[i];
+		 		if(cp.num==value) {
+		 			storeCollectionPointID(cp);	
+		 		}
+		 	}
+					 	$(".storeListDiv .continuecheckoutbutton").show();
+		 	$(".storeListDiv .giftMessageDiv").show();
+		} 
+	setOmnitureforCollectionPoints();	
+</script>
+<iselse>
+		<input type="hidden" value="${Resource.msg(errorCode,'checkout',null)}" id="errorMessage"/>
+</isif>

@@ -1,0 +1,92 @@
+<div class="account_addresses">
+	<isif condition="${!empty(pdict.CurrentCustomer.profile.addressBook.addresses)}">
+		<iscomment>addresses are sorted, preferred first, than alphabetic </iscomment>
+		
+		<isif condition="${pdict.Status != null && pdict.Status.isError()}">				 
+			<span class="error">
+				<isprint value="${Resource.msg('addressdetails.' + pdict.Status.code, 'account',null)}"/>
+			</span>
+		</isif>
+				
+		<isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address" status="loopindex">
+			<div class="accountaddress dRadio">
+				<iscomment>
+				<div class="defaultselection">
+					<input class="selectDefault" type="radio" <isif condition="${(pdict.CurrentCustomer.profile.addressBook.preferredAddress!=null) && (pdict.CurrentCustomer.profile.addressBook.preferredAddress.ID == address.ID)}">checked="checked"</isif> value="${address.ID}" /> ${Resource.msg('editaddress.defaultaddress','account',null)}
+				</div></iscomment>
+				<iscomment><!-- make the default address font BOLD --></iscomment>
+				<isif condition="${(pdict.CurrentCustomer.profile.addressBook.preferredAddress!=null) && (pdict.CurrentCustomer.profile.addressBook.preferredAddress.ID == address.ID)}">
+					
+					<isminiaddress p_address="${address}" p_showphone="true" p_isdefault="true"/>	
+					<div class="defaultselection bold">	
+						<label for="selectDefault${loopindex.count}" class="hideLabel">
+							${Resource.msg('profile.title','forms',null)}
+						</label>
+						<div class="radioButton" >
+							<div class="sprite radioSwitch marginRight"></div>
+						</div>
+						<input id="selectDefault${loopindex.count}" class="selectDefault hidden" type="radio" checked="checked" value="${address.ID}" /> ${Resource.msg('editaddress.defaultaddress','account',null)}
+					</div>			
+				<iselse/>
+					
+					<isminiaddress p_address="${address}" p_showphone="true"/>
+					<div class="defaultselection">
+						<label for="selectDefault${loopindex.count}" class="hideLabel">
+							${Resource.msg('profile.title','forms',null)}
+						</label>
+						<div class="radioButton">
+							<div class="sprite radioSwitch marginRight"></div>
+						</div>
+						<input id="selectDefault${loopindex.count}" class="selectDefault hidden" type="radio" value="${address.ID}" /> ${Resource.msg('editaddress.defaultaddress','account',null)}
+					</div>
+				</isif>
+				
+				<div class="actions">				
+					<iscomment><div class="roundedBtn floatleft"><button class="expandable-btn grey editButton" type="button" name="${address.ID}"><span>${Resource.msg('global.edit','locale',null)}</span></button></div></iscomment>
+					<div class="roundedBtn floatleft"><a class="expandable-btn grey editButton" name="${address.ID}" title="${Resource.msg('addressinclude.edittitle','account',null)}" href="javascript:;"><span>${Resource.msg('global.edit','locale',null)}</span></a></div>
+					<div class="roundedBtn floatleft"><a class="expandable-btn grey deletelink" name="${address.ID}" title="${Resource.msg('addressinclude.delete','account',null)}" href="javascript:;"><span>${Resource.msg('global.delete','locale',null)}</span></a></div>
+					<div class="clear"></div>
+					<iscomment>
+						<button class="editButton" type="button" name="${address.ID}"><span>${Resource.msg('global.edit','locale',null)}</span></button>
+						<a class="deletelink" title="${Resource.msg('addressinclude.delete','account',null)}" name="${address.ID}">${Resource.msg('addressinclude.delete','account',null)}</a>
+					</iscomment>
+				</div>
+				<div class="clear"></div>				
+			</div>
+			<iscomment>Add a clear DIV after every third address | Naveen Kumar</iscomment>			
+			<isif condition="${loopindex.count%2==0}">
+				<div class="clear"></div>
+			</isif>			
+		</isloop>	
+	</isif>
+
+</div>
+<script type="text/javascript"><!--
+	jQuery(document).ready(function() {
+		jQuery(".selectDefault").click(function() {
+			var setDefaultURL = app.util.appendParamToURL("${URLUtils.url('Address-SetDefault')}", "AddressID", this.value);
+			window.location.href = setDefaultURL;
+		});
+		jQuery(".editButton").click(function(e) {			
+			var url = app.util.appendParamToURL("${URLUtils.url('Address-Edit')}", "AddressID", jQuery(this).attr('name'));
+			app.dialog.open(url, "${Resource.msg('addressinclude.edittitle','account',null)}");
+		});
+		
+			jQuery(".deletelink").click(function() {	
+				var url = app.util.appendParamToURL("${URLUtils.url('Address-DeleteConfirmation')}", "AddressID", jQuery(this).attr('name'));
+				app.dialog.open(url,'${Resource.msg('addresslist.deletedialogheader','account',null)}');
+		});
+		jQuery("#address_list").find("input[type=radio]").each(function(){
+			 if(jQuery(this).is(":checked")){
+				 jQuery(this).parents(".accountaddress").find("div.radioButton .sprite").addClass("checked");
+			 }
+			 
+		 });
+		jQuery('#address_list .radioSwitch').click(function(){
+			 jQ(this).parents('#address_list').find('div.radioButton .sprite').removeClass('checked');
+			 jQ(this).addClass('checked').parents('.accountaddress').find('input[type=radio]').click();
+			 
+		 });
+			
+	});
+//--></script>

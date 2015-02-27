@@ -1,0 +1,114 @@
+<isinclude template="util/modules"/>
+
+<iscomment>memorize some locale variables for reuse</iscomment>
+<isset name="SearchModel" value="${pdict.searchmodel}" scope="page"/>
+<isset name="Category" value="${pdict.category}" scope="page"/>
+<isset name="CategoryPath" value="${pdict.categorypath}" scope="page"/>
+<isset name="Refinements" value="${pdict.searchmodel.refinements}" scope="page"/>
+<isset name="CategoryLevel" value="${new Number(pdict.categorylevel)}" scope="page"/>
+<isset name="CategoryGroup" value="" scope="page"/>
+
+<isscript>
+	var IDPath = new dw.util.ArrayList();
+
+	if(CategoryPath != null)
+	{
+		// remove the first level successively
+		if(CategoryPath.size() > 0)
+		{
+			CategoryPath.removeAt(0);
+		}
+
+		// build array list of category IDs
+		var pathIterator = CategoryPath.iterator();
+		while( pathIterator.hasNext() )
+		{
+			IDPath.add( pathIterator.next().ID );
+		}
+	}
+	
+		var categoryType : String=null;
+		var isUpdatedCategoryType : Boolean = false;
+		var defaultDisplayed : Boolean = false;
+	
+</isscript>
+<isif condition="${SearchModel != null}">
+	<iscomment>
+		in case the given category is the current refinement category we render the
+		next level category refinement values for that category using the search refinements;
+		in case the given category is not the current refinement category we use the
+		online sub categories independent of the search result!
+	</iscomment>
+	<isif condition="${empty(Category) || SearchModel.categoryID == Category.ID}">
+		
+		<iscomment>display the next level category refinement values for the given category</iscomment>
+		<isset name="RefinementValues" value="${Refinements.getNextLevelCategoryRefinementValues(Category)}" scope="page"/>
+		<isscript>
+			var categoryList : dw.util.ArrayList = new dw.util.ArrayList();
+		</isscript>
+		<isif condition="${RefinementValues.size() > 0}">
+		<iscomment><!-- Changed the class="refinementcategory" wrapper to make it same as VD | Asha | 04-mar-2011 --></iscomment>
+		<isloop items="${RefinementValues}" var="RefinementValue">
+			<iscomment>get the category object</iscomment>
+			<isset name="categoryObj" value="${dw.catalog.CatalogMgr.getCategory( RefinementValue.getValue() )}" scope="page"/>
+			<isscript>
+				categoryList.add(categoryObj);
+			</isscript>
+		</isloop>	
+		<isscript>
+			var  propCompare : dw.util.PropertyComparator = new dw.util.PropertyComparator("custom.categoryType");
+			categoryList.sort(propCompare);
+		</isscript>
+			<isloop items="${categoryList}" var="catObj" status="loopstate">
+				<isscript>
+					if(null == categoryType || categoryType!=catObj.custom.categoryType)
+					{							
+						categoryType = catObj.custom.categoryType;		
+						isUpdatedCategoryType = true;
+					}
+				</isscript>
+				<iscomment> COMMENTED FOR NEW LOOK OF LHN ON CATEGORY LANDING PAGES | Naveen Kumar 
+					<isif condition="${isUpdatedCategoryType==true}">
+						<isif condition="${null == categoryType && !defaultDisplayed}">
+							<isif condition=${!loopstate.first}></ul></li></ul></isif>
+							<ul><li>${dw.system.Site.current.preferences.custom.defaultCategoryType.toString()}</li>	<!-- Group Name --><isset name="defaultDisplayed" value="${true}" scope="page"/><li><ul>
+						<iselseif condition="${null != categoryType}" >
+							<isif condition=${!loopstate.first}></ul></li></ul></isif>
+							<ul><li><isprint value="${categoryType}"/></li>		<!-- Group Name --><li><ul>
+						</isif>						
+						<isscript>isUpdatedCategoryType = false;</isscript>
+					</isif>
+					<li><a class="refineLink <isif condition="${IDPath.contains(catObj.getID())}"> active</isif>" title="${catObj.getDisplayName()}" href="${SearchModel.urlRefineCategory('Search-Show',catObj.getID())}"><isprint value="${catObj.getDisplayName()}"/></a></li>				
+					<isif condition=${loopstate.last}></ul></li></ul></isif>
+				</iscomment>
+									
+				<isif condition="${isUpdatedCategoryType==true}">														
+					<isif condition="${null == categoryType && !defaultDisplayed}">
+						<isif condition=${!loopstate.first}></ul></isif>
+						<h3>
+							<isset name="defaultCatType" value="${dw.system.Site.current.preferences.custom.defaultCategoryType.toString()}" scope="page"/>
+							<isprint value="${defaultCatType.slice(defaultCatType.indexOf(' ')+1,defaultCatType.length)}"/>
+						</h3>	<!-- Group Name --> 
+						<isset name="defaultDisplayed" value="${true}" scope="page"/>
+						<ul>
+					<iselseif condition="${null != categoryType}" >
+						<isif condition=${!loopstate.first}></ul></isif>
+						<h3>
+							<iscomment>Praveen: Changes made for Category Ordering changes CR</iscomment>
+							<isprint value="${categoryType.slice(categoryType.indexOf(' ')+1,categoryType.length)}"/>
+						</h3>
+						<ul>
+					</isif>						
+					<isscript>							
+						isUpdatedCategoryType = false;
+					</isscript>
+				</isif>					
+				<li class="lhn-li">
+					<a class="refineLink <isif condition="${IDPath.contains(catObj.getID())}"> active</isif>" title="${catObj.getDisplayName()}" href="${SearchModel.urlRefineCategory('Search-Show',catObj.getID())}"><isprint value="${catObj.getDisplayName()}"/></a>
+				</li>				
+				<isif condition=${loopstate.last}></ul></isif>
+			</isloop>
+		</isif>	
+	</isif>
+	
+</isif>

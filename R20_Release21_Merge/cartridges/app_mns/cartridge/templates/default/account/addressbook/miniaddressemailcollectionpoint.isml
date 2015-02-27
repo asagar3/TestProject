@@ -1,0 +1,69 @@
+<p style="font-family:Arial, Helvetica, sans-serif;font-size:14px;color:#666666;">
+  	<isprint value="${pdict.p_address.title}"/> 
+  	<isprint value="${pdict.p_address.firstName}"/> 
+  	<isprint value="${pdict.p_address.lastName}"/>
+<br />
+<isif condition="${pdict.p_address.countryCode == 'GB'}">
+	<isif condition="${pdict.p_address.address1 != null}">
+  		<isprint value="${pdict.p_address.address1}"/><br/>
+  	</isif>
+  	<isif condition="${pdict.p_address.address2 != null}">
+  		<isprint value="${pdict.p_address.address2}"/><br />
+  	</isif>
+	<isif condition="${pdict.p_address.custom.address3 != null}">
+  		<isprint value="${pdict.p_address.custom.address3}"/><br />
+  	</isif>
+  	<isif condition="${pdict.p_address.city != null}">
+		<isprint value="${pdict.p_address.city}"/>  &nbsp; 
+	</isif>
+	<isif condition="${pdict.p_address.postalCode != null}">
+		<isprint value="${pdict.p_address.postalCode}"/><br />
+	</isif>
+	<isif condition="${pdict.p_address.stateCode != null}">
+  		<isprint value="${pdict.p_address.stateCode}"/>&nbsp;
+  	</isif>
+<iselse> 
+<iscomment>INT-721 : Manipulate the first line of address to remove mondial collection point ID</iscomment> 
+	<isscript>
+	var address1 = pdict.p_address.address1; 
+	var splitAddress = address1.split(" - ");
+	if (splitAddress[1] != null) { address1 = splitAddress[1]; } 
+	</isscript> 
+		<isif condition="${pdict.p_address.address1 != null}">
+			<isprint value="${address1}"/><br />
+		</isif>
+  	<isif condition="${pdict.p_address.address2 != null}">
+  		<isprint value="${pdict.p_address.address2}"/><br />
+  	</isif>
+  	<isif condition="${pdict.p_address.custom.residence != null}">
+  		<isprint value="${pdict.p_address.custom.residence}"/><br />
+  	</isif>
+		<isif condition="${pdict.p_address.custom.streetName != null}">
+			<isprint value="${pdict.p_address.custom.streetName}"/><br />
+		</isif>	
+
+		<isif condition="${pdict.p_address.postBox != null}">
+			<isprint value="${pdict.p_address.postBox}"/>  &nbsp; 
+		</isif>
+		<isif condition="${pdict.p_address.postalCode != null}">
+			<isprint value="${pdict.p_address.postalCode}"/><br />
+		</isif>
+
+		<isif condition="${pdict.p_address.city != null}">
+			<isprint value="${pdict.p_address.city}"/>&nbsp;</span>
+		</isif>
+</isif>
+		<isif condition="${pdict.p_address.countryCode != null}">
+			<isprint value="${pdict.p_address.countryCode}"/>.<br />
+		</isif>	
+
+		<iscomment><isif condition="${pdict.p_showphone == 'true'}"></iscomment>
+		<isif condition="${pdict.p_showphone == 'true' && pdict.p_address.phone != null}">
+			${Resource.msg('miniaddress.phone','account',null)} <isprint value="${pdict.p_address.phone}"/><br />
+		</isif>	
+
+		<isif condition="${pdict.p_address.custom.alternateContactNumber != null}">
+			${Resource.msg('miniaddress.alternatePhone','account',null)} <isprint value="${pdict.p_address.custom.alternateContactNumber}"/>
+		</isif>	
+</p>
+	

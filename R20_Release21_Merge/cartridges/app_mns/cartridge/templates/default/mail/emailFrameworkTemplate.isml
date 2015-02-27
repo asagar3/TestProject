@@ -1,0 +1,46 @@
+<iscontent type="text/html" charset="UTF-8"/>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<isinclude template="util/modules"/>
+<isscript>
+importScript( "common/stringReplace.ds" );
+importPackage( dw.system );
+importPackage( dw.content );
+var instanceName : String = !empty( System.getInstanceHostname() ) ? System.getInstanceHostname() : "(unknown)";
+var envName = instanceName.split(".");
+var emailSubject : String = StringUtils.decodeString(pdict.MailSubject, StringUtils.ENCODE_TYPE_HTML);
+var emailContent : String = StringUtils.decodeString(pdict.MailContent, StringUtils.ENCODE_TYPE_HTML);
+var mailContent1 : String = "";
+var mailContent2 : String = "";
+var orderIndex : Number = emailContent.indexOf("<&orderdetailemail&>");
+var orderWithoutBillingIndex : Number = emailContent.indexOf("<&orderdetailnobillingemail&>");
+var regExp = new RegExp("(<&).*(&>)");
+if (orderIndex>=0) {
+	mailContent1 = emailContent.substring(0, orderIndex);
+	mailContent2 = emailContent.substring(orderIndex+27);
+} else if (orderWithoutBillingIndex>=0) {
+	mailContent1 = emailContent.substring(0, orderWithoutBillingIndex);
+	mailContent2 = emailContent.substring(orderWithoutBillingIndex+36);
+} else {
+	mailContent1 = emailContent;
+}
+	mailContent1 = replaceAll(mailContent1, regExp, "");   
+	mailContent2 = replaceAll(mailContent2, regExp, "");   
+</isscript>
+<subject><isprint value="${emailSubject}" encoding="off"/><isif condition="${pdict.InstanceReqd}">- ${envName[0]}</isif></subject>
+
+<body>
+<isprint value="${mailContent1}" encoding="off"/>
+<isif condition="${orderIndex >= 0}">
+<isset name="showBillingDetails" value="true" scope="pdict" />
+<isorderdetailsemail order="${pdict.Order}" showBillingDetails="${pdict.showBillingDetails}" orderShipped="${pdict.orderShipped}" showReturnInfo="${pdict.showReturnInfo}" 
+showAvailableQuantity="${pdict.showAvailableQuantity}" returnedItems="${pdict.returnedItems}" trackURL="${pdict.trackURL}"/>
+<isprint value="${mailContent2}" encoding="off"/>
+</isif>
+<isif condition="${orderWithoutBillingIndex >= 0}">
+<isset name="showBillingDetails" value="false" scope="pdict" />
+<isorderdetailsemail order="${pdict.Order}" showBillingDetails="${pdict.showBillingDetails}" orderShipped="${pdict.orderShipped}" showReturnInfo="${pdict.showReturnInfo}" 
+showAvailableQuantity="${pdict.showAvailableQuantity}" returnedItems="${pdict.returnedItems}" trackURL="${pdict.trackURL}"/>
+<isprint value="${mailContent2}" encoding="off"/>
+</isif>
+</body>
+</html>

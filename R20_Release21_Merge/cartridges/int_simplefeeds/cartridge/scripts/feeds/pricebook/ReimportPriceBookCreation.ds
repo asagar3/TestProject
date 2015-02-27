@@ -1,0 +1,164 @@
+/**
+* Demandware Script File
+* This script file will be used to remove the unused product entries from the PriceBook(s).
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @input xmlReaderObj : dw.io.XMLStreamReader
+*   @input xmlWriterObj : dw.io.XMLStreamWriter
+*   @input pids : dw.util.HashSet
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.object );
+importPackage( dw.catalog );
+importPackage( dw.io );
+importPackage( dw.net );
+
+var TOP_NODE : String = "pricebooks";
+var PRICETABLE_NODE : String = "price-table";
+var ATTR_MODE_NAME : String = "mode";
+var ATTR_MODE_VALUE : String = "delete";
+var ATTR_PID_NAME : String = "product-id";
+var ONLINE_FROM_NODE : String = "online-from";
+var pidList : HashSet = new HashSet(); 
+
+function execute( args : PipelineDictionary ) : Number
+{
+	pidList = args.pids;
+	var xmlReader : XMLStreamReader = args.xmlReaderObj;
+	var writer : XMLStreamWriter = args.xmlWriterObj;
+	
+	var parseEvent : Number = 0;
+	var xml_element : XML = null;
+	var isSiteId : Boolean = false;
+	
+	if (pidList!=null && !pidList.empty){
+		try {
+			//Start Writing the file
+				parseEvent = xmlReader.next();		
+				if (parseEvent==XMLStreamConstants.START_ELEMENT)
+				{
+					if (xmlReader.getLocalName().equalsIgnoreCase(PRICETABLE_NODE)){
+						if (pidList.contains(getPid(xmlReader))){
+							xml_element = xmlReader.XMLObject;
+								//Create Price Table Tags
+								createPriceTableElement(xml_element, writer);
+								//args.deletecounter= args.deletecount + 1;
+						}
+						else{
+							xml_element = xmlReader.XMLObject;
+							//args.nodeletecounter = args.nodeletecounter + 1;
+						}
+					}
+					else{
+						//Create Normal Tags
+						createElement(xmlReader, writer);
+					}
+				}else if (parseEvent==XMLStreamConstants.END_ELEMENT){
+					writer.writeEndElement();
+					writer.writeRaw("\r\n");	
+				}			
+		} catch (ex){
+			Logger.error( "ReimportPriceBookCreation:: XML file generation failed"+ex);	
+			return PIPELET_ERROR;
+		}
+	} else {
+		Logger.error( "ReimportPriceBookCreation::Collection is null or empty");	
+		return PIPELET_ERROR;
+	}
+	return PIPELET_NEXT;
+}
+
+//Method for creating the normal elements
+function createElement(xmlReader : XMLStreamReader, writer : XMLStreamWriter) : XMLStreamReader {
+	var parseEventTemp : Number = 0;
+	writer.writeStartElement(xmlReader.getLocalName());
+	// Write nameSpace
+	if (xmlReader.getLocalName().equalsIgnoreCase(TOP_NODE) && !empty(xmlReader.getNamespaceURI())){
+		writer.writeDefaultNamespace(xmlReader.getNamespaceURI());
+	}	
+	// Create Attribues
+	createAttributes(xmlReader, writer);
+	parseEventTemp = xmlReader.next();
+	//called if it is an empty node
+	if (parseEventTemp==XMLStreamConstants.END_ELEMENT){
+		writer.writeEndElement();
+		writer.writeRaw("\r\n");
+	// If children exist.
+	} else if (parseEventTemp==XMLStreamConstants.START_ELEMENT){
+		createElement(xmlReader, writer);
+	}else if (parseEventTemp==XMLStreamConstants.CHARACTERS){
+		writer.writeCharacters(xmlReader.getText());
+	} 
+	return xmlReader;
+}
+//Method for creating the attributes
+function createAttributes(xmlReader : XMLStreamReader, writer : XMLStreamWriter) : XMLStreamReader {	
+	var index : Number;
+	var attrName : String;
+	var attrValue : String;
+	
+	for (index=0; index<xmlReader.getAttributeCount(); index++){		
+		if (!empty(xmlReader.getAttributePrefix(index))){
+			attrName = xmlReader.getAttributePrefix(index) + ":" + xmlReader.getAttributeLocalName(index);
+		}else {
+			attrName = xmlReader.getAttributeLocalName(index);
+		}	
+		attrValue = xmlReader.getAttributeValue(index);		
+		writer.writeAttribute(attrName, attrValue);
+	}
+	return xmlReader;
+}
+//Method for creating the Price Table Element
+function createPriceTableElement(element_XML : XML, writer : XMLStreamWriter) : XMLStreamReader {	
+	writer.writeStartElement(element_XML.localName().toString());
+	//Write Attributes
+	for each( var attr : XML in element_XML.attributes()) {
+		//if (xmlReader.getLocalName().equalsIgnoreCase(PRICETABLE_NODE))
+		
+		if(attr.localName()!=ATTR_MODE_NAME)
+		{
+		writer.writeAttribute(attr.localName().toString(), attr.valueOf().toString());
+		}	
+		}
+	//add the mode attribute
+	//writer.writeAttribute(ATTR_MODE_NAME, ATTR_MODE_VALUE);
+			
+	//Create Children
+	for each( var child : XML in element_XML.children()) {
+		if(child.localName()) {
+			writer.writeStartElement(child.localName().toString());
+			//Write Attributes
+			for each( var attr : XML in child.attributes()) {
+				writer.writeAttribute(attr.localName().toString(), attr.valueOf().toString());
+			}
+			writer.writeCharacters(child.valueOf().toString());
+			writer.writeEndElement();
+		}else if (child.nodeKind("text")){
+			writer.writeCharacters(child.valueOf().toString());
+		}		
+	}		
+	writer.writeEndElement();
+	writer.writeRaw("\r\n");
+}
+//Method for extracting the ProductID
+function getPid(xmlReader : XMLStreamReader) : String {	
+	var index : Number;	
+	var attrValue : String = null;
+	
+	for (index=0; index<xmlReader.getAttributeCount(); index++){		
+		if (ATTR_PID_NAME.equalsIgnoreCase(xmlReader.getAttributeLocalName(index))){
+			attrValue = xmlReader.getAttributeValue(index);
+		}				
+	}	
+	return attrValue;
+}

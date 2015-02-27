@@ -1,0 +1,380 @@
+/**
+*  @input Basket : dw.order.Basket
+*  @output customObject : Object
+* 
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.campaign );
+importPackage( dw.util);
+importPackage( dw.catalog);
+importPackage( dw.value); 
+
+function execute( pdict : PipelineDictionary ) : Number
+ { 
+	try { 
+		var dwBasket:Basket = pdict.Basket ;
+		
+		var tsopBasket = new Object();
+		tsopBasket.productLineItems = new Array();
+		 
+		var pliIt : dw.util.Iterator = dwBasket.productLineItems.iterator();
+		var cartQty : Number = 0;		
+		var pli : ProductLineItem = null ;
+		var basketProduct :Object = null ;
+		var promos:Collection = null ;
+		var product:Product = null ;
+		while (pliIt.hasNext()) {  
+			
+			pli  = pliIt.next(); 	
+			product = pli.product ;	
+			cartQty += pli.quantity.value ;
+			
+			basketProduct = new Object();		
+			basketProduct.productId = pli.productID ;			
+			
+			 if(product.variationModel != null && product.variationModel.master != null ){
+				basketProduct.parentProductId = product.variationModel.master.ID ;
+			}else{ 
+				basketProduct.parentProductId = pli.productID ;
+			}
+			basketProduct.productName = pli.product.name ;		
+			
+		
+			basketProduct.promotions = getProductPromotions(pli);
+		
+			
+			if(product.getImage('catlanding',0) != null){
+				basketProduct.imageDetails = getImageDetails(pli);
+			}
+			
+			if(product != null && product.isVariant()){
+				basketProduct.variationAttributes = getVariationAttributes(product) ;
+			}
+			basketProduct.quantity =  pli.quantity.value ;
+			
+			basketProduct.pricing =  getProductPricingDetails(pli);	
+			
+			basketProduct.stockStatus  = getStockStatus(product) ;	
+			
+			tsopBasket.productLineItems.push(basketProduct);	 
+		}
+		
+		var coupons : Collection = dwBasket.couponLineItems ;
+		if(coupons.length > 0 ){
+			tsopBasket.coupons = getCouponDetails(coupons);
+		}
+		
+		tsopBasket.shipmentDetails = getShipmentDetail(dwBasket);
+		tsopBasket.shippingContent = getShippingContent(dwBasket);	
+		if(!empty(dwBasket.priceAdjustments)){
+			tsopBasket.orderPromotionMessages = getOrderLevelPromotionMessages(dwBasket);
+		}
+		addOrderAmountDetails(tsopBasket,dwBasket);	
+		tsopBasket.cartQty = cartQty ;
+			
+		pdict.customObject = tsopBasket ;
+	}catch(e){
+		Logger.error("ManageBasket: CreateBasketJSON Script Error:::"+e.message) ;
+		 return PIPELET_ERROR ;	
+	}
+   return PIPELET_NEXT; 
+}
+
+function getOrderLevelPromotionMessages(basket:Basket):Array{
+	
+	var orderPromotionMessages = new Array();
+	try{
+		var orderPromotions:Collection = basket.priceAdjustments ;
+		for each(var priceAdjustment:LineItemCtnr in orderPromotions){
+			//var promotionalMessage = new Object();
+			var promotionalMessage =  priceAdjustment.lineItemText ;
+			orderPromotionMessages.push(promotionalMessage);
+		}
+	}catch(e){
+		Logger.error("CreateBasketJSON.ds Error while getting order level promotional message "+e.message);	
+		
+	} 	
+	return orderPromotionMessages ;
+	
+}
+
+function addOrderAmountDetails(tsopBasket:Object, dwBasket:Basket){
+	try{
+		tsopBasket.orderSubTotal = StringUtils.formatMoney(dwBasket.getAdjustedMerchandizeTotalPrice(false)) ;	
+		var merchTotalExclOrderDiscounts : Money = dwBasket.getAdjustedMerchandizeTotalPrice(false);	
+		var merchTotalInclOrderDiscounts : Money = dwBasket.getAdjustedMerchandizeTotalPrice(true);	
+		var orderDiscount : dw.value.Money = merchTotalExclOrderDiscounts.subtract( merchTotalInclOrderDiscounts );
+		
+		if(!empty(orderDiscount) && orderDiscount.value > 0.0){		
+			tsopBasket.discount = StringUtils.formatMoney(orderDiscount) ;					
+		}	   
+		
+		if(dwBasket.totalGrossPrice.available){		
+			tsopBasket.orderTotal = StringUtils.formatMoney(dwBasket.totalGrossPrice) ;		
+		}else {		
+			tsopBasket.orderTotal = StringUtils.formatMoney(dwBasket.getAdjustedMerchandizeTotalPrice(true)) ;		
+		}
+	}catch(e){
+		throw new Error("Error while getting order totals in CreateBasketJSON.addOrderAmountDetails "+e.message);	
+	}	
+}
+
+function getCouponDetails(basketCoupons:Collection ):Array
+{
+	var coupons = new Array();	
+	try{
+		var coupon : Object = null;
+		var pa : PriceAdjustment = null ;  
+		var couponLineItem:CouponLineItem = null ;		
+		for each(couponLineItem in basketCoupons){								
+				coupon = new Object() ;			
+				coupon.couponCode = couponLineItem.couponCode ;
+				coupon.applied = couponLineItem.applied ;
+				coupon.promoID = couponLineItem.promotion.ID ;
+				coupon.promoname = couponLineItem.promotion.name ;
+				if(couponLineItem.promotion.calloutMsg != null ){
+					coupon.promoCallOutMsg = couponLineItem.promotion.calloutMsg.markup ;
+				}			
+				if (couponLineItem.priceAdjustments != null) {
+					
+					for each(pa in couponLineItem.priceAdjustments)
+					{	 				 
+					  coupon.promoPrice = StringUtils.formatMoney(pa.getPrice()) ;
+					}
+				}
+				coupons.push(coupon); 
+		}
+	}catch(e){
+		throw new Error("Error while getting coupons in CreateBasketJSON.getCouponDetails "+e.message);	
+	}
+	
+	return coupons  ;
+	
+}
+
+function getImageDetails(pli:ProductLineItem):Object{		
+		var imageDetails = new Object();		
+		try {			
+			var scene7ImageUrl : dw.web.URL = pli.product.getImage('catlanding',0).absURL	;								
+			imageDetails.assetId = scene7ImageUrl.toString();
+			imageDetails.type = pli.product.custom.ImageType ;		
+		}catch(e){
+			Logger.error("Error while getting image details in CreateBasketJSON.getImageDetails"+e.message) ;	
+	}
+	 return	imageDetails ;	
+}
+
+function getVariationAttributes( product:Product):Array{
+	var variationAttributes = new Array() ;	
+	try{	
+		var variant:Object = null ; 
+		var selectedVariationValue:ProductVariationAttributeValue = null ;
+		var va:ProductVariationAttribute = null ;
+		for each(va in product.variationModel.getProductVariationAttributes() ){
+			variant = new Object();
+			selectedVariationValue = product.variationModel.getSelectedValue(va) ;
+			
+			if(selectedVariationValue != null){
+				
+				variant.attributeId = va.ID ;
+				var displayValue:String = selectedVariationValue.displayValue  ; 
+				variant.attributeName = displayValue ;
+				variant.attributeValue = displayValue ;		
+			}
+			variationAttributes.push(variant);
+		}			
+		
+	}catch(e){		
+		throw new Error("Error while getting variation attributes for product id "+product.ID +"   "+e.message) ;	
+	}			
+   
+   return variationAttributes ;	
+}
+
+function getShippingContent(dwBasket:Basket):Array{
+	var shippingContent = new Array();
+	try{
+		var shippingMethod = new Object();
+	
+		var shippingMethodColl : dw.util.Collection = dw.order.ShippingMgr.getAllShippingMethods();
+		for each(var shippingMeth:ShippingMethod in shippingMethodColl ){
+	
+				shippingMethod = new Object();
+				shippingMethod.ID = shippingMeth.ID ;
+				shippingMethod.shippingMethod = shippingMeth.displayName ;				
+				shippingMethod.shippingLeadTime  = shippingMeth.description ;				
+				shippingMethod.shippingPrice = StringUtils.formatMoney(ShippingMgr.getShipmentShippingModel(dwBasket.shipments.iterator().next()).getShippingCost(shippingMeth).amount) ;				
+				shippingMethod.isDefaultShipping = shippingMeth.defaultMethod ;
+				shippingContent.push(shippingMethod);
+	
+		}
+	}catch(e){
+		throw new Error("Error while shipping content"+e.message) ;
+	}
+ return shippingContent ;
+	
+}
+function getShipmentDetail(dwBasket:Basket):Object
+{	
+	var shipmentDetails = new Object();
+	try{
+		var money:Money = new Money(0.00, Site.getCurrent().getCurrencyCode());
+		var shipment : Shipment = dwBasket.shipments.iterator().next() ;
+		shipmentDetails.shippingDiscount = StringUtils.formatMoney(money) ;
+		shipmentDetails.shippingTotalPrice = StringUtils.formatMoney(money) ;
+		
+		var shipmentTotal:Money = null ;  
+		
+		
+		if(!empty(shipment) && !empty(shipment.shippingMethod)){
+				shipmentDetails.shipmentMethodName = shipment.shippingMethod.displayName ;
+				if(dwBasket.shippingTotalPrice.available){
+					shipmentTotal = dwBasket.shippingTotalPrice ;
+				}	
+		}
+		
+		var shippingExclDiscounts : Money = dwBasket.shippingTotalPrice;
+		var shippingInclDiscounts : Money = dwBasket.getAdjustedShippingTotalPrice();
+		var shippingDiscount : Money = shippingExclDiscounts.subtract( shippingInclDiscounts );
+			
+		if(!empty(shippingDiscount) && shippingDiscount.value > 0.0){				
+			shipmentDetails.shippingDiscount = StringUtils.formatMoney(shippingDiscount) ;
+		}
+		
+		if(shipmentTotal != null){
+			shipmentDetails.shippingTotalPrice = StringUtils.formatMoney(shipmentTotal) ;
+		}
+		
+	}catch(e){
+		throw new Error("Error while getting shipment details in CreateBasketJSON.getShipmentDetails"+e.message);	
+	}
+	return shipmentDetails ;
+}
+
+function getProductPromotions(pli :ProductLineItem): Array{
+	
+	
+	var promotions = new Array() ;	
+	try {		
+		var promos:Collection = pli.priceAdjustments ;
+		
+		if(!empty(promos)){
+			var promotion:Object = null ;
+			var promo:PriceAdjustment = null ; 
+			for each(promo in promos){
+				promotion = new Object();				
+				promotion.callOutMsg = promo.lineItemText ;
+				promotion.details  = promo.lineItemText ;				
+				promotions.push(promotion);
+			}	
+		}
+	}catch(e){
+		Logger.error("ManageBasket: getProductPromotions Script Error:::"+e.message) ;	
+	}
+	return promotions ;
+}
+
+/* function to get asset id from image url */
+function getAssetId(imageUrl:dw.web.URL):String{
+   var assetID :String = null ;
+   if (null != imageUrl) {
+			var imageURLSplit : Array = imageUrl.toString().split("/");
+			assetID = imageURLSplit[(imageURLSplit.length)-1];
+		 }
+   return assetID;
+}
+
+
+/*Pricing function*/
+function getProductPricingDetails(pli:ProductLineItem): Object {
+	var pricing = new Object() ;			
+	try{
+		var product:Product = pli.product ;		
+		if(product != null) {
+			
+			pricing.listprice = null ;
+			pricing.saleprice = null ;
+			pricing.promoprice = null ;
+			pricing.productTotal = null ;
+			
+			var priceModel:ProductPriceModel = product.getPriceModel()  ;
+			var standardPrice:Money = new Money(0.0, Site.getCurrent().getCurrencyCode());
+			if(!priceModel.getPrice().available){			
+				standardPrice = Money.NOT_AVAILABLE ;
+			}else if(!empty(dw.system.Site.current.preferences.custom.listPriceDefault)){
+				standardPrice = priceModel.getPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault) ;			
+			}else {
+				standardPrice = priceModel.getPriceBookPrice("list-prices");
+			}			
+			
+			var salesPrice:Money = priceModel.getPrice();/*getPrice will always give the laterst price availiable*/
+			var showStandardPrice = false ;
+			
+			if (standardPrice.available && standardPrice.value > salesPrice.value){
+				pricing.listprice = StringUtils.formatMoney(standardPrice) ; ;
+				showStandardPrice = true ;
+			}
+			
+			var lineItemPrice:Money = pli.getPrice().divide(pli.getQuantity().getValue()) ;
+			if(showStandardPrice){			
+					pricing.saleprice = StringUtils.formatMoney(salesPrice) ;
+					pricing.productTotal = StringUtils.formatMoney(salesPrice) ;
+			}else {
+				if (standardPrice.available && standardPrice.value == salesPrice.value){				
+					pricing.listprice = StringUtils.formatMoney(lineItemPrice) ;	
+					pricing.productTotal = StringUtils.formatMoney(lineItemPrice) ;									
+				}else {
+					pricing.saleprice = StringUtils.formatMoney(salesPrice) ;
+					pricing.productTotal = StringUtils.formatMoney(salesPrice) ;
+				} 
+		
+			}		
+			var lineItemPrice : Money = new Money(0.0, Site.getCurrent().getCurrencyCode());
+			lineItemPrice = pli.getPrice().divide(pli.getQuantity().getValue()) ; 
+			
+			var li:ProductLineItem = null ;
+			for each(li in pli.priceAdjustments ){
+				lineItemPrice = lineItemPrice.add(li.getPrice().divide(pli.getQuantity().getValue())) ;
+							
+					if (pli.priceAdjustments.length > 1){			
+						pricing.promoprice = StringUtils.formatMoney(lineItemPrice) ;
+						pricing.productTotal = StringUtils.formatMoney(lineItemPrice) ;	
+					}else {						
+					
+						pricing.promoprice = StringUtils.formatMoney(lineItemPrice) ;	
+						pricing.productTotal = StringUtils.formatMoney(pli.getAdjustedPrice()) ;	
+					}
+			}
+				
+			if (pli.priceAdjustments && pli.priceAdjustments.length != 1 
+					&& (showStandardPrice || pli.quantity > 1)){											
+					 pricing.productTotal = StringUtils.formatMoney(pli.getAdjustedPrice()) ;										
+				}
+		}	
+	}catch(e){
+		throw new Error("Error while getting pricing details in CreateBasketJSON.getProductPricingDetails"+e.message);	
+	}			
+	return pricing;		
+}
+
+
+/*Function for getting stock status*/
+function getStockStatus(product:Product):Object{
+	var stockStatus = new Object() ;	
+	try {		
+		var avm:ProductAvailabilityModel = product.availabilityModel ;
+		stockStatus.avStatus = avm.availabilityStatus ;
+		stockStatus.inStock = avm.inStock ;	
+		if(avm.inventoryRecord != null ){
+			stockStatus.ats = avm.inventoryRecord.ATS.value ;
+		}
+	}catch(e){
+		throw new Error("Error while getting stock status details in CreateBasketJSON.getStockStatus"+e.message);	
+	}
+	
+	return stockStatus ;	
+}
+
+
+

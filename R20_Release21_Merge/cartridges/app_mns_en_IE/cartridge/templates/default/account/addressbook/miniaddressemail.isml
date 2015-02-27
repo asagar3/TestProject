@@ -1,0 +1,51 @@
+<p style="font-family:Arial, Helvetica, sans-serif;font-size:14px;color:#666666;">
+  	<isprint value="${pdict.p_address.title}"/> 
+  	<isprint value="${pdict.p_address.firstName}"/> 
+  	<isprint value="${pdict.p_address.lastName}"/>
+<br />
+  	<isif condition="${pdict.p_address.address1 != null}">
+  		<isprint value="${pdict.p_address.address1}"/>&nbsp;
+  		<br />
+  	</isif>
+  	<isif condition="${pdict.p_address.address2 != null}">
+  		<isprint value="${pdict.p_address.address2}"/>
+  		<br />
+  	</isif>
+
+		<isif condition="${pdict.p_address.postBox != null}">
+			<isprint value="${pdict.p_address.postBox}"/>&nbsp;
+			<br />
+		</isif>
+		
+		<iscomment>
+		<isif condition="${pdict.p_address.custom.streetName != null}">
+			<isprint value="${pdict.p_address.custom.streetName}"/><br />
+		</isif>	
+
+		<isif condition="${pdict.p_address.postBox != null}">
+			<isprint value="${pdict.p_address.postBox}"/>  &nbsp; 
+		</isif>
+		</iscomment>
+		<isif condition="${pdict.p_address.postalCode != null && pdict.p_address.postalCode != '.'}">
+			<isprint value="${pdict.p_address.postalCode}"/><br />
+		</isif>
+
+		<isif condition="${pdict.p_address.city != null}">
+			<isprint value="${pdict.p_address.city}"/><br/>
+		</isif>
+		<isif condition="${pdict.p_address.stateCode != null}">
+			<isprint value="${pdict.p_address.stateCode}"/>,			
+		</isif>
+		<isif condition="${pdict.p_address.countryCode != null}">
+			<isprint value="${pdict.p_address.countryCode}"/><br />
+		</isif>	
+
+		<isif condition="${pdict.p_showphone == 'true' && pdict.p_address.phone != null}">
+			${Resource.msg('miniaddress.phone','account',null)} <isprint value="${pdict.p_address.phone}"/><br />
+		</isif>	
+
+		<isif condition="${pdict.p_address.custom.alternateContactNumber != null}">
+			${Resource.msg('miniaddress.alternatePhone','account',null)} <isprint value="${pdict.p_address.custom.alternateContactNumber}"/>
+		</isif>	
+</p>
+	

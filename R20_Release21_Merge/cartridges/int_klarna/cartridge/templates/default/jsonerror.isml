@@ -1,0 +1,2 @@
+<!--- TEMPLATENAME: jsonerror.isml --->
+{error : "${pdict.KlarnaError}"}

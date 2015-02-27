@@ -1,0 +1,220 @@
+<iscomment>the page title calculated by the app </iscomment>
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<title>${pdict.CurrentPageMetaData.title}</title>
+<iscomment>Praveen: Fix for 843</iscomment>
+<script type="text/javascript">
+var testGlobalNew = '${Resource.msg('global.close','locale',null)}';
+var clearText = '${Resource.msg('searchrefinebar.clearselection','search',null)}';
+var pleaseWaitText = '${Resource.msg('cart.pleasewait','checkout',null)}';
+var updateQuickView = '${Resource.msg('global.updatequickview','locale',null)}';
+//Variable added for Omniture CR 154 (LHN Refinement Tracking)
+var evar10 = "";
+var evar11 = "";
+var getFeedbackText = '${Resource.msg('product.getFeedbackText','product',null)}';
+
+
+</script>
+<iscomment>Dkumar :INC000006664542 variable protocal used to store https.</iscomment>
+<isscript>
+	var protocol : String = request.httpProtocol;
+</isscript>
+
+<link href="${URLUtils.staticURL('/css/default.css')}" type="text/css" rel="stylesheet" />
+<!--- TODO: Move all CSS that contains image references into "/css" folder and adjust references --->
+<isinclude template="components/header/css_min" />
+<link href="${URLUtils.staticURL('/css/print.css')}" type="text/css" rel="stylesheet" title="Demandware Store" media="print" />
+
+<iscomment>BROWSER SPECIFIC STYLESHEETS: For IE make sure to use Microsoft conditional comments</iscomment>
+<!--[if IE 7]><link href="${URLUtils.staticURL('/themes/demandwarestore/css/ie7.css')}" type="text/css" rel="stylesheet" /><![endif]-->
+<!--[if IE 6]><link href="${URLUtils.staticURL('/css/ie6.css')}" type="text/css" rel="stylesheet" /><![endif]-->
+<!--[if IE 8]><link href="${URLUtils.staticURL('/themes/demandwarestore/css/ie8.css')}" type="text/css" rel="stylesheet" /><![endif]-->
+<!--[if IE 9]><link href="${URLUtils.staticURL('/themes/demandwarestore/css/ie9.css')}" type="text/css" rel="stylesheet" /><![endif]-->
+<script type="text/javascript">
+var browVal = navigator.userAgent.toLowerCase();
+if(browVal.indexOf("firefox") != -1){
+	document.write("<link href='${URLUtils.staticURL("/css/fontface_firefox_mcfp.css")}' type='text/css' rel='stylesheet' />");
+}else{
+	document.write("<link href='${URLUtils.staticURL("/css/fontface_mcfp.css")}' type='text/css' rel='stylesheet' />");
+}
+</script>
+<iscomment>FAVICON ICON: (website icon, a page icon or an urlicon) 16x16 pixel image icon for website</iscomment>
+<link href="${URLUtils.staticURL('/images/favicon.ico')}" rel="shortcut icon" />
+<link rel="stylesheet" href="${URLUtils.absStatic(URLUtils.CONTEXT_LIBRARY,null,'images/custom/css/customMarksAndSpencer.css')}" type="text/css" media="screen" />
+
+<iscomment>include all meta tags</iscomment>
+<iscomment>
+	This Content-Type setting is optional as long as the webserver transfers
+	the Content-Type in the http header correctly. But because some browsers or
+	proxies might not deal with this setting in the http header correctly, a
+	second setting can help to keep everything just fine.
+</iscomment>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<iscomment>This tag is required by Scene7 viewers</iscomment>
+<meta http-equiv="imagetoolbar" content="no" />
+
+<iscomment>Automatic generation for meta tags.</iscomment>
+<isif condition="${!empty(pdict.CurrentPageMetaData.description)}"><meta name="description" content="${pdict.CurrentPageMetaData.description}"/></isif>
+<isif condition="${!empty(pdict.CurrentPageMetaData.keywords)}"><meta name="keywords" content="${pdict.CurrentPageMetaData.keywords}"/></isif>
+<iscomment>Insert meta tag for the "Google-Verification" feature to verify that you are the owner of this site.</iscomment>
+<isif condition="${'GoogleVerificationTag' in dw.system.Site.current.preferences.custom && dw.system.Site.current.preferences.custom.GoogleVerificationTag!=''}">
+    <meta name="google-site-verification" content="<isprint value="${dw.system.Site.current.preferences.custom.GoogleVerificationTag}"/>" />
+</isif>
+
+<iscomment>
+	Add your own meta information here, e.g. Dublin-Core information
+</iscomment>
+<iscomment>Davinder: pleaes do not merge the below two files</iscomment>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/jquery-1.8.3.min.aliased.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/jquery.carouFredSel-6.2.0-packed.js')}" type="text/javascript"></script>
+<isinclude template="components/header/js_min" />
+<!-- Tooltip Framework -->
+<!--[if IE]><script src="${URLUtils.staticURL('/lib/jquery/js/excanvas_r3/excanvas.js')}" type="text/javascript" charset="utf-8"></script><![endif]-->
+
+
+<isif condition="${dw.system.System.getInstanceType() != dw.system.System.PRODUCTION_SYSTEM && true}">
+	<script src="${URLUtils.staticURL('/js/debug.js')}" type="text/javascript"></script>
+</isif>
+<iscomment>javascript for flash banners </iscomment>
+<iscomment><script src="${URLUtils.staticURL('/js/AC_RunActiveContent.js')}" type="text/javascript"></script></iscomment>
+
+<iscomment>Script for powerreviews:</iscomment>
+<iscomment> Commenting this line to remove JS 404 Error from Site
+<script src="${URLUtils.staticURL(URLUtils.CONTEXT_CATALOG, null, '/pwr/engine/js/full.js')}" type="text/javascript"></script></iscomment>
+<script type="text/javascript">
+<!--
+  // PowerReview related settings
+  var pr_zip_location = "${URLUtils.staticURL(URLUtils.CONTEXT_CATALOG, null, '')}";
+  var pr_merchant_id = "6690";
+//--></script>
+<iscomment>file is created and included for Country specific CSS and JS</iscomment> <isinclude template="components/mns_lang.isml" />
+<iscomment>The follow snippet is executed to pass some Demandware URLs into the script</iscomment>
+<isinclude template="content/errormessages"/>
+
+
+<script type="text/javascript"><!--
+/** BEGIN scene7 initialisation 
+ *  set isRoot
+ *  set company
+ *  set max_thumb_images
+ *  set params
+ *  
+ *  Leave everything else as it is.
+ * */
+ <iscomment><!-- TODO: Scene7 viewer 18th May 2011 this is the real root. changed to s7g1 from s7ips3  --></iscomment>
+ <isset name="scene7root" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('scene7RootUrl')}" scope="page"/> 
+
+ <iscomment><!-- /**
+
+ NOTE: This is a DEMO account so when the account is signed for by M&S these addresses may change
+  
+ LIVE address:
+ <isset name="scene7root" value="http://s7g1.scene7.com/is/image/" scope="page"/>
+ PRE-LIVE address: 
+ <isset name="scene7root" value=" http://s7e1a.scene7.com/is/image/" scope="page"/>
+ */
+ --></iscomment>
+
+ <isset name="company" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('s7companyName')}" scope="page"/>
+ <isset name="mainimagewidth" value="278" scope="page"/>
+
+
+
+ 
+function S7ConfigObject(){
+	this.isVersion		= "2.8";
+	this.isViewerRoot	= "${protocol}${dw.system.Site.getCurrent().getCustomPreferenceValue('scene7ImageViewerPathUrl')}";/* use the s7e1a viewer for compatibility. */
+	this.isRoot		= "${scene7root}";/* this is where the images actually are. see scene7 asset 'preview' to get the correct base url */
+	/* NOTE: images served from s7g1 will NOT appear until a Publish action has been performed in Scene7 Image Catalog */
+	this.imagesetaddress = app.URLs.s7ImageSet;//"${URLUtils.staticURL('proxy/proxy.php')}";/*proxy to gain the scene7 assets via ajax */
+	this.mainimageaddress = app.URLs.s7MainImage;//"${URLUtils.staticURL('proxy/S7Imagesize_stub.txt')}";
+
+		/*This proxy must accept GET_[jsonurl]
+		                    		returns: 
+		                    		content-type:'text/plain'
+
+		proxy domain set to ${scene7root}
+
+
+	*/
+}
+var S7ConfigClient	= new S7ConfigObject();
+function docWrite(line) {document.write(line);}	
+var company = "${company}";/*company name associated with the root and viewerroot */
+var preset  ='config2';
+
+
+
+ var s7params={
+	"default":{
+		/*"transition":	"fade,0.25"	,*/
+		"transition":	"none"	, /*QC 324 fix*/
+		"flyout":	"$jswidth$,$jsheight$,278,0"	,/* only change offset left/top */
+		"zoomFactor":	"4.2"	, /* change the zoom size*/
+		"frameBorder":	"#D3D3D3 1px solid"	,
+		"flyoutBorder":	"#D3D3D3 4px solid",
+		"flyoutminheight": "400",
+		"videotriggerclass": "scene7flyoutvideotrigger"
+ 	}
+} 
+
+ 
+sj_codebase = S7ConfigClient.isViewerRoot + /dhtml/;
+
+/* in order to use cropping we use our own version 
+ * TODO: scene7 viewer 19th may 2011
+ document.write replaced with this append as old version interferes with QuickView
+ */
+
+
+
+/* use this if local hybrid is NOT allowed */
+ 
+ //if IE
+ if($.browser.msie){
+jQuery(document).ready(function(){
+	var script = document.createElement("script");
+	script.setAttribute('type','text/javascript');
+	script.setAttribute('src',S7ConfigClient.isViewerRoot + '/dhtml/sj_flyout.js?company='+company);
+	//Changing the way we use 'append' to fix the JS errors on IE9.
+	document.body.appendChild(script);
+//	$(document).append(script);
+});
+
+ }else{
+// if NOT IE
+$('head').append('<script type="text/javascript" src="'+S7ConfigClient.isViewerRoot + '/dhtml/sj_flyout.js?company='+company+'"/>');
+ }
+
+/***********
+ *  END scene7 initialisation 
+ ***********/
+ //-->
+/*appending span for template alignment IE7 */
+ jQuery(function(){
+	 if($.browser.msie && jQuery.browser.version == '7.0'){
+	 	jQuery('a.greyLink_sml_arrow').append('<span></span>');
+	 }
+ });
+
+function showPopUp(productId){
+	 var url = "${URLUtils.url('Product-Show')}?pid=" + productId;
+	 app.quickView.show({url: url, source: "quickview"});
+	 
+ }
+
+jQ(document).ready(function(){
+	if(jQ("#featured").length){
+		jQ(window).load(function(){
+			jQ("#featured").orbit();
+		});
+	}
+	if(jQ("#tier2NewCarousel").length){
+		jQ(window).load(function(){
+			jQ("#tier2NewCarousel").orbit();
+		});
+	}
+});
+</script>
+<iscomment>Demandware active data scripts</iscomment>
+<isactivedatahead>

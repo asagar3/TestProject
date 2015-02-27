@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?demandware-pipeline version="2.0"?>
+
+<pipeline type="view">
+  <branch basename="TextIdCollection">
+    <segment>
+      <node>
+        <start-node call-mode="private" name="TextIdCollection" secure="false"/>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="feeds/CompareTextFiles.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="&quot;17Apr-catalog-onlypid.txt&quot;" key="catalogFileName"/>
+          <key-binding alias="&quot;18Apr-After-salesPrice.txt&quot;" key="priceFileName"/>
+          <key-binding alias="resultCount" key="compareResultCount"/>
+          <key-binding alias="dw.system.Site.getCurrent().preferences.custom.compareResultFileName" key="compareResultFileName"/>
+          <key-binding alias="dw.system.Site.getCurrent().preferences.custom.firstFileName" key="firstFileName"/>
+          <key-binding alias="dw.system.Site.getCurrent().preferences.custom.secondFileName" key="secondFileName"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <end-node/>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+</pipeline>

@@ -1,0 +1,9 @@
+<iscache status="off">
+
+<iscomponent pipeline="ReportingEvent-Start" ID="ABTest" Name="RichRelevance" Segment="${pdict.rrABtest}">
+
+<isif condition="${pdict.rrABtest == 'DW'}">
+	<isinclude template="product/components/recommendations"/>
+<iselse>
+	<script charset="utf-8" type="text/javascript">r3_placement('${pdict.PlacementType}');</script>
+</isif>

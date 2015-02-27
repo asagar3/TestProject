@@ -1,0 +1,73 @@
+<!--- TEMPLATENAME: customobjectlisting.isml --->
+<isdecorate template="application/MenuFrame">
+
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<isinclude template="util/modules">
+<style type="text/css">
+   .LOG_INFO
+   {
+      background-color: #99bbff;
+   }
+   
+   .LOG_DEBUG 
+   {
+     background-color: #ccff99;
+   
+   }
+   
+   .LOG_ERROR
+   {
+     background-color: #ff9966;
+   
+   }
+
+   .LOG_CRITICAL
+   {
+     background-color: #ff9966;
+   
+   }
+
+   .LOG_WARN
+   {
+     background-color: #ffcc66;
+   } 
+  
+   .text_black
+   {
+     font-color: #000000;
+     color: #000000;
+   }     
+   
+    .strong {font-weight: bold;}
+    .pageBrowser{}
+	.pageBrowser .pagination ul {margin:auto;}
+	.pageBrowser .pagination li {list-style-type:none; float:left; margin-left:5px;}
+	.pageBrowser .pagination a {text-decoration:underline;}
+	.pageBrowser .pagination .nextpage a {text-decoration:none;}
+	.pageBrowser .pagination .previouspage a {text-decoration:none;}
+	.pageBrowser .labelPage {padding:3px;margin-right:20px;}
+	.pageBrowser .pageBrowserCell .pageBrowser {height:auto;}
+</style>
+		
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+
+					<tr>
+						<td class="table_title aldi" width="100%">
+							Error
+						</td>
+					</tr>
+					<tr>
+						<td class="table_title_description w s e" width="100%">
+							No Config Object found - Please contact demandware support
+						</td>
+					</tr>
+					<tr>
+						<td class="table_title_description w s e" width="100%">
+							Click <a href="https://support.demandware.com/">here</a> to go to Customer Central
+						</td>
+					</tr>
+						
+					</table>
+   
+<!--- End: extension/exportresult.isml --->
+</isdecorate>

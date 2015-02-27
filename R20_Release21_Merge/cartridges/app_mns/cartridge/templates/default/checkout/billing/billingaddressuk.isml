@@ -1,0 +1,48 @@
+<!--- TEMPLATENAME: billingaddress.isml --->
+
+<isinclude template="util/modules"/>
+
+<div class="formfield addressline1">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.addressline1}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.addressline1}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+
+<div class="formfield addressline2">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.addressline2}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.addressline2}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+
+<div class="formfield address3">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address3}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address3}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+  
+  <!-- END: state --> 
+<div class="formfield city">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.city}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.city}" type="input" label="false" xhtmlclass="startWithAlphabet"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+
+<!-- END: city -->
+<div class="formfield state">
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.county}" type="input" value="false"/>
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.county}" type="input" label="false"/>
+    <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+    <!--QC 3174 -->
+<div class="formfield zip">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.zip}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.zip}" type="input" label="false" xhtmlclass="billingpage"/>
+  <div class="formfieldtooltip ziptip">
+ 		<istooltip content_id="help-billingPostCode"/>
+  </div>
+  <div class="clear"><!-- FLOAT CLEAR --></div>
+</div>
+<!-- END: zip -->
+		
+<div class="clear"></div>
+

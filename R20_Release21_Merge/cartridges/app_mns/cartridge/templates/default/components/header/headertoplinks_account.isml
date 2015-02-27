@@ -1,0 +1,18 @@
+
+
+
+
+<isif condition="${!pdict.CurrentCustomer.authenticated}"> <a
+	title="${Resource.msg('account.pagetitle.login','account',null)}"
+	href="${URLUtils.https('Account-SignIn')}" class="userlogin">${Resource.msg('account.pagetitle.login','account',null)}</a>
+<span class="divider">.</span> <a
+	title="${Resource.msg('global.register','locale',null)}"
+	href="${URLUtils.https('Account-StartRegister')}" class="userregister">${Resource.msg('global.register','locale',null)}</a>
+<span class="divider">.</span> </isif>
+
+<isif condition="${pdict.CurrentCustomer.authenticated}"> <a
+	title="My account" href="${URLUtils.https('Account-Show')}">${Resource.msg('header.myaccount','components',null)}</a>
+</isif>
+
+
+

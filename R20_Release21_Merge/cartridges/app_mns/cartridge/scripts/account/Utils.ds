@@ -1,0 +1,179 @@
+/**
+ * This script provides utility functions shared across other account
+ * related scripts. Reused script components for account management 
+ * should be contained here, while this script is imported into the 
+ * requiring script.
+ */
+importPackage( dw.customer );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.value );
+importPackage( dw.web );
+
+/**
+ * Determines a unique address ID for an address to be save the given
+ * address book. The function first checks the city as the candidate ID 
+ * or appends a counter to the city (if already used as address ID) and 
+ * checks the existence of the resulting ID candidate. If the resulting 
+ * ID is unique this ID is returned, if not the counter is incremented and
+ * checked again.
+ */
+function determineUniqueAddressID( city : String, addressBook : AddressBook )
+{
+	var counter : Number = 0;
+	var existingAddress : CustomerAddress = null;
+
+	// check, if attribute "city" is set and has a value
+	if( city == null || empty(city) )
+	{
+		Logger.debug("Cannot determine unique address ID from non existing or not set attribute \"city\".");
+		return null;
+	}
+
+	// initialize the candidate ID
+	var candidateID : String = city;
+
+	while( existingAddress == null )
+	{
+		existingAddress = addressBook.getAddress(candidateID);
+		if( existingAddress != null )
+		{
+			// this ID is already taken, increment the counter 
+			// and try the next one
+			counter++;
+			candidateID = city + "-" + counter;
+			existingAddress = null;
+		}
+		else
+		{
+			return candidateID;
+		}
+	}
+
+	// should never go here
+	return null;
+}
+
+/**
+ * Returns a possible equivalent address to the given order address from the 
+ * address book or null, if non equivalent address was found.
+ */
+ 
+ //Changed For QC:3214  UK address was not getting saved when Addressbook already have France address 
+ 
+function getEquivalentAddress(addressBook : AddressBook, orderAddress : OrderAddress) : CustomerAddress
+{
+	
+	var address : CustomerAddress = null;
+	for each(address in addressBook.addresses)
+	{
+		if(orderAddress!= null && address.countryCode.getValue().equalsIgnoreCase(orderAddress.countryCode.getValue()))
+		{
+			if(address.countryCode.getValue().equalsIgnoreCase("FR") || address.countryCode.getValue().equalsIgnoreCase("MC") ){
+				address= getEquivalentFRAddress(address,orderAddress);
+				if(address != null){
+					return address;
+				}
+			}
+			else {
+				address= getEquivalentNonFRAddress(address,orderAddress);
+				if(address != null){
+					return address;
+				}
+			}			
+		}
+	}	
+	return null;
+}
+ 		
+ //Changed For QC:3214  UK address was not getting saved when Addressbook already have France address 	
+ function getEquivalentFRAddress(address : CustomerAddress, orderAddress : OrderAddress) : CustomerAddress
+ {
+ 	if(orderAddress.custom!=null && !empty(orderAddress.custom.streetName))
+		{
+			if(address.isEquivalentAddress(orderAddress) && address.custom.streetName.equalsIgnoreCase(orderAddress.custom.streetName) && address.custom.alternateContactNumber == orderAddress.custom.alternateContactNumber && address.custom.residence == orderAddress.custom.residence)
+			{
+				return address;
+			}
+		}
+	return null ;		
+ }	
+ 
+ //Changed For QC:3214  UK address was not getting saved when Addressbook already have France address 
+ function getEquivalentNonFRAddress(address : CustomerAddress, orderAddress : OrderAddress) : CustomerAddress
+ {
+ 			if(!empty(address.stateCode) && !empty(orderAddress.stateCode)) 
+ 			{
+ 				if(address.firstName.equalsIgnoreCase(orderAddress.firstName) && 
+ 					address.lastName.equalsIgnoreCase(orderAddress.lastName) && 
+ 					address.stateCode.equalsIgnoreCase(orderAddress.stateCode) && 
+ 					address.address1.equalsIgnoreCase(orderAddress.address1) && 
+ 					address.city.equalsIgnoreCase(orderAddress.city) && 
+ 					address.phone == orderAddress.phone ) {
+					return address;
+				}
+ 			} else {
+ 				if(address.firstName.equalsIgnoreCase(orderAddress.firstName) && 
+ 					address.lastName.equalsIgnoreCase(orderAddress.lastName) && 
+ 					address.address1.equalsIgnoreCase(orderAddress.address1) && 
+ 					address.city.equalsIgnoreCase(orderAddress.city) && 
+ 					address.phone == orderAddress.phone  ) {
+						return address;
+					}
+ 			}
+ 	return null ;			
+}	
+ 	
+ 		
+/**
+ * Returns a possible equivalent customer address to the given form address from the 
+ * address book. If no equivalent address is present then it returns null.
+ */	
+ 		
+	
+function getEquivalentCustomerAddress(addressBook : AddressBook, orderAddress : Form) : CustomerAddress
+{
+	var address : CustomerAddress = null;
+	for each(address in addressBook.addresses)
+	{
+		if(!empty(orderAddress.address.streetName.value))
+ 		{
+			if(address.title.equalsIgnoreCase(orderAddress.address.title.value) && 
+				address.firstName.equalsIgnoreCase(orderAddress.address.firstname.value) && 
+				address.lastName.equalsIgnoreCase(orderAddress.address.lastname.value) && 
+				address.city.equalsIgnoreCase(orderAddress.address.city.value) && 
+				(address.postalCode == orderAddress.address.zip.value) && 
+				(address.phone == orderAddress.address.phone.value) && 
+				address.custom.streetName.equalsIgnoreCase(orderAddress.address.streetName.value)) {
+					return address;
+			}
+ 		} else {
+ 			// This if block is added for EU Site as statecode is non-mandatory field in EU.
+ 			if(!empty(address.stateCode) && !empty(orderAddress.address.states.state.value)) 
+ 			{
+ 				if(address.firstName.equalsIgnoreCase(orderAddress.address.firstname.value) && 
+ 					address.lastName.equalsIgnoreCase(orderAddress.address.lastname.value) && 
+ 					address.stateCode.equalsIgnoreCase(orderAddress.address.states.state.value) && 
+ 					address.address1.equalsIgnoreCase(orderAddress.address.address1.value) && 
+ 					address.city.equalsIgnoreCase(orderAddress.address.city.value) && 
+ 					address.phone == orderAddress.address.phone.value ) {
+						return address;
+				}
+ 			}else {
+ 				// Flow would come to this else only in case of EU site and that too when statecode field in address is empty.
+ 				if(address.firstName.equalsIgnoreCase(orderAddress.address.firstname.value) && 
+ 					address.lastName.equalsIgnoreCase(orderAddress.address.lastname.value) && 
+ 					address.address1.equalsIgnoreCase(orderAddress.address.address1.value) && 
+ 					address.city.equalsIgnoreCase(orderAddress.address.city.value) && 
+ 					address.phone == orderAddress.address.phone.value ) {
+						return address;
+					}
+ 			}
+ 	    }
+ 			
+	}
+	return null;
+}
+
+

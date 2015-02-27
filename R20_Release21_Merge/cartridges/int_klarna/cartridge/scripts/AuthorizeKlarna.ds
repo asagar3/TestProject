@@ -1,0 +1,359 @@
+/**
+* This script communicates with Klarna and performs the actual payment
+* authorization. Depending on the outcome it returns an error message and
+* order status.
+*
+* @input OrderNo : String The Current OrderNo
+* @input Basket : dw.order.Basket The customers basket
+* @output ErrorMessage : String The error message if any
+* @output klarnaOrderStatus : String
+* @output InvoiceNo : String
+*- @input KlarnaFormInvoice : dw.web.Form The Klarna form
+*- @input KlarnaFormPartPayment : dw.web.Form The Klarna form
+*- @input KlarnaFormSpecial : dw.web.Form The Klarna form
+* @input billingForm : dw.web.Form The Klarna form
+* @input PaymentProcessor : dw.order.PaymentProcessor The Payment Processor used
+* @output StatusMessage : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.net );
+importPackage ( dw.crypto );
+importPackage ( dw.util );
+importPackage( dw.catalog );
+importPackage ( dw.object );
+importPackage(dw.value);
+
+importScript("int_klarna:libKlarnaAPI.ds");
+
+function build_goodslist(klarna, paymentInstr, basket) {
+	// Variable to hold the product options
+	var options : ProductOptionModel;
+	// Variable to store the price adjustments
+	var priceAdjustments : Collection = basket.getPriceAdjustments();
+	// Variable to hold all gift cards
+	var giftcards : Collection = basket.getGiftCertificatePaymentInstruments();
+
+	// Start by adding the basket order price adjustments
+	if(!priceAdjustments.isEmpty()) {
+		for each (var promo : PriceAdjustment in priceAdjustments ) {
+			klarna.add_article(1, "", promo.getLineItemText(),
+				promo.getGrossPrice().getValue(), promo.getTaxRate()*100, 0, Flag.INC_VAT);
+		}
+	}
+
+	var options : String = "";
+	// Loop through all items in the basket
+	for each(var p : ProductLineItem in basket.getProductLineItems() ) {
+		// Variables that will store the different kind of product types.
+		var bundledProducts : Collection = p.getBundledProductLineItems();
+		var optionalProducts : Collection = p.getOptionProductLineItems();
+
+		// Get the product attributes for the current product line item
+		var va : Collection = p.getProduct().getVariationModel().getProductVariationAttributes();
+		for(var i : Number = 0; i < va.length; i++) {
+			options += va[i].displayName + ": " +  p.getProduct().getVariationModel().getSelectedValue(va[i]).getDisplayValue();
+			// Only add the semi colon if we have mor than one option and
+			// are not on the last one.
+			if(va.length > 1 && (i != va.length - 1)) {
+				options += "; ";
+			}
+		}
+
+		// Add the current product
+		var productName = p.getProductName() + (options.length > 0 ? " - " + options : "");
+		//Praveen : Changing the product-id to product-UPC as requested by ICOS
+		klarna.add_article(p.getQuantityValue(), p.getProduct().UPC, productName,
+			p.getGrossPrice().getValue()/p.getQuantityValue(), p.getTaxRate()*100, 0, Flag.INC_VAT);
+
+		// Price adjustment for this product line item
+		priceAdjustments = p.getPriceAdjustments();
+		if(!priceAdjustments.isEmpty()) {
+			for each (var promo : PriceAdjustment in priceAdjustments ) {
+				klarna.add_article(1, "", promo.getLineItemText(),
+					promo.getGrossPrice().getValue(), promo.getTaxRate()*100, 0, Flag.INC_VAT);
+			}
+		}
+
+		// If there are optional products, add them to the products array
+		if(!optionalProducts.isEmpty()) {
+			for each (var option : ProductLineItem in optionalProducts ) {
+				klarna.add_article(option.getQuantityValue(), option.getProductID(), option.getProductName(),
+					option.getGrossPrice().getValue()/option.getQuantityValue(), p.getTaxRate()*100, 0, Flag.INC_VAT);
+
+				priceAdjustments = option.getPriceAdjustments();
+				if(!priceAdjustments.isEmpty() ) {
+					for each (var promo : PriceAdjustment in priceAdjustments ) {
+						klarna.add_article(1, "", promo.getLineItemText(),
+							promo.getGrossPrice().getValue(), promo.getTaxRate()*100, 0, Flag.INC_VAT);
+					}
+				}
+			}
+		}
+
+		// If there are bundled products add them to the products array. As bundled products do not
+		// affect the price we simply add 0 as the price.
+		if(!bundledProducts.isEmpty()) {
+			for each(var bundledProduct : ProductLineItem in bundledProducts) {
+				klarna.add_article(bundledProduct.getQuantityValue(), bundledProduct.getProductID(), bundledProduct.getProductName(),
+					0, 0, 0, 32);
+
+				priceAdjustments = bundledProduct.getPriceAdjustments();
+				if( !priceAdjustments.isEmpty() ) {
+					for each (var promo : PriceAdjustment in priceAdjustments ) {
+						klarna.add_article(1, "", promo.getLineItemText(),
+							promo.getGrossPrice().getValue(), promo.getTaxRate()*100, 0, Flag.INC_VAT);
+					}
+				}
+			}
+		}
+	}
+
+	// Add the giftcard amount to the invoice
+	for each (var gpi : OrderPaymentInstrument in giftcards) {
+		var gpt : PaymentTransaction = gpi.getPaymentTransaction();
+		klarna.add_article(1, "", dw.web.Resource.msg("klarna.gift_certificate", "klarna", null),
+			gpt.getAmount().getValue()*-1, 0, 0, Flag.INC_VAT);
+	}
+}
+
+function execute( args : PipelineDictionary ) : Number
+{
+//	var klarna = new Klarna(); //Commented for CR 3079
+	var orderNo : String = args.OrderNo;
+	var basket : Basket = args.Basket;
+	
+	// Define some handy shortcuts
+	
+	var shipments : Collection = basket.getShipments();
+	var shipment : Shipment = shipments[0];
+	var shippingAddress : OrderAddress = shipment.getShippingAddress();
+	var billingAddress : OrderAddress = basket.getBillingAddress();
+	var taxJurisdiction : String = TaxMgr.getTaxJurisdictionID(new ShippingLocation(shippingAddress));
+	var KlarnaCountry : String = shippingAddress.getCountryCode();
+	
+	//CR 3079 : select merchant_id on the basis of Country and shipping method
+	var shipping_Method : String = shipment.getShippingMethod().ID;
+	var shipping_CountryCode : String = shippingAddress.getCountryCode().value;
+	var klarna = new Klarna(shipping_CountryCode,shipping_Method);
+
+	// Find any KLARNA payment instrument in the collection
+	var paymentInstruments : Collection = basket.getPaymentInstruments();
+	var paymentInstr : OrderPaymentInstrument = null;
+	var paymentMethod : String = null;
+	for each (var paymentInstrument : OrderPaymentInstrument in paymentInstruments) {
+		if(paymentInstrument.getPaymentMethod().equals(dw.order.PaymentInstrument.METHOD_BML)) {
+			paymentMethod = paymentInstrument.getPaymentMethod();
+			paymentInstr = paymentInstrument;
+			break;	
+		}	
+	}
+	
+	//Praveen : Set the Klarna specific values
+	
+	var l : dw.object.CustomAttributes = paymentInstr.getCustom();
+
+	//Praveen: Setting the pclassID to -1, assuming this will be -1(invoice) always
+	//var pclassID : Number = Number(form['pclass'].htmlValue);
+	var pclassID : Number = -1;
+	
+	l["KlarnaPClassID"] = pclassID;
+	
+	
+	var klarnaTaxClass : String = Site.getCurrent().getCustomPreferenceValue("KLARNA_TAX_CLASS");
+	var invoiceFeeTaxRate : Number = (taxJurisdiction == null || klarnaTaxClass == null ? 0 : TaxMgr.getTaxRate(klarnaTaxClass, taxJurisdiction))+1;
+	l["KlarnaInvoiceFee"] = Number(Site.getCurrent().getCustomPreferenceValue("KLARNA_INVOICEFEE_" + shippingAddress.getCountryCode()));
+	l["KlarnaInvoiceFeeTaxAmount"] = Number(l["KlarnaInvoiceFee"]*(1-1/invoiceFeeTaxRate));
+	l["KlarnaPaymentDescription"] = dw.web.Resource.msg("KLARNA_description", 'klarna', null);
+	 
+	
+
+	// Grab the correct form based on payment method
+	//var form : dw.web.Form = (paymentMethod == "KLARNA" ? args.KlarnaFormInvoice : (paymentMethod == "KLARNA_PARTPAYMENT" ? args.KlarnaFormPartPayment : args.KlarnaFormSpecial));
+
+	//TODO Check for more than one shipment
+	if( shipments.length > 1 ) {
+		args.ErrorMessage = dw.web.Resource.msg("klarna.error_multiple_shipping", "klarna", null);
+		return PIPELET_ERROR;
+	}
+
+	
+
+	// FIXME, why is this different in Klarna.ds
+	var klarnaTaxClass : String = getSetting("KLARNA_TAX_CLASS");
+	var invoiceFeeTaxRate : Number = (taxJurisdiction == null || klarnaTaxClass == null ? 0 : TaxMgr.getTaxRate(klarnaTaxClass, taxJurisdiction))*100;
+
+	// Build goods list
+	try {
+		build_goodslist(klarna, paymentInstr, basket);
+
+		// Get the tax class ID for the current shipping method
+		var shippingTaxClassID : String = shipment.getShippingMethod().getTaxClassID();
+
+		// Fetch tax rate from settings
+		var shippingTaxRate : Number = (taxJurisdiction == null || shippingTaxClassID == null ? 0 : TaxMgr.getTaxRate(shippingTaxClassID, taxJurisdiction))*100;
+		// Add the shipping	cost to the array of items to add to the invoice
+		// FIXME
+		//Praveen: Changing 'add_article' call to have shipping method ID call to have the shipping-method-ID as the 'artno' 
+		klarna.add_article(1, shipment.getShippingMethod().ID, shipment.getShippingMethod().getDisplayName() || "Shipping",
+			shipment.getShippingTotalGrossPrice().getValue(), shippingTaxRate, 0, Flag.INC_VAT + Flag.IS_SHIPMENT);
+
+		// Add invoice fee if any, not set for accont nor campaign
+		/*if(paymentInstr.custom.KlarnaInvoiceFee != 'undefined') {
+			klarna.add_article(1, "", dw.web.Resource.msg("klarna.invoice_fee", "klarna", null),
+				paymentInstr.custom.KlarnaInvoiceFee, invoiceFeeTaxRate, 0, Flag.INC_VAT + Flag.IS_HANDLING);
+		}*/
+
+	} catch(e) {
+		var error: Error = e;
+		Logger.error(error.toString());
+		args.ErrorMessage = error.toString();
+		return PIPELET_ERROR;	
+	}
+
+	// Send request to Klarna
+	try {
+		//Praveen: For DE 'ssn' will be same as DOB
+		var ssn : String = null;
+		var pclass : String = paymentInstr.custom.KlarnaPClassID;
+		var gender : String = null;
+		var numGender : Number = null;
+		var sstreet : String = "";
+		var bstreet : String = "";
+		var house_number : String = "";
+		var bhouse_number : String = "";
+		var house_extension : String = "";
+		if(KlarnaCountry == "DE" || KlarnaCountry == "AT") {
+			ssn = args.billingForm.billingAddress.addressFields.dateofbirth.value;
+		
+			gender = args.billingForm.billingAddress.addressFields.gender.value;
+			if("M".equalsIgnoreCase(gender)){
+				numGender=1;
+			}else{
+				numGender=0;
+			}
+			bhouse_number = billingAddress.custom.klarnaHouseNo;
+			
+			bstreet = billingAddress.custom.klarnaStreetName;
+
+			house_number = shippingAddress.custom.klarnaHouseNo;
+			
+			sstreet = shippingAddress.custom.klarnaStreetName;
+			
+			house_extension = shippingAddress.custom.klaraHouseExtension;
+		}
+
+		// FIXME refactor address building
+		klarna.shipping = {
+			//'company'         : shippingAddress.getCompanyName(),
+			'fname'           : shippingAddress.getFirstName(),
+			'lname'           : shippingAddress.getLastName(),
+			'street'          : sstreet,
+			'careof'          : "",
+			'zip'             : shippingAddress.getPostalCode(),
+			'city'            : shippingAddress.getCity(),
+			'country'         : getCountryDetails(shippingAddress.getCountryCode().value)[1],
+			'telno'           : shippingAddress.getPhone(),
+			'cellno'          : shippingAddress.getPhone(),
+			'email'           : basket.customerEmail,
+			'house_number'    : house_number,
+			'house_extension' : house_extension
+		}
+
+		klarna.billing = {
+			//'company'         : billingAddress.getCompanyName(),
+			'fname'           : billingAddress.getFirstName(),
+			'lname'           : billingAddress.getLastName(),
+			'street'          : bstreet,
+			'careof'          : "",
+			'zip'             : billingAddress.getPostalCode(),
+			'city'            : billingAddress.getCity(),
+			'country'         : getCountryDetails(billingAddress.getCountryCode().value)[1],
+			'telno'           : billingAddress.getPhone(),
+			'cellno'          : billingAddress.getPhone(),
+			'email'           : basket.customerEmail,
+			'house_number'    : bhouse_number,
+			'house_extension' : house_extension
+		}
+     
+		// Set referenced used for company orders
+		//Praveen: Commenting Reference
+		//klarna.reference_person = paymentInstr.custom['KlarnaReferencePerson'];
+
+		/*Praveen: Commenting ysal
+		if(form['ysal'].htmlValue != 0) {
+			klarna.incomeinfo['yearly_salary'] = Number(form['ysal'].htmlValue);
+		}*/
+		
+		klarna.set_estore_info(orderNo, "", basket.getCustomerNo());
+
+		/* Make the call to Klarna Online */
+		var statusmap = {'1' : 'ACCEPTED', '2' : 'PENDING', '3' : 'DENIED'};
+		var invoiceNo : String = "";
+		var flags = 0;
+		var status : String = "";
+		var faultCode : String = "";
+		if(getSetting('KLARNA_TEST_FLAG') == true) {
+			flags += Flag.TEST_MODE;
+		}
+		if(getSetting("KLARNA_INTEGRATION_MODE") == "standard") {
+			var result = klarna.add_transaction(ssn, gender, flags, KlarnaCountry.value, pclass);
+			invoiceNo = result['invno'];
+			status = result['status'];
+		} else if(getSetting("KLARNA_INTEGRATION_MODE") == "advanced") {
+			//var result = klarna.reserve_amount(ssn, gender, -1, flags, KlarnaCountry.value, pclass);
+			var result = klarna.reserve_amount(ssn, numGender, -1, flags, KlarnaCountry.value, pclass);
+			invoiceNo = result['rno'];
+			status = result['status'];
+			faultCode = result['faultCode'];
+		} 
+		//Praveen:- If invoiceNo & status are empty, its a denied scenario. Otherwise, Pending or Accepted
+		
+		if(!empty(invoiceNo) && !empty(status)){
+			var statusstr = statusmap[String(status)];
+			//Praveen: Setting the order status to be used later in the application
+			args.klarnaOrderStatus = statusstr;
+			
+			if("PENDING".equalsIgnoreCase(statusstr)){
+				paymentInstr.custom.KlarnaStatus="REVIEW";
+			}else{
+				paymentInstr.custom.KlarnaStatus = statusstr;	
+			}
+			
+			paymentInstr.custom.invoiceid = invoiceNo;
+			// If everything went well with the call to Klarna update the orderpaymenttransaction
+			// with the invoice fee and set our invoice number as the transaction ID
+			var orderPaymentTransaction : PaymentTransaction = paymentInstr.getPaymentTransaction();
+			// Include the invoice fee.
+			if(paymentMethod == "KLARNA") {
+				orderPaymentTransaction.setAmount(
+					new dw.value.Money(orderPaymentTransaction.getAmount().getValue()+paymentInstr.custom.KlarnaInvoiceFee,
+					orderPaymentTransaction.getAmount().getCurrencyCode()));
+			}
+			
+			// Set information on payment instrument object
+			orderPaymentTransaction.setTransactionID(invoiceNo);
+			Logger.error("Order Number : "+orderNo+" , Klarna Status : "+statusstr);
+			args.InvoiceNo = invoiceNo;
+				
+			
+		}else{//Denied Scenario
+			args.klarnaOrderStatus = "REJECT";
+			args.ErrorMessage = faultCode.toString().trim();
+			Logger.error("Order Number : "+orderNo+" , Klarna Status : REJECT");
+			return PIPELET_ERROR;
+		}
+		
+	} catch(e) {
+		//If there is any error, order will not be processed.
+		args.klarnaOrderStatus = "ERROR";
+		Logger.error("Order Number : "+orderNo+" , Klarna Status : ERROR");
+		var error : Error = e;
+		Logger.error("Error in Klarna, error message : "+error);
+		args.StatusMessage="Error in Klarna, Error message : "+error+"<BR>User Details=Title:"+billingAddress.title+" , FirstName:"+billingAddress.firstName+" , LastName:"+billingAddress.lastName+" , CountryCode:"+billingAddress.countryCode;
+		return PIPELET_ERROR;	
+	}			
+
+    return PIPELET_NEXT;
+}

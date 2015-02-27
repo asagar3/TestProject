@@ -1,0 +1,189 @@
+<iscomment>
+	This template renders a summary of all shipments of the basket which is
+	used below the order summary at the right hand side in the checkout
+	process.
+</iscomment>
+<isset name="Shipments" value="${pdict.Basket.shipments}" scope="page"/>
+
+
+<iscomment>the url to edit shipping addresses depends on the checkout scenario</iscomment>
+<isset name="editUrl" value="${URLUtils.https('COShipping-Start')}" scope="page"/>
+<isif condition="${pdict.CurrentForms.multishipping.entered.value}">
+	<isset name="editUrl" value="${URLUtils.https('COShippingMultiple-Start')}" scope="page"/>
+</isif>
+<iscomment>Praveen:- Condition Edited so that following content will be visible on billing page but not on shipping page</iscomment>
+<isif condition="${!empty(Shipments) && !empty(pdict.checkoutPageStatus) && pdict.checkoutPageStatus.equals('onBillingPage')}">
+	<iscomment>render a box per shipment</iscomment>
+	<isset name="shipmentCount" value="${0}" scope="page"/>
+	<div class="minishipment"> <!-- TAR:919752 | 'minishipment' div is put out of the loop | Naveen Kumar-->
+		<isloop items="${Shipments}" var="shipment" status="loopstate">
+			<isif condition="${(shipment.giftCertificateLineItems.size() > 0 && shipment.shippingAddress == null) || shipment.shippingAddress != null}">
+				<isset name="shipmentCount" value="${shipmentCount+1}" scope="page"/>
+				<iscomment>omit the shipment name, if there is just one shipment</iscomment>
+				<isif condition="${Shipments.size() > 1 && pdict.Basket.productLineItems.size() > 0}">
+					<div class="name">Shipment ${'#' + shipmentCount}</div>
+				</isif>
+				<table border="0" cellpadding="0" cellspacing="0" width="100%" class="deliverySummarycontainer"><tr valign="top"><td>
+					<div class="deliverySummaryInfoPane">
+						<isif condition="${shipment.giftCertificateLineItems.size() > 0}">
+							${Resource.msg('minishipments.shipping','checkout',null)}
+							<h5>${Resource.msg('minishipments.giftcertdelivery','checkout',null)}</h5>
+							<iselseif condition="${shipment.shippingAddress != null && pdict.Basket.productLineItems.size() > 0}"/>
+								<iscomment><a href="${editUrl}">${Resource.msg('global.edit','locale',null)}</a>
+								<span class="divider"></span></iscomment>
+								<h5>${Resource.msg('minishipments.shippingaddress','checkout',null)}</h5>
+							</isif>
+							<isif condition="${shipment.giftCertificateLineItems.size() > 0}">
+								<isloop items="${shipment.giftCertificateLineItems}" var="giftCertLI">
+									<span><isprint value="${giftCertLI.recipientName}"/></span><br/>
+									<span>(<ismask p_string="${giftCertLI.recipientEmail}" p_maskchars="${6}"/>)</span>
+								</isloop>
+								<iselseif condition="${shipment.shippingAddress != null && pdict.Basket.productLineItems.size() > 0}"/>
+									<isset name="address" value="${shipment.shippingAddress}" scope="page"/>
+									
+									<isif condition="${shipment.shippingMethod != null && ! Resource.msg('shipping.deliverymethod.storecollection','checkout',null).equals(shipment.shippingMethod.ID)}"/>
+									<span><isprint value="${address.title}"/></span>
+								</isif>
+								<span><isprint value="${address.firstName}"/> <isprint value="${address.lastName}"/></span>
+								
+									<isif condition="${!empty(address.address1)}">
+										
+											<isif condition="${shipment.shippingMethodID == Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}">
+											<span>${Resource.msg('minishipments.storecollection.msg','checkout',null)} <isprint value="${address.address1}" encoding="off"/></span>
+										<br/> 
+											<iselse>
+												<span><isprint value="${address.address1}" encoding="off"/></span>
+										<br/>
+											</isif> 
+										
+									</isif>
+									<isif condition="${!empty(address.address2)}">
+										<span><isprint value="${address.address2}"/></span><br/>
+									</isif>
+									<isif condition="${!empty(address.postBox)}">
+										<span><isprint value="${address.postBox}"/></span><br/>
+									</isif>
+									<isif condition="${!empty(address.custom.residence)}">
+										<span><isprint value="${address.custom.residence}"/></span><br/>
+									</isif>
+									<isif condition="${!empty(address.city)}">
+										<span><isprint value="${address.city}"/></span><br/>
+									</isif>
+									<isif condition="${!empty(address.stateCode)}">
+										<span><isprint value="${address.stateCode}"/></span>&nbsp;
+									</isif>
+									<isif condition="${!empty(address.countryCode)}">
+										<span><isprint value="${address.countryCode}"/></span><br/>
+									</isif>
+									<isif condition="${!empty(address.phone)}">
+										<span><isprint value="${address.phone}"/></span><br/>
+									</isif>
+									<isif condition="${!empty(address.alternateContactNumber)}">
+										<span><isprint value="${address.alternateContactNumber}"/></span>
+									</isif>
+								</isif>
+								
+								
+							</div>
+							</td><td>
+							<div class="deliverySummaryInfoPane">
+								<isif condition="${shipment.shippingMethod != null}"/>					
+								<iscomment>
+									<a href="${URLUtils.url('COShipping-Start')}">${Resource.msg('minishipments.edit','checkout',null)}</a>
+									<span class="divider"></span>
+								</iscomment>
+								<iscomment>Davinder Kumar: INT 286</iscomment>
+								<h5>${Resource.msg('minishipments.shippingmethod','checkout',null)}</h5>
+								<span>
+									<isif condition="${shipment.shippingMethodID == Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}">
+										<iscomment>${Resource.msg('global.free','locale',null)}</iscomment>
+									<iselse>
+										<div><isprint value="${shipment.shippingMethod.displayName}"/></div> 
+										<div><isprint value="${shipment.shippingTotalPrice}"/></div>
+									</isif>
+									<isif condition="${Shipments[0].shippingMethodID == Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}">
+										<div><isprint value="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storeCollectionDate.value}" /></div>
+									<iselse>
+										<div><isprint value="${Shipments[0].shippingMethod.description}" /></div>
+									</isif> 
+										<iscomment> CR023-START | Additional Description | Naveen Kumar </iscomment>
+										<span class="additionalinfo"><isprint value="${shipment.shippingMethod.custom.additionalDesc}"/></span>
+										<iscomment> CR023-END | Additional Description | Naveen Kumar </iscomment>
+										<iscomment><div>
+											<isprint value="${shipment.shippingMethod.calloutMsg}"/>
+										</div></iscomment>
+										<br/>					
+									</isif>
+										<isif condition="${!empty(shipment.custom.deliveryInstructions)}">					
+											<h5>${Resource.msg('singleshipping.deliveryMessage','checkout',null)}</h5>
+											<iscomment>Davider Kumar :: commenting this section as it breaks even a single word in two lines
+											JIRA ID INT - 246
+											<isif condition="${shipment.custom.deliveryInstructions.length > 32}">
+												<isscript>
+													var startIndex : Number = 0;
+													var endIndex : Number= (shipment.custom.deliveryInstructions.length)/32;
+												</isscript>
+												<span>
+												<isloop status="i" begin="${startIndex}" end="${endIndex}">
+													<isprint value="${shipment.custom.deliveryInstructions.substring(startIndex,startIndex+32)}"/>
+													<isscript>
+														startIndex = startIndex+32;
+													</isscript>
+												</isloop>
+												</span><br/>
+												<iselse>
+													<span><isprint value="${shipment.custom.deliveryInstructions}"/></span>
+												</isif></iscomment>
+												<span><isprint value="${shipment.custom.deliveryInstructions}"/></span>
+												<br/><br/>
+											</isif>	
+											<isif condition="${!empty(shipment.giftMessage)}">					
+												<iscomment><a href="${URLUtils.url('COShipping-Start')}">${Resource.msg('minishipments.edit','checkout',null)}</a>
+												<span class="divider"></span></iscomment>
+												<h5>${Resource.msg('minishipments.giftmessage','checkout',null)}</h5>
+												<iscomment>Davider Kumar :: commenting this section as it breaks even a single word in two lines
+												JIRA ID INT - 246
+												<isif condition="${shipment.giftMessage.length > 32}">
+													<isscript>
+														var startIndex : Number = 0;
+														var endIndex : Number= (shipment.giftMessage.length)/32;
+													</isscript>
+													<span>
+													<isloop status="i" begin="${startIndex}" end="${endIndex}">
+														<isprint value="${shipment.giftMessage.substring(startIndex,startIndex+32)}"/>
+														 <isscript>
+															startIndex = startIndex+32;
+														</isscript>
+													</isloop>
+													</span><br/>
+													<iselse>
+														<span><isprint value="${shipment.giftMessage}"/></span>
+													</isif></iscomment>
+													<span><isprint value="${shipment.custom.deliveryInstructions}"/></span>
+												</isif>	
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="changeDeliveryAddressContainer">
+											<div class="floatleft btn-grey-flat">
+												<div class="link_button">
+													<a class="orderedit" href="${URLUtils.url('COShipping-Start')}">${Resource.msg('pt_checkout.change_shipping_address','checkout',null)}</a>
+												</div>
+											</div>
+										</td>
+										<td class="changeDeliveryAddressContainer">
+											<div class="floatleft btn-grey-flat">
+												<div class="link_button">
+													<a class="orderedit" href="${URLUtils.url('COShipping-Start')}">${Resource.msg('pt_checkout.change_shipping_address','checkout',null)}</a>
+												</div>
+											</div>
+										</td>	
+									</tr>	
+								</table>
+								<div class="clear"></div>
+							</isif>
+						</isloop>
+					</div>
+				</isif>
+								

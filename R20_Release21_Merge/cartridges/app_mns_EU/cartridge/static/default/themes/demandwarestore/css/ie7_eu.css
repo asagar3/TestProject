@@ -1,0 +1,25 @@
+.checkout .addressoptions .fieldSet{padding-left:193px;}
+.checkout .actions{margin:-13px 0 0 197px; float:left;}
+.checkout .addressoptions input{z-index:1; position:static;}
+.checkout .country .value{width:200px;}
+.checkout .country .value select, 
+#PaymentMethod_BANK_TRANSFER .selectbank select,
+#PaymentMethod_BANK_TRANSFER .selectcountry select{float:left;}
+
+#shippingmethodform .shippingmethods fieldset{margin-left:-3px;}
+
+.checkout .shippingmethods .formfieldtooltip{
+	display: inline;
+}
+.checkout .shippingmethods legend{margin-left: -2px; position: absolute;}
+
+.addressoptions .actions{float:left;margin:0px 0px 5px 0px;}/*Defect 1810832*/
+.addressoptions .fieldSet .formfieldtooltipAdjust .tooltip_icon {
+	float:right;
+}
+.checkout  .shippngRight .shippingmethod .value{
+	margin-left:-45px;
+}
+.shippingmethods .returns_info{
+	padding-left:30px;
+}

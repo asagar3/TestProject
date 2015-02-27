@@ -1,0 +1,66 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @output fileNameToArchive : String 
+*   @output fileWriter : dw.io.CSVStreamWriter 
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.io );
+importPackage( dw.catalog );
+importScript('int_cybersource:cybersource/Date&TimeUtility.ds');
+
+function execute( args : PipelineDictionary ) : Number
+{
+	try
+	{
+	    var writer : FileWriter=null;
+	    var pid : String = "";
+	    
+		var currentDateAndTime : Date = new Date(); 
+		var startCalender : dw.util.Calendar = new Calendar(currentDateAndTime);
+		var timestamp_date : String = getDate(startCalender);
+		var timestamp_time : String = getTime(startCalender);
+		timestamp_time=timestamp_time.replace(/[:]/g,"");
+	    var fileName : String = "DW_Product_For_Capita_" + timestamp_date + timestamp_time + Site.getCurrent().name + ".csv";
+	    
+	    var fileout : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "Capita" + File.SEPARATOR+ fileName);
+	    
+		var writer : FileWriter = new FileWriter(fileout);
+		var csvWriter : CSVStreamWriter = new CSVStreamWriter(writer);
+		var artId : String = "ArticleId";
+		var parentID : String = "Parent Article ID"; 
+		var deptNumbr : String = "Department Number";
+		var stroke : String = "Stroke";
+		var color : String = "Color";
+		var site : String = "Site";
+		var listPrice : String = "List Price";
+		var salesPrice : String = "Sales Price";
+		var customTaxClass:String="Custom Tax Class";
+		var inventory : String ="inventory";
+		var str : String = artId + "," + parentID + "," + deptNumbr + "," + stroke + "," + color + "," + site + "," + listPrice + "," + salesPrice + "," + customTaxClass+ "," + inventory;
+		var arr : Array = str.split(",");
+		csvWriter.writeNext(arr);
+		args.fileNameToArchive = fileName;
+		args.fileWriter = csvWriter;
+		
+	}
+	catch(e)
+	{
+		Logger.error(String(e));
+		return PIPELET_ERROR;
+	}
+    return PIPELET_NEXT;
+}

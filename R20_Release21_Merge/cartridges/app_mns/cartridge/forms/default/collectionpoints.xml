@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+	<field formid="zip_cp" label="forms.zippostalcode" class="ignore" type="string" mandatory="true" min-length="5" max-length="5" regexp="^(\d{5})(-\d{4})?$" binding="postalCode" missing-error="forms.errorzip" range-error="forms.address.field.invalid" parse-error="forms.address.field.invalid" />
+	
+			<!-- gift options -->
+	<field formid="isGift" label="forms.checkout.shipment.isgift" type="boolean" default-value="false" binding="gift" mandatory="false" />
+	<field formid="giftMessage" label="" type="string" binding="giftMessage" mandatory="false" /> <!-- description="forms.checkout.shipment.giftmessage.hint"-->
+	<action formid="send" valid-form="true"/>
+</form>

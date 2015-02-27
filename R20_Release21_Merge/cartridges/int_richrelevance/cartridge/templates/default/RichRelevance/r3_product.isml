@@ -1,0 +1,35 @@
+<iscomponent pipeline="RichRelevance-IncludeCommon">
+<script type="text/javascript">
+var pts = "${!empty(pdict.Product.custom.rrPlacementTypes) ? pdict.Product.custom.rrPlacementTypes : dw.system.Site.current.preferences.custom.rrPlacementItem}".split(',');
+for (var i = 0; i < pts.length; i++) {
+	R3_COMMON.addPlacementType(pts[i]);
+}
+R3_ITEM = new r3_item();
+R3_ITEM.setId('${(pdict.Product.variant ? pdict.Product.variationModel.master.ID : pdict.Product.ID)}');	
+
+<isscript>
+	var rrcategory : dw.catalog.Category = null;
+	
+	// get category from search context
+	if( !empty(pdict.ProductSearchResult) )
+	{
+		rrcategory = pdict.ProductSearchResult.category;
+	}
+	
+	if( rrcategory == null )
+	{
+		// get category from products primary category
+		rrcategory = pdict.Product.primaryCategory;
+
+		// get category from product master if not set at variant
+		if( rrcategory == null && pdict.Product.variant )
+		{
+			rrcategory = pdict.Product.masterProduct.primaryCategory;
+		}
+	}
+</isscript>	
+<isif condition="${rrcategory != null}">
+	R3_ITEM.addCategory('${rrcategory.ID}', '${rrcategory.displayName.replace('&', '').replace('\'', '')}');
+</isif>
+r3();
+</script>

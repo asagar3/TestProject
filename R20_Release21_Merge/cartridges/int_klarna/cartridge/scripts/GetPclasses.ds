@@ -1,0 +1,160 @@
+/**
+*	This script retrieves the Pclasses custom objects. Is used for BM as well as storefront functionality
+*
+*	@output PClasses : Array
+*	@output KlarnaError : String
+*	@output SpecialLogo : String
+*	@output SpecialURL : String
+* 	@input Basket : dw.order.Basket;
+*
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+importPackage( dw.util );
+importPackage( dw.web );
+
+importScript("int_klarna:libKlarnaCalc.ds");
+//var Logger : Log = dw.system.Logger.getLogger("klarna", "getpclasses");
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var pclasses : SeekableIterator;
+	var pclassCollection : Array = new Array();
+	var Amount : Number;
+	var countryCode : String = request.httpParameters["countryCode"] ? request.httpParameters["countryCode"][0] : null;
+
+	try {
+		if(countryCode == null) {
+			/* With no countryCode set return all pclasses with full info, used in Business Manager */
+
+			pclasses = CustomObjectMgr.getAllCustomObjects("Pclasses");
+			while(pclasses.hasNext()) {
+				var pclass = pclasses.next();
+				var attrs = pclass.getCustom();
+				pclassCollection.push(attrs);
+			}
+
+			pclassCollection = pclassCollection.sort(function(a : List, b : List) {
+				// Sort by country and then pclass id
+				if(a['country'] != b['country'])
+					return a['country'] - b['country']
+				return a['pclassID'] - b['pclassID']
+			});
+		} else if(request.httpParameters["campaignType"] != null && request.httpParameters["campaignType"][0] == "Special") {
+			/* Special campaigns */
+			pclasses = CustomObjectMgr.queryCustomObjects("Pclasses", "custom.country={0} AND custom.type = 2", "custom.pclassID asc",
+				Number(translateCountryCode(countryCode)));
+			while(pclasses.hasNext()) {
+				var pclass = pclasses.next();
+				var attrs = pclass.getCustom();
+				pclassCollection.push({
+						'pclassID': attrs['pclassID'],
+						'type': attrs['type'],
+						'description': attrs['description'],
+						'logo': Site.getCurrent().getCustomPreferenceValue("KLARNA_SPECIAL_LOGO"),
+						'url': Site.getCurrent().getCustomPreferenceValue("KLARNA_SPECIAL_URL")});
+			}
+		} else {
+			/* Part payment, return estimated monthly cost */
+
+			if(request.httpParameters['amount'] != null) {
+				Amount = Number(request.httpParameters['amount'][0]);
+			} else {
+				Amount = Number(args.Basket.getTotalGrossPrice().getValue());
+			}
+			pclasses = CustomObjectMgr.queryCustomObjects("Pclasses", "custom.country={0} AND custom.type != 2", "custom.pclassID asc",
+				Number(translateCountryCode(countryCode)));
+			var monthlyCost : Number = 0;
+			var minAccount = get_lowest_payment_for_account(Number(translateCountryCode(countryCode)));
+			while(pclasses.hasNext()) {
+				pclass = pclasses.next();
+				var attrs = pclass.getCustom();
+				if (attrs.type == 0) {
+					monthlyCost = calc_monthly_cost(Amount, attrs, 0); // FIXME checkout / product page?
+					
+					if(Amount >= attrs['minAmount']) {
+						var currencyMsg : String;
+						
+						if (countryCode == "DE" || countryCode == "FI" || countryCode == "NL")
+							currencyMsg = Resource.msg('klarna.partpayment_th_month_eur', 'klarna', null);
+						else if (countryCode = "DK")
+							currencyMsg = Resource.msg('klarna.partpayment_th_month_dkk', 'klarna', null);
+						else 
+							currencyMsg = Resource.msg('klarna.partpayment_th_month_sek', 'klarna', null);
+							
+						pclassCollection.push({
+							'pclassID': attrs['pclassID'],
+							'type': attrs['type'],
+							'monthlyCost': monthlyCost.toFixed(2),
+							'pclassID': attrs["pclassID"],
+							'description': attrs['months']+' '+ currencyMsg,
+							'months': attrs["months"]});
+					}
+				} else if(attrs.type == 1) {
+					monthlyCost = calc_monthly_cost(Amount, attrs, 0); // FIXME checkout / product page?
+					if(monthlyCost > minAccount && monthlyCost > 1) {
+						pclassCollection.push({
+							'pclassID': attrs['pclassID'],
+							'type': attrs['type'],
+							'monthlyCost': monthlyCost.toFixed(2),
+							'pclassID': attrs["pclassID"],
+							'description': Resource.msg('klarna.partpayment_account', 'klarna', null),
+							'months': attrs["months"]});
+					}
+				} else if (attrs.type == 3) {
+					pclassCollection.push({
+						'pclassID': attrs['pclassID'],
+						'type': attrs['type'],
+						'description': attrs['description']
+					});
+				} else if (attrs.type == 4) {
+					pclassCollection.push({
+						'pclassID': attrs['pclassID'],
+						'type': attrs['type'],
+						'description': attrs['description']
+					});
+				}
+			}
+			pclassCollection = pclassCollection.sort(pclasscmp);
+		}
+		
+		args.PClasses = pclassCollection;
+    }catch(e) {
+		var error : Error = e;
+		args.KlarnaError = error.message;
+		Logger.error(error.message);
+		return PIPELET_ERROR;
+			
+	}
+    return PIPELET_NEXT;
+}
+
+function pclasscmp(a : List, b : List) {
+	// Sort by type, account first
+	if(a['type'] != b['type']) {
+		if(a['type'] == 1)
+			return -1
+		else if(b['type'] == 1)
+			return 1
+	}
+
+	// Sort by number of months
+	return a['months'] - b['months']
+}
+
+function translateCountryCode(countryCode : String) : Number {
+	switch(countryCode) {
+	case "SE":
+		return 209;
+	case "FI":
+		return 73;
+	case "DE":
+		return 81;
+	case "DK":
+		return 59;
+	case "NO":
+		return 164;
+	case "NL":
+		return 154;
+	}
+}

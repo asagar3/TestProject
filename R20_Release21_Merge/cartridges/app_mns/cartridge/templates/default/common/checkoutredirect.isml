@@ -1,0 +1,4 @@
+
+<isredirect location="${URLUtils.https('COBilling-Start')}" permanent="false" />
+
+

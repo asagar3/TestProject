@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?demandware-pipeline version="2.0"?>
+
+<pipeline type="view">
+  <branch basename="DeleteCategories">
+    <segment>
+      <node>
+        <start-node call-mode="private" name="DeleteCategories" secure="false"/>
+        <node-display x="2" y="0"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Assign" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <key-binding alias="&quot;DeleteCategories/catalog_&quot;" key="From_0"/>
+          <key-binding alias="catalog" key="To_0"/>
+          <key-binding alias="&quot;.xml&quot;" key="From_1"/>
+          <key-binding alias="extension" key="To_1"/>
+          <key-binding alias="dw.util.StringUtils.formatCalendar(new dw.util.Calendar(), &quot;yyyy-MM-dd HH-mm-ss&quot;)" key="From_2"/>
+          <key-binding alias="timestamp" key="To_2"/>
+          <key-binding alias="&quot;DeleteCategories/updated_&quot;" key="From_3"/>
+          <key-binding alias="update" key="To_3"/>
+          <key-binding alias="catalog+timestamp+extension" key="From_4"/>
+          <key-binding alias="origFileName" key="To_4"/>
+          <key-binding alias="update+timestamp+extension" key="From_5"/>
+          <key-binding alias="updatedFileName" key="To_5"/>
+          <key-binding alias="null" key="From_6"/>
+          <key-binding alias="null" key="To_6"/>
+          <key-binding alias="null" key="From_7"/>
+          <key-binding alias="null" key="To_7"/>
+          <key-binding alias="null" key="From_8"/>
+          <key-binding alias="null" key="To_8"/>
+          <key-binding alias="null" key="From_9"/>
+          <key-binding alias="null" key="To_9"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="feeds/DeleteExportedCategories.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="origFileName" key="origFileName"/>
+          <key-binding alias="updatedFileName" key="updatedFileName"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b2" source-connector="error">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <end-node/>
+              <node-display orientation="horizontal" x="1" y="0"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="ImportCatalog" pipelet-set-identifier="bc_api">
+          <key-binding alias="updatedFileName" key="ImportFile"/>
+          <key-binding alias="&quot;DELETE&quot;" key="ImportMode"/>
+          <key-binding alias="null" key="ErrorCode"/>
+          <key-binding alias="null" key="ErrorMsg"/>
+          <key-binding alias="null" key="LogFileName"/>
+          <key-binding alias="null" key="Status"/>
+          <key-binding alias="null" key="ImportConfiguration"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b3" source-connector="error">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <end-node/>
+              <node-display orientation="horizontal" x="1" y="0"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <end-node/>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+  <branch basename="EditCategories">
+    <segment>
+      <node>
+        <start-node call-mode="private" name="EditCategories" secure="false"/>
+        <node-display x="4" y="0"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Assign" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <key-binding alias="&quot;EditCategories/catalog_&quot;" key="From_0"/>
+          <key-binding alias="catalog" key="To_0"/>
+          <key-binding alias="&quot;.xml&quot;" key="From_1"/>
+          <key-binding alias="extension" key="To_1"/>
+          <key-binding alias="dw.util.StringUtils.formatCalendar(new dw.util.Calendar(), &quot;yyyy-MM-dd HH-mm-ss&quot;)" key="From_2"/>
+          <key-binding alias="timestamp" key="To_2"/>
+          <key-binding alias="&quot;EditCategories/updated_&quot;" key="From_3"/>
+          <key-binding alias="update" key="To_3"/>
+          <key-binding alias="catalog+timestamp+extension" key="From_4"/>
+          <key-binding alias="origFileName" key="To_4"/>
+          <key-binding alias="update+timestamp+extension" key="From_5"/>
+          <key-binding alias="updatedFileName" key="To_5"/>
+          <key-binding alias="null" key="From_6"/>
+          <key-binding alias="null" key="To_6"/>
+          <key-binding alias="null" key="From_7"/>
+          <key-binding alias="null" key="To_7"/>
+          <key-binding alias="null" key="From_8"/>
+          <key-binding alias="null" key="To_8"/>
+          <key-binding alias="null" key="From_9"/>
+          <key-binding alias="null" key="To_9"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="ExportCatalog" pipelet-set-identifier="bc_api">
+          <key-binding alias="dw.catalog.CatalogMgr.getSiteCatalog()" key="Catalog"/>
+          <key-binding alias="origFileName" key="ExportFile"/>
+          <key-binding alias="null" key="Categories"/>
+          <key-binding alias="null" key="ExportProducts"/>
+          <key-binding alias="null" key="ExportCategories"/>
+          <key-binding alias="null" key="ExportSubCategories"/>
+          <key-binding alias="null" key="OverwriteExportFile"/>
+          <key-binding alias="null" key="ErrorCode"/>
+          <key-binding alias="errorMsg" key="ErrorMsg"/>
+          <key-binding alias="null" key="LogFileName"/>
+          <key-binding alias="null" key="Status"/>
+          <key-binding alias="null" key="ExportCategoryAssignments"/>
+          <key-binding alias="null" key="ExportRecommendations"/>
+          <key-binding alias="null" key="ExportProductOptions"/>
+          <key-binding alias="null" key="ExportVariationAttributes"/>
+          <key-binding alias="null" key="Products"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b2" source-connector="error">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <end-node/>
+              <node-display orientation="horizontal" x="1" y="0"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition/>
+      <node>
+        <pipelet-node pipelet-name="Script" pipelet-set-identifier="bc_api">
+          <config-property key="Transactional" value="false"/>
+          <config-property key="OnError" value="PIPELET_ERROR"/>
+          <config-property key="ScriptFile" value="feeds/changeCategories.ds"/>
+          <key-binding alias="null" key="ScriptLog"/>
+          <key-binding alias="origFileName" key="origFileName"/>
+          <key-binding alias="updatedFileName" key="updatedFileName"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b3" source-connector="error">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <end-node/>
+              <node-display orientation="horizontal" x="1" y="0"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition>
+        <transition-display>
+          <bend-point relative-to="source" x="0" y="1"/>
+        </transition-display>
+      </simple-transition>
+      <node>
+        <pipelet-node pipelet-name="ImportCatalog" pipelet-set-identifier="bc_api">
+          <key-binding alias="updatedFileName" key="ImportFile"/>
+          <key-binding alias="&quot;MERGE&quot;" key="ImportMode"/>
+          <key-binding alias="null" key="ErrorCode"/>
+          <key-binding alias="null" key="ErrorMsg"/>
+          <key-binding alias="null" key="LogFileName"/>
+          <key-binding alias="null" key="Status"/>
+          <key-binding alias="null" key="ImportConfiguration"/>
+        </pipelet-node>
+        <node-display x="0" y="1"/>
+        <branch basename="b4" source-connector="error">
+          <transition target-connector="in">
+            <transition-display>
+              <bend-point relative-to="source" x="1" y="0"/>
+            </transition-display>
+          </transition>
+          <segment>
+            <node>
+              <end-node/>
+              <node-display orientation="horizontal" x="1" y="0"/>
+            </node>
+          </segment>
+        </branch>
+      </node>
+      <simple-transition/>
+      <node>
+        <end-node/>
+        <node-display x="0" y="1"/>
+      </node>
+    </segment>
+  </branch>
+</pipeline>

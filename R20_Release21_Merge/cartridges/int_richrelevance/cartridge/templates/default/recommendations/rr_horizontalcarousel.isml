@@ -1,0 +1,232 @@
+<!--- TEMPLATENAME: rr_horizontalcarousel.isml --->
+<iscomment>Creates the horizontal carousel</iscomment>
+<script type="text/javascript">
+
+/*
+ * RR Carousel will pre-load 6 products, then each time the user
+ * clicks on the next arrow, 6 more will be loaded until we 
+ * reach the maxRecommendedPrdsHor total
+ */
+
+$(".richRelevanceRecommendationsHorizontal").each(function(){
+
+	var pMaphor = "${productMap}".substring(1, "${productMap}".length-1),
+		placementOutputhor = "${placementOutput}",
+		productshor = pMaphor.split(","),
+		prodsToLoadhor = new Array([]),
+		loadedBeforehor = 0,
+		_thishor = $(this),
+		prevhoz = _thishor.find("div.prevhoz"),
+		nexthoz = _thishor.find("div.nexthoz"),
+		showPerPagehor = 6,
+		elemWidth = 145,
+		maxProdshor = "${maxRecommendedPrds}",
+		currentPositionhor = 0;
+	
+	// format the product array
+	if(productshor[0].substring(0,1) == " "){
+		productshor[0] = productshor[0].substring(1);
+	}
+	var splittingindexhor = productshor[0].indexOf("=");
+	var tempprodhor = [productshor[0].substring(0,splittingindexhor), productshor[0].substring(splittingindexhor+1,productshor[0].length)];
+	var findhor = "&amp;";
+	var rehor = new RegExp(findhor, "g");
+	tempprodhor[1] = tempprodhor[1].replace(rehor,"&");
+	prodsToLoadhor[0] = tempprodhor;
+	// add the rest of the products
+	for(var i = 1; productshor.length > maxProdshor ? i < maxProdshor : i < productshor.length; i++){
+		splittingindexhor = productshor[i].indexOf("=");
+		tempprodhor = [productshor[i].substring(0,splittingindexhor), productshor[i].substring(splittingindexhor+1,productshor[i].length)];
+		if(tempprodhor[0].substring(0,1) == " "){
+			tempprodhor[0] = tempprodhor[0].substring(1);
+		}
+		tempprodhor[1] = tempprodhor[1].replace(rehor,"&");
+		prodsToLoadhor.push(tempprodhor);
+	}
+
+	// count the number of items that we have received in the array
+	var numberOfItemshor = prodsToLoadhor.length;
+	/*
+	 * Once the document is fully loaded, then we begin to populate the carousel with
+	 * products from the prodsToLoad array
+	 */
+	$(document).ready(function(){
+		
+		// populate the first items
+		addProductsHorizontal(showPerPagehor, false);
+		
+		// show the next arrow
+		nexthoz.css("visibility","visible");		
+		
+		// bind the next arrow
+		nexthoz.live("click", function(){
+			
+			// check how many products have been loaded before each loop
+			loadedBeforehor = $('.horizontalrecommendations li').length;
+			numberOfItemshor = prodsToLoadhor.length + loadedBeforehor;
+			
+			// check if we have more products to load, and if we are in a correct position to load them
+			if(loadedBeforehor != numberOfItemshor && currentPositionhor >= loadedBeforehor - showPerPagehor){
+				
+				// check how many products to load
+				if(numberOfItemshor - loadedBeforehor >= showPerPagehor){
+					addProductsHorizontal(showPerPagehor, true);
+				}else{
+					addProductsHorizontal(numberOfItemshor - loadedBeforehor, true);
+				}
+			}else{
+				
+				// if we are not loading any more products, here we control the scrolling functionality
+				if(currentPositionhor + showPerPagehor >= numberOfItemshor){
+					nexthoz.css('visibility','hidden');
+				}else{
+					var xslide = (loadedBeforehor - (showPerPagehor + currentPositionhor)) > showPerPagehor ? showPerPagehor : (loadedBeforehor - (showPerPagehor + currentPositionhor));
+					$('.horizontalrecommendations').animate({
+						'marginLeft' : "-=" + elemWidth * xslide
+					});
+					prevhoz.css('visibility', 'visible');
+					currentPositionhor += xslide;
+					if(currentPositionhor >= numberOfItemshor - showPerPagehor){
+						nexthoz.css('visibility','hidden');
+					}
+				}
+			}
+		});
+		
+		// bind the previous arrow
+		prevhoz.live("click", function(){
+			
+			// make sure we don't scroll too far upwards
+			if(currentPositionhor > showPerPagehor){
+				$('.horizontalrecommendations').animate({
+					'marginLeft' : "+=" + elemWidth * showPerPagehor
+				});
+				currentPositionhor -= showPerPagehor;
+				nexthoz.css('visibility', 'visible');
+			}else if(currentPositionhor > 0){
+				$('.horizontalrecommendations').animate({
+					'marginLeft' : "+=" + elemWidth * currentPositionhor
+				});
+				currentPositionhor = 0;
+				nexthoz.css('visibility', 'visible');
+				prevhoz.css('visibility', 'hidden');
+			}else{
+				prevhoz.css('visibility', 'hidden');
+			}
+		});
+	});
+		
+
+	
+	/*
+	 * This function is used to do the AJAX calls to the server which query the product
+	 * and then add the response to the carousel. The function takes two parameters; 1. The 
+	 * number of products to add, and whether or not to slide the carousel once the call has
+	 * finished, for example, when we first load the carousel, we will use (3, false) as the parameters
+	 */
+	function addProductsHorizontal(numberToAdd, slide){
+		$('.rrOverlayHor').css('visibility', 'visible');
+		
+		// decrement the loop counter of how many products are left to add
+		var left = numberToAdd - 1;
+		
+		//check we still have products to load
+		if(prodsToLoadhor.length > 0){
+			
+			// create the url that we are calling with AJAX, using the product information from the prodsToLoad array,
+			// then remove the product from prodsToLoad
+			var nextProduct = prodsToLoadhor[0],
+				url = "${URLUtils.url('RichRelevance-GetRemoteInclude')}";
+			url += "?key=" + nextProduct[0] + "&rrProdUrl=" + nextProduct[1] + "&placementOutput=" + placementOutputhor;
+			var tempurl = nextProduct[1];
+			prodsToLoadhor.splice(0, 1);
+			jQuery.ajax({
+				url: url,
+				success: function(response){
+					
+					// check if we should call this function again, to search another product
+					if(left > 0){
+						
+						/*
+					 		check if the response contains a product, if not, decrement numberToAdd and 
+							call function again with the old numberToAdd, if it does, call function again
+							but with the already decremented value
+						*/
+						if(response.indexOf("<li") == -1){
+							numberOfItemshor--;
+							addProductsHorizontal(numberToAdd, slide);
+						}else{
+							$('.horizontalrecommendations').append(response);
+							$('.horizontalrecommendations li:last').find('a').each(function(){
+								if($(this).hasClass('rrlink')){
+									$(this).attr('href', tempurl);
+								}
+							});		
+							addProductsHorizontal(left, slide);
+						}
+					}else if(response.indexOf("<li") == -1){
+						/*
+							we only get here if we have come into the function if the parament numberToAdd == 1,
+							then, we check if the last call found a product, if not, call function again to get another
+						*/
+						numberOfItemshor--;
+						addProductsHorizontal(1, slide);
+					}else{
+						
+						/*
+							check the length of the carousel, if less than the number of products we were supposed to add, and
+							we have more products to load, then call function to add another, if no more are left and we are
+							still below the number of products we were supposed to add, then we scroll the carousel as far
+							as we can, then, finally, if we have added the correct amount, then we check the slide boolean, if
+							that is true, then we slide the carousel
+						*/
+						$('.horizontalrecommendations').append(response);
+						$('.horizontalrecommendations li:last').find('a').each(function(){
+							if($(this).hasClass('rrlink')){
+								$(this).attr('href', tempurl);
+							}
+						});		
+						var carLen = $('.horizontalrecommendations li').length,
+							loadedAfterhor = carLen - loadedBeforehor;
+						if(loadedAfterhor < showPerPagehor && numberOfItemshor > carLen){
+							numberOfItemshor--;
+							addProductsHorizontal(1, slide);
+						}else if(loadedAfterhor < showPerPagehor){
+							numberOfItemshor -= (showPerPagehor - loadedAfterhor);
+							$('.horizontalrecommendations').animate({'marginLeft' : '-=' + elemWidth * loadedAfterhor});
+							prevhoz.css('visibility','visible');
+							currentPositionhor += loadedAfterhor;
+							$('.rrOverlayHor').css('visibility', 'hidden');
+						}else if(slide){
+							$('.horizontalrecommendations').animate({'marginLeft' : '-=' + elemWidth * loadedAfterhor});
+							prevhoz.css('visibility','visible');
+							$('.rrOverlayHor').css('visibility', 'hidden');
+							currentPositionhor += showPerPagehor;
+						}else{
+							$('.rrOverlayHor').css('visibility', 'hidden');
+						}
+					}
+			 	}
+			});
+		}else{
+			/*
+				check if we should scroll, and by how much, if we should, do it!!
+			*/
+			if(currentPositionhor  + showPerPagehor < $('.horizontalrecommendations li').length){
+					$('.horizontalrecommendations').animate({'marginLeft' : '-=' + elemWidth * ($('.horizontalrecommendations li').length - currentPositionhor - showPerPagehor)});
+					currentPositionhor += ($('.horizontalrecommendations li').length - currentPositionhor - showPerPagehor);
+					prevhoz.css('visibility','visible');
+			}
+				
+			//always hide the next button, as if we get to here no more products can be loaded, and we have already scrolled if neeeded
+			nexthoz.css('visibility', 'hidden');
+			$('.rrOverlayHor').css('visibility', 'hidden');
+		}
+		if(prodsToLoadhor.length === 0){
+			// safety check for if we have no more products
+			nexthoz.css('visibility','hidden');
+		}
+	 }
+});	
+
+</script>

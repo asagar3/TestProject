@@ -1,0 +1,160 @@
+/**
+*	 @input ProductPagingModel : dw.web.PagingModel
+* 	 @input ProductSearchResult : dw.catalog.ProductSearchModel
+*    @input customObject : Object  
+*    @output customObject : Object
+*
+*/
+importPackage( dw.system );
+importPackage( dw.catalog );
+importPackage(dw.util);
+importPackage( dw.object );
+importPackage( dw.value );
+
+ 
+function execute( args : PipelineDictionary ) : Number
+{
+	var categoryProductDefaultObject:Object = args.customObject ;
+	
+	
+	var categoryProductsObject  = new Object();	/* The master categoryProductObject */
+	var productSearchModel : ProductSearchModel = args.ProductSearchResult ;
+	
+    var productPagingModel : dw.web.PagingModel = args.ProductPagingModel ;
+    var productHits : Iterator = null ;
+    var productCount : Number=0;
+     var suggestedSearchPhrase :String ;
+    
+     
+    if(productPagingModel == null ){//in case of zero results paging model will be null 
+    	productHits = productSearchModel.getProducts();
+     	args.customObject = categoryProductDefaultObject ; /*Assigning categoryProductObject back to customObject as to display it in ISML*/
+  	 return PIPELET_NEXT;
+    } else{
+    	productHits = productPagingModel.pageElements;      
+    }
+    categoryProductDefaultObject.defaultNames = new Array(); 
+	categoryProductsObject.products  = new Array();	
+	 
+    try{
+	  	for each (var productHit:Product in  productHits){
+	   	    var product : Product = productHit.product ;
+	   	    var categoryProduct  = new Object();	    		
+			categoryProduct.productName = product.name ;
+			categoryProduct.productId = product.ID ;
+			categoryProductsObject.products.push(categoryProduct);	
+	    } 
+   
+    }catch (e){
+		Logger.error("CreateCategoryProductDefaultJSON::Error"+ e.message);		
+		return PIPELET_ERROR;
+	}
+	var refinements:Object = getRefinements(productSearchModel);
+	
+	if(refinements.categoryRefinements.length > 0){
+		categoryProductsObject.refinements = getRefinements(productSearchModel);
+	}
+	categoryProductDefaultObject.defaultNames.push(categoryProductsObject);
+    args.customObject = categoryProductDefaultObject ; 
+   return PIPELET_NEXT;
+}
+
+
+function getRefinements(productSearchModel : ProductSearchModel):Object {
+    var refinements = new Object();    
+    var Refinements = 	productSearchModel.refinements ;
+	for each(var RefinementDefinition : dw.catalog.ProductSearchRefinementDefinition  in Refinements.refinementDefinitions){
+		var refinementValueObj = new Object();
+		refinementValueObj.refinementAttributeId = "";
+		refinementValueObj.refinementDisplayName = "";				
+		refinementValueObj.refinementVals = new Array(); 
+		
+		if( RefinementDefinition.isCategoryRefinement() ){ 
+			refinements.categoryRefinements = getCategoryRefinements(productSearchModel);
+			if(refinements.categoryRefinements.length>0){
+				 return refinements;
+				}
+			}
+		}
+  	 return refinements;
+ }
+function getCategoryRefinements(productSearchModel : ProductSearchModel):Array {///function to get category refinement attributes
+   // var refinementsObject = new Array();
+    var categoryRefinements = new Array();
+    var Refinements = 	productSearchModel.refinements ;
+     var category :dw.catalog.Category =null;
+     var categoryType : String=null;
+	if(Refinements != null && Refinements.refinementDefinitions.size() > 0){
+		var cat = productSearchModel.category;
+		var path = new dw.util.ArrayList();
+		while( cat != null && cat.parent != null )
+		{
+			if( !cat.online )
+			{
+				cat = cat.parent;
+				continue;
+			}
+			path.addAt( 0, cat );
+			cat = cat.parent;
+		}
+		if(path.size()>0){
+		category =path.get(path.size()-1);
+		}
+		
+			var IDPath = new dw.util.ArrayList();
+
+		if(path != null)
+		{
+			// remove the first level successively
+			if(path.size() > 0)
+			{
+			path.removeAt(0);
+			}
+
+			// build array list of category IDs
+			var pathIterator = path.iterator();
+			while( pathIterator.hasNext() )
+			{
+				IDPath.add( pathIterator.next().ID );
+			}
+		}
+		
+	   
+	    if(category ==null || productSearchModel.categoryID == category.ID){
+	    	var RefinementValues :dw.util.Collection =Refinements.getNextLevelCategoryRefinementValues(category);
+	    	//var categoryList : dw.util.ArrayList = new dw.util.ArrayList();
+	    	if(RefinementValues.size() > 0){
+	    		
+				
+	    		for each(var RefinementValue:dw.catalog.ProductSearchRefinementValue  in RefinementValues){
+	    			
+	    			var categoryObj =dw.catalog.CatalogMgr.getCategory( RefinementValue.getValue() );
+	    			if(null == categoryType || categoryType!=categoryObj.custom.categoryType)
+						{							
+							categoryType = categoryObj.custom.categoryType;		
+							//isUpdatedCategoryType = true;
+						}
+					if(null == categoryType){
+						categoryType=dw.system.Site.current.preferences.custom.defaultCategoryType;
+					}
+	    			    var catRefinementValueObj = new Object();
+	    				catRefinementValueObj.refinementAttributeId = categoryObj.getID();
+	    				catRefinementValueObj.refinementDisplayName = categoryObj.getDisplayName();
+	    				categoryRefinements.push(catRefinementValueObj);
+	    			
+	    		}
+	    	}
+	    }else{
+	    	if(category.onlineSubCategories.size() > 0){
+	    		for each(var subCategory:dw.catalog.Category in category.onlineSubCategories){
+	    			var catRefinementValueObj = new Object();
+	    			catRefinementValueObj.refinementAttributeId = subCategory.getID();
+	    			catRefinementValueObj.refinementDisplayName = subCategory.getDisplayName();	    			
+	    			categoryRefinements.push(catRefinementValueObj);
+	    		}
+	    		
+	    	}
+	    }
+	}
+	  return categoryRefinements;
+	}

@@ -1,0 +1,48 @@
+/**
+ * Abdul. 
+ * INTP-22 - INTP-22 Long description requires delimiter handling
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+
+
+var separatorInlineReferences="###";
+
+
+/**
+ * for PDP - desktop and tablet
+ */
+function splitString(valueString:String):List{
+	
+	//var logger:Logger = Logger.getLogger("product");	
+	var inlineReferencesTokens = valueString.split(separatorInlineReferences);	
+	var descriptions:List=new ArrayList();
+
+	for each (inlineRef in inlineReferencesTokens){	
+		descriptions.add(inlineRef);
+	}
+	return descriptions;
+}
+
+function mergeList(list:Collection, separator:String):String{
+	
+	var result:String = "";	
+	for each (value in list){		
+		result += value+separator;		
+	}
+	
+	return	result.length > 0 ? result.substring(0, result.length-(separator.length) ):"";	
+}
+
+function endsWith(str:String, suffix:String):Boolean{
+	
+	if(str.length >= suffix.length){
+		var suffixValue:String = str.substr(str.length-suffix.length);
+		if(suffix.equals(suffixValue)){
+			return true;
+		}
+	}
+	return false;
+	
+}
+

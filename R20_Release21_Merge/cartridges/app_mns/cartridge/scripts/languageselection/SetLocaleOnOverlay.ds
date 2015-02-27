@@ -1,0 +1,42 @@
+/**
+ * This script will be used to create/update cookie & to get the browser settings.
+ *
+ * 
+ * @input LocaleStr : String
+ * @input OldRequestLocale : String
+ * @output redirectURL : String
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript('app_mns:languageselection/CookieUtils.ds');
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var localeStr : String = pdict.LocaleStr;
+	
+	//If Request has locale available
+ 	if(!empty(localeStr)){
+		/**
+		* httpReferer is used, when customer selects his preferred locale from overlay(on homepage or from header/footer), 
+		* to redirect him on the home page, instead of redirecting to ShowWithLocale pipeline 
+		*/
+		//pdict.redirectURL = updateURL(request.httpReferer,localeStr,pdict.OldRequestLocale);
+		//pdict.redirectURL = updateURL(request.httpHost,localeStr,pdict.OldRequestLocale);
+		
+		var url : String = null ;
+		
+		if(request.httpReferer.indexOf("/en/Default-Start") > -1){
+			url  = updateURLWithENLocale(request.httpReferer,localeStr,"en");
+		}else {
+			url = updateURL(request.httpReferer,localeStr,pdict.OldRequestLocale);
+		}
+		/*if (url.indexOf(localeStr) < 0){
+			url = url + localeStr;
+		} */
+		//setSessionVar(localeStr);			
+		pdict.redirectURL = url;
+	}	
+    return PIPELET_NEXT;
+}
+

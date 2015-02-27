@@ -1,0 +1,104 @@
+/**
+ * Script representation of the account transactions webservice
+ *
+ * If a Service implementation needs to override a method, the overridden method can always be
+ * called using this._super();
+ */
+
+importPackage(dw.system);
+importPackage(dw.object);
+importPackage(dw.util);
+importPackage(dw.net);
+
+importScript("util/libInheritance.ds");
+importScript("util/WebServiceUtils.ds");
+importScript("util/WebserviceConfiguration.ds");
+importScript("services/AbstractBaseService.ds");
+
+// Hack, because vars cannot be imported in DW, only functions
+function getBaseFTPService() {
+	return BaseFTPService;
+}
+
+var AbstractBaseService = getAbstractBaseService();  
+
+/**
+ * Base class of all FTP services.
+ */
+var BaseFTPService = AbstractBaseService.extend(
+/** @lends BaseFTPService.prototype */
+{
+
+    /**
+     * Create a new ftp service.
+     * @constructs
+     */
+	init : function(serviceName : String, object : Object){
+		this._super(serviceName, object);
+		this.initServiceClient();
+	},
+	
+	
+	/**
+	*	Creates the DW ftpClient Object
+	*/
+	initServiceClient : function () {
+		this.serviceClient = new FTPClient();
+		this.serviceClient.setTimeout(this.configuration.getTimeout());
+	},
+	
+	
+	/**
+	*	Performs the FTP connect
+	*/
+	connect : function () {
+		if (!this.serviceClient.connect(this.credentials.getUrl(), this.credentials.getUser(), this.credentials.getPassword())) {
+			throw new Error('AbstractFTPService: Failed to establish connection to FTP');
+		}
+	},
+	
+	/** 
+	 *  rapes FTP Functions into service framework 
+	 *	there is no actual request, it collects the parameters that need to be filled on FTP call
+	 */ 
+	createRequest : function(ftpFunction, args){
+		var newRequest = new Object();
+		newRequest.ftpFunction = ftpFunction;
+		newRequest.ftpArguments = args; 
+		
+		return newRequest;
+	},
+
+	/**
+	*	returns response from FTP Call
+	**/
+	executeServiceCall : function() {
+		// check if we connected before
+		if (!this.serviceClient.getConnected()) {
+			this.connect();
+		}
+		var ftpFunction = this.request.ftpFunction;
+		var response = this.serviceClient[ftpFunction].apply(this.serviceClient, this.request.ftpArguments);
+		this.response = response;
+		return this.response;
+	},
+
+	/**
+	*	creates a simple status object
+	*/
+	initStatusFromResponse : function(){
+		if(this.response != false){
+			this.status.code = 'OK';
+		}else{
+			this.status.code = 'ERROR';
+		}
+	},
+	
+	/**
+	*	overrides the log communication method as no XML is given
+	*/
+	logCommunication : function () {
+		// log request and response message if feature is enabled
+		this.serviceClientLogger.logFTPCommunication(this.request, this.response, this.serviceName, this.configuration);
+	},
+});

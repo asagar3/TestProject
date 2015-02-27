@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <custom-type type-id="OrderWatcher">
+        <display-name xml:lang="x-default">Order Watcher</display-name>
+        <description xml:lang="x-default"/>
+        <staging-mode>no-staging</staging-mode>
+        <storage-scope>organization</storage-scope>
+        <key-definition attribute-id="WatcherID">
+            <type>string</type>
+            <searchable-flag>false</searchable-flag>
+        </key-definition>
+        <attribute-definitions>
+            <attribute-definition attribute-id="CurrentOrderNumber">
+                <display-name xml:lang="x-default">Current Order Number</display-name>
+                <description xml:lang="x-default"/>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="InFault">
+                <display-name xml:lang="x-default">In Fault</display-name>
+                <description xml:lang="x-default"/>
+                <type>boolean</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="PreviousOrderNumber">
+                <display-name xml:lang="x-default">Previous Order Number</display-name>
+                <description xml:lang="x-default"/>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+                <field-length>0</field-length>
+                <field-height>0</field-height>
+            </attribute-definition>
+        </attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="OrderWatcherView">
+                <display-name xml:lang="x-default">Order Watcher View</display-name>
+                <attribute attribute-id="CurrentOrderNumber"/>
+                <attribute attribute-id="InFault"/>
+                <attribute attribute-id="PreviousOrderNumber"/>
+                <attribute attribute-id="WatcherID"/>
+                <attribute attribute-id="creationDate" system="true"/>
+            </attribute-group>
+        </group-definitions>
+    </custom-type>
+</metadata>

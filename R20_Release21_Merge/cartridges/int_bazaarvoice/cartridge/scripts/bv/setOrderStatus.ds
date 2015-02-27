@@ -1,0 +1,32 @@
+/**
+* @output orderIterator : dw.util.Iterator
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.content );
+importPackage( dw.object );
+importScript("int_simplefeeds:/feeds/Date&TimeUtility.ds");
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+    var numDaysLookback : Number = Site.getCurrent().getCustomPreferenceValue("bvPurchaseFeedNumDaysLookback");	
+	var numDaysLookbackStartDate : Date = null;
+    var helperCalendar = new Calendar();
+    helperCalendar.add(Calendar.DATE, (-1 * numDaysLookback));  //Subtract numDaysLookback days from the current date.
+    numDaysLookbackStartDate = helperCalendar.getTime();	
+	var queryString : String = "creationDate >= {0}";
+	var orderItr : SeekableIterator;   
+	try{
+		orderItr = OrderMgr.queryOrders(queryString, "orderNo ASC", numDaysLookbackStartDate);
+		var count=orderItr.getCount();
+		Logger.error("Total order selected to update their orderstatus:"+count);
+		
+	}catch(ex){
+	    Logger.error("Error Message While WriteXMLProductForLocalizedData in BV export Product Feed:"+ ex.message);
+	 return PIPELET_ERROR;
+	}
+	pdict.orderIterator=orderItr;
+    return PIPELET_NEXT;
+}

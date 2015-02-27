@@ -1,0 +1,160 @@
+/**
+* Demandware Script File
+* Script to call the EcGetDetails Service
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* @input Basket : dw.order.Basket	
+* @input OrderNo : String The order no
+* @input  purchaseTotals : Object
+* @input paypalToken : String
+* @input requestId : String
+* @input requestToken : String
+* @output paypalPayerId : String
+* @output decision : String decision returned by Cybersource
+* @output billTo : Object
+* @output reasonCode : dw.util.BigInteger reasonCode returned by Cybersource
+* @output StatusMessage : String
+* @output OmnitureMessage : String
+* @output PayPalPayerStatus : String for fraud check
+* @output PayPalAddressStatus : String for fraud check
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.rpc );
+importPackage( dw.util );
+importPackage( dw.customer );
+
+importScript('cybersource/libCybersource.ds');
+importScript('cybersource/Cybersource_BillTo_Object.ds');
+
+function execute( pdict : PipelineDictionary ) : Number
+{	
+	var basket : Basket = pdict.Basket;
+    var orderNo : String = pdict.OrderNo;    
+    var purchaseObject: PurchaseTotals_Object = pdict.purchaseTotals;
+    var CybersourceHelper = getCybersourceHelper();
+	
+	var csReference : WebReference = webreferences.CyberSourceTransaction;
+	var service : Stub = csReference.getService("TransactionProcessor", "portXML");
+	CybersourceHelper.setEndpoint(service);
+	if(!CybersourceHelper.createPayPalHeader(service)){
+			return PIPELET_ERROR;
+	}
+	var request = new csReference.RequestMessage();
+	
+	request.merchantID = CybersourceHelper.getPaypalMerchantID();
+	__setClientData( request, orderNo );		
+	request.purchaseTotals = __copyPurchaseTotals(purchaseObject);		
+	request.payPalEcGetDetailsService = new CybersourceHelper.csReference.PayPalEcGetDetailsService(); 
+	request.payPalEcGetDetailsService.run = true;
+	request.payPalEcGetDetailsService.paypalToken = pdict.paypalToken;
+	request.payPalEcGetDetailsService.paypalEcSetRequestToken = pdict.requestToken;
+	request.payPalEcGetDetailsService.paypalEcSetRequestID = pdict.requestId;
+	
+	var response = null;
+	
+	try{
+		response = service.runTransaction(request);
+	}catch(e){
+		Logger.error("[PayPalEcGetDetailsService.ds] Error in PayPal request ( {0} )",e.message);
+		pdict.StatusMessage="[PayPalEcGetDetailsService.ds] Error in PayPal request ( {0} )"+e.message;
+		pdict.OmnitureMessage = "paypalerror";
+		if(e.message.indexOf("SocketTimeoutException") != -1) {
+            pdict.reasonCode = 999; //set timeout error code 999
+            return PIPELET_NEXT;
+		}	
+		if(empty(response) || response.decision == null || response.reasonCode == null) {	
+			pdict.StatusMessage = "Empty response , Error Message::"+e.message;		
+			pdict.decision = "ERROR";
+		}
+	}
+	if(response == null) {
+		Logger.getRootLogger().fatal("[PayPalEcGetDetailsService.ds] Error in PayPal request: null response");		
+		pdict.StatusMessage="PayPalEcGetDetailsService.ds Null Response";
+		pdict.OmnitureMessage = "paypalerror";
+		pdict.decision = "ERROR";
+		return PIPELET_ERROR;
+	}
+	pdict.reasonCode = response.reasonCode;
+	pdict.decision = response.decision;
+			
+	if (response.reasonCode != "100") {		
+		pdict.OmnitureMessage = "paypalerror";
+		return PIPELET_ERROR;
+	} 
+	else {
+		Logger.warn("PayPalEcGetDetailsService: RequestID :"+response.requestID + "|PayPalEcGetDetailsService: Decision : "+response.decision + "|PayPalEcGetDetailsService: ReasonCode : "+response.reasonCode +"|PayPalEcGetDetailsService: orderNo : "+orderNo);   
+		var billTo :BillTo_Object = populateBillingDetails(response);
+		var basket:Basket = populateBillingDetailsinBasket(response,basket); 	
+		pdict.billTo = billTo;
+		pdict.paypalPayerId = response.payPalEcGetDetailsReply.payerId;
+		//INT 846: fields to be passed onto PayPalEcDoPayment service for fraud checking
+		pdict.PayPalPayerStatus = response.payPalEcGetDetailsReply.payerStatus;
+		pdict.PayPalAddressStatus = response.payPalEcGetDetailsReply.addressStatus;
+		return PIPELET_NEXT;
+	}
+}
+
+function populateBillingDetails(response:Object):BillTo_Object {
+	var billToObject: BillTo_Object = new BillTo_Object();
+	billToObject.setFirstName(response.payPalEcGetDetailsReply.payerFirstname);
+	billToObject.setLastName(response.payPalEcGetDetailsReply.payerLastname);
+	billToObject.setStreet1(response.payPalEcGetDetailsReply.street1);
+	billToObject.setStreet2(response.payPalEcGetDetailsReply.street2);
+	billToObject.setCity(response.payPalEcGetDetailsReply.city);
+	billToObject.setPostalCode(response.payPalEcGetDetailsReply.postalCode);
+	billToObject.setState(response.payPalEcGetDetailsReply.state);
+	billToObject.setCountry(response.payPalEcGetDetailsReply.countryName);
+	billToObject.setEmail(response.payPalEcGetDetailsReply.payer);
+	return billToObject;
+}
+function populateBillingDetailsinBasket(response:Object,basket:Basket):Basket{	
+	
+		var fName = response.payPalEcGetDetailsReply.payerFirstname ;
+		var lName = response.payPalEcGetDetailsReply.payerLastname;
+		if(fName !=null && !empty(fName)){
+			fName = fName.substring(0,19);
+		}
+		if(lName !=null && !empty(lName)){
+			lName = lName.substring(0,19);
+		}		
+		if(basket.defaultShipment.shippingMethodID == "STORE_COLLECTION" || basket.defaultShipment.shippingMethodID == "COLLECTION_POINT"){//populate delivery name from billing
+			basket.defaultShipment.shippingAddress.setFirstName(fName);
+			basket.defaultShipment.shippingAddress.setLastName(lName);
+			basket.defaultShipment.shippingAddress.setTitle(" ");
+		}
+		
+		var address1 = "";
+		var address2 ="";
+		
+		if(!empty(response.payPalEcGetDetailsReply.street1) && response.payPalEcGetDetailsReply.street1 != null){
+		 address1 = response.payPalEcGetDetailsReply.street1.substring(0,34);
+		}
+		
+		if(!empty(response.payPalEcGetDetailsReply.street2) && response.payPalEcGetDetailsReply.street2 != null){
+		 address2 = response.payPalEcGetDetailsReply.street2.substring(0,34);
+		}
+		
+		basket.billingAddress.setTitle(" ");
+		//Anju:22/7/2014 -  restricting first and last name to maximum 20 characters because of ICOS restriction 
+		basket.billingAddress.setFirstName(fName);
+		basket.billingAddress.setLastName(lName);
+		//Nadeem:21/7/2014 -  removing the extra chars in address1,2 becuase of ICOS restriction 
+		basket.billingAddress.setAddress1(address1);
+		basket.billingAddress.setAddress2(address2);
+		basket.billingAddress.setCity(response.payPalEcGetDetailsReply.city);
+		basket.billingAddress.setPostalCode(response.payPalEcGetDetailsReply.postalCode);
+		basket.billingAddress.setStateCode(response.payPalEcGetDetailsReply.state);		
+		basket.billingAddress.setCountryCode(response.payPalEcGetDetailsReply.countryCode);		
+		basket.setCustomerEmail(response.payPalEcGetDetailsReply.payer);
+
+	return basket;
+}

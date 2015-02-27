@@ -1,0 +1,43 @@
+/**
+* @input fileName:String
+* @output Message : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+importScript("int_bazaarvoice:/lib/libBazaarvoice.ds");
+importScript("int_bazaarvoice:/lib/libConstants.ds");
+
+var bvHelper = getBazaarVoiceHelper();
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+    var purchaseFeedEnabled : Boolean = Site.getCurrent().getCustomPreferenceValue("bvEnablePurchaseFeed");
+    if (!purchaseFeedEnabled) {
+       pdict.Message = "Purchase Feed is not enabled!";
+       return PIPELET_NEXT;
+    }
+  
+    try {         
+         var destinationPath : String = Site.getCurrent().getCustomPreferenceValue("bvPurchaseFeedPath");
+         var uploadFilename : String = Site.getCurrent().getCustomPreferenceValue("bvPurchaseFeedFileName");		 
+     	 var destinationFilename : String = uploadFilename.substr(0, uploadFilename.length - 4) + "-" + StringUtils.formatCalendar(Site.getCalendar(), "yyyy-MM-dd") + ".xml";
+    	 bvHelper.updateHost(Site.getCurrent().getCustomPreferenceValue("bvFTPHostPurchaseExport"));
+    	 var file : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + pdict.fileName);
+    	 var ret : String = bvHelper.uploadFile(destinationPath, destinationFilename, file, pdict);
+         pdict.Message = ret;
+         if (!empty(ret) && ret.indexOf("[Job Details] [STATUS=  ERROR")>-1) {
+        	return PIPELET_ERROR;    
+           }
+
+    } catch(ex) {
+        Logger.error("[exception caught]" + ex.message);
+        pdict.Message="[PIE EXPORT failed]: " + ex.message;
+        return PIPELET_ERROR;    
+    }         
+
+return PIPELET_NEXT;
+}
+
+

@@ -1,0 +1,38 @@
+
+importPackage( dw.system );
+importPackage(dw.util);
+importPackage( dw.catalog );
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+   	/*Below code checks if the service is invoked within specified time*/
+		var isValidTimeForProcessing:Boolean = isServiceInvokedWithinExecutionTime();
+		if(!isValidTimeForProcessing){
+			return PIPELET_ERROR;
+		}
+
+   return PIPELET_NEXT;
+}
+
+/*Below function verifies if the service is invoked with in the correct time*/
+function isServiceInvokedWithinExecutionTime():Boolean{
+	var date:Date = new Date();
+	var currentHour = date.getHours();
+	var currentMin = date.getMinutes();
+	
+	var minHourForCategoryService = Site.current.preferences.custom.minHourForCategoryService ;
+	var minMinForCategoryService = Site.current.preferences.custom.minMinForCategoryService ;
+	var maxMinForCategoryService = Site.current.preferences.custom.maxMinForCategoryService ;
+	var maxHourForCategoryService = Site.current.preferences.custom.maxHourForCategoryService ;
+	
+	if(currentHour <= maxHourForCategoryService && currentHour >= minHourForCategoryService){
+		if(currentMin <= maxMinForCategoryService && currentMin >= minMinForCategoryService){		
+			return true ;
+		}
+		
+	}
+	
+	return false ;
+	
+} 

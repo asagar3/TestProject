@@ -1,0 +1,49 @@
+<isscript>
+ var Product : dw.catalog.Product = dw.catalog.ProductMgr.getProduct(pdict.ProductID);
+</isscript>
+
+<isif condition="${Product.master && pdict.CurrentVariationModel && pdict.CurrentVariationModel.variants.size() > 0}">
+				<isset name="imageProduct" value="${pdict.CurrentVariationModel.variants[0]}" scope="page"/>
+			<iselse/>
+				<isset name="imageProduct" value="${pdict.Product}" scope="page"/>
+			</isif>
+
+<h1 class="cufonIt rrHead" ><isprint value="${Resource.msg('product.rrcustomerReview','product',null)}" encoding="off"/></h1>
+
+<div class="rrReviewCont">
+	<div class="rrImage">
+		<isif condition="${imageProduct != null && imageProduct.getImage('catlanding',0) != null}">
+			<isscript>
+				var cartproductlineitemswidth : Integer = dw.system.Site.getCurrent().preferences.custom.WriteAReviewImageWidth;
+				var cartproductlineitemsheight : Integer = dw.system.Site.getCurrent().preferences.custom.WriteAReviewImageHeight;
+				var scene7ImageUrl : String = pdict.Product.getImage('catlanding',0).URL + '?' + dw.system.Site.getCurrent().preferences.custom.s7Preset + 'wid='+cartproductlineitemswidth+'&hei='+cartproductlineitemsheight;
+			</isscript>
+			<img src="${scene7ImageUrl}" alt="${imageProduct.getImage('catlanding',0).alt}" title="${imageProduct.getImage('catlanding',0).title}"/>
+		<iselse>
+			<img src="${URLUtils.staticURL('/images/noimagesmall.png')}" alt="${imageProduct.productName}" title="${imageProduct.productName}"/>
+		</isif>
+	</div>
+	<div class="rrDesc" id="hideDottedBorder">
+		<h2 class="cufonIt"><isprint value="${imageProduct.getName()}" /></h2>
+		<h3>
+			<isinclude template="product/components/pricing"/>
+		</h3>		
+	</div>
+	<div class="clear"></div>
+</div>
+<iscomment>
+	<h1 class="cufonIt rrHead" id="ReviewHeading"><isprint value="${Resource.msg('product.writereview','product',null)}" encoding="off"/></h1>
+</iscomment>
+<h1 id="ReviewHeading" class="cufonIt">
+	<div class="reviewHeadingText"><isprint value="${Resource.msg('product.writereview','product',null)}" encoding="off"/></div>
+    <div class="reviewHeadingArrow">&nbsp;</div>
+    <div class="clear"></div>
+</h1><div class="clear"></div>
+<div id="inputmsg" style="display:none">
+<p class="rrDescP"><isprint value="${Resource.msg('product.thankyou','product',null)}" encoding="off"/></p>
+</div>
+<div id="Previewmsg" style="display:none">
+<p class="rrDescP"><isprint value="${Resource.msg('product.checkreviewforaccuracy','product',null)}" encoding="off"/></p>
+<p class="rrDescP"><isprint value="${Resource.msg('product.editareview','product',null)}" encoding="off"/></p>
+</div>
+

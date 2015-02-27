@@ -1,0 +1,1137 @@
+.richRelevanceRecommendations .price .salesprice, .richRelevanceRecommendations .price .standardprice{display:block; margin:0;} 
+.richRelevanceRecommendationsHorizontal .price .salesprice, .richRelevanceRecommendationsHorizontal .price .standardprice{display:block; margin:0;}
+
+
+#BVRRSecondarySummaryContainer .BVRRSecondaryRatingSummary .BVRRRatingSummaryLinks {left: 200px;}
+.BVRRDisplayContentNoReviews a{display: inline-block !important; vertical-align: super; margin-left: 5px !important;}
+.BVRRDisplayContentNoReviews a:hover{display: inline-block !important; vertical-align: super; margin-left: 5px !important;}
+
+
+/****** Product Variation Attribute Swatch Rendering ******/
+.variationattributes_altics  {clear: both;font-size: 1.1em;margin:30px 0 0 0;color:#333333;/* display: inline;float: left;padding-top: 50px;*/} /* PSP issue 19 Sep */
+.variationattributes_altics .special{font-size:12px; font-weight:bold; text-transform:lowercase; display:inline}
+.variationattributes_altics .special:first-letter{text-transform:uppercase;}
+.variationattributes_altics .swatches {clear: both;margin: 0px 0px 20px 0px;}/*07-apr*/
+.variationattributes_altics .swatches ul.swatchesdisplay{display:block;padding:5px 0 0 0 ;  width: 435px;}
+.variationattributes_altics .color li {border:2px solid #fff;cursor:pointer; float: left;height: 50px;margin: 0px 1px 10px 1px;padding: 0px;text-align: center;width: 51px;}
+.variationattributes_altics .color li a {width:51px;float:left; overflow:hidden;/*margin:-1px;*/ background:none;border:none;height:50px;text-indent:30px;/*filter:alpha(opacity=0);opacity:0.5; -moz-opacity:0.5; */cursor:pointer;}/*fixed for ie8*/
+.variationattributes_altics .color li:hover, .variationattributes_altics .color li:focus{border:2px solid #cddf69; margin: 0px 1px 10px 1px;}
+.variationattributes_altics .color li.focused{border:2px solid #ccdf6b; height:56px; width:58px} /* LBI issue 17 Oct */
+.variationattributes_altics .color li a:hover {border:none !important; text-indent:-999px; }
+.variationattributes_altics .color li.selected {margin: 0px 1px 10px 1px; width:51px; float:left; overflow:hidden;/*margin:-1px; */height:50px;background:none;/*filter:alpha(opacity=0);opacity:0.5; -moz-opacity:0.5;*/ border:2px solid #ccdf6b}/*fixed for ie8*/
+/*.variationattributes_altics .color li.selected:hover{margin: 0px 0px 10px 0px}*/
+.variationattributes_altics .color li.selected a {border:none}
+.variationattributes_altics .color li.unselectable a {background:transparent url(../images/overlay_wh.png) repeat 0 0;border:1px solid #d6d6d6;cursor:default;z-index:25;}
+.variationattributes_altics .color li.unselectable a:hover {border:1px solid #d6d6d6;}
+.variationattributes_altics .color li a#swatch-Miscellaneous {background-position: 0 -75px;}
+.variationattributes_altics .color li a#swatch-Miscellaneous:hover {background-position: 0 -150px;}
+.variationattributes_altics .color li.selected a#swatch-Miscellaneous {background-position: 0 -125px;}
+.variationattributes_altics .color li a.swatchanchor{color:transparent;filter:alpha(opacity=0);opacity:1;}
+
+.variantdropdown_altics{margin:0px 0px 20px 0px; overflow:hidden;}
+.productdetail .variantdropdown_altics .label{/*padding-right:20px*/} /*slide 24*/
+.variantdropdown_altics select{width: auto;padding: 5px 29px 5px 15px;padding-left: 10px;font-size: 11px;line-height: 1;border: 0;border-radius: 0;height: 25px;color: #4b4b4b;background: transparent;-webkit-appearance: none;}
+
+
+.variationattributes_altics .errorIcon, .variationattributes_altics .successIcon{display:inline !important; padding-top:10px; float: left;}
+.variationattributes_altics .successIcon {background-position:9px -3510px; padding:10px 10px 16px 18px;}
+
+.productdetail .box-offres-speciales-head + .promotion {padding-top:10px;}
+
+
+.productdetail .attributecontentlink_altics{clear:both;font-size: 10px;text-decoration: none;color: #4b4b4b;display: block;margin-top: 5px;float: left;padding-left: 5px;}
+.productdetail .attributecontentlink_altics:hover{clear:both;text-decoration: none !important;color: #000 !important;}
+
+/*! jQuery UI - v1.10.3 - 2013-07-16
+* http://jqueryui.com
+* Includes: jquery.ui.core.css, jquery.ui.tabs.css
+* To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana%2CArial%2Csans-serif&fwDefault=normal&fsDefault=1.1em&cornerRadius=0px&bgColorHeader=%23ffffff&bgTextureHeader=gloss_wave&bgImgOpacityHeader=75&borderColorHeader=%23ffffff&fcHeader=%23eaf5f7&iconColorHeader=%23d8e7f3&bgColorContent=%23fcfdfd&bgTextureContent=inset_hard&bgImgOpacityContent=100&borderColorContent=%23ffffff&fcContent=%23222222&iconColorContent=%230078ae&bgColorDefault=%23d2d2d3&bgTextureDefault=glass&bgImgOpacityDefault=0&borderColorDefault=%23aaaaaa&fcDefault=%23656565&iconColorDefault=%23e0fdff&bgColorHover=%23d2d2d3&bgTextureHover=glass&bgImgOpacityHover=0&borderColorHover=%23aaaaaa&fcHover=%23656565&iconColorHover=%23056b93&bgColorActive=%23ffffff&bgTextureActive=gloss_wave&bgImgOpacityActive=50&borderColorActive=%23aaaaaa&fcActive=%23000000&iconColorActive=%23f5e175&bgColorHighlight=%23f8da4e&bgTextureHighlight=glass&bgImgOpacityHighlight=55&borderColorHighlight=%23fcd113&fcHighlight=%23915608&iconColorHighlight=%23f7a50d&bgColorError=%23e14f1c&bgTextureError=gloss_wave&bgImgOpacityError=45&borderColorError=%23cd0a0a&fcError=%23ffffff&iconColorError=%23fcd113&bgColorOverlay=%23aaaaaa&bgTextureOverlay=flat&bgImgOpacityOverlay=75&opacityOverlay=30&bgColorShadow=%23999999&bgTextureShadow=flat&bgImgOpacityShadow=55&opacityShadow=45&thicknessShadow=0px&offsetTopShadow=5px&offsetLeftShadow=5px&cornerRadiusShadow=5px
+* Copyright 2013 jQuery Foundation and other contributors Licensed MIT */
+
+
+
+/* Layout helpers
+----------------------------------*/
+.ui-helper-hidden {
+	display: none;
+}
+.ui-helper-hidden-accessible {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+}
+.ui-helper-reset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	line-height: 1.3;
+	text-decoration: none;
+	font-size: 100%;
+	list-style: none;
+}
+.ui-helper-clearfix:before,
+.ui-helper-clearfix:after {
+	content: "";
+	display: table;
+	border-collapse: collapse;
+}
+.ui-helper-clearfix:after {
+	clear: both;
+}
+.ui-helper-clearfix {
+	min-height: 0; /* support: IE7 */
+}
+.ui-helper-zfix {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	position: absolute;
+	opacity: 0;
+	filter:Alpha(Opacity=0);
+}
+
+.ui-front {
+	z-index: 100;
+}
+
+
+/* Interaction Cues
+----------------------------------*/
+.ui-state-disabled {
+	cursor: default !important;
+}
+
+
+/* Icons
+----------------------------------*/
+
+/* states and images */
+.ui-icon {
+	display: block;
+	text-indent: -99999px;
+	overflow: hidden;
+	background-repeat: no-repeat;
+}
+
+
+/* Misc visuals
+----------------------------------*/
+
+/* Overlays */
+.ui-widget-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.ui-tabs {
+	position: relative;/* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
+	padding: 0;
+	width: 511px;
+}
+.ui-tabs .ui-tabs-nav {
+	margin: 0;
+	padding: 0;
+	margin-left: -2px;
+	margin-bottom: -1px;
+}
+.ui-tabs .ui-tabs-nav li {
+	list-style: none;
+	float: left;
+	position: relative;
+	top: 0;
+	margin: 0;
+	border-bottom-width: 0;
+	padding: 0;
+	margin-left: 1px;
+	white-space: nowrap;
+	font-size: 12px;
+}
+.ui-tabs .ui-tabs-nav li a {
+	float: left;
+	padding: .5em 1em;
+	text-decoration: none;
+	outline: none;
+}
+.ui-tabs .ui-tabs-nav li a:hover {
+	text-decoration: underline;
+}
+.ui-tabs .ui-tabs-nav li {
+	margin-bottom: -1px;
+	padding-bottom: 1px;
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a,
+.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
+.ui-tabs .ui-tabs-nav li.ui-tabs-loading a {
+	
+}
+.ui-tabs .ui-tabs-nav li a, /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
+.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-active a {
+	cursor: pointer;
+}
+.ui-tabs .ui-tabs-panel {
+	display: block;
+	border-width: 0;
+	padding: 1em 1.4em;
+	background: none;
+	border: solid 1px #aaaaaa;
+	font-size: 12px;
+	color: #555555;
+}
+
+/* Component containers
+----------------------------------*/
+.ui-widget {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 1.1em;
+}
+.ui-widget .ui-widget {
+	font-size: 1em;
+}
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 1em;
+}
+.ui-widget-content {
+	border: 1px solid #ffffff;
+	background: #fcfdfd;
+	color: #222222;
+}
+.ui-widget-content a {
+	color: #222222;
+}
+.ui-widget-header {
+	border: 1px solid #ffffff;
+	background: #ffffff;
+	color: #eaf5f7;
+	font-weight: bold;
+}
+.ui-widget-header a {
+	color: #eaf5f7;
+}
+
+/* Interaction states
+----------------------------------*/
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+	border: 1px solid #d2d2d3;
+	background: #d2d2d3 url(../images/altics/bg-tabs2.png) repeat-x bottom;
+	font-weight: normal;
+	color: #656565;
+}
+.ui-state-default a,
+.ui-state-default a:link,
+.ui-state-default a:visited {
+	color: #656565;
+	text-decoration: underline;
+}
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+	border: 1px solid #d2d2d3;
+	background: #d2d2d3 url(../images/altics/bg-tabs2.png) repeat-x bottom;
+	font-weight: normal;
+	color: #656565;
+}
+.ui-state-hover a,
+.ui-state-hover a:hover,
+.ui-state-hover a:link,
+.ui-state-hover a:visited {
+	color: #656565;
+	text-decoration: underline;
+}
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+	border: 1px solid #aaaaaa;
+	background: #ffffff url(../images/altics/bg-tabs.png) repeat-x bottom;
+	font-weight: normal;
+	color: #555555;
+}
+.ui-state-active a,
+.ui-state-active a:link,
+.ui-state-active a:visited {
+	color: #555555;
+	text-decoration: underline;
+}
+
+/* Interaction Cues
+----------------------------------*/
+.ui-state-highlight,
+.ui-widget-content .ui-state-highlight,
+.ui-widget-header .ui-state-highlight {
+	border: 1px solid #fcd113;
+	background: #f8da4e;
+	color: #915608;
+}
+.ui-state-highlight a,
+.ui-widget-content .ui-state-highlight a,
+.ui-widget-header .ui-state-highlight a {
+	color: #915608;
+}
+.ui-state-error,
+.ui-widget-content .ui-state-error,
+.ui-widget-header .ui-state-error {
+	border: 1px solid #cd0a0a;
+	background: #e14f1c;
+	color: #ffffff;
+}
+.ui-state-error a,
+.ui-widget-content .ui-state-error a,
+.ui-widget-header .ui-state-error a {
+	color: #ffffff;
+}
+.ui-state-error-text,
+.ui-widget-content .ui-state-error-text,
+.ui-widget-header .ui-state-error-text {
+	color: #ffffff;
+}
+.ui-priority-primary,
+.ui-widget-content .ui-priority-primary,
+.ui-widget-header .ui-priority-primary {
+	font-weight: bold;
+}
+.ui-priority-secondary,
+.ui-widget-content .ui-priority-secondary,
+.ui-widget-header .ui-priority-secondary {
+	opacity: .7;
+	filter:Alpha(Opacity=70);
+	font-weight: normal;
+}
+.ui-state-disabled,
+.ui-widget-content .ui-state-disabled,
+.ui-widget-header .ui-state-disabled {
+	opacity: .35;
+	filter:Alpha(Opacity=35);
+	background-image: none;
+}
+.ui-state-disabled .ui-icon {
+	filter:Alpha(Opacity=35); /* For IE8 - See #6059 */
+}
+
+
+
+
+/* Misc visuals
+----------------------------------*/
+
+/* Corner radius */
+.ui-corner-all,
+.ui-corner-top,
+.ui-corner-left,
+.ui-corner-tl {
+	border-top-left-radius: 0px;
+}
+.ui-corner-all,
+.ui-corner-top,
+.ui-corner-right,
+.ui-corner-tr {
+	border-top-right-radius: 0px;
+}
+.ui-corner-all,
+.ui-corner-bottom,
+.ui-corner-left,
+.ui-corner-bl {
+	border-bottom-left-radius: 0px;
+}
+.ui-corner-all,
+.ui-corner-bottom,
+.ui-corner-right,
+.ui-corner-br {
+	border-bottom-right-radius: 0px;
+}
+
+/* Overlays */
+.ui-widget-overlay {
+	background: #aaaaaa url(images/ui-bg_flat_75_aaaaaa_40x100.png) 50% 50% repeat-x;
+	opacity: .3;
+	filter: Alpha(Opacity=30);
+}
+.ui-widget-shadow {
+	margin: 5px 0 0 5px;
+	padding: 0px;
+	background: #999999 url(images/ui-bg_flat_55_999999_40x100.png) 50% 50% repeat-x;
+	opacity: .45;
+	filter: Alpha(Opacity=45);
+	border-radius: 5px;
+}
+
+
+@charset "UTF-8";
+/* CSS Document */
+
+
+/* POUR MAQUETTE
+-------------------------------------------------------------- */
+div.content-demo{
+	width: 970px;
+	margin-left: auto;
+	margin-right: auto;
+}
+div.wrap2013{
+	width: 960px;
+	margin-left: auto;
+	margin-right: auto;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
+/* TOOLS
+-------------------------------------------------------------- */
+div.productdetail div.productreview{
+	zoom:0.9;
+}
+
+.pdpMain #pdpATCDivpdpMain {margin-top:0px;}
+/* #variationContainer #pdpATCDivpdpMain {margin: 30px 0 80px 0;} */
+#variationContainer {margin-top:60px; min-height:100px};
+
+div.productdetail .left{
+	float: left;
+}
+div.productdetail .right{
+	float: right;
+}
+div.productdetail div.clear{
+	clear: both;
+}
+div.productdetail .txt10{
+	font-size: 10px;
+}
+div.productdetail .txt11{
+	font-size: 11px;
+}
+div.productdetail .txt12{
+	font-size: 12px;
+}
+div.
+ .txt14{
+	font-size: 14px;
+}
+div.productdetail .txt18{
+	font-size: 18px;
+}
+div.productdetail .gris{
+	color: #626262;
+}
+div.productdetail .txt14{
+	font-size:14px;
+}
+div.productdetail .vert{
+	color: #457c4e;
+}
+div.productdetail .noir{
+	color: #1e1e1e;
+}
+div.productdetail .valignmid{
+	vertical-align: middle;
+}
+
+div.productdetail .sgimage{
+	vertical-align: middle;
+	background: url(../images/altics/guide-tailles.png) no-repeat;
+	height:8px;
+	width:22px;
+	display:inline-block;	
+}
+
+div.productdetail .ml35{
+	margin-left: 35px;
+}
+div.productdetail .mt20{
+    margin-top: 20px;
+}
+
+
+
+/* TEMPLATE
+-------------------------------------------------------------- */
+div.productdetail{
+	padding-top: 25px;
+}
+div.productdetail div.col-left{
+	width: 375px;
+	float: left;
+}
+div.productdetail div.col-right{
+	width: 520px;
+	float: right;
+	margin-right: 50px;
+}
+div.productdetail .erreur{
+	font-size: 11px;
+	color: #a0071f;
+}
+div.productdetail div.titre-comment{
+	font-size: 22px;
+	color: #4b4b4b;
+}
+div.productdetail div.social-left{
+	width: 150px;
+	float: left;
+	margin-left: 20px;
+}
+div.productdetail div.social-right{
+	width: 150px;
+	float: right;
+	margin-right: 25px;
+	text-align: right;
+}
+
+
+/* COL RIGHT
+-------------------------------------------------------------- */
+div.productdetail h1.productname{
+	font-weight: normal;
+	font-style: normal;
+	font-size: 22px;
+	color: #4b4b4b;
+    margin: 0;
+	padding: 0;
+	margin-bottom: 5px;
+}
+div.productdetail select.select{
+	width: 196px;
+	padding: 5px;
+	padding-left: 10px;
+	font-size: 11px;
+	line-height: 1;
+	border: 0;
+	border-radius: 0;
+	height: 27px;
+	color: #4b4b4b;
+	background: transparent;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+div.productdetail div.select-taille{
+	float: left;
+	width: auto;
+	height: 25px;
+	position: relative;
+	border: 1px solid #cbcbc8;
+	border-radius: 2px;
+	background: #fefefe url(../images/altics/select2.png) no-repeat 101% -1px;
+ background:  url(../images/altics/select2.png) no-repeat 101% -1px, -moz-linear-gradient(top, #fefefe 0%, #ededed 100%);
+ background:  url(../images/altics/select2.png) no-repeat 101% -1px, -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fefefe), color-stop(100%,#ededed));
+ background:  url(../images/altics/select2.png) no-repeat 101% -1px, -webkit-linear-gradient(top, #fefefe 0%,#ededed 100%);
+ background:  url(../images/altics/select2.png) no-repeat 101% -1px, -o-linear-gradient(top, #fefefe 0%,#ededed 100%);
+ background:  url(../images/altics/select2.png) no-repeat 101% -1px, linear-gradient(to bottom, #fefefe 0%,#ededed 100%);
+ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fefefe', endColorstr='#ededed',GradientType=0 );
+}
+
+.select-taille select{-moz-appearance: none; text-indent: 0.01px; text-overflow: '';}		
+
+.ext-ie .select-taille{background: transparent !important;}
+.ext-ie .select-taille select{padding-right:10px;overflow:hidden;}
+
+div.productdetail a.lien1{
+	color: #666666;
+	text-decoration: none;
+}
+div.productdetail a.lien1:hover{
+	color: #000;
+	text-decoration: none;
+}
+div.productdetail span.num{
+	font-family: Helvetica, sans-serif;
+}
+div.productdetail div.titre-taille{
+	padding-top: 8px;
+	padding-right: 15px;
+	height: 16px;
+	width: 50px;
+}
+div.productdetail div.bloc-taille{
+
+}
+div.productdetail a.guide-tailles{
+font-size: 10px;
+text-decoration: none;
+color: #4b4b4b;
+display: block;
+margin-top: 5px
+}
+div.productdetail a.guide-tailles:hover{
+	text-decoration: none !important;
+	color: #000 !important;
+}
+
+div#erreurcouleur{
+	display: none;
+}
+div#erreurtaille{
+	display: none;
+}
+
+
+/* QTE
+-------------------------------------------------------------- */
+div.productdetail div.titre-qte{
+	padding-top: 8px;
+	padding-right: 10px;
+}
+
+div.productdetail .quantity_dropdown_altics{
+  margin: 2px 0px 0 0 !important;
+  float: left;
+  width: 30px;
+  padding-top: 5px;
+  text-align: center;
+  font-size: 14px;
+  color: #696969;
+  border: none !important;
+  background: url(none);
+  margin-right:0px;
+}
+
+
+div.productdetail .quantity_dropdown_altics:focus{
+	outline: -webkit-focus-ring-color auto 5px;
+	outline-offset: -2px;
+}
+
+div.productdetail .buttonqte {
+  margin: 0;
+  text-indent: -9999px;
+  cursor: pointer;
+  width: 28px;
+  height: 27px;
+  float: left;
+  text-align: center; 
+  outline: none;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+}
+div.productdetail .dec {
+  background: url(../images/altics/qtem.png) no-repeat;
+}
+div.productdetail .inc {
+  background: url(../images/altics/qtep.png) no-repeat;
+}
+
+
+/* OFFRES SPECIALES
+-------------------------------------------------------------- */
+div.productdetail div.box-offres-speciales{
+	width: 301px;
+	border: 1px solid #dfdfde;
+}
+div.productdetail div.box-offres-speciales div.box-offres-speciales-head{
+	font-size: 15px;
+	color: #3e3e3e;
+	padding-left: 15px;
+    padding-top: 5px;
+	height: 22px;
+	background: url(../images/altics/bg-offres.png) repeat-x;
+}
+div.productdetail div.box-offres-speciales div.box-offres-speciales-content{
+	padding: 10px 15px 10px 15px;
+	font-size: 14px;
+	line-height: 18px;
+	color: #c50021;
+}
+div.productdetail div.box-offres-speciales-bottom{
+	paddin-left: 1px;
+}
+div.productdetail a.ensavoirplus{
+	font-size: 10px;
+	color: #666666;
+}
+div.productdetail a.ensavoirplus:hover{
+	font-size: 10px;
+	color: #000;
+}
+
+
+/* REASSURANCE
+-------------------------------------------------------------- */
+div.productdetail div.box-reassurance{
+	width: 510px;
+	height: 71px;
+	background: url(../images/altics/bg-reassurance.png) repeat-x;
+	border: 1px solid #c6c6c4;
+	font-size: 11px;
+	color: #444444;
+	text-align: center;
+	margin: 20px 0;
+}
+div.productdetail div.box-reassurance a{
+	color: #444444;
+	text-decoration: none;
+}
+div.productdetail div.box-reassurance a:hover{
+	color: #000;
+	text-decoration: underline;
+}
+div.productdetail div.box-reassurance div{
+	float: left;
+	width: 126px;
+	height: 66px;
+	padding-top: 5px;	
+	border-right: 1px solid #c6c6c4;
+}
+div.productdetail div.box-reassurance div.reassurance-aide{
+	border-right: none;
+	width: 129px;
+	padding-top: 12px;
+	height: 59px;
+}
+
+
+/* PRIX
+-------------------------------------------------------------- */
+
+div.productdetail div.bouton{
+	display:block;
+}
+
+div.productdetail div.pricebutton{
+	float:right;
+	width:206px;
+	display:inline-block;
+	*display:inline;
+	position: absolute;
+	right: 150px;
+	top: 200px;
+	zoom:1;
+}
+
+div.productdetail div.bloc-prix{
+	float: right;
+	width: 110px;
+	text-align: left;
+}
+div.productdetail div.bloc-prix div.apartir{
+	text-align: left;
+	font-size: 11px;
+	color: #4b4b4b;
+}
+div.productdetail div.bloc-prix div.prix{
+	font-size: 35px;
+}
+div.productdetail div.bloc-prix div.prix span.ctm{
+	font-size: 18px;
+}
+div.productdetail div.bloc-prix div.promo{
+
+}
+div.productdetail div.bloc-prix div.promo span.pourcent{
+	font-size: 16px;
+	color: #a50720;
+}
+div.productdetail div.bloc-prix div.promo span.prix-barre{
+	font-size: 12px;
+	color: #464646;
+	text-decoration: line-through;
+}
+div.productdetail div.bloc-ajout-panier{
+	float: right;
+	width: 206px;
+}
+div.productdetail .boutonadd{
+	width: 206px;
+	height: 84px;
+	background: url(../images/altics/bt-ajout-panier.png) no-repeat top;
+	border: 0;
+	cursor: pointer;
+	text-indent: -999px;
+	overflow: hidden;
+	font-size: 0;
+	display:block;
+	line-height: 0;
+}
+div.productdetail .boutonadd:hover{
+	width: 206px;
+	height: 84px;
+	background: url(../images/altics/bt-ajout-panier.png) no-repeat bottom;
+}
+
+
+/*
+ * Title: jQuery Etalage plugin CSS
+ * Author: Berend de Jong, Frique
+ * Author URI: http://www.frique.me/
+ * Version: 1.3.1 (20120705.1)
+ *
+ * ------------------------------------ STYLE ------------------------------------
+ * Edit this section to style your thumbnails, zoom area, magnifier etc.
+ * If the id of your Etalage instance is different, do a find/replace on #etalage.
+ * -------------------------------------------------------------------------------
+ */
+
+/* Etalage container (large thumb + small thumbs): */
+#etalage{
+	display: none;
+	margin-bottom: 50px;
+	margin-left: 20px;
+}
+
+/* Large thumbnail: */
+#etalage .etalage_thumb{
+	background: white url(../images/altics/loading.gif) center no-repeat;
+	padding: 6px;
+}
+
+/* Large thumbnail - image (in case you want to add a border around the image within the frame) */
+#etalage .etalage_thumb_image{
+		
+}
+
+/* Small thumbnails: */
+#etalage .etalage_small_thumbs{
+	width: 320px;
+	margin-top: 40px;
+}
+#etalage .etalage_small_thumbs li{
+	margin: 5px;
+	padding: 5px;
+	padding-right: 13px;
+	background: url(../images/altics/border-thumb.png) repeat-y right #fff;
+}
+
+/* The one on the left that makes them slide */
+#etalage ul li.etalage_smallthumb_first{
+
+}
+
+/* The one on the right that makes them slide */
+#etalage ul li.etalage_smallthumb_last{ 
+	background: url(../images/altics/noborder-thumb.png) repeat-y right #fff;
+}
+
+/* The currently active one */
+#etalage ul li.etalage_smallthumb_active{
+	background-color: #cddf69;
+}
+
+/* Zoomed image area: */
+#etalage .etalage_zoom_area,
+.etalage_zoom_area{
+	background: white url(../images/altics/loading.gif) center no-repeat;
+	border: 5px solid #ddd;
+	padding: 6px;
+}
+
+/* Magnifier area (thumbnail hovering rectangle): */
+#etalage .etalage_magnifier{
+	background: white;
+	border: 1px solid #bbb;
+	cursor: url("http://demandware.edgesuite.net/aagf_prd/on/demandware.static/Sites-FranceSite-Site/-/fr_FR/v1373930570345/images/cursors/zoom32.cur"), move;
+}
+
+/* Icon that will apear at the left bottom of the large thumbnail (optional): */
+#etalage .etalage_icon{
+
+}
+
+/* Hint that will apear at the top right of the large thumbnail (optional): */
+#etalage .etalage_hint{
+
+}
+
+/* Description area (optional) */
+#etalage .etalage_description{
+	background: white;
+	font-style: italic;
+	margin: 10px;
+	padding: 6px 10px;
+}
+
+/* FLECHES */
+div.productdetail .button-prev{
+	float: left;
+	margin-top: -105px;
+	cursor: pointer;
+}
+div.productdetail .button-next{
+	float: right;
+	margin-top: -105px;
+	cursor: pointer;
+}
+
+/* ZOOM ET VIDEO */
+div.productdetail div.clic-zoom{
+	float: left;
+	font-size: 11px;
+	color: #4b4b4b;
+	margin-top: -205px;
+	margin-left: 15px;
+	position: relative;
+}
+div.productdetail div.clic-video{
+	float: right;
+	font-size: 11px;
+	color: #4b4b4b;
+	padding-top: 2px;
+	margin-top: -205px;
+	margin-right: 25px;
+	position: relative;
+}
+div.productdetail div.clic-zoom a,
+div.productdetail div.clic-video a{
+	font-size: 11px;
+	color: #4b4b4b;
+	text-decoration: none;
+}
+div.productdetail div.clic-zoom a:hover,
+div.productdetail div.clic-video a:hover{
+	color: #000;
+}
+
+/*
+ * ------------------------------------ FUNCTIONALITY --------------------------------------
+ * The following CSS serves to make Etalage function properly. Don't edit or edit carefully.
+ * -----------------------------------------------------------------------------------------
+ */
+
+.etalage, .etalage_thumb, .etalage_thumb_image, .etalage_source_image, .etalage_zoom_preview, .etalage_icon, .etalage_hint{ display:none }
+.etalage, .etalage ul, .etalage li, .etalage img, .etalage_hint, .etalage_icon, .etalage_description{ margin:0; padding:0; border:0; list-style:none }
+.etalage, .etalage_magnifier div, .etalage_magnifier div img, .etalage_small_thumbs ul, ul .etalage_small_thumbs li, .etalage_zoom_area div, .etalage_zoom_img{ position:relative }
+.etalage img, .etalage li{ -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none; -o-user-select:none; user-select:none; -webkit-user-drag:none; -moz-user-drag:none; user-drag:none }
+.etalage, .etalage_small_thumbs li{ float:left }
+.etalage_right{ float:right }
+.etalage li{ position:absolute }
+.etalage img{ vertical-align:bottom; max-width:none }
+.etalage_magnifier{ cursor:default }
+.etalage_magnifier div, .etalage_small_thumbs{ overflow:hidden }
+.etalage_magnifier div img{ display:none }
+.etalage_icon, .etalage_hint{ cursor:default; width:0; height:0; overflow:hidden }
+.etalage_small_thumbs li.vertical{ float:none }
+.etalage_zoom_area{ z-index:996 }
+.etalage_zoom_area div{ overflow:hidden; z-index:997 }
+.etalage_zoom_preview{ position:absolute; z-index:998 }
+.etalage_zoom_img, .etalage_hint{ z-index:999 }
+.etalage{ direction:ltr }
+div.etalage_description{ position:absolute; bottom:0; left:0; z-index:999 }
+div.etalage_description.rtl{ direction:rtl; text-align:right }
+
+.jcarousel-skin-couleurs .jcarousel-container {
+   margin-top: 10px;
+   margin-left: 15px;
+}
+
+.jcarousel-skin-couleurs .jcarousel-direction-rtl {
+	direction: rtl;
+}
+
+.jcarousel-skin-couleurs .jcarousel-container-horizontal {
+    width: 245px;
+    padding: 0;
+	padding-left: 15px;
+	border-top: 0px;
+	border-bottom: 0px;
+	padding-right: 7px;
+}
+
+.jcarousel-skin-couleurs .jcarousel-clip {
+    overflow: hidden;
+}
+
+.jcarousel-skin-couleurs .jcarousel-clip-horizontal {
+    width:  229px;
+    height: 58px;
+}
+
+.jcarousel-skin-couleurs .jcarousel-item {
+    width: 51px;
+    height: 50px;
+    border: 2px solid #fff;
+}
+.jcarousel-skin-couleurs .jcarousel-item:hover,
+.jcarousel-skin-couleurs .jcarousel-item:focus {
+    border-color: #cddf69;
+}
+
+
+.jcarousel-skin-couleurs .item-coul-selected {
+    border: 4px solid #cddf69;
+}
+
+.jcarousel-skin-couleurs .jcarousel-item-horizontal {
+    margin-left: 0;
+    margin-right: 3px;
+}
+
+.jcarousel-skin-couleurs .jcarousel-direction-rtl .jcarousel-item-horizontal {
+	margin-left: 7px;
+	margin-right: 0;
+}
+
+.jcarousel-skin-couleurs .jcarousel-item-placeholder {
+}
+
+/**
+ *  Horizontal Buttons
+ */
+.jcarousel-skin-couleurs .jcarousel-next-horizontal {
+    position: absolute;
+    top: 20px;
+    right: 0px;
+    width: 9px;
+    height: 15px;
+    cursor: pointer;
+    background: transparent url(../images/altics/coul-next.gif) no-repeat;
+}
+
+.jcarousel-skin-couleurs .jcarousel-direction-rtl .jcarousel-next-horizontal {
+    left: 5px;
+    right: auto;
+    background-image: url(prev-horizontal.gif);
+}
+
+.jcarousel-skin-couleurs .jcarousel-next-horizontal:hover,
+.jcarousel-skin-couleurs .jcarousel-next-horizontal:focus {
+    
+}
+
+.jcarousel-skin-couleurs .jcarousel-next-horizontal:active {
+    
+}
+
+.jcarousel-skin-couleurs .jcarousel-next-disabled-horizontal,
+.jcarousel-skin-couleurs .jcarousel-next-disabled-horizontal:hover,
+.jcarousel-skin-couleurs .jcarousel-next-disabled-horizontal:focus,
+.jcarousel-skin-couleurs .jcarousel-next-disabled-horizontal:active {
+    cursor: default;
+    background-position: -96px 0;
+}
+
+.jcarousel-skin-couleurs .jcarousel-prev-horizontal {
+    position: absolute;
+    top: 20px;
+    left: 0px;
+    width: 9px;
+    height: 15px;
+    cursor: pointer;
+    background: transparent url(../images/altics/coul-prev.gif) no-repeat;
+}
+
+.jcarousel-skin-couleurs .jcarousel-direction-rtl .jcarousel-prev-horizontal {
+    left: auto;
+    right: 5px;
+    background-image: url(next-horizontal.gif);
+}
+
+.jcarousel-skin-couleurs .jcarousel-prev-horizontal:hover,
+.jcarousel-skin-couleurs .jcarousel-prev-horizontal:focus {
+   
+}
+
+.jcarousel-skin-couleurs .jcarousel-prev-horizontal:active {
+  
+}
+
+.jcarousel-skin-couleurs .jcarousel-prev-disabled-horizontal,
+.jcarousel-skin-couleurs .jcarousel-prev-disabled-horizontal:hover,
+.jcarousel-skin-couleurs .jcarousel-prev-disabled-horizontal:focus,
+.jcarousel-skin-couleurs .jcarousel-prev-disabled-horizontal:active {
+    cursor: default;
+    background-position: -96px 0;
+}
+.alticsDeliveryIcon {background: no-repeat; width: 37px; height:29px;margin: 0 auto; display: block;}
+.alticsDeliveryIconLivraison {background-image: url('../images/altics/picto-livraison.png');width:37px}
+.alticsDeliveryIconRetour {background-image: url('../images/altics/picto-retour.png');width:31px}
+.alticsDeliveryIconRetrait {background-image: url('../images/altics/picto-retrait.png');width:32px}
+.reassurance-aide span.txt10.vert {display:block}
+ul.genTab > li > a {font-weight:normal; border:0;
+border-bottom: 1px solid #ccc;
+}
+ul.genTab > li > a.activeTab {border: 1px solid #aaaaaa;
+background: #ffffff url(../images/altics/bg-tabs.png) repeat-x bottom;
+color: #555555;
+border-bottom: 1px solid #F3F3F3;
+}
+
+.bouton button{width: 206px;height: 84px;background:transparent url(../images/altics/bt-ajout-panier.png) repeat-x top; border: 0;cursor: pointer; overflow: hidden;display: block;line-height: 0;font-size:150%;font:arial;text-transform:uppercase;font-weight:bold;}
+.bouton button:hover {width: 206px;height: 84px;background:transparent url(../images/altics/bt-ajout-panier.png) repeat-x bottom;font-size:150%;font:arial;text-transform:uppercase;font-weight:bold;}
+
+
+#productDescription {
+border-top: 0
+}
+
+#productDescription {
+border-top: 0
+}
+
+.box-offres-speciales-bottom{
+background: url("../images/altics/bottom-offres.png") no-repeat top center;
+height: 9px;
+width: 330px;
+}
+/* scene7 viewer css (background !important required here.)*/
+.scene7flyoutviewer_altics{min-height:300px;border:0px solid #D3D3D3;position:relative;overflow:hidden;}
+.scene7flyoutviewer_altics .scene7flyoutimagecontainer{background-color:#FFFFFF!important;overflow:hidden;}
+.scene7flyoutviewer_altics .scene7flyoutimagecontainer img{display:block;width:278px;background-color:#FFFFFF;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer{height:147px;z-index:10000;}
+.scene7flyoutviewer_altics .scene7flyoutcontrols{z-index:11;margin-top:0px;position:relative;} /*small frame at the bottom: scene 7*/
+.scene7flyoutviewer_altics .scene7flyoutcontrols .imgcntrlbg{position:absolute;top:0;left:0;width:1px;height:1px;}
+.scene7flyoutviewer_altics .scene7flyoutcontrols .scene7flyoutvideotrigger{font-size:14px;height:23px;top:6px;float:right;padding:9px 15px 0 5px;}
+.scene7flyoutviewer_altics .scene7flyoutcontrols .scene7flyoutvideotrigger a{display:block;font-size:12px;height:19px;line-height:19px;padding:0px 30px 0 0;background-position:0 0; cursor:pointer; background: url(../images/altics/video.gif) right 112% no-repeat;}
+.scene7flyoutviewer_altics .scene7flyoutcontrols .scene7flyoutvideotrigger.disabled{display:none;}
+.scene7flyoutviewer_altics .scene7flyoutcontrols .s7_prompt{font-size:12px;padding:11px 0 0 21px;background: url(../images/altics/zoom.gif) left 80% no-repeat;}
+.scene7flyoutviewer_altics .scene7flyoutcontrol_thumbs{position:absolute;bottom:-1px;width:100%;}
+.scene7flyoutviewer_altics .scene7flyoutcontrol_thumbs img{cursor:pointer;border:0}
+.customcursorZoom{
+	cursor:url(../images/cursors/zoom32.cur),move;
+	cursor:url(../images/cursors/zoom32.cur),move\9;
+}
+.scene7flyoutviewer_altics .scene7flyoutcontrol_thumbs .borderinside{display:block;position:absolute;width:73px;height:113px;background:transparent url(../images/blank.gif) repeat 0 0 ;}
+.scene7flyoutviewer_altics .scene7flyoutcontrol_thumbs .borderinsideactive{border:4px solid #cddf69;*width:68px!important;}
+.scene7flyoutviewer_altics .borderinside:hover{border:4px solid #d3d3d3;*width:68px!important;}
+/* video modal settings */
+.scene7videomodalactual iframe#scene7dialog{display:block;min-width:740px;height:665px!important;margin:0 auto;outline:0;overflow:hidden;}
+.scene7videomodalactual{width:760px!important;height:675px!important;}
+/* additional information CR-023 */
+.additionalinfo {margin-left:70px;font-size:1em;}
+.minishipment .additionalinfo {margin-left:0;font-size:0.75em;}
+
+/***** Scene7 jcarousel Skinning *****/
+.ui-corner-all {-moz-border-radius:0px;}
+.jcarousel-container {border-top: 0;border-bottom: 0;}
+.scene7flyoutviewer .scene7flyoutthumbscontainer *{
+-ms-box-sizing:border-box;
+box-sizing:border-box;
+-moz-box-sizing:border-box;
+-webkit-box-sizing:border-box;
+}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-container-horizontal {padding: 0px 18px 10px 18px;width:100%;height:133px;} 
+
+
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-clip-horizontal {height: 116px;width: 233px;margin-left:3px;padding:1px;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-item {width: 79px;height: 112px;position:relative;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-item.last {width: 75px;height: 112px;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-item-horizontal {margin-right: 0px;}
+/* Horizontal Buttons */
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-next-horizontal {background-position:100% -2281px;cursor: pointer;height: 100%;position: absolute;right: 5px;top: 0;width: 16px;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-prev-horizontal {background-position:0 -2281px;cursor: pointer;height: 100%;left: 5px;position: absolute;top: 0;width: 16px;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-next-disabled-horizontal, .scene7flyoutthumbscontainer .jcarousel-next-disabled-horizontal:hover,.scene7flyoutthumbscontainer .jcarousel-next-disabled-horizontal:active,
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-prev-disabled-horizontal, .scene7flyoutthumbscontainer .jcarousel-prev-disabled-horizontal:hover, .scene7flyoutthumbscontainer .jcarousel-prev-disabled-horizontal:active {background-position: -1000px  center!important;cursor: default;}
+
+/* IE7 scene7 over-rides */
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer .jcarousel-container-horizontal {*position:static;*padding: 8px 18px 10px 18px;*width:243px;*height:auto;}
+.scene7flyoutviewer_altics .scene7flyoutcontrol_thumbs .borderinside{*width:63px;*height:103px;}
+.scene7flyoutviewer_altics .scene7flyoutthumbscontainer{*margin-top:6px;}
+.scene7flyoutviewer_altics .scene7flyoutcontrol_thumbs .borderinsideactive{*width:66px!important;}
+.scene7flyoutviewer_altics .borderinside:hover{*width:66px!important;}
+
+.promo_altics{margin-top:-17px;}

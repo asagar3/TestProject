@@ -1,0 +1,32 @@
+
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<iscomment>
+Desc:
+Includes promotions into the product information area
+
+Parameter:
+Product - the product to use
+
+Options:
+none
+
+Available if empty: no
+Full-Block-Element: yes
+</iscomment>
+<iscomment>Active product promotions</iscomment>
+<isset name="promos" value="${dw.campaign.PromotionMgr.activeCustomerPromotions.getProductPromotions(pdict.Product)}" scope="page"/>
+<isif condition="${! empty(promos)}">
+<isloop items="${promos}" var="promo">
+	<div class="promotion">
+		<span class="label">${Resource.msg('promotions.special','product',null)}</span>
+		<span id="pdpPromoDiv" class="promocallout">
+			<isprint value="${promo.calloutMsg}" encoding="off"/>
+			<isif condition="${!empty(promo.details) && !isQuickView }">
+				<span class="formfieldtooltip">(<a class="tooltip" href="javascript:;" id="tooltipviewdetails">${Resource.msg('global.promotionalmoredetails','locale',null)}<div class="tooltip-body" style="display:none"><div class="tooltipcontainer"><div class="tooltipcontent"><isprint value="${promo.details}" encoding="off"/></div></div></div></a>)</span>	
+			</isif>
+<iscomment>Break after first promotion display</iscomment>
+		</span>
+	</div>
+</isloop>
+<div class="dotted_border"></div>
+</isif>

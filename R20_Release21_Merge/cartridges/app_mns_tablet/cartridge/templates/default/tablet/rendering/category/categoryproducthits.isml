@@ -1,0 +1,200 @@
+<isset name="CategorgyRenderTemplate" value="list" scope="page"/>
+<isset name="view" value="" scope="page"/>
+<isif condition="${empty(pdict.CurrentHttpParameterMap.view.value) || pdict.CurrentHttpParameterMap.view.value == "grid"}">
+<isset name="DecoratorTemplate" value="tablet/search/pt_productsearchresult" scope="page"/>
+<isset name="view" value="grid" scope="page"/>
+<iselse/>
+<isset name="DecoratorTemplate" value="tablet/search/pt_productsearchresult_carousal" scope="page"/>
+<isset name="view" value="carousel" scope="page"/>
+</isif>
+
+<isif condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+  <isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+  <iscomment>Specific call for ajax | Sep 29, 2011</iscomment>
+  <script src="${URLUtils.staticURL('/themes/demandwarestore/js/ajaxCallSpec.js')}" type="text/javascript"></script> 
+</isif>
+<isdecorate template="${DecoratorTemplate}">
+  <iscomment> Use the decorator template based on the requested output. If
+    a partial page was requested an empty decorator is used.
+    The default decorator for the product hits page is
+    search/pt_productsearchresult. </iscomment>
+  <iscache type="relative" minute="30" varyby="price_promotion"/>
+  <isinclude template="tablet/util/modules"/>
+  <script type="text/javascript">
+$(document).ready(function(){
+	if($.browser.safari ) {
+		var getIdHeight = $("#search").height();
+		if(getIdHeight > 1000 && getIdHeight < 1400){
+			$("#noofitemsperpage option:selected").removeAttr("selected");
+			$("#noofitemsperpage").find("option:first").attr("selected", "selected");
+		}
+	}
+});
+</script>
+  <iscomment> Configured as default template for the product search results.
+    Displays a global slot with static html and the product search
+    result grid. </iscomment>
+  <iscomment>create reporting event</iscomment>
+  <isinclude template="util/reporting/ReportSearch.isml"/>
+  <isif condition="${!empty(pdict.ProductSearchResult.getSuggestedSearchPhrase())}">
+    <div class="didyoumean"> ${Resource.msg('search.nohits.didyoumeanex','search',null)} <a title="${pdict.ProductSearchResult.suggestedSearchPhrase}" href="<isprint value="${URLUtils.http('Search-Show','q',pdict.ProductSearchResult.suggestedSearchPhrase)}"/>">
+      <isprint value="${pdict.ProductSearchResult.suggestedSearchPhrase}"/>
+      </a> </div>
+  </isif>
+  <isif condition="${view=='carousel'}">
+  
+  <iselse>
+  	<a class="lhs-arrow open"  title="Show/Hide Menu">Show/Hide Menu</a>
+  </isif>
+  	 <iscomment>
+  	 <a class="lhs-show"  title="Show/Hide Menu">Show/Hide Menu</a>
+	 <a class="lhs-hide"  title="Show/Hide Menu">Show/Hide Menu</a>
+	 </iscomment>
+  <div class="producthits <isif condition="${view=='carousel'}">carousel</isif>">
+  	
+    <isif condition="${!empty(pdict.ProductSearchResult.category)}">
+      <isif condition="${pdict.createSlotForKiosk != null }">
+        <isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+        <isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+      </isif>
+    </isif>
+    <iscomment>
+    <div class="breadcrumb2_searchresultspage noClashTitle">
+        <isinclude template="tablet/search/components/productsearchbreadcrumbs"/>
+    </div>
+    </iscomment>
+    <iscomment><!-- End | ASHA | Added static HTML Snippet for Search Page --></iscomment>
+	<iscomment>
+		Render promotional content at the top of search results as global slot.
+		This content is only displayed if the search result is refined by a category.
+		If the search result is not refined by a category a global default is displayed.
+	</iscomment>
+	<isif condition="${!empty(pdict.ProductSearchResult.category)}">
+	
+		<iscomment> Removing the Asset for CR 3043 and placing container with the category page name below</iscomment>
+		<div id="catBannerSlotContainer">
+			<isslot id="cat-banner" context="category" description="Category Banner" context-object="${pdict.ProductSearchResult.category}"/>
+		</div>
+		<div id="catBannerBreadcrumb" class="top_banner_grey clearfix" style="visibility:hidden">
+		  <div class="banner_head">
+		  	<h2>${pdict.ProductSearchResult.category.displayName}</h2>
+		  </div>
+		  <div class="banner_head_shadow"></div>
+		</div>
+		
+		<isif condition="${pdict.createSlotForKiosk != null }">
+			<iscomment>This slot is created only for content slots for Kiosk</iscomment>
+			<isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+			<isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+		</isif>
+	<iselse/>
+		<div class="breadcrumb2_searchresultspage noClashTitle">
+			<isinclude template="tablet/search/components/productsearchbreadcrumbs"/>
+		</div>
+	<iscomment>	<isslot id="search-result-banner" description="Promotional Search Result Banner" context="global"/></iscomment>
+	</isif>
+    <div id="search" class="search"> 
+      <isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+        <div class="searchinformation"> ${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt; <a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a> </div>
+        <!-- END: searchinformation --> 
+      </isif>
+      <isscript> var selectedString = 'selected="selected"'; </isscript>
+      <isif condition="${!pdict.ProductPagingModel.empty}">
+        <div class="searchresultsheader">
+          <div class="sorthitscontainer">
+               <div class="view-switcher thirdSection">
+            <isif condition="${!empty(pdict.CurrentHttpParameterMap.q.stringValue)}">
+                  	<a class="switched" href="<isprint value="${URLUtils.url('Search-Show','q',pdict.CurrentHttpParameterMap.q.value,'view','grid')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_grid">view grid</a>
+                 	 <a class="" href="<isprint value="${URLUtils.url('Search-Show','q',pdict.CurrentHttpParameterMap.q.value,'view','carousel')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_carousel"></a></td>
+                 <iselse/>
+                 	<a class="switched" href="<isprint value="${URLUtils.url('Search-Show','cgid',pdict.CurrentHttpParameterMap.cgid.value,'view','grid')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_grid">view grid</a>
+                 	<a class="" href="<isprint value="${URLUtils.url('Search-Show','cgid',pdict.CurrentHttpParameterMap.cgid.value,'view','carousel')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_carousel"></a></td>
+             </isif>      
+            </div>
+            
+            
+            
+          
+            <div>  
+                          <div class="innerTD2 floatleft"><isproductsortingoptions productsearchmodel="${pdict.ProductSearchResult}" pagingmodel="${pdict.ProductPagingModel}"/></div>
+                          <!-- END: innerTD2 -->
+                          
+                         <div class="floatright padtop7">  
+	                          <div class="innerTD1"><ispaginginformation pagingmodel="${pdict.ProductPagingModel}" pageurl="${pdict.ProductSearchResult.url('Search-Show')}"/></div>
+	                         
+	                         	 <div class="innerTD1">
+									<iscomment>Show All Toggle Button</iscomment>
+									<ispagingbar pageurl="${pdict.ProductSearchResult.url('Search-Show')}" pagingmodel="${pdict.ProductPagingModel}" showtoggle="true"/>
+								</div>
+						</div>
+						    <!-- END: innerTD1 --> 
+              </div> 
+         
+            
+            <div class="clear"><!-- FLOAT CLEAR --></div>
+          </div>
+          <!-- END: sorthitscontainer -->
+          
+          <isinclude template="tablet/search/components/productsearchbreadcrumbsvalues"/>
+          <isif condition="${!empty(pdict.ProductSearchResult) && !empty(pdict.ProductSearchResult.category)}">
+            <iscomparecontrols category="${pdict.ProductSearchResult.category}"/>
+          </isif>
+          <div class="clear"><!-- FLOAT CLEAR --></div>
+        </div>
+        <!-- END: searchresultsheader -->
+       <!--  commented by Anoop - 18 Jan -->
+        <iscomment>
+        <isif condition="${!view=='carousel'}">    
+        <div class="productresultarea port-view">
+        </isif>
+        </iscomment>
+      <!--  commented by Anoop - 18 Jan -->
+        <isif condition="${view=='carousel'}">
+         <div class="productresultarea">
+           <div id='twoUpContainer'>
+	        	<div id="scroller">
+	        		<ul class="twoUp">
+	        			<isproductcarousel producthits="${pdict.ProductPagingModel.pageElements}" productrows="${1000}" productstoskip="${0}" productsperrow="${100}" pagingmodel="${pdict.ProductPagingModel}" scope="search"/>
+	        		</ul>
+	        	</div>
+	          
+	        </div>
+	       </div>       
+	     <iselse>
+	      <div class="productresultarea port-view">
+        <isproductgrid producthits="${pdict.ProductPagingModel.pageElements}" productrows="${1000}" productstoskip="${0}" productsperrow="${3}" pagingmodel="${pdict.ProductPagingModel}" scope="search"/>
+        </div>
+        </isif>
+       <!--  commented by Anoop - 18 Jan -->
+        <iscomment>
+       <isif condition="${!view=='carousel'}">
+        </div> 
+        </isif>
+        </iscomment>
+         <!--  commented by Anoop - 18 Jan -->
+        <!-- END: productresultarea -->
+        
+        <div class="searchresultsfooter">
+          <ispagingbar pageurl="${pdict.ProductSearchResult.url('Search-Show')}" pagingmodel="${pdict.ProductPagingModel}"/>
+          <div class="clear"><!-- FLOAT CLEAR --></div>
+        </div>
+        <!-- END: searchresultsheader -->
+        <isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+          <div class="searchinformation"> ${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt; <a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a> </div>
+          <!-- END: searchinformation -->
+          <isinclude template="search/topcontenthits"/>
+        </isif>
+        <iselse/>
+        <div class="noresults"> ${Resource.msg('productresultarea.noresults','search',null)} </div>
+        <!-- END: noresults --> 
+        
+      </isif>
+    </div>
+    <!-- END: search -->
+    <isslot id="search-promo" description="Promotional Content at the bottom of Search Results" context="global"/>
+  </div>
+  <!-- END: producthits -->
+  
+  <iscomment>Include inline JS to update the refinements</iscomment>
+  <isinclude template="search/components/jsrefinementsupdate"/>
+</isdecorate>

@@ -1,0 +1,16 @@
+<!--- TEMPLATENAME: slotTemplate.isml --->
+<iscache type="relative" hour="24"/>
+<isif condition="${slotcontent != null}">
+	<isscript>
+			var jsonObject = new Object();
+		
+		</isscript>	
+		
+	<isloop items="${slotcontent.content}" var="markupText">
+		<isscript>
+			
+			jsonObject = markupText.markup ;
+		</isscript>		
+	</isloop>	
+		${JSON.stringify(jsonObject)}
+</isif>

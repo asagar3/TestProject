@@ -1,0 +1,242 @@
+/**
+*  @input  Product : dw.catalog.Product
+*  @input  ProductVariationModels : dw.util.Map
+*  @input  CurrentVariationModel : dw.catalog.ProductVariationModel
+*  @input  customObject : Object
+*  @output customObject : Object
+
+* 
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.value );
+importPackage( dw.campaign );
+importPackage( dw.order);
+importPackage( dw.content);
+ 
+function execute( pdict : PipelineDictionary ) : Number
+{ 
+	try{
+		var productDefaultJsonObject  = pdict.customObject;
+		productDefaultJsonObject.defaultNames  = new Array(); 
+		
+			
+		var productJsonObject = new Object();	
+		var product:Product = pdict.Product ;
+		var currentVariationModel:ProductVariationModel = pdict.CurrentVariationModel ;
+		var productVariationModels:Map =  pdict.ProductVariationModels ;
+				
+		if(product.productSet){
+					
+				
+			productJsonObject.products = getProductSetProductDetails(product,currentVariationModel,productVariationModels);
+			productJsonObject.productSetTitle =  product.name ; 
+				
+		} else {
+			
+			productJsonObject.products = new Array() ;
+			var productDetails = getProductDetails(product,currentVariationModel,productVariationModels);
+			productJsonObject.products.push(productDetails);
+			
+		}
+		productDefaultJsonObject.defaultNames.push( productJsonObject) ;
+		
+		pdict.customObject = productDefaultJsonObject ;
+	}catch(e){
+		Logger.error("GetProductDetails: CreateProductDetailsDefaultJSON script error:::"+e.message) ;
+		return PIPELET_ERROR ;		
+	}
+	
+
+    return PIPELET_NEXT;
+}
+
+function getProductSetProductDetails(product:Product,
+	currentVariationModel:ProductVariationModel,productVariationModels:Map):Object{	
+	var products = new Array();
+	var productSetProducts: Collection = product.getProductSetProducts();
+	var productDetails:Object = null ;
+	var subProduct:Product = null ;
+	for each(subProduct in productSetProducts){
+		if(subProduct.online){/*Process only for online products in the product set*/			
+			productDetails = getProductDetails(subProduct,currentVariationModel,productVariationModels);			
+			products.push(productDetails);
+		}
+	}	
+	return products ;								
+}
+
+function getProductDetails(product:Product,
+	currentVariationModel:ProductVariationModel,productVariationModels:Map):Object{	
+	
+	var productDetails = new Object();
+	try {
+		productDetails.productId = product.ID ;
+		productDetails.productName = product.name ;
+		if(product.isVariant() || product.isMaster()){
+			productDetails.variations = getProductVariations(product,currentVariationModel, productVariationModels);		
+		}
+	}catch(e){
+		throw new Error(e.message);	
+	}
+	return productDetails ;
+}
+/*Function for getting variations*/
+function getProductVariations(product:Product,CurrentVariationModel:ProductVariationModel,
+			productVariationModels:Map): Array{
+	var variations = new Array() ;
+	var vProduct:Object = null ;
+	try{		
+		if(product.isVariant() || product.isMaster()){
+			var pvm:ProductVariationModel = null ;			
+			if(CurrentVariationModel != null){
+				pvm = CurrentVariationModel ;
+			}else {
+				pvm = product.variationModel ;
+			}
+			
+			var cleanPVM:ProductVariationModel = product.variant ? product.variationModel.master.variationModel: product.variationModel ;
+			
+			
+			var variants : dw.util.Collection = product.getVariationModel().getMaster().getVariants();		 
+			var productVariationAttributes:Collection = pvm.productVariationAttributes ;
+			var needToLoop:Boolean = false ;
+			
+			var isOnlySize:Boolean = false ;
+			var isOnlyColor:Boolean = false ;
+			var isBothSizeAndColor:Boolean = false ;
+			var va_color:ProductVariationAttribute = null ;
+			var va_size:ProductVariationAttribute = null ;
+			
+			if (productVariationAttributes.length == 1){
+				for each( var va:ProductVariationAttribute in productVariationAttributes ){
+					var vaId:String = va.getAttributeID() ;
+					if (vaId == 'color'){
+						isOnlyColor = true ;
+						va_color = va ;
+					}else if (vaId == 'size'){
+						isOnlySize = true ;
+						va_size = va ;
+					}				
+				}				 				
+			}else if (productVariationAttributes.length == 2){
+				isBothSizeAndColor = true ;
+				for each( var va:ProductVariationAttribute in productVariationAttributes ){
+					var vaId:String = va.getAttributeID() ;
+					if (vaId == 'color'){
+						va_color = va ;
+					}else if (vaId == 'size'){
+						va_size = va ;
+					}				
+				}
+			}
+			
+			if(isBothSizeAndColor){			
+				var vavals_color = null ;	
+				if (!empty(pvm.getAllValues(va_color)) && (null != pvm.getAllValues(va_color))){
+					 vavals_color = pvm.getAllValues(va_color) ;
+				}			
+				var vaId_color:String = va_color.getAttributeID() ;
+				for each(var vv_color in vavals_color){											
+					if(cleanPVM.hasOrderableVariants(va_color, vv_color)){
+						var variantsItr : Iterator = variants.iterator();	
+						var variantsWithGivenValue : Collection = new ArrayList();	
+
+						while(variantsItr.hasNext()){
+							var variant : Product = variantsItr.next();
+							if(variant.custom.color == vv_color.value){									
+								variantsWithGivenValue.add(variant);
+							}   
+						}
+							
+						var vavals_size = null ;
+						var vaId_size:String = va_size.getAttributeID() ;
+						if (!empty(pvm.getAllValues(va_size)) && (null != pvm.getAllValues(va_size))){
+						 	vavals_size = pvm.getAllValues(va_size) ;
+						}	
+					 	
+						for each( var vv_size in vavals_size){		
+							if (cleanPVM.hasOrderableVariants(va_size, vv_size)){						
+								for each(var variant:Product in variantsWithGivenValue ){							
+									if(vv_size.value == variant.custom.size || vv_size.displayValue == variant.custom.size){																				
+										vProduct = getProductVariationAttributes(variant,vaId_color,vaId_size,vv_color,vv_size,true);
+										variations.push(vProduct);
+									}								
+								}
+							}
+						}								
+					}				
+				}
+			}else if(isOnlySize){				
+				var vavals_size = null ;	
+				if (!empty(pvm.getAllValues(va_size)) && (null != pvm.getAllValues(va_size))){
+					 vavals_size = pvm.getAllValues(va_size) ;
+				}					
+				var vaId_size:String = va_size.getAttributeID() ;					
+				for each(var vv_size in vavals_size){	
+					if(cleanPVM.hasOrderableVariants(va_size, vv_size)){
+						var variantsItr : Iterator = variants.iterator();	
+						var variantsWithGivenValue : Collection = new ArrayList();	
+
+						while(variantsItr.hasNext()){
+							var variant : Product = variantsItr.next();
+							if(variant.custom.size == vv_size.value){									
+								variantsWithGivenValue.add(variant);
+								break ;
+							}   
+						}
+						
+						for each(var variant:Product in variantsWithGivenValue ){							
+							if(vv_size.value == variant.custom.size || vv_size.displayValue == variant.custom.size){																				
+								vProduct = getProductVariationAttributes(variant,vaId_size,null,vv_size,null,false);																													
+								variations.push(vProduct);
+							}								
+						}						
+						
+					}						
+				}
+			}else if(isOnlyColor){				
+				var vavals_color = null ;	
+				if (!empty(pvm.getAllValues(va_color)) && (null != pvm.getAllValues(va_color))){
+					 vavals_color = pvm.getAllValues(va_color) ;
+				}					
+				var vaId_color:String = va_color.getAttributeID() ;					
+				for each(var vv_color in vavals_color){	
+					if(cleanPVM.hasOrderableVariants(va_color, vv_color)){
+						var variantsItr : Iterator = variants.iterator();	
+						var variantsWithGivenValue : Collection = new ArrayList();	
+
+						while(variantsItr.hasNext()){
+							var variant : Product = variantsItr.next();
+							if(variant.custom.color == vv_color.value){									
+								variantsWithGivenValue.add(variant);
+								break ;
+							}   
+						}
+						
+						for each(var variant:Product in variantsWithGivenValue ){							
+							if(vv_color.value == variant.custom.color || vv_color.displayValue == variant.custom.color){																				
+									vProduct = getProductVariationAttributes(variant,vaId_color,null,vv_color,null,false);																
+									variations.push(vProduct);
+							}								
+						}	
+					}					
+				}				
+			}			
+			
+		}
+	}catch(e){
+		throw new Error("Error while product variation details in CreateProductDetailsDefaultJSON.getProductVariations "+e.message);	
+	}
+	return variations ;
+}
+
+function getProductVariationAttributes(variant:Product,vaId:String,
+		vaId1:String,vv:Object,vv1:Object,includeTwoVariationAttributes:Boolean):Object{
+	
+	var vProduct = new Object();				
+	vProduct.variationProductID = variant.ID ;
+	vProduct.variationProductName= variant.name ;
+	return 	vProduct ;													
+}

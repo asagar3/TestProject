@@ -1,0 +1,66 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*  @input CallFrom : String 
+*  @input Basket : dw.order.Basket 
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.web );
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+	var callFrom : String = args.CallFrom;
+	var basket : Basket = args.Basket;
+	Logger.error("<<<<<<<<<<<<<<<<<<<<<<<"+callFrom+">>>>>>>>>>>>>>>>>>>>");
+	var useAsBillingAddress : FormGroup = args.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress;
+	if(basket==null)
+	{
+		Logger.error("basket null");
+	}
+	else if(basket.defaultShipment==null)
+	{
+		Logger.error("basket defaultShipment null");		
+	}
+	
+	else if (basket.defaultShipment.shippingAddress==null)
+	{
+		Logger.error("basket.defaultShipment.shippingAddress null");
+	}
+	else if (callFrom.equalsIgnoreCase("COShipping-HandleShippingSettings-After") || callFrom.equalsIgnoreCase("COBilling-Start"))
+	{
+		var shippingAddress : dw.order.OrderAddress = basket.defaultShipment.shippingAddress;
+   //Logger.error(shippingAddress.title);
+   Logger.error("<<<<Shipping address in Basket--" + callFrom + ">>>>" +"title "+shippingAddress.title+" firstName "+shippingAddress.firstName+" lastName "+shippingAddress.lastName+" address1 "+shippingAddress.address1+
+   	" address2 "+shippingAddress.address2+" city "+shippingAddress.city+" postalCode "+shippingAddress.postalCode+" stateCode "+
+   	shippingAddress.stateCode+" countryCode "+shippingAddress.countryCode+" ShippingMethodID:: "+basket.defaultShipment.getShippingMethodID()+"<<<<<<<<<<<<<<<END>>>>>>>>>>>>>>>>>>>>>>>");
+	
+	var shippingAddressForm : FormGroup = args.CurrentForms.singleshipping.shippingAddress.addressFields;
+	Logger.error("<<<<<<<Shipping Form address details--" +callFrom + ">>>First Name::" +shippingAddressForm.firstName.value + "  Last Name::"+shippingAddressForm.lastName.value+ "  Address Line1::" +shippingAddressForm.address1.value
+	+ "  CountryCode::"+shippingAddressForm.country.value+" Same as shipping::"+useAsBillingAddress.value+" - End>>>>>>>>");
+		
+	}
+	
+	else
+	{
+	var shippingAddress : dw.order.OrderAddress = basket.defaultShipment.shippingAddress;
+   //Logger.error(shippingAddress.title);
+   Logger.error("title "+shippingAddress.title+" firstName "+shippingAddress.firstName+" lastName "+shippingAddress.lastName+" address1 "+shippingAddress.address1+
+   	" address2 "+shippingAddress.address2+" city "+shippingAddress.city+" postalCode "+shippingAddress.postalCode+" stateCode "+
+   	shippingAddress.stateCode+" countryCode "+shippingAddress.countryCode+"--ShippingMethodID:: "+basket.defaultShipment.getShippingMethodID()+" Same as shipping::"+useAsBillingAddress.value+"<<<<<<<<<<<<<<<END>>>>>>>>>>>>>>>>>>>>>>>");
+	}
+   return PIPELET_NEXT;
+}

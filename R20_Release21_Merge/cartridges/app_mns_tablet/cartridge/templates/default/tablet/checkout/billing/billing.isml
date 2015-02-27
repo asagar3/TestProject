@@ -1,0 +1,2107 @@
+<isdecorate template="tablet/checkout/pt_checkout"/>
+<isinclude template="tablet/util/modules"/>
+
+<iscomment>
+	This template visualizes the billing step of both checkout scenarios.
+	It provides selecting a payment method, entering gift certificates and
+	specifying a separate billing address.
+	Depending on the checkout scenario (single or multi shipping) it is
+	either the second or third checkout step.
+</iscomment>
+
+<iscomment>Report this checkout step</iscomment>
+
+<isset name="checkoutstep" value="${4}" scope="page"/>
+<isset name="checkoutname" value="${'Billing'}" scope="page"/>
+<isset name="miniSummaryHeader" value="${Resource.msg('checkoutheader.payment','checkout',null)}" scope="page"/>
+<isset name="miniSummarySubHeader" value="${Resource.msg('checkoutheader.orderAndDelivery','checkout',null)}" scope="page"/>
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+<div class="waitingIconHidden"></div>
+<div class="checkout">
+    <iscomment>checkout progress indicator</iscomment>
+    <iscomment><!-- TODO: MattS - Steptracker needs to be removed  --></iscomment>
+	
+    <iscomment>    
+	    <isif condition="${!pdict.CurrentForms.multishipping.entered.value}">
+	    	<ischeckoutprogressindicator step="2" multishipping="false" rendershipping="${pdict.Basket.productLineItems.size() == 0 ? 'false' : 'true'}"/>
+			<iselse/>
+			<ischeckoutprogressindicator step="3" multishipping="true" rendershipping="${pdict.Basket.productLineItems.size() == 0 ? 'false' : 'true'}"/>
+		</isif>
+	</iscomment>
+	<iscomment><!-- asha | TODO:  MattS Please check the position of this include is okay --></iscomment>
+	<iscomment><!-- payment method area --></iscomment>
+	<div id="allPaymentForms" class="collapsibleArea">
+		<isinclude template="tablet/checkout/billing/paymentmethods"/>
+		<div id="cardholderform" class="collapse">
+			<span class="done-check">&nbsp;</span>
+			<h5 class="grey_block_header">
+				<span>
+					<strong class="content_grey_header">${Resource.msg('billing.addressheaderformobile','checkout',null)}</strong>
+				</span>
+				<div class="floatright btn-grey-flat">
+					<div class="link_button">
+						<a id="changeBillingAddress">${Resource.msg('minishipments.ChangeText','checkout',null)}</a>
+					</div>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</h5>
+		</div>
+		<div class=" checkoutbilling">
+		<iscomment>billing address area</iscomment>
+		<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.htmlName}" autocomplete="off">
+			<fieldset>
+				<div  id="addressformOuter" class="collapseContent">
+				<isif condition ="${!pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}">
+					<div id="addressform" class="addressform padTop36 clearfix">
+						<iscomment>Nadeem: in case of store collection do not show same as shipping option </iscomment>
+						
+						<div class="formfield">
+							<div class="label">
+								<span class="labeltext">&nbsp;</span>
+							</div>
+							<div class="value">
+								<span class="labeltext bold ship-msg">${Resource.msg('billing.samebillinganddeliveryaddress','checkout',null)}</span>
+								<div class="clear"></div>
+								<span id="oldDeliveryAddress">
+								<isif condition="${error.equals('true') && pdict.CurrentForms.billing.fulfilled.value}">
+									<isminiaddress p_showphone="false" p_address="${pdict.Basket.billingAddress}"/>
+								<iselse>
+									<isminiaddress p_showphone="false" p_address="${pdict.Basket.defaultShipment.shippingAddress}"/>
+								</isif>
+								</span>
+							</div>
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+						</div>
+						
+						<div class="formfield pad-Bottom">
+							<div class="label">
+								<span class="labeltext">&nbsp;</span>
+							</div>
+							<div class="value">
+								<div class="switchButton" id="useDeliveryAddressAsBilling">
+									<div class="sprite switch switchYes active">
+										<span>${Resource.msg('global.yes','locale',null)}</span>
+									</div>
+									<div class="sprite switch switchNo ">
+										<span>${Resource.msg('global.no','locale',null)}</span>
+									</div>
+									<div class="clear"></div>
+								</div>
+							</div>
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+						</div>
+						
+						<div class="formfield">
+							<div class="label">
+								<span class="labeltext">&nbsp;</span>
+							</div>
+							<div class="value">
+								<div class="floatright btn-green-flat">
+									<button type="button" id="billingAddressNext" name="next" value="Next">
+										<span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+										<span class="forward-icon">&nbsp;</span>
+									</button>
+								</div>
+							</div>
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+						</div>
+					</div>
+					<div style="display: none;">
+						<div id="dialogcontainerNew" class="checkout">
+							<iscomment>hidden input with action to trigger for the address form</iscomment>
+							<input type="hidden" name="${pdict.CurrentForms.billing.save.htmlName}" value="true" />
+								<iscomment>display select box with stored addresses if customer is authenticated and there are saved addresses</iscomment>
+								<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+									<div class="formfield addresslist">
+										<div class="label">
+											<span class="label">&nbsp;<label for="${pdict.CurrentForms.billing.addressList.htmlName}" class="hideLabel">
+											${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}
+										</label></span>
+											
+										</div>
+										<div class="value ">
+										<span class="tablet-selectbox width265">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.addressList.htmlName}" name="${pdict.CurrentForms.billing.addressList.htmlName}">
+											<option value="${Resource.msg('global.selectaddress','locale',null)}" selected="selected">${Resource.msg('global.selectaddress','locale',null)}</option>
+											
+											<isif condition="${pdict.CurrentCustomer.profile.addressBook.addresses.size() == 0}">
+												<option value="">There are currently no Saved Addresses</option>
+											<iselse>
+												<isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address">
+													<option value="${address.ID}">
+														<isif condition="${address.countryCode != 'GB'}">
+															<iscomment>Praveen: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+															<isif condition="${address.address1 != null && !empty(address.address1)}">
+																<isprint value="${address.address1}"/>,
+															</isif> 
+															<isprint value="${address.custom.streetName}"/>, 
+															<isprint value="${address.postalCode}"/>,
+															<isprint value="${address.city}"/>
+														<iselse/>
+															<iscomment>CR801: EU Address format is used in case of the UK country</iscomment>										
+															<isprint value="${address.address1}"/>,
+															<isprint value="${address.city}"/>,
+															<isif condition="${address.stateCode != null && !empty(address.stateCode)}">
+																<isprint value="${address.stateCode}"/>,
+															</isif>
+															<isif condition="${address.postalCode != null && !empty(address.postalCode)}">
+																<isprint value="${address.postalCode}"/>,
+															</isif>
+															<isprint value="${address.countryCode}"/>						
+														</isif>
+													</option>
+													<iscomment>End: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+												</isloop>
+											</isif>
+										</select>
+										</span>
+										</div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div>
+								</isif>
+								<iscomment>
+									<div class="formfield required requiredmessagewrapper">
+										<div class="label">
+											<span class="requiredmessage">${Resource.msg('global.requiredfield','locale',null)}</span>
+											<span class="requiredindicator">*</span>
+										</div>
+										<div class="value"><!-- Empty Value Container --></div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div><!-- END: requiredcaption -->
+								</iscomment>
+								<div class="formfield title">
+									<iscomment>
+									<label class="label">
+										<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span> 
+									<span class="requiredindicator">*</span>
+									</label>
+									</iscomment>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.title}" type="input" value="false"/>
+									<isscript>
+										importScript('app_mns:checkout/Utils.ds');
+										var titleMap : dw.util.Map = getTitleMap();					
+									</isscript>
+									<div class="value">
+									 <span class="tablet-selectbox">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="selectbox title required">					
+											<option value="">${Resource.msg('forms.select','forms',null)}</option>
+											<isloop items="${titleMap.keySet().iterator()}" var="key">
+												<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+											</isloop>
+										</select>
+									</span>
+									</div>
+									<iscomment>
+									<isloop items="${titleMap.keySet().iterator()}" var="key" status="loopstatus">						
+										<span>					
+											<isif condition="${loopstatus.first}"> 
+												<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" checked/>
+											<iselse/>
+												<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">checked</isif>/>	                            	
+											</isif>	                     	
+											<label class="nonbold" for="${key}">
+												${titleMap.get(key)}
+											</label>
+										</span>						
+									</isloop>
+									</iscomment>
+								</div>
+								<div class="formfield firstname">
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" value="false"/>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" label="false"/>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: firstname -->
+								<div class="formfield lastname">
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" value="false"/>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" label="false"/>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: lastname -->
+								
+								<!-- CR 3030 : END of comment to show drop-down for Monaco and France -->	
+								<!-- CR 3030 : Start of Code to show drop-down for Monaco and France -->	
+								<isscript>
+									var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+								</isscript>
+								<div class="formfield country">		    
+									<label for="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="label">
+										<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+										<span class="requiredindicator">*</span>
+									</label>
+									<div class="value">
+									<span class="tablet-selectbox">
+										<select id="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="selectbox country required">
+											<option value="">${Resource.msg('forms.select','forms',null)}</option>
+											<isloop items="${countryCodes}" var="countryCode">
+												<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+											</isloop>
+										</select>
+									</span>
+									</div>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: country -->			    	    
+									<!-- CR 3030 : END of code to show drop-down for Monaco and France-->		    		
+									<span class="dynamicFields">
+										<isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value != 'GB'}">
+											<isinclude template="tablet/checkout/billing/billingaddressnonuk"/>
+										<iselse>
+											<isinclude template="tablet/checkout/billing/billingaddressuk"/>
+										</isif>
+									</span>
+									<div class="formfield">
+										<label class="label">	
+											
+										</label>
+										<div class="value">
+											<div class="continuebutton btn-green-flat">
+												<button id="popupContinueAddress" type="button" name="${Resource.msg('global.continueText','locale',null)}" value="${Resource.msg('global.continueText','locale',null)}">
+													<span class="btn-ic-lock">${Resource.msg('global.continueText','locale',null)}</span>
+													<span class="forward-icon">&nbsp;</span>
+												</button>
+											</div>
+										</div>
+									</div>	
+								</div><!--  END: addressformOuter -->
+						</div>
+					<iselse>
+					<iscomment>in store collection</iscomment>
+						<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+							<iscomment>in store collection, with saved address, show address selector and enter new button, use dialog for address</iscomment>
+							
+							<div id="enterAddressForm" class="padTop36">
+							<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+									<div class="formfield addresslist">
+										<div class="label">
+											<span class="label">&nbsp;<label for="${pdict.CurrentForms.billing.addressList.htmlName}" class="hideLabel">
+											${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}
+										</label></span>
+											
+										</div>
+										<div class="value">
+										<span class="tablet-selectbox width265">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.addressList.htmlName}" name="${pdict.CurrentForms.billing.addressList.htmlName}">
+											<option value="${Resource.msg('global.selectaddress','locale',null)}" selected="selected">${Resource.msg('global.selectaddress','locale',null)}</option>
+											
+											<isif condition="${pdict.CurrentCustomer.profile.addressBook.addresses.size() == 0}">
+												<option value="">There are currently no Saved Addresses</option>
+											<iselse>
+												<isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address">
+													<option value="${address.ID}">
+														<isif condition="${address.countryCode != 'GB'}">
+															<iscomment>Praveen: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+															<isif condition="${address.address1 != null && !empty(address.address1)}">
+																<isprint value="${address.address1}"/>,
+															</isif> 
+															<isprint value="${address.custom.streetName}"/>, 
+															<isprint value="${address.postalCode}"/>,
+															<isprint value="${address.city}"/>
+														<iselse/>
+															<iscomment>CR801: EU Address format is used in case of the UK country</iscomment>										
+															<isprint value="${address.address1}"/>,
+															<isprint value="${address.city}"/>,
+															<isif condition="${address.stateCode != null && !empty(address.stateCode)}">
+																<isprint value="${address.stateCode}"/>,
+															</isif>
+															<isif condition="${address.postalCode != null && !empty(address.postalCode)}">
+																<isprint value="${address.postalCode}"/>,
+															</isif>
+															<isprint value="${address.countryCode}"/>						
+														</isif>
+													</option>
+													<iscomment>End: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+												</isloop>
+											</isif>
+										</select>
+										</span>
+										</div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div>
+								</isif>
+							<div class="formfield required">
+								<div class="label">		
+									<span class="labeltext">&nbsp;</span> 		
+								</div>
+								<div class="value">
+									<span class="labeltext">${Resource.msg('global.or','locale',null)}</span> 
+								</div>
+								<div class="clear"></div>
+							</div>	
+							<div class="formfield required">
+								<div class="label">		
+									<span class="labeltext">&nbsp;</span> 		
+								</div>
+								<div class="value">
+									<div class="floatleft btn-grey-flat margin0">
+										<div class="link_button">
+											<a href="#" id="enterNewAddress"><span>${Resource.msg('pt_checkout.new_shipping_address','checkout',null)}</span></a>
+										</div>
+									</div>
+								</div>
+								<div class="clear"></div>
+							</div>
+						</div>
+						<div style="display: none;">
+						<div id="dialogcontainerNew" class="checkout">
+							<iscomment>hidden input with action to trigger for the address form</iscomment>
+							<input type="hidden" name="${pdict.CurrentForms.billing.save.htmlName}" value="true" />
+								<iscomment>display select box with stored addresses if customer is authenticated and there are saved addresses</iscomment>
+								<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+									<div class="formfield addresslist">
+										<div class="label">
+											<span class="label">&nbsp;<label for="${pdict.CurrentForms.billing.addressList.htmlName}" class="hideLabel">
+											${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}
+										</label></span>
+											
+										</div>
+										<div class="value">
+										<span class="tablet-selectbox width265">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.addressList.htmlName}" name="${pdict.CurrentForms.billing.addressList.htmlName}">
+											<option value="${Resource.msg('global.selectaddress','locale',null)}" selected="selected">${Resource.msg('global.selectaddress','locale',null)}</option>
+											
+											<isif condition="${pdict.CurrentCustomer.profile.addressBook.addresses.size() == 0}">
+												<option value="">There are currently no Saved Addresses</option>
+											<iselse>
+												<isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address">
+													<option value="${address.ID}">
+														<isif condition="${address.countryCode != 'GB'}">
+															<iscomment>Praveen: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+															<isif condition="${address.address1 != null && !empty(address.address1)}">
+																<isprint value="${address.address1}"/>,
+															</isif> 
+															<isprint value="${address.custom.streetName}"/>, 
+															<isprint value="${address.postalCode}"/>,
+															<isprint value="${address.city}"/>
+														<iselse/>
+															<iscomment>CR801: EU Address format is used in case of the UK country</iscomment>										
+															<isprint value="${address.address1}"/>,
+															<isprint value="${address.city}"/>,
+															<isif condition="${address.stateCode != null && !empty(address.stateCode)}">
+																<isprint value="${address.stateCode}"/>,
+															</isif>
+															<isif condition="${address.postalCode != null && !empty(address.postalCode)}">
+																<isprint value="${address.postalCode}"/>,
+															</isif>
+															<isprint value="${address.countryCode}"/>						
+														</isif>
+													</option>
+													<iscomment>End: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+												</isloop>
+											</isif>
+										</select>
+										</span>
+										</div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div>
+								</isif>
+								<iscomment>
+									<div class="formfield required requiredmessagewrapper">
+										<div class="label">
+											<span class="requiredmessage">${Resource.msg('global.requiredfield','locale',null)}</span>
+											<span class="requiredindicator">*</span>
+										</div>
+										<div class="value"><!-- Empty Value Container --></div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div><!-- END: requiredcaption -->
+								</iscomment>
+								<div class="formfield title">
+									<iscomment>
+									<label class="label">
+										<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span> 
+									<span class="requiredindicator">*</span>
+									</label>
+									</iscomment>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.title}" type="input" value="false"/>
+									<isscript>
+										importScript('app_mns:checkout/Utils.ds');
+										var titleMap : dw.util.Map = getTitleMap();					
+									</isscript>
+									<div class="value">
+									<span class="tablet-selectbox">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="selectbox title required">					
+											<option value="">${Resource.msg('forms.select','forms',null)}</option>
+											<isloop items="${titleMap.keySet().iterator()}" var="key">
+												<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+											</isloop>
+										</select>
+									 </span>
+									</div>
+									<iscomment>
+									<isloop items="${titleMap.keySet().iterator()}" var="key" status="loopstatus">						
+										<span>					
+											<isif condition="${loopstatus.first}"> 
+												<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" checked/>
+											<iselse/>
+												<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">checked</isif>/>	                            	
+											</isif>	                     	
+											<label class="nonbold" for="${key}">
+												${titleMap.get(key)}
+											</label>
+										</span>						
+									</isloop>
+									</iscomment>
+								</div>
+								<div class="formfield firstname">
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" value="false"/>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" label="false"/>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: firstname -->
+								<div class="formfield lastname">
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" value="false"/>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" label="false"/>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: lastname -->
+								
+								<!-- CR 3030 : END of comment to show drop-down for Monaco and France -->	
+								<!-- CR 3030 : Start of Code to show drop-down for Monaco and France -->	
+								<isscript>
+									var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+								</isscript>
+								<div class="formfield country">		    
+									<label for="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="label">
+										<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+										<span class="requiredindicator">*</span>
+									</label>
+									<div class="value">
+									<span class="tablet-selectbox">
+										<select id="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="selectbox country required">
+											<option value="">${Resource.msg('forms.select','forms',null)}</option>
+											<isloop items="${countryCodes}" var="countryCode">
+												<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+											</isloop>
+										</select>
+									</span>
+									</div>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: country -->			    	    
+									<!-- CR 3030 : END of code to show drop-down for Monaco and France-->		    		
+									<span class="dynamicFields">
+										<isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value != 'GB'}">
+											<isinclude template="tablet/checkout/billing/billingaddressnonuk"/>
+										<iselse>
+											<isinclude template="tablet/checkout/billing/billingaddressuk"/>
+										</isif>
+									</span>
+									<div class="formfield">
+										<label class="label">	
+											
+										</label>
+										<div class="value">
+											<div class="continuebutton btn-green-flat">
+												<button id="popupContinueAddress" type="button" name="${Resource.msg('global.continueText','locale',null)}" value="${Resource.msg('global.continueText','locale',null)}">
+													<span class="btn-ic-lock">${Resource.msg('global.continueText','locale',null)}</span>
+													<span class="forward-icon">&nbsp;</span>
+												</button>
+											</div>
+										</div>
+									</div>	
+								</div><!--  END: addressformOuter -->
+						</div>
+						<iselse>
+							<iscomment>in store collection, without saved address, show address form on page</iscomment>
+							
+							<div id="enterAddressForm" class="padTop36">
+						
+							<iscomment>hidden input with action to trigger for the address form</iscomment>
+							<input type="hidden" name="${pdict.CurrentForms.billing.save.htmlName}" value="true" />
+								<iscomment>display select box with stored addresses if customer is authenticated and there are saved addresses</iscomment>
+								<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+									<div class="formfield addresslist">
+										<div class="label">
+											<span class="label">&nbsp;<label for="${pdict.CurrentForms.billing.addressList.htmlName}" class="hideLabel">
+											${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}
+										</label></span>
+											
+										</div>
+										<div class="value">
+										<span class="tablet-selectbox width265">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.addressList.htmlName}" name="${pdict.CurrentForms.billing.addressList.htmlName}">
+											<option value="${Resource.msg('global.selectaddress','locale',null)}" selected="selected">${Resource.msg('global.selectaddress','locale',null)}</option>
+											
+											<isif condition="${pdict.CurrentCustomer.profile.addressBook.addresses.size() == 0}">
+												<option value="">There are currently no Saved Addresses</option>
+											<iselse>
+												<isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address">
+													<option value="${address.ID}">
+														<isif condition="${address.countryCode != 'GB'}">
+															<iscomment>Praveen: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+															<isif condition="${address.address1 != null && !empty(address.address1)}">
+																<isprint value="${address.address1}"/>,
+															</isif> 
+															<isprint value="${address.custom.streetName}"/>, 
+															<isprint value="${address.postalCode}"/>,
+															<isprint value="${address.city}"/>
+														<iselse/>
+															<iscomment>CR801: EU Address format is used in case of the UK country</iscomment>										
+															<isprint value="${address.address1}"/>,
+															<isprint value="${address.city}"/>,
+															<isif condition="${address.stateCode != null && !empty(address.stateCode)}">
+																<isprint value="${address.stateCode}"/>,
+															</isif>
+															<isif condition="${address.postalCode != null && !empty(address.postalCode)}">
+																<isprint value="${address.postalCode}"/>,
+															</isif>
+															<isprint value="${address.countryCode}"/>						
+														</isif>
+													</option>
+													<iscomment>End: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+												</isloop>
+											</isif>
+										</select>
+										</span>
+										</div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div>
+								</isif>
+								<iscomment>
+									<div class="formfield required requiredmessagewrapper">
+										<div class="label">
+											<span class="requiredmessage">${Resource.msg('global.requiredfield','locale',null)}</span>
+											<span class="requiredindicator">*</span>
+										</div>
+										<div class="value"><!-- Empty Value Container --></div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div><!-- END: requiredcaption -->
+								</iscomment>
+								<div class="formfield title">
+									<iscomment>
+									<label class="label">
+										<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span> 
+									<span class="requiredindicator">*</span>
+									</label>
+									</iscomment>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.title}" type="input" value="false"/>
+									<isscript>
+										importScript('app_mns:checkout/Utils.ds');
+										var titleMap : dw.util.Map = getTitleMap();					
+									</isscript>
+									<div class="value">
+									<span class="tablet-selectbox">
+										<select onclick="this.focus();" id="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="selectbox title required">					
+											<option value="">${Resource.msg('forms.select','forms',null)}</option>
+											<isloop items="${titleMap.keySet().iterator()}" var="key">
+												<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+											</isloop>
+										</select>
+									</span>
+									</div>
+									<iscomment>
+									<isloop items="${titleMap.keySet().iterator()}" var="key" status="loopstatus">						
+										<span>					
+											<isif condition="${loopstatus.first}"> 
+												<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" checked/>
+											<iselse/>
+												<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">checked</isif>/>	                            	
+											</isif>	                     	
+											<label class="nonbold" for="${key}">
+												${titleMap.get(key)}
+											</label>
+										</span>						
+									</isloop>
+									</iscomment>
+								</div>
+								<div class="formfield firstname">
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" value="false"/>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" label="false"/>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: firstname -->
+								<div class="formfield lastname">
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" value="false"/>
+									<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" label="false"/>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: lastname -->
+								
+								<!-- CR 3030 : END of comment to show drop-down for Monaco and France -->	
+								<!-- CR 3030 : Start of Code to show drop-down for Monaco and France -->	
+								<isscript>
+									var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+								</isscript>
+								<div class="formfield country">		    
+									<label for="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="label">
+										<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+										<span class="requiredindicator">*</span>
+									</label>
+									<div class="value">
+									<span class="tablet-selectbox">
+										<select id="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="selectbox country required">
+											<option value="">${Resource.msg('forms.select','forms',null)}</option>
+											<isloop items="${countryCodes}" var="countryCode">
+												<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+											</isloop>
+										</select>
+									</span>
+									</div>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: country -->			    	    
+									<!-- CR 3030 : END of code to show drop-down for Monaco and France-->		    		
+									<span class="dynamicFields">
+										<isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value != 'GB'}">
+											<isinclude template="tablet/checkout/billing/billingaddressnonuk"/>
+										<iselse>
+											<isinclude template="tablet/checkout/billing/billingaddressuk"/>
+										</isif>
+									</span>
+									<div class="formfield">
+										<label class="label">	
+											
+										</label>
+										<div class="value">
+											<div class="continuebutton btn-green-flat">
+												<button id="popupContinueAddress" type="button" name="${Resource.msg('global.continueText','locale',null)}" value="${Resource.msg('global.continueText','locale',null)}">
+													<span class="btn-ic-lock">${Resource.msg('global.continueText','locale',null)}</span>
+													<span class="forward-icon">&nbsp;</span>
+												</button>
+											</div>
+										</div>
+									</div>	
+						</div>
+						</isif>
+					
+						<div id="addressform" class="addressform hide">
+						</div>
+					</isif>
+					
+					
+					</div>	
+		
+				
+				
+
+					
+					<div class="collapseContent2 hide nopadding" id="newAddressContainer">
+						<div class="newaddressform">
+							<div class="formfield">
+							<div class="label">
+								<span class="labeltext">&nbsp;</span>
+							</div>
+							<div class="value">
+								<span id="newDeliveryAddress">
+									&nbsp;<div class="waitingIconNew"></div>
+								</span>
+							</div>
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+						</div>
+						</div>
+					</div>
+					<div id="contactdetailsform" class="collapse">
+						<h5 class="grey_block_header">
+							<span>
+								<strong class="content_grey_header">${Resource.msg('billing.contactdetailsformobile','checkout',null)}</strong>
+							</span>
+						</h5>
+					</div>
+					<div id="addressformOuter2" class="collapseContent">
+						<div id="addressform2" class="addressform">
+							<iscomment>Praveen: [441]QC defect fixing</iscomment>
+						<isif condition="${pdict.CurrentCustomer.authenticated}">
+							<div class="formfield email margintop">	
+								<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.emailAddress}" type="input" value="false" xhtmlclass="emailnum"/>
+								<div class="value padTop5">
+									<input type="text" value="${pdict.CurrentForms.billing.billingAddress.email.emailAddress.value}" disabled="disabled" name="${pdict.CurrentForms.billing.billingAddress.email.emailAddress.htmlName}" id="${pdict.CurrentForms.billing.billingAddress.email.emailAddress.htmlName}" class="textinput disabled_textfield" />
+								</div>
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+							</div>
+						<iselse>
+							<div class="formfield email margintop">	
+								<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.emailAddress}" type="input" value="false" xhtmlclass="emailnum"/>
+								<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.emailAddress}" type="input" label="false" xhtmlclass="emailnum"/>
+								<div class="clear"><!-- FLOAT CLEAR --></div>			
+							</div><!-- END: email -->
+						</isif>
+						<iscomment>Praveen: [441]END</iscomment>
+							
+						<iscomment>[QC 380] | Remove the "Confirm Email" field for a logged in user. | Naveen Kumar </iscomment>
+						<isif condition="${!pdict.CurrentCustomer.authenticated}">			
+							<div class="formfield confirmEmail">	
+								<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.confirmEmailAddress}" type="input" value="false" xhtmlclass="confirmemailnum CONFIRM_EMPTY"/>
+								<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.confirmEmailAddress}" type="input" label="false" xhtmlclass="confirmemailnum CONFIRM_EMPTY"/>
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+							</div>
+						</isif>
+							
+						<iscomment>
+							<div class="formfield confirmEmail">
+								<div class="label">
+									<span class="labeltext">${Resource.msg('billing.confirmemial','checkout',null)}:</span>
+									<span class="requiredindicator">*</span>
+								</div>
+								<div class="value">
+									
+									<input type="text" name="confirmEmail" id="confirmEmail" class="confirmemailnum textinput"/>
+								</div>
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+							</div>
+						</iscomment>			
+							
+						<div class="formfield phone">
+							<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.phone}" type="input" value="false"/>
+							<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.phone}" type="input" label="false"/>
+							<div class="formfieldtooltip">
+								<istooltip content_id="help-telephone"/>
+							</div>			    	
+							<div class="clear"><!-- FLOAT CLEAR --></div>			
+						</div><!-- END: phone -->
+						<div class="formfield altphone">
+							<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber}" type="input" value="false" xhtmlclass="phone"/>
+							<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber}" type="input" label="false" xhtmlclass="phone" />
+							<div class="formfieldtooltip">
+								<istooltip content_id="help-telephone"/>
+							</div>			    	
+							<div class="clear"><!-- FLOAT CLEAR --></div>			
+						</div>
+							
+						<iscomment>provide option to add address to address book if customer is authenticated</iscomment>
+						<isif condition="${pdict.CurrentCustomer.authenticated}">
+							<iscomment>Commenting the code for eliminating the checkbox and setting the 'addToAddressBook' to true
+								<div class="formfield addressoptions">
+									<div class="label">&nbsp;</div><!-- END: label -->
+									<div class="value">
+										<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addToAddressBook}" type="checkbox"/>
+									</div><!-- END: value -->
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: addressoptions -->
+							</iscomment>
+							<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addToAddressBook}" type="hidden" value="${true}"/>
+						</isif>
+						<div class="formfield emailsignup">
+							<div class="label">&nbsp;</div><!-- END: label -->
+							<div class="value checkbox">
+								<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addToEmailList}" type="checkbox" label="false" xhtmlclass="floatleft" />		    		
+								<div class="chkContent newPrivacyContainer">
+									<label for="${pdict.CurrentForms.billing.billingAddress.addToEmailList.htmlName}">
+										${Resource.msg('global.email.policy1','locale',null)} <br/>
+										${Resource.msg('global.email.policy2','locale',null)}
+										<a target="_blank" href="${URLUtils.http('Page-Show', 'cid', 'privacy-policy')}" title="${Resource.msg('global.privacypolicy','locale',null)}" id="privacyPolicy">${Resource.msg('global.privacypolicy','locale',null)}</a>
+									</label>
+									
+								</div>		    		
+								<iscomment><a id="privacy" title="${Resource.msg('global.privacypolicy','locale',null)}" href="#">${Resource.msg('global.privacypolicy','locale',null)}</a></iscomment>
+							</div><!-- END: value -->
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+							<!-- **** START: CR023 | Naveen Kumar ***** -->
+							<div class="tnc-header">${Resource.msg('global.termsandconditions.read','locale',null)}</div>
+							<!-- **** General Terms and Condition ***** -->
+							<div class="terms_conditions">
+								<div class="label">${Resource.msg('global.tnc.general.title','locale',null)}<span class="requiredindicator">*</span>
+								</div><!-- END: label -->
+								<div class="value checkbox">
+									<label for="terms_condition_checkbox_general" class="hideLabel">
+										${Resource.msg('title.M','forms',null)}
+									</label>
+									<input type="checkbox" class="tncerror floatleft" name="terms_condition_checkbox_general" id="terms_condition_checkbox_general" value="${Resource.msg('global.termsandconditions','locale',null)}"></input>
+									<div class="chkContent">
+										${Resource.msg('global.tnc.general','locale',null)}
+										<a id="toDO" target="_blank" title="${Resource.msg('global.privacypolicy','locale',null)}" href="${URLUtils.http('Page-Show', 'cid', 'terms')}">${Resource.msg('global.tnc.general.link','locale',null)}</a>
+										${Resource.msg('global.tnc.agree','locale',null)}
+									</div>
+									<div class="clear"></div>
+								</div><!-- END: value -->
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+							</div>
+							<!-- **** Delivery Terms and Condition ***** -->
+							<iscomment>Uncommenting the code; this change will now go in EU project ||| Delivery Terms and Conditions is to be romeved from Ireland Site as Part of CR809. Hence below piece of code is commented out.	 
+							<div class="terms_conditions">
+								<div class="label">${Resource.msg('global.tnc.delivery.title','locale',null)}<span class="requiredindicator">*</span>
+								</div><!-- END: label -->
+								<div class="value checkbox">
+									<label for="terms_condition_checkbox_delivery" class="hideLabel">
+										${Resource.msg('title.M','forms',null)}
+									</label>
+									<input type="checkbox" class="tncerror floatleft" name="terms_condition_checkbox_delivery" id="terms_condition_checkbox_delivery" value="${Resource.msg('global.termsandconditions','locale',null)}"></input>
+									<div class="chkContent">
+										${Resource.msg('global.tnc.delivery','locale',null)}
+										<a id="toDO1" target="_blank" title="${Resource.msg('global.privacypolicy','locale',null)}" href="${URLUtils.http('Page-Show', 'cid', 'terms')}">${Resource.msg('global.tnc.delivery.link','locale',null)}</a>
+										${Resource.msg('global.tnc.agree','locale',null)}
+									</div>
+									<div class="clear"></div>
+								</div><!-- END: value -->
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+								<!-- **** END: CR023 | Naveen Kumar ***** -->	    			
+							</div>
+							</iscomment>
+						</div><!-- END: emailsignup -->
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+						<div class="formactions">
+							<div class="label">&nbsp;</div>
+					           <!-- END: label -->
+					           <div class="value">
+									<div class="floatright btn-green-flat">
+										<button type="submit" id="billingShoppingButton" name="${pdict.CurrentForms.billing.save.htmlName}" value="${Resource.msg('billing.submitorder','checkout',null)}"><span class="btn-ic-lock">${Resource.msg('billing.payandplaceorder','checkout',null)}</span><span class="forward-icon">&nbsp;</span></button>
+									</div><!--  END : floatright -->
+								</div>
+					      		<div class="clear"></div>
+						</div>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+						
+						</div>
+						
+						
+					</div><!-- END: addressform -->
+					<input type="hidden" name="${pdict.CurrentForms.billing.secureKeyHtmlName}" value="${pdict.CurrentForms.billing.secureKeyValue}"/>
+			</fieldset>
+		</form>
+				
+		<isset name="gcApplicable" value="${'false'}" scope="page"/>
+		<isif condition="${dw.order.PaymentMgr.getPaymentMethod(dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE).isActive()}">
+			<isset name="gcApplicable" value="${'true'}" scope="page"/>
+		</isif>
+				
+		<iscomment>coupon code / gift certificate area</iscomment>
+		<iscomment>
+			<div id="couponsform" class="giftcertcouponform">
+				
+				<isif condition="${pdict.Basket.giftCertificateLineItems.size() == 0 && gcApplicable == 'true'}">
+					<h5>${Resource.msg('billing.giftcouponheader','checkout',null)}</h5>
+					<iselse/>
+					<h5>${Resource.msg('billing.couponheader','checkout',null)}</h5>
+				</isif>
+				
+				<div id="couponentry" class="couponform">
+					<isif condition="${gcApplicable == 'true'}">
+						<div class="helptext"><iscontentasset aid="checkout-giftcertcoupon-help"/></div>
+						<iselse>
+							<div class="helptext"><iscontentasset aid="checkout-coupon-help"/></div>	
+						</isif>
+						<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billingcoupon.htmlName}" class="suppress">
+							<div class="formfield couponcode">
+								<isinputfield formfield="${pdict.CurrentForms.billingcoupon.couponCode}" type="input" value="false"/>
+								<isinputfield formfield="${pdict.CurrentForms.billingcoupon.couponCode}" type="input" label="false"/>
+								<button type="submit" name="${pdict.CurrentForms.billingcoupon.applyCoupon.htmlName}" value="${Resource.msg('global.apply','locale',null)}"><span>${Resource.msg('global.apply','locale',null)}</span></button>
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+							</div><!-- END: couponcode -->
+							<div class="redemption"><!-- container for coupon applied success messages --></div>
+						</form>
+					</div><!-- END: couponsform -->
+					
+					
+					<isset name="gcPITotal" value="${0}" scope="page"/>
+					<isif condition="${gcApplicable == 'true'}">
+						
+						
+						<isif condition="${pdict.Basket.giftCertificateLineItems.size() == 0}">
+							<div id="giftcertentry" class="giftcertform">
+								<div class="helptext"><iscontentasset aid="checkout-giftcert-help"/></div>
+								<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billinggiftcert.htmlName}" class="suppress">
+									<div class="formfield giftcertfield">
+										<isinputfield formfield="${pdict.CurrentForms.billinggiftcert.giftCertCode}" type="input" value="false"/>
+										<isinputfield formfield="${pdict.CurrentForms.billinggiftcert.giftCertCode}" type="input" label="false"/>
+										<button type="submit" name="${pdict.CurrentForms.billinggiftcert.redeemGiftCert.htmlName}" value="${Resource.msg('global.apply','locale',null)}"><span>${Resource.msg('global.apply','locale',null)}</span></button>
+										<span class="checkbalance"><a href="${'#'}">${Resource.msg('global.checkbalance','locale',null)}</a></span>
+										<div class="redemption">
+											
+											<isset name="gcPITotal" value="${0}" scope="page"/>
+											<isif condition="${pdict.Basket.giftCertificatePaymentInstruments.size() > 0}">
+												<isloop items="${pdict.Basket.giftCertificatePaymentInstruments}" var="giftCertPI">
+													<isset name="gcPITotal" value="${gcPITotal + giftCertPI.paymentTransaction.amount}" scope="page"/>
+													<div class="success giftcertpi" id="gc-${giftCertPI.giftCertificateID}"><isprint value="${giftCertPI.paymentTransaction.amount}"/> ${Resource.msg('billing.giftcertredeemed','checkout',null)} <a id="rgc-${giftCertPI.giftCertificateID}" class="remove" href="${'#'}"><img src="${URLUtils.staticURL('/images/icon_remove.gif')}" alt="${Resource.msg('global.remove','locale',null)}"/><span>${Resource.msg('global.remove','locale',null)}</span></a></div>
+												</isloop>
+											</isif>
+										</div>
+										<div class="balance"><!-- contains the balance information on a successful balance check --></div>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div><!-- END: giftcertfield -->
+								</form>
+							</div><!-- END: giftcertform -->
+						</isif>
+						
+					</isif>
+					
+				</div><!-- END: giftcertcouponform -->
+		</iscomment>
+		<isset name="gcPITotal" value="${0}" scope="page"/>
+		<iscomment>payment method area
+			<div id="paymentmethodform" class="paymentmethodform">
+				<isinclude template="checkout/billing/paymentmethods"/>
+			</div>
+		</iscomment>
+		<div class="formactions">
+			
+			
+			<div class="floatleft btn-grey-flat">
+				<div class="link_button">
+					<a href="${URLUtils.url('COShipping-Start')}" class="back-icon"><span>${Resource.msg('singleshipping.back','checkout',null)}</span></a>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+		</div><!-- END: formactions -->
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+	</div><!-- END: checkoutbilling -->
+	</div>			
+				
+</div><!-- END: checkout -->
+<iscomment><isset name="orgID" value="1snn5n9w" scope="page"/></iscomment>
+<isset name="orgID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue("csOrgIDForDeviceFingerprint")}" scope="page"/>
+<isset name="merchantID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue("CsMerchantId")}" scope="page"/>
+<isset name="sessionID" value="${pdict.CurrentSession.sessionID}" scope="page"/>
+<!-- Device Finger Print Code -->
+
+<!-- Image Code -->
+
+<p style="background:url(https://h.online-metrix.net/fp/clear.png?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}&amp;m=1)"></p>
+<img src="https://h.online-metrix.net/fp/clear.png?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}&amp;m=2" alt=" "/>
+
+<!-- Image Code -->
+
+<!-- Flash Code -->
+			
+<object type="application/x-shockwave-flash" data="https://h.online-metrix.net/fp/fp.swf?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}" width="1" height="1" id="thm_fp">
+	<param name="movie" value="https://h.online-metrix.net/fp/fp.swf?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}" />
+	<div>
+		<span class="hideLabel">
+			${Resource.msg('profile.title','forms',null)}
+		</span>
+	</div>
+</object>
+			
+<!-- Flash Code -->
+
+<!-- JS Code -->
+<script src="https://h.online-metrix.net/fp/check.js?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}" type="text/javascript">
+</script>
+<!-- JS Code -->
+<!-- Device Finger Print Code -->
+<div id="dialogcontainer"></div>
+<script type="text/javascript"><!--
+
+var addressJSONObject = new Object();
+cleanAddress = false;
+function populateAddressFormFromShippingAddress() //@TODO: Use proper if condition
+{
+	//var paymentMethod = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").val();	
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.value}");
+	
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.value}");
+	changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]")[0], "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value}");
+	
+	if("${pdict.Basket.defaultShipment.shippingMethodID}" != "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]")[0], "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.value}");
+		jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName.value}");
+		jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName.value}");	
+		
+	}
+		
+}
+function changeFormSelection(selectElem, selectedValue)
+{
+	//single shipping FR
+	//check to see if the title dropdown has the value we want to put in it
+	if((typeof(selectElem)!=undefined) && (jQ.trim(selectedValue)!='')){
+		var tempCheck = false;
+		jQ(selectElem).find("option").each(function(){
+			if(jQ(this).val() == selectedValue){
+				tempCheck = true;
+			}
+		});
+		if(tempCheck){
+			jQ(selectElem).val(selectedValue);
+			//old code deprecated in favour of jQuery
+			/*if(!selectElem) return;
+			var options = selectElem.options;
+			if(options.length > 0) {
+				// find index of value to select
+				var idx = 0;
+				for(var i=0; i<options.length; i++) {
+					if(options[i].value != selectedValue) continue;
+					idx = i; break;
+				}
+				selectElem.selectedIndex = idx;
+			}*/	
+		}/*else{
+			
+			if(!jQ(selectElem).is(':visible')){
+				var tempDialogId = jQ(selectElem).parents('.ui-dialog-content').attr('id'); 
+				if(!jQuery('#' + tempDialogId).dialog('isOpen')){
+					jQuery('#' + tempDialogId).dialog('open');
+				}
+				
+			}
+			jQ(selectElem).focus().blur();
+		}*/
+	}
+}
+/*Global vars for checking if store collection and the user has any saved addresses */
+var isStoreCollect = ${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))},
+	hasSavedAddresses = ${pdict.CurrentCustomer.authenticated && (pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0)};
+jQ(function(){
+		var dlgBillingAddress = jQuery('#dialogcontainerNew').dialog({
+			bgiframe: true,
+			autoOpen: false,
+			modal: true,
+			overlay: {
+	    		opacity: 0.5,
+	     		background: "black"
+			},
+	    	height: "auto",
+	    	width: 600,
+	    	resizable: false,
+	    	close: function( event, ui ) {
+	    		//jQ('#useDeliveryAddressAsBilling').find('div.sprite.switchYes').click();
+	    		jQ('#useDeliveryAddressAsBilling').find('div.sprite.switchYes').addClass('active');
+	    		jQ('#useDeliveryAddressAsBilling').find('div.sprite.switchNo').removeClass('active');
+	    	}
+		});
+		dlgBillingAddress.parent().appendTo(jQ("${'#' + pdict.CurrentForms.billing.htmlName}"));
+		//fix for jQueryUI dialog moving fields out of the form
+		
+ window.addEventListener("orientationchange", function() {
+	  // Announce the new orientation number
+	jQ('#dialogcontainerNew').parent().css({ "marginLeft":-300 +"px", "left":"50%" }); 
+	}, false);
+	
+	
+jQ('#billingShoppingButton').on('click', function(e){
+	e.preventDefault();
+	 jQ('#dialogcontainerNew').parent().css({ "marginLeft":0 }); 
+			
+});
+		jQ('#billingAddressNext').on('click', function(e){
+			
+			jQ('#newDeliveryAddress').html(jQ('#oldDeliveryAddress').html());
+			jQuery('#dialogcontainerNew').dialog('close');
+			jQ("#addressformOuter").removeClass('hide').show().next(".collapseContent2").removeClass('hide').find('div:first').removeClass('hide').slideDown();
+			jQ('#newDeliveryAddress').parents('.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+			jQ('#addressformOuter').slideUp();
+			
+			jQ('#cardholderform').addClass('done').removeClass('accordionOpen');
+			jQ('#contactdetailsform').addClass('accordionOpen');
+			jQ('#addressform2').removeClass('hide').slideDown();
+		});
+		jQ("#useDeliveryAddressAsBilling .switch").click(function(event){
+			if(jQuery(this).not('.active')){
+				jQuery(this).addClass('active').siblings('.switch').removeClass('active');
+				if(jQuery(this).hasClass('switchYes')){
+					sameAsShipping("yes");
+					populateAddressFormFromShippingAddress();
+					cleanAddress = false;
+				}else{
+					cleanAddress = true;
+					sameAsShipping("no");
+					jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val('');
+					jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val('');
+					jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val('');
+					
+					
+					
+					var dialogTitle = ${pdict.CurrentCustomer.authenticated} ? "${Resource.msg('billing.authenticatedNewBillingAddressTitle','checkout',null)}" : "${Resource.msg('billing.unauthenticatedBillingAddressTitle','checkout',null)}";
+					jQuery('#dialogcontainerNew').dialog('option', 'title', dialogTitle);
+					jQuery('#dialogcontainerNew').dialog('open');
+					 
+					 /* for all dialogue boxes - set to center in both orientations - Shahzad */
+					 var popupW = jQuery('#dialogcontainerNew').width();	 
+					 jQuery('#dialogcontainerNew').parent().css({ "marginLeft":-300 +"px", "left":"50%", "top":"-60px" });
+					 /* end */ 	
+				}
+			}
+			
+		});
+		jQ('#popupContinueAddress').on('click', function(e){
+			e.preventDefault();
+			if( isStoreCollect && !hasSavedAddresses){
+				var billingFormValid = true;
+				/*jQ('form[id=${pdict.CurrentForms.billing.htmlName}]').find('input.required, select.required').each(function(){*/
+				jQ('#enterAddressForm').find('input.required, select.required').each(function(){
+					if(!$(this).valid()){
+						billingFormValid = false ;
+					}
+				});
+				if(billingFormValid){
+					updateAddressObject();
+					var newAddr = (jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val())!='' ? jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val())!='' ? " "+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val())!='' ? " "+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val()) : "") +
+						(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val()) : "");
+					jQ('#newDeliveryAddress').html(newAddr);
+					jQ("#addressformOuter").next(".collapseContent2").removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					jQ('#newDeliveryAddress').parents('.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					jQ('#addressformOuter').slideUp();
+					jQ('#cardholderform').addClass('done').removeClass('accordionOpen');
+					jQ('#contactdetailsform').addClass('accordionOpen');
+					jQ('#addressform2').removeClass('hide').slideDown();
+					jQ('#newAddressContainer').removeClass('hide').slideDown();
+				}else{
+					jQ('#paymentmethods').slideUp().addClass('hide');
+					jQ('#cardholderform').addClass('accordionOpen').removeClass('done');
+					jQ('#addressformOuter').removeClass('hide').slideDown();
+					jQ('#newAddressContainer').slideUp(); 
+				}
+			}else{
+				var popupFormValid = true;
+				jQ('#dialogcontainerNew').find('input.required').each(function(){
+					popupFormValid = $(this).valid() == 0 ? false : true;
+					/*if(jQ.trim(jQ(this).val()) == ''){
+						popupFormValid = false;
+					}*/
+				});
+				jQ('#dialogcontainerNew').find('select.required').each(function(){
+					if(!$(this).valid()){
+						 popupFormValid = false;
+					 }
+				});
+			 	if(popupFormValid){
+			 		updateAddressObject();
+					var newAddr = (jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val())!='' ? jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val())!='' ? " "+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val())!='' ? " "+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val()) : "") +
+					(jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val())!='' ? "<br>"+ jQ.trim(jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val()) : "");
+					jQ('#newDeliveryAddress').html(newAddr);
+					jQuery('#dialogcontainerNew').dialog('close');
+					
+					
+					jQ("#addressformOuter").next(".collapseContent2").removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					jQ('#newDeliveryAddress').parents('.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					jQ('#addressformOuter').slideUp();
+					jQ('#cardholderform').addClass('done').removeClass('accordionOpen');
+					jQ('#contactdetailsform').addClass('accordionOpen');
+					jQ('#addressform2').removeClass('hide').slideDown();
+					
+				}
+			}
+		});
+		jQ('#changeBillingAddress').on('click', function(e){
+			if( isStoreCollect && !hasSavedAddresses){
+				jQ('#paymentmethods').slideUp().addClass('hide');
+				 jQ('#cardholderform').addClass('accordionOpen').removeClass('done');
+				 jQ('#addressformOuter').removeClass('hide').slideDown();
+				 jQ('#newAddressContainer').slideUp();
+				 jQ('#contactdetailsform').removeClass('accordionOpen')
+			}else{
+				var dialogTitle = ${pdict.CurrentCustomer.authenticated} ? "${Resource.msg('billing.authenticatedNewBillingAddressTitle','checkout',null)}" : "${Resource.msg('billing.unauthenticatedBillingAddressTitle','checkout',null)}";
+				dialogTitle = "${Resource.msg('billing.authenticatedChangeBillingAddressTitle','checkout',null)}";
+				/*jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val(0);
+				jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val('');
+				jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val('');
+				jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val('');
+				jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val('');
+				jQ("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val('');
+				jQ("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val();*/
+				jQuery('#dialogcontainerNew').dialog('option', 'title', dialogTitle);
+				jQuery('#dialogcontainerNew').dialog('open');
+				 /* for all dialogue boxes - set to center in both orientations - Shahzad */
+				 var popupW = jQuery('#dialogcontainerNew').width();	 
+				 jQuery('#dialogcontainerNew').parent().css({ "marginLeft":-300 +"px", "left":"50%", "top":"-60px" });
+			}
+		});
+		jQ('#enterNewAddress').on('click', function(){
+			jQuery('#dialogcontainerNew').dialog('option', 'title', "${Resource.msg('address.new.title','checkout',null)}");
+			jQuery('#dialogcontainerNew').dialog('open');
+			 var popupW = jQuery('#dialogcontainerNew').width();	 
+			 jQuery('#dialogcontainerNew').parent().css({ "marginLeft":-300 +"px", "left":"50%", "top":"-60px" });
+		});
+		
+	});
+	//Praveen:[362]QC defect fixing
+	jQuery(document).ready(function() {
+		jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").val("");
+		addressdata = null;
+		var expiryMonth = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}').value;
+		var startMonth = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}').value;
+		if(expiryMonth != null && expiryMonth != "" && expiryMonth < 10){
+			var expiryMonth = "0"+ expiryMonth;
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val(expiryMonth);
+		}
+		if(startMonth != null && startMonth != "" && startMonth < 10){
+			var startMonth = "0"+ startMonth;
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").val(startMonth);
+		}
+		
+		jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").change(function() {
+			updateStateLabel(jQuery(this).val(), true);
+			var options = {
+				minWidth:513,
+				minHeight:220,
+				title: pleaseWaitText,
+				zIndex:90210,
+				resizable:false,
+				modal:true,
+				dialogClass:'pleaseWaitDialog',
+				closeText:'close',
+				close: function(ev, ui) { $(this).remove(); },
+				stack:true,
+				closeOnEscape: false,
+				open: function(event, ui) { $(".pleaseWaitDialog .ui-dialog-titlebar-close").hide(); } // Hides close button 
+			}
+			$('#dialogcontainer').dialog(options);
+			jQuery.ajax({
+				dataType: "html",
+				url		: "${URLUtils.url('Util-GetWaitDeliveryImage')}",
+				cache	: true,		
+				success: function(response, textStatus) {
+					jQuery('#dialogcontainer').html(response);	
+					jQuery("#dwfrm_billing_billingAddress_addressFields_country").focus();
+				}
+			});		
+			fillDynamicAddress(jQuery(this).val());
+		});
+		
+	});
+		
+	$(document).ajaxComplete(function() {
+		$('.tooltip').bt({
+			trigger: ['focus mouseover', 'blur mouseout'],
+			contentSelector: "jQuery(this).find('.tooltip-body').html()", 
+			fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1}
+		}).attr('tabindex', '0');	
+	});
+		
+	//Praveen:END
+	
+	function fillDynamicAddress(countryVal){
+		//var countryVal = jQuery(this).val();
+		
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-GetBillingAddressFields')}","country", countryVal);
+		jQuery.ajax({
+			url: url,
+			success: function(data){
+				jQuery(".dynamicFields").html(data);
+				if(cleanAddress){
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.phone.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val('');
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber.htmlName}]").val('');
+				}
+				if(addressdata != null){
+					if(cleanAddress){
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.phone.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val('');
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber.htmlName}]").val('');
+					}else{
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val(addressdata.address.address1);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val(addressdata.address.address2);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val(addressdata.address.address3);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val(addressdata.address.stateCode);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val(addressdata.address.city);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val(addressdata.address.postalCode);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.phone.htmlName}]").val(addressdata.address.phone);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val(addressdata.address.streetName);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val(addressdata.address.postBox);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val(addressdata.address.residence);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber.htmlName}]").val(addressdata.address.alternateContactNumber);
+						jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").filter("[value="+addressdata.address.title+"]").attr("checked","checked");	
+					}
+				
+					
+				}					
+				/*$("div.ui-widget-overlay, div.pleaseWaitDialog").remove();*/	
+				jQuery('#dialogcontainer').dialog('close');
+			},
+			failure: function(data) {				   	
+				alert("${Resource.msg('global.serverconnection','locale',null)}");		
+			}
+		});
+	}
+	
+	function applyCouponCode(couponCode) {
+		setCouponError(null);
+		// nothing entered
+		if(!couponCode) {
+			setCouponError("${Resource.msg('billing.couponinvalid','checkout',null)}");
+			return;
+		}
+		// attempt to apply
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-ApplyCoupon')}","couponCode", couponCode);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				updateSummary();
+				if(!data) {
+					setCouponError("${Resource.msg('billing.couponinvalid','checkout',null)}");
+					return false;
+				}
+				if(data.redemptionErrorMsg) {
+					setCouponError(data.redemptionErrorMsg);
+					return false;
+				}
+				if(!data.redemption)
+				{
+					setCouponError("${Resource.msg('billing.couponinvalid','checkout',null)}");
+					return false;
+				}
+				// empty input field and display redemption in UI
+				jQuery("input[name=${pdict.CurrentForms.billingcoupon.couponCode.htmlName}]").val("");
+				setCouponRedemptionInfo(data.redemption);
+				// update gift card redemptions as amounts might have changed after coupon
+				jQuery.each(data.redemption.gcRedemptions, function(){
+					setGiftCertRedemptionInfo(this.giftCertificateID, this.amount);
+				});
+				var countryCode = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+				updatePaymentMethods( countryCode );
+			}
+		});
+	}
+	
+	function redeemGiftCert(giftCertificateId) {
+		setGiftCertError(null);
+		setGiftCertBalanceInfo(null);
+		// nothing entered
+		if(!giftCertificateId) {
+			setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+			return;
+		}
+		// attempt to redeem
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-RedeemGiftCertificate')}", "giftCertificateID", giftCertificateId);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data) {
+					setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+					return false;
+				}
+				if(data.redemptionErrorMsg) {
+					setGiftCertError(data.redemptionErrorMsg);
+					return false;
+				}
+				if(!data.redemption)
+				{
+					setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+					return false;
+				}
+				// empty input field and display redemption in UI
+				jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").val("");
+				setGiftCertRedemptionInfo(data.redemption.giftCertificateID, data.redemption.amount);
+				
+				if(data.redemption.orderBalance <= 0)
+				{
+					setPaymentSection(data.redemption.orderBalance);
+				}
+				else
+				{
+					var countryCode = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+					updatePaymentMethods( countryCode );
+				}
+				
+				updateSummary();
+			}
+		});
+	}
+	
+	function checkGiftCertBalance(giftCertificateId) {
+		setGiftCertError(null);
+		setGiftCertBalanceInfo(null);
+		// nothing entered
+		if(!giftCertificateId) {
+			setGiftCertError("${Resource.msg('billing.giftcertidmissing','checkout',null)}");
+			return;
+		}
+		// load gift certificate details
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-GetGiftCertificateBalance')}", "giftCertificateID", giftCertificateId);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.giftCertificate) {
+					setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+					return false;
+				}
+				// display details in UI
+				setGiftCertBalanceInfo(data.giftCertificate.balance);
+			}
+		});
+	}
+	
+	function removeGiftCertificate(giftCertificateId) {
+		jQuery(".balance").empty();
+		// remove gift certificate
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-RemoveGiftCertificate')}", "giftCertificateID", giftCertificateId);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.giftCertificate || !data.giftCertificate.removed) {
+					setGiftCertError("${Resource.msg('billing.giftcerterror','checkout',null)}");
+					return false;
+				}
+				// remove message in UI
+				jQuery("${'#'}gc-"+giftCertificateId).remove();
+				// reinstate payment methods section which might have been hidden if the whole order was paid with gift certs
+				jQuery("${'#'}paymentmethods").removeClass('hide').show();
+				// hide gift cert used for otder total message
+				jQuery(".giftcertused").hide();
+				
+				var countryCode = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+				updatePaymentMethods( countryCode );
+				
+				updateSummary();
+			}
+		});
+	}
+	
+	function setCouponError(msg) {
+		if(!msg) {
+			jQuery("${'#'}couponentry span.errormessage").remove();
+			return;
+		}
+		jQuery("input[name=${pdict.CurrentForms.billingcoupon.couponCode.htmlName}]").parent().append("<span class=\"errormessage\">" + msg + "<\/span>");
+	}
+	
+	function setGiftCertError(msg) {
+		if(!msg) {
+			jQuery("${'#'}giftcertentry span.errormessage").remove();
+			return;
+		}
+		jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").parent().append("<span class=\"errormessage\">" + msg + "<\/span>");
+	}
+	
+	function setGiftCertBalanceInfo(amountExpr) {
+		if(!amountExpr) {
+			jQuery(".balance").empty();
+			return;
+		}
+		jQuery(".balance").text("${Resource.msg('billing.giftcertbalance','checkout',null)}" + amountExpr);
+	}
+	
+	function setCouponRedemptionInfo(redemption) {
+		if(!redemption) return;
+		var redeemMsg = "${Resource.msg('billing.couponnotapplied','checkout',null)}";
+		if(redemption.applied) redeemMsg = "${Resource.msg('billing.couponapplied','checkout',null)}";
+		jQuery("${'#'}couponentry .redemption").append("<div class=\"success\">${Resource.msg('billing.couponlabel','checkout',null)} <span class=\"submitedcoupon\">" + redemption.couponCode + "</span> " + redeemMsg + "<\/div>");
+	}
+	
+	function setGiftCertRedemptionInfo(giftCertificateId, amountExpr) {
+		if(!giftCertificateId || !giftCertificateId) {
+			return;
+		}
+		jQuery("${'#'}gc-"+giftCertificateId).remove();
+		jQuery("${'#'}giftcertentry .redemption").append("<div class=\"success giftcertpi\" id=\"gc-" + giftCertificateId + "\">" + amountExpr + " ${Resource.msg('billing.giftcertredeemed','checkout',null)} <a id=\"rgc-" + giftCertificateId + "\" class=\"remove\" href=\"${'#'}\"><img src=\"${URLUtils.staticURL('/images/icon_remove.gif')}\" alt=\"${Resource.msg('global.remove','locale',null)}\"\/><span>${Resource.msg('global.remove','locale',null)}<\/span><\/a><\/div>");
+		bindGiftCertificateRemoval();
+	}
+	// if the whole order total was paid with gift certs then hide other payment methods and show a message
+	function setPaymentSection(orderBalance) {
+		
+		if(!orderBalance) {
+			return;
+		}
+		
+		if (orderBalance <= 0) {
+			// if the whole order total was paid with gift certs then hide other payment methods and show a message
+			jQuery("${'#'}paymentmethods").hide();
+			// if the order total is zero, determine was it because of the gift certificate use or a promotion? and show appropriate message		
+			jQuery(".giftcertused").html(jQuery(".giftcertpi").length > 0 ? "${Resource.msg('billing.giftcertnomethod','checkout',null)}" : "${Resource.msg('billing.zerobalance','checkout',null)}").show();
+		}
+	}
+	
+	function bindGiftCertificateRemoval() {
+		jQuery("${'#'}giftcertentry a.remove").unbind("click").bind("click", function() {
+			var gcId = app.util.trimPrefix(jQuery(this).attr("id"), "rgc-");
+			removeGiftCertificate(gcId);
+			return false;
+		});
+	}
+	
+	// updates the address form with the attributes of a given address
+	function populateAddressForm(addressID)
+	{
+		// load address details
+		var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.address) {
+					return false;
+				}
+				addressdata = data;
+				// fill the form
+				jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val(data.address.firstName);
+				jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val(data.address.lastName);
+				changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]")[0], data.address.countryCode);
+				jQuery(".country select").change();
+				if(data.address.countryCode == "GB") {
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline1.htmlName}]").val(data.address.address1);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline2.htmlName}]").val(data.address.address2);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val(data.address.address3);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val(data.address.stateCode);
+					}else {
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val(data.address.address1);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val(data.address.address2);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val(data.address.streetName);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val(data.address.residence);
+					jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val(data.address.postBox);
+				}
+				jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val(data.address.city);
+				jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val(data.address.postalCode);
+				//changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]")[0], data.address.stateCode);
+				jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.phone.htmlName}]").val(data.address.phone);
+				jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber.htmlName}]").val(data.address.alternateContactNumber);
+				//jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").filter("[value="+data.address.title+"]").attr("checked","checked");
+				jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val(data.address.title);
+				
+				// remove error messaging
+				jQuery("#addressform span.errormessage").remove();
+				jQuery("#addressform input.errormessage").removeClass("errormessage");
+				jQuery("#addressform .errorlabel").removeClass("errorlabel");
+				/*
+					*Praveen:- Commenting out the following 'updatePaymentMethods(countryCode)' method call, so that if a loggedin user selects a address
+					*			 from drop down then payment details will not be refreshed. 
+					*			
+				*/
+				//updatePaymentMethods( data.address.countryCode );
+				updateAddressObject();
+				var newAddr = (jQ.trim(data.address.title)!='' ? jQ.trim(data.address.title) : "") +
+					(jQ.trim(data.address.firstName)!='' ? " "+ jQ.trim(data.address.firstName) : "") +
+					(jQ.trim(data.address.lastName)!='' ? " "+ jQ.trim(data.address.lastName) : "") +
+					(jQ.trim(data.address.address1)!='' ? "<br>"+ jQ.trim(data.address.address1) : "") +
+					(jQ.trim(data.address.city)!='' ? "<br>"+ jQ.trim(data.address.city) : "") +
+					((jQ.trim(data.address.postalCode)!='.') && (jQ.trim(data.address.postalCode)!='') ? "<br>"+ jQ.trim(data.address.postalCode) : "");
+				jQ('#newDeliveryAddress').html(newAddr);
+				jQ('#addressformOuter').slideUp();
+				jQ('#cardholderform').addClass('done');
+				
+				jQ('#newAddressContainer').removeClass('hide').slideDown();
+				jQ('#newDeliveryAddress').parents('.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+				jQ('#contactdetailsform').addClass('accordionOpen');
+			}
+		});
+	}
+	
+	// updates the credit card form with the attributes of a given card
+	function populateCreditCardForm(cardID)
+	{
+		// load card details
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-SelectCreditCard')}", "creditCardUUID", cardID);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.creditCard) {
+					return false;
+				}
+				
+				// fill the form / clear the former cvn input
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}]").val(data.creditCard.holder);
+				changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]")[0], data.creditCard.type);
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val(data.creditCard.maskedNumber);
+				var expYearValue = "";
+				if(data.creditCard.startYear.indexOf(",") > -1)
+				{
+					expYearValue = data.creditCard.startYear.replace(/,/g,'');
+				}
+				if(data.creditCard.startYear.indexOf(".") > -1)
+				{
+					expYearValue = data.creditCard.startYear.replace(/\./g,'');
+				}
+				
+				//813913: calling the 'showValidFrom' method to make the start from div visible.
+				showValidFrom(data.creditCard.type);
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").val(data.creditCard.startMonth);
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").val(expYearValue);
+				
+				
+				var finalYearValue = "";
+				if(data.creditCard.expirationYear.indexOf(",") > -1)
+				{
+					finalYearValue = data.creditCard.expirationYear.replace(/,/g,'');
+				}
+				if(data.creditCard.expirationYear.indexOf(".") > -1)
+				{
+					finalYearValue = data.creditCard.expirationYear.replace(/\./g,'');
+				}
+				
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val(data.creditCard.expirationMonth);
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val(finalYearValue);
+				
+				//changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]")[0], data.creditCard.expirationMonth);
+				//changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]")[0], data.creditCard.expirationYear);
+				jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").val("");
+				// remove error messaging
+				jQuery("#PaymentMethod_CREDIT_CARD span.errormessage").remove();
+				jQuery("#PaymentMethod_CREDIT_CARD input.errormessage").removeClass("errormessage");
+				jQuery("#PaymentMethod_CREDIT_CARD .errorlabel").removeClass("errorlabel");
+			}
+		});
+	}
+	
+	// changes the selection of the given form select to the given value
+	function changeFormSelection(selectElem, selectedValue)
+{
+	//single shipping FR
+	//check to see if the title dropdown has the value we want to put in it
+	if((typeof(selectElem)!=undefined) && (jQ.trim(selectedValue)!='')){
+		var tempCheck = false;
+		jQ(selectElem).find("option").each(function(){
+			if(jQ(this).val() == selectedValue){
+				tempCheck = true;
+			}
+		});
+		if(tempCheck){
+			jQ(selectElem).val(selectedValue);
+			//old code deprecated in favour of jQuery
+			/*if(!selectElem) return;
+			var options = selectElem.options;
+			if(options.length > 0) {
+				// find index of value to select
+				var idx = 0;
+				for(var i=0; i<options.length; i++) {
+					if(options[i].value != selectedValue) continue;
+					idx = i; break;
+				}
+				selectElem.selectedIndex = idx;
+			}*/	
+		}/*else{
+			
+			if(!jQ(selectElem).is(':visible')){
+				var tempDialogId = jQ(selectElem).parents('.ui-dialog-content').attr('id'); 
+				if(!jQuery('#' + tempDialogId).dialog('isOpen')){
+					jQuery('#' + tempDialogId).dialog('open');
+				}
+				
+			}
+			jQ(selectElem).focus().blur();
+		}*/
+	}
+}
+	
+	// changes the payment method form
+	function changePaymentMethod(paymentMethodID)
+	{
+		jQuery(".paymentform").hide();
+		jQuery("${'#'}PaymentMethod_" + paymentMethodID).removeClass('hide').show();
+		if( jQuery("${'#'}PaymentMethod_" + paymentMethodID).length == 0 )
+		{
+			jQuery("${'#'}PaymentMethod_Custom").removeClass('hide').show();
+		}
+		
+		// ensure checkbox of payment method is checked
+		jQuery("${'#'}is-" + paymentMethodID).attr("checked", true);
+	}
+	
+	// initializes the payment method forms
+	function initPaymentMethodSelection() {
+		
+		// get selected payment method from payment method form
+		var paymentMethodID = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]:checked").val();
+		if( !paymentMethodID )
+		{
+			// if necessary fall back to default payment method (first non-gift-certificate method)
+			paymentMethodID = getDefaultPaymentMethod();
+		}
+		
+		// show payment method section
+		changePaymentMethod(paymentMethodID);
+	}
+	
+	// returns the default payment method
+	function getDefaultPaymentMethod() {
+		<isloop items="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.options}" var="pm">
+	<iscomment>Ignore GIFT_CERTIFICATE method, GCs are handled separately before other payment methods.</iscomment>
+	<isif condition="${pm.value.equals(dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE)}"><iscontinue/></isif>
+	return "${pm.value}";<isbreak/>
+</isloop>
+}
+
+	// updates the current address list entry with the updated address details
+	function updateAddressListEntry() {
+		// get the current address ID and load address details
+		var addressID = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}]").val();
+		var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.address) {
+					return false;
+				}
+				// update the address select entry
+				var addressLine = "(" + data.address.ID + ") " + data.address.address1 + ", " + data.address.city +
+				", " + data.address.stateCode + ", " + data.address.postalCode;
+				
+				// update address list entry
+				var optionElem = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}] > option[value=" + data.address.ID + "]");
+				optionElem.html(addressLine);
+			}
+		});
+	}
+
+	// removes the current address list entry
+	function removeAddressListEntry() {
+		// get the current address ID
+		var addressID = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}]").val();
+		// remove the option element
+		var optionElem = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}] > option[value=" + addressID + "]");
+		optionElem.remove();
+		// reset selection to first entry
+		jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}]")[0].selectedIndex = 0;
+	}
+
+	// updates the order summary based on a possibly recalculated 
+	// basket after a coupon code has been applied (possibly added
+	// bonus products and order discounts are rendered along with
+	// the updated basket)
+	function updateSummary() {
+		var url = "${URLUtils.url('COBilling-UpdateSummary')}";
+		
+		// indicate progress
+		jQuery("#rightcolumn").html(app.showProgress());
+		
+		// load the updated summary area
+		jQuery("#rightcolumn").load( url, function() {
+			jQuery("#rightcolumn").fadeIn("fast");
+		});
+	}
+
+	//updates the state label depending on the given contry code
+	//if the flag updateSelection is set to true the state selection
+	//changes to the first possible select option based on the country
+	function updateStateLabel(countryCode, updateSelection) {
+		var label = "${Resource.msg('forms.state','forms',null)}:";
+		if(countryCode == "CA") {
+			label = "${Resource.msg('forms.province','forms',null)}:";
+		}
+		jQuery("div.state > .label > .labeltext").html(label);
+		
+		if(updateSelection) {
+			var initialOption = "##";
+			if(countryCode == "US") {
+				initialOption = "";
+				} else if(countryCode == "CA") {
+				initialOption = "AB";
+			}
+			changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]")[0], initialOption);
+		}
+	}
+
+	 
+	
+	jQuery(document).ready(function() {
+		
+		updateAddressObject();
+		// select address from list
+		jQuery(".addresslist select").change(function() {
+			var addressID = jQuery(this).val();
+			if(!addressID) return false;
+			cleanAddress = false;
+			populateAddressForm(addressID);
+			return false;
+		});
+		
+		// update state label upon entering page
+		updateStateLabel(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val(), false);
+		
+		// bind coupon redemption
+		jQuery("${'#'+pdict.CurrentForms.billingcoupon.htmlName}").submit(function() {
+			var couponCode = jQuery("input[name=${pdict.CurrentForms.billingcoupon.couponCode.htmlName}]").val();
+			applyCouponCode(couponCode);
+			return false;
+		});
+		
+		// bind gift cert redemption
+		jQuery("${'#'+pdict.CurrentForms.billinggiftcert.htmlName}").submit(function() {
+			var gcId = jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").val();
+			redeemGiftCert(gcId);
+			return false;
+		});
+		
+		// bind gift cert balance check
+		jQuery(".checkbalance a").click(function() {
+			var gcId = jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").val();
+			checkGiftCertBalance(gcId);
+			return false;
+		});
+		
+		// bind gift cert removal
+		bindGiftCertificateRemoval();
+		
+		// bind country code change handler
+		//CR 3030 : Commented to Stop Redisplay of Billing Method Section 
+		//bindCountryChangeHandler();
+		
+		// bind payment method change handler
+		bindPaymentMethodChangeHandler();
+		
+		// initialize payment method selection
+		
+		//Praveen-Commenting this for billing page late load issue
+		//initPaymentMethodSelection();
+		
+		// select credit card from list
+		bindCreditCardPopulationHandler();
+		
+		// handle whole form submit (bind click to continue checkout button)
+		// append form fields of current payment form to this submit
+		// in order to validate the payment method form inputs too
+		jQuery("button[name=${pdict.CurrentForms.billing.save.htmlName}]").click(function() {
+			// determine the current payment method form
+			copyAddressFromJSON();
+			var allFormValid = true,
+			tempInvalidElem = null;
+			jQ("${'#' + pdict.CurrentForms.billing.htmlName}").find('input.required, select.required').each(function(){
+				if(!$(this).valid()){
+					allFormValid = false;
+			        tempInvalidElem = jQ(this);
+			    }
+			});
+			if(allFormValid){
+				var selectedPaymentMethodID = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]:checked").val();
+				
+				// payment method could be absent if the total is 0 (perhaps because of promotion(s)
+				// - 0 is needed otherwise the expression won't return a valid number in non-default locales e.g. in de_DE (decimal point is , which doesn't work)
+				//if(!selectedPaymentMethodID && ${pdict.Basket.getTotalGrossPrice() - 0} > 0) return false;
+				
+				// reset payment insturment flag, false when order total is 0 (becuase of promotion perhaps)
+				var resetPayIns = true;
+				
+				// get the main form
+				var mainForm = jQuery("${'#' + pdict.CurrentForms.billing.htmlName}");
+				
+				// set the payment method at the main form
+				mainForm.append("<input type=\"hidden\" name=\"${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}\" />");		
+				
+				// determine if the order total was paid using gift cert or a promotion
+				if (jQuery(".giftcertused").css("display") == "none") {
+					jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").val(selectedPaymentMethodID);
+					
+					// append inputs of payment method form as hidden elements to main form (all inputs except checkboxes)
+					jQuery("${'#'}PaymentMethod_" + selectedPaymentMethodID + " form :input").filter(":not(:checkbox)").each(function(i, elem) {
+						var input = jQuery(this);
+						mainForm.append("<input type=\"hidden\" name=\"" + input.attr("name") + "\" />");
+						jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=" + input.attr("name") + "]").val(input.val());
+					});
+					// checkboxes are only appended if checked
+					jQuery("${'#'}PaymentMethod_" + selectedPaymentMethodID + " form :checkbox:checked").each(function(i, elem) {
+						var input = jQuery(this);
+						mainForm.append("<input type=\"hidden\" name=\"" + input.attr("name") + "\" />");
+						jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=" + input.attr("name") + "]").val(input.val());
+					});
+				}
+				else {
+					// determine if the order total was paid using gift cert or it was 0 because of promotion(s)
+					jQuery(".giftcertpi").length > 0 ? jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").val("${dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE}") : (resetPayIns=false);
+				}
+				// reset the remaining payment forms (synchronous) only when a method is specified i.e. there is no payment method when order total is 0 perhaps due to promotion(s)
+				if (resetPayIns) {
+					app.ajax.getJson({
+						url: app.util.appendParamToURL("${URLUtils.url('COBilling-ResetPaymentForms')}", "paymentMethodID", selectedPaymentMethodID),
+						async: false,
+						callback: function(data) {}
+					});
+				}
+				// submit the main form - check to see if form is valid - if so, overlay 
+				// please wait dialogue box
+				//* COMMENTED OUT PAYMENT WAIT STORY | TEMPORARY 
+				//INC000006341662 Missing validation message for payment section 
+				var payMethodForm = jQuery("${'#' + pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}");
+				removeValidFrom();
+				var confirmPayMethodValid = payMethodForm.valid();
+				var confirmValid = mainForm.valid();
+				if(confirmValid==true){
+					// show loading spinner
+					//	open a modal window - this has been used instead of the 
+					//	app.dialog version - more room for customisation
+					if(!$("#dialogcontainer").get(0)){
+						jQuery(document.body).append("<div id=\"dialogcontainer\"></div>");
+					}
+					var options = {
+						minWidth:513,
+						minHeight:220,
+						
+						title: pleaseWaitText,
+						zIndex:90210,
+						resizable:false,
+						modal:true,
+						dialogClass:'pleaseWaitDialog',
+						closeText:'close',
+						close: function(ev, ui) { $(this).remove(); },
+						stack:true,
+						closeOnEscape: false,
+						open: function(event, ui) { $(".pleaseWaitDialog .ui-dialog-titlebar-close").hide(); } // Hides close button 
+					}
+					$('#dialogcontainer').dialog(options);
+					jQuery.ajax({
+						
+						dataType: "html",
+						//TODO - this url needs to be made dynamic MattS 7.June 2011
+						url		: "${URLUtils.url('COBilling-GetImage')}",
+						cache	: true,
+						
+						success: function(response, textStatus) {
+							jQuery('#dialogcontainer').html(response);
+							
+							mainForm.submit();									
+						},
+						
+						error: function(request, textStatus, error) {
+							if (textStatus === "parsererror") {								
+								
+							}
+						}
+					});						
+					} else {		
+					// submit form if validation errors.
+					mainForm.submit();
+				}
+				//*/
+				// submit the main form
+				//mainForm.submit();
+			}else{
+				//validation has failed on form submit, so open the popups and slides which contains the faulty field
+				if(!jQ(tempInvalidElem).is(':visible')){
+					//now check to see if its in a dialog or accordion	
+					var tempDialogId = jQ(tempInvalidElem).parents('.ui-dialog-content').attr('id');
+					if(!jQuery('#' + tempDialogId).dialog('isOpen')){
+						jQuery('#' + tempDialogId).dialog('open');
+						 
+					}
+					
+				} 
+			}
+		});
+		
+		jQuery("#privacy").click(function() {
+			jQuery(this).attr("target", "_blank");
+		});
+		// see if we need to show/hide payment methods if the order was paid with gc
+		setPaymentSection("${pdict.Basket.getTotalGrossPrice() - gcPITotal}");
+		
+	});
+
+	function bindPaymentMethodChangeHandler()
+	{
+		// bind payment method change handler
+		jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").click(function() {
+			var selectedID = jQuery(this).val();
+			changePaymentMethod(selectedID);
+		});
+	}
+
+	function bindCreditCardPopulationHandler()
+	{
+		// select credit card from list
+		jQuery(".creditcardlist select").change(function() {
+			var cardUUID = jQuery(this).val();
+			if(!cardUUID) return false;
+			populateCreditCardForm(cardUUID);
+			return false;
+		});
+	}
+
+	function bindCountryChangeHandler()
+	{
+		// bind country code change handler
+		jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").change(function() {
+			updatePaymentMethods( jQuery(this).val() );
+		});
+	}
+ function sameAsShipping(value){
+	 jQuery.ajax({
+			
+			url		: app.util.appendParamToURL("${URLUtils.url('COBilling-SetShippingAddress')}", "sameAsShipping", value),
+			cache	: false,		
+			success: function(response, textStatus) {
+				
+			}
+		});		
+ }
+	//updates the payment method section after billing address country-code changed, coupon code was entered or
+	//or gift certificate was redeemed
+	function updatePaymentMethods(countryCode) 
+	{
+		if (jQuery(".giftcertused").css("display") != "none") return;
+		
+		var url = app.util.appendParamToURL("${URLUtils.url('COBilling-RefreshPaymentMethods')}", "countryCode", countryCode);
+		
+		// indicate progress
+		jQuery("#paymentmethodform").html(app.showProgress());
+		
+		// load the updated payment method area
+		jQuery("#paymentmethodform").load( url, function() {
+			jQuery("#paymentmethodform").fadeIn("fast");
+			initPaymentMethodSelection();
+			bindPaymentMethodChangeHandler();
+			bindCreditCardPopulationHandler();
+		});
+		
+		app.execUjs();
+	}
+	
+	//update address object with the form values
+	function updateAddressObject(){
+		addressJSONObject.firstName =jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val();
+		addressJSONObject.lastName = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val();
+		addressJSONObject.country = jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+		addressJSONObject.city =   jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val();
+		addressJSONObject.zip = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val();
+		addressJSONObject.title = jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]").val();
+		
+        if( ${pdict.CurrentForms.billing.billingAddress.addressFields.country.value == "GB"}){
+		addressJSONObject.address1 = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline1.htmlName}]").val();
+		addressJSONObject.address2 = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline2.htmlName}]").val();
+		addressJSONObject.address3 = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val();
+		addressJSONObject.county = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val();
+		}else{
+		
+		addressJSONObject.address1 = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val();
+		addressJSONObject.address2 = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val();
+		//addressJSONObject.city = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val();
+		//addressJSONObject.county = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]").val();
+		addressJSONObject.streetName = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val();
+		addressJSONObject.residence = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val();
+		addressJSONObject.postBox = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val();
+		}
+}
+		
+	//update form with address object values
+	function copyAddressFromJSON(){
+		 jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val(addressJSONObject.firstName);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val(addressJSONObject.lastName);
+			changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]")[0], addressJSONObject.country);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val(addressJSONObject.city);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val(addressJSONObject.zip);
+			changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]")[0], addressJSONObject.title);
+			
+			
+			
+			if( addressJSONObject.country =="GB"){
+			
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline1.htmlName}]").val(addressJSONObject.address1);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline2.htmlName}]").val(addressJSONObject.address2);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val(addressJSONObject.address3);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val(addressJSONObject.county);
+			}else{
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val(addressJSONObject.address1);
+			jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val(addressJSONObject.address2);
+			//jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val(addressJSONObject.city);
+		    //jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]").val(addressJSONObject.county);
+		    jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val(addressJSONObject.streetName);
+		    jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val(addressJSONObject.residence);
+		    jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val(addressJSONObject.postBox);
+		}
+
+	}	
+
+//--></script>
+
+</isdecorate>

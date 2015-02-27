@@ -1,0 +1,92 @@
+<isdecorate template="account/pt_account_landing">
+<isinclude template="util/modules"/>
+<div class="accountpaymentinstruments">
+	<div class="accountoverview surround">
+	<isslot id="account-banner2" description="Banner for My Account pages" context="global" />
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+	<iscomment><h4>${Resource.msg('paymentinstrumentlist.header','account',null)}</h4></iscomment>
+	<iscomment><a class="addcreditcard" id="AddCreditCard" title="${Resource.msg('paymentinstrumentlist.addcard','account',null)}">${Resource.msg('paymentinstrumentlist.addcard','account',null)}</a></iscomment>
+	
+	
+	<iscomment>Praveen: Code change for swapping the position of "Add a Card" button and card images</iscomment>
+	
+	<div class="addCard roundedBtn">
+		<a href="javascript:;" class="expandable-btn grey addcreditcard" id="AddCreditCard" title="${Resource.msg('paymentinstrumentlist.addcard','account',null)}"><span>${Resource.msg('paymentinstrumentlist.addcard','account',null)}</span></a>
+	</div>		
+	<iscomment>Praveen: End</iscomment>
+	<div class="paymentinstruments">
+		<isif condition="${pdict.PaymentInstruments.size() > 0}">
+				<isloop items="${pdict.CurrentForms.paymentinstruments.creditcards.storedcards}" var="creditcard" status="loopstate">
+				<div class="creditcard">
+					<iscomment>
+					<div class="defaultselection">
+						<input id="SetDefault${creditcard.object.UUID}" type="radio" value="${creditcard.object.UUID}" /> ${Resource.msg('paymentinstrumentlist.defaultcard','account',null)}
+					</div><!-- END: defaultselection -->
+					</iscomment>
+					<isminicreditcard p_card="${creditcard.object}" p_show_expiration="${true}"/>
+					<div class="actions">
+						<form action="${URLUtils.url('PaymentInstruments-Delete')}"  method="post" id="creditcards_${loopstate.count}">
+							<fieldset>
+								<input id="card_${loopstate.count}" style="display:none" type="submit" value="${Resource.msg('paymentinstrumentlist.deletecard','account',null)}" name="${creditcard.remove.htmlName}"/>	
+								<div class="roundedBtn"><a href="javascript:;" class="deletelink expandable-btn grey" title="${Resource.msg('paymentinstrumentlist.deletecard','account',null)}"><span>${Resource.msg('paymentinstrumentlist.deletecard','account',null)}</span></a></div>
+								<input type="hidden" name="${pdict.CurrentForms.paymentinstruments.secureKeyHtmlName}" value="${pdict.CurrentForms.paymentinstruments.secureKeyValue}"/>
+							</fieldset>
+						</form>			
+					</div><!-- END: actions -->			
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div><!-- END: creditcard -->
+		    	</isloop>
+		    	<div class="clear"><!-- FLOAT CLEAR --></div>
+		<iselse>
+		    <div class="">${Resource.msg('paymentinstrumentlist.nocardsaddedmsg','account',null)}</div>	
+		    <div class="clear"><!-- FLOAT CLEAR --></div>
+		</isif>
+	</div><!-- END: paymentinstruments -->
+	<div class="bordertop"></div>
+	<iscomment>Praveen: Code change for swapping the position of "Add a Card" button and card images</iscomment>
+	<div class="dwContent">
+		<div class="payment_cards ms_text_2">
+			<span class="paymentcardtext">${Resource.msg('paymentinstrumentlist.payementmethodsaccepted','account',null)}</span>
+			<iscontentasset aid="payment-card-images"/>	
+			<div class="clear"><!-- FLOAT CLEAR --></div>	
+		</div>
+	</div>
+	<iscomment>Praveen: END</iscomment>
+	</div><!-- END: accountoverview -->
+<div class="button_wrapper">
+			<div class="floatleft btn-grey-flat padding0">
+						<button value="Back" name="BACK_ACTION_TODO" type="submit" class="" onclick="javascript: window.location.href='${URLUtils.https('Account-Show')}';">
+							<span class="back-icon">${Resource.msg('global.back','locale',null)}</span>
+						</button>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="floatright btn-grey-dark padding0">
+						<button value="Finished" name="BACK_ACTION_TODO" type="submit" class="" onclick="javascript: window.location.href='${URLUtils.https('Account-Show')}';">
+							<span class="back-icon">${Resource.msg('global.returnmyaccount','locale',null)}</span>
+						</button>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>	
+		</div>
+</div><!-- END: accountpaymentinstruments -->
+<iscontentasset aid="account-footer"/>
+<script type="text/javascript"><!--
+	jQuery(document.body).bind('dialogClosed', function(event){
+	      window.location.href = "${URLUtils.url('PaymentInstruments-List')}";	
+    });
+
+	jQuery(document).ready(function() {
+		jQuery(".deletelink").click(function() {	
+			var url = app.util.appendParamToURL("${URLUtils.url('PaymentInstruments-DeleteConfirmation')}", "cardID", jQuery(this).parent().prev().attr('id'));
+			app.dialog.open(url,'${Resource.msg('paymentinstrumentlist.deletedialogheader','account',null)}');
+		});	
+
+		jQuery(".addcreditcard").click(function() {	
+			app.dialog.open('${URLUtils.url('PaymentInstruments-Add')}','${Resource.msg('paymentinstrumentdetails.header','account',null)}');
+		});	
+
+	});
+
+
+//--></script>
+</isdecorate>

@@ -1,0 +1,130 @@
+<isdecorate template="tablet/account/pt_account">
+<isinclude template="tablet/util/modules"/>
+
+<iscomment>Report this checkout step</iscomment>
+<isset name="checkoutstep" value="${1}" scope="page"/>
+<isset name="checkoutname" value="${'CheckoutMethod'}" scope="page"/>
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+<h1 class="ms_header_1 checkoutwelcome">${Resource.msg('globalaccount.welcome','locale',null)}</h1>
+<div class="checkoutlogin">
+
+	<iscomment>new customer</iscomment>
+	<div class="logincreate">
+	<iscomment><!--  added class in h3 | Asha | 04-march-2011 --></iscomment>
+		<iscomment><!-- Added sIFR implementaion | Asha | 08-mar-2011 --></iscomment>
+		<h3 class="logincreateHeader"><span class="ms_header_login">${Resource.msg('globalaccount.createheader','locale',null)}</span></h3>
+		<iscomment>
+		<div class="createaccount">
+			<p>${Resource.msg('globalaccount.createmessage','locale',null)}</p>
+			<form action="${URLUtils.httpsContinue()}" method="post">
+					<div class="createaccountbutton">
+						<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.login.register.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span></button>
+					</div><!-- END: createaccountbutton -->
+					<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				
+			</form>
+			<div class="createbenefits">
+				<iscontentasset aid="create-account-benefits"/>
+			</div><!-- END: createbenefits -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: createaccount -->
+		</iscomment>
+		<iscomment><!-- Adding static HTML snippet as per VD | we don't have this available in sitegenesis. Please create dynamic component.| Asha | 04-mar-2011 --></iscomment>
+		<div class="continue_checkout">
+			<!-- <div class="shadowbar">&nbsp;</div> -->
+				<h4>${Resource.msg('globalaccount.createmessageheading','locale',null)}</h4>
+				<p>${Resource.msg('globalaccount.createmessagetext','locale',null)}</p>
+			<form action="${URLUtils.httpsContinue()}" method="post">
+				<div class="floatleft btn-green-flat topmargin">
+						<button title="${Resource.msg('global.continueCheckout','locale',null)}" type="button" onclick="submitLoginForm();" value="${Resource.msg('global.continueCheckout','locale',null)}" name="${pdict.CurrentForms.login.unregistered.htmlName}"><span class="btn-ic-lock">${Resource.msg('global.continueCheckout','locale',null)}</span><span class="arrow-btn"></span></button>
+						<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				</div>
+			</form>
+			<div class="clear"></div>
+		</div>
+	</div><!-- END: logincreate -->
+
+	<iscomment>returning customer</iscomment>
+	<isset name="pageName" value="checkout" scope="pdict"/>
+	<script type="text/javascript">
+		//Variables added for Omniture Tagging | Naveen Kumar	
+		//this event var is used on chkout signin and account signin pages
+		s.events = "${Resource.msg('omniture.events.signin','omniture',null)}" ;
+	</script>	
+	<isinclude template="tablet/account/login/logininclude"/>
+	<iscomment><!--  Check Order section is not required as per VD | Asha | 04-march-2011 --></iscomment>
+	<iscomment>Not Available in HTMLs | Naveen | <br /></iscomment>
+	<iscomment>
+	<div class="logingeneral">
+		<h3>${Resource.msg('checkoutlogin.guestheader','checkout',null)}</h3>
+		<div class="guestcontinue">
+			<p>${Resource.msg('checkoutlogin.guestmessage','checkout',null)}</p>
+			<form action="${URLUtils.httpsContinue()}" method="post">
+			<div class="continuecheckoutbutton">
+				<button type="submit" value="${Resource.msg('checkoutlogin.continuebutton','checkout',null)}" name="${pdict.CurrentForms.login.unregistered.htmlName}"><span>${Resource.msg('checkoutlogin.continuebutton','checkout',null)}</span></button>
+				<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				</div><!-- END: createaccountbutton -->
+			</form>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: checkorder -->
+	</div>
+	</iscomment>
+
+</div>
+<div class="clear"></div>
+<div class="backbutton floatleft btn-grey-flat">
+	<div class="link_button">
+		<a href="${URLUtils.http('Cart-Show')}" title="${Resource.msg('global.back','locale',null)}" class="back-icon">${Resource.msg('global.back','locale',null)}</a>
+	</div>
+</div>
+<div class="clear"></div>
+<iscomment>
+<!-- shifted to footer_checkout.isml : shahzad for 4499 UAT-->
+<div class="checkout_generic_bottom">
+		<div class="inner_wrapper">
+			<h3 class="needhelp"><span class="chkoutHelpFooter">${Resource.msg('cart.needhelp','checkout',null)} ${Resource.msg('cart.customerservicenumber','checkout',null)}</span></h3>
+			<p class="supportText">
+				${Resource.msg('cart.customerservicetext','checkout',null)} 
+					<a target="_blank" href="${URLUtils.http('Page-HelpPageShow','secId','faq-06-02','quesId','#faq-06-02-01')}" title="${Resource.msg('cart.customerservicetextlink','checkout',null)}">					
+						${Resource.msg('cart.customerservicetextlink','checkout',null)}</a>${Resource.msg('global.fullstop','locale',null)}
+			</p>
+		</div>
+		<!--<div class="divider">&nbsp;</div>
+		<div class="detail_section">
+				 <h4>${Resource.msg('cart.customerservicenumber','checkout',null)}</h4>
+				 <p>${Resource.msg('cart.customerservicetext','checkout',null)} 
+					<a target="_blank" href="${URLUtils.http('Page-HelpPageShow','secId','faq-06-02','quesId','#faq-06-02-01')}" title="${Resource.msg('cart.customerservicetextlink','checkout',null)}">					
+						${Resource.msg('cart.customerservicetextlink','checkout',null)}</a>${Resource.msg('global.fullstop','locale',null)}
+				</p>
+								
+		</div> -->
+</div>
+</iscomment>
+<script type="text/javascript"><!--
+function submitLoginForm() {
+	    var post = null;
+		
+		var submitDialogURL = "${URLUtils.url('COShipping-Start')}";
+
+  		jQuery.ajax({
+		   type: "POST",
+		   url: app.URLs.submitFormURL,
+		   data: post,
+		   dataType: 'html',
+		   success: function(data){
+				var showurl = "${URLUtils.https('COShipping-Start')}";
+				window.location.href = showurl;
+		   },
+		   failure: function(data) {
+		   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+		   }
+		});
+
+
+
+			
+		}
+
+//--></script>
+
+</isdecorate>

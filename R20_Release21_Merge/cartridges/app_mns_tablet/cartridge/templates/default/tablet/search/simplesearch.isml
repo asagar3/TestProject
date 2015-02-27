@@ -1,0 +1,67 @@
+<script type="text/javascript"><!--
+var searchSuggestURL = "${URLUtils.url('Search-GetSuggestions')}";
+
+jQuery(document).ready(function() {
+	app.searchsuggest.init("SimpleSearchForm", "searchinput","searchbutton", "${Resource.msg('simplesearch.searchtext','search',null)}", "suggestions", searchSuggestURL);
+	$(window).resize(function() {
+		app.searchsuggest.init("SimpleSearchForm", "searchinput","searchbutton", "${Resource.msg('simplesearch.searchtext','search',null)}", "suggestions", searchSuggestURL);
+	});
+});
+//-->
+//QC defect - 613 | default Search text should be removed when control is in the search text box
+function emptyTextBox(){
+	var textVal = document.getElementById("searchinput").value; 
+	var hiddenTextVal = document.getElementById("hiddenSearchinput").value;	
+	if (textVal == hiddenTextVal) {		
+		document.getElementById("searchinput").value = "";
+	}
+	return true;
+}
+</script>
+
+<div class="sitesearch">
+	<form action="${URLUtils.http('Search-Show')}" method="get" id="SimpleSearchForm" class="simplesearch"> <!-- onsubmit="javascript: setOmnitureVariablesForSearch();"  -->
+		<fieldset>
+			<legend>Personalia:</legend>
+			<label for="searchinput">${Resource.msg('simplesearch.searchlabel','search',null)}</label>
+			<span class="deleteicon" />
+				<input type="text" name="q" value="${Resource.msg('simplesearch.searchtext','search',null)}" class="simplesearchinput deletable" id="searchinput" onfocus="javascript: emptyTextBox();"/>
+				<span id="closebtn" class="hidden"></span>
+			</span>
+			<iscomment>hidden field created to fix the QC defect - 613</iscomment>
+			<label for="hiddenSearchinput">${Resource.msg('simplesearch.searchlabel','search',null)}</label><input type="hidden" name="hiddenQ" value="${Resource.msg('simplesearch.searchtext','search',null)}" id="hiddenSearchinput"/>
+			<iscomment>
+			    Please do not use a image based button here, because it will prevent caching due to its dynamic
+			    image click coordinates in the url. It is possible but might hurt the performance.
+			</iscomment>
+			<button type="submit" value="${Resource.msg('global.go','locale',null)}" name="simplesearch" title="Search" id="searchbutton"><span>${Resource.msg('global.go','locale',null)}</span></button>
+		</fieldset>
+	</form>
+</div><!-- END: sitesearch -->
+<script type="text/javascript">
+	$(document).ready(function(){
+        $("#closebtn").click(function() {
+            $(this).prev('input').val('').focus();
+            $("span.deleteicon span").removeClass().addClass("hidden");
+        });
+		
+        $('input.deletable').bind("keyup focus",function(event){
+        	if($(this).val() != ""){
+        		$(this).css({
+        			'width':236,
+        			'paddingRight':35
+        		});
+        		$("span.deleteicon span").removeClass().addClass("visible");
+        		//$("span.deleteicon span").show();
+        	}
+        	else{
+        		//$("span.deleteicon span").hide();
+        		$(this).css({
+        			'width':271,
+        			'paddingRight':0
+        		});
+        		$("span.deleteicon span").removeClass().addClass("hidden");
+        	}
+        });
+	});
+</script>

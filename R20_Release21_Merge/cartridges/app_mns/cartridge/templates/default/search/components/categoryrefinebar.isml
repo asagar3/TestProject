@@ -1,0 +1,43 @@
+<isinclude template="util/modules"/>
+
+<iscomment>
+	This template renders the category refinement for the top level categories
+	only. The refinements are not calculated based on a search result, but
+	rendered from the online sub categories of the root category.
+
+	The template can be used by pages that need to display some sort of condensed
+	refinement navigation, e.g. empty search results.
+</iscomment>
+
+<iscomment>determine top level categories </iscomment>
+<isscript>
+	var siteCatalog : dw.catalog.Catalog = dw.catalog.CatalogMgr.getSiteCatalog();
+	var root : dw.catalog.Category = null;
+	if(siteCatalog != null)
+	{
+		root = siteCatalog.getRoot();
+	}
+</isscript>
+
+<div class="searchrefine">
+	<iscomment><!-- Following 2 headers are not required as per current VD | So commenting out | Asha | 04-Mar-2011 --></iscomment>
+	
+	<h1 class="searchheader">${Resource.msg('searchrefinebar.searchresults','search',null)}</h1>
+	<iscomment>
+	<div class="searchrefinemessage">${Resource.msg('searchrefinebar.refineresults','search',null)}</div><!-- END: searchrefinemessage -->
+	</iscomment>
+	<div class="searchrefinements">
+		<div id="refinement-category" class="searchcategories refinement">
+		<iscomment><!-- changed span tag to h3 to match with VD | Asha | 04-mar-2011 --></iscomment>
+			<div class="searchcategory"><h3>${Resource.msg('categoryrefinebar.brand','search',null)}</h3></div>
+			<iscomment><ul class="refinementcategory" id="category-level-1"></iscomment>
+			<ul class="refineattributes" id="category-level-1">
+			<isloop items="${root.onlineSubCategories}" var="topCat">
+				<li <isif condition="${topCat.onlineSubCategories.size() > 0}">class="expandable"</isif>>
+					<a class="refineLink" title="${topCat.displayName}" href="${dw.catalog.ProductSearchModel.urlForCategory('Search-Show',topCat.ID)}"><isprint value="${topCat.displayName}"/></a>
+				</li>
+			</isloop>
+			</ul>
+		</div><!-- END: searchcategories -->
+	</div><!-- END: searchrefinements -->
+</div><!-- END: searchrefine -->

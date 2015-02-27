@@ -1,0 +1,34 @@
+<!--- TEMPLATENAME: DiscountCheckEmail.isml --->
+<iscontent type="text/html" charset="UTF-8"/>
+<isinclude template="util/modules"/>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"> 
+
+<font size="5"><b><isprint value="${'Products having list price as N/A : '}"></b></font> <BR>
+<isif condition="${pdict.FinalOutput1[0] !='No products found'}">
+<b><isprint value="${'Product ID , Product Name'}"> </b> <BR>
+</isif>
+<isloop iterator="${pdict.FinalOutput1}" var="product1" status="status">
+<isprint value="${product1}"> <BR>
+</isloop>
+
+<BR>
+<BR>
+
+ <font size="5"><b><isprint value="${'Products selling on more than 50% discount : '}"> </b></font><BR>
+<isif condition="${pdict.FinalOutput2[0] !='No products found'}">
+<b><isprint value="${'Product ID , Product Name , List Price , Sales Price'}"> </b><BR>
+</isif>
+<isloop iterator="${pdict.FinalOutput2}" var="product2" status="status">
+<isprint value="${product2}"> <BR>
+</isloop>
+
+<BR>
+<BR>
+
+<font size="5"><b><isprint value="${'Products having less than 1 Euro sale price : '}"></b></font><BR>
+<isif condition="${pdict.FinalOutput3[0] !='No products found'}">
+<b><isprint value="${'Product ID , Product Name , List Price , Sales Price'}"> </b><BR>
+</isif>
+<isloop iterator="${pdict.FinalOutput3}" var="product3" status="status">
+<isprint value="${product3}"> <BR>
+</isloop>

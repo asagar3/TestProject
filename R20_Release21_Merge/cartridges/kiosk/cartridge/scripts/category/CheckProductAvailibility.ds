@@ -1,0 +1,30 @@
+/**
+*
+* 	 @input searchQuery : String
+*	 @output searchPhrase : String
+*/
+importPackage( dw.system );
+importPackage( dw.catalog);
+importPackage( dw.util);
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var searchQuery : String = args.searchQuery;
+	try{
+		var prod : dw.catalog.Product = dw.catalog.ProductMgr.getProduct(searchQuery);
+		if(!empty(prod) &&  prod.isVariant()){
+			var variationModel : dw.catalog.ProductVariationModel = prod.variationModel;
+			var prod = variationModel.master;
+			args.searchPhrase = prod.ID;
+		}else{
+			args.searchPhrase = searchQuery;	
+		}
+	}catch(e){
+		Logger.error("Error in CheckProductAvailibility, error: "+e);	
+		return PIPELET_ERROR;
+	}
+	return PIPELET_NEXT;
+}
+
+
+

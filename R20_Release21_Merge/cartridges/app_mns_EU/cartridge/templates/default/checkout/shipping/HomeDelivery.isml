@@ -1,0 +1,370 @@
+
+<div class="collapseContent">
+	<div class="homeDelivery">
+		<div class="userAddressDetails">
+						<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+				<div class="addresslist">
+					<iscomment>
+					<div class="selectaddress">
+						<span class="selectaddressmessage">${Resource.msg('pt_checkout.select_shipping_address','checkout',null)}</span>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div><!-- END: selectaddress -->
+					</iscomment>
+					<label for="${pdict.CurrentForms.singleshipping.addressList.htmlName}" class="hideLabel">
+						${pdict.CurrentForms.singleshipping.addressList.htmlName}
+		        	</label>
+					<select id="${pdict.CurrentForms.singleshipping.addressList.htmlName}" name="${pdict.CurrentForms.singleshipping.addressList.htmlName}">
+						<option value="" selected="selected">${Resource.msg('forms.address.list.select','forms',null)}</option>
+
+						<isif condition="${pdict.CurrentCustomer.profile.addressBook.addresses.size() == 0}">
+							<option value="">${Resource.msg('forms.address.list.none','forms',null)}</option>
+						<iselse/>
+							<isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address">
+								<isif condition="${address.countryCode != 'GB'}"><iscomment>added this if condition for INC000009381959  </iscomment>
+									<option value="${address.ID}">
+										<iscomment><isprint value="${address.custom.streetName}"/>,</iscomment>
+										<iscomment>Praveen: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+										
+										<isprint value="${address.address1}"/>,
+										<isprint value="${address.city}"/>,
+										<isif condition="${address.stateCode != null && !empty(address.stateCode)}">
+											<isprint value="${address.stateCode}"/>,
+										</isif>
+										<isif condition="${address.postalCode != null && !empty(address.postalCode)}">
+											<isprint value="${address.postalCode}"/>,
+										</isif>
+										<isprint value="${address.countryCode}"/>
+									</option>
+								</isif>
+								<iscomment>End: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+							</isloop>
+						</isif>
+						<isloop items="${productListAddresses.keySet()}" var="addressKey">
+							<isset name="address" value="${productListAddresses.get(addressKey)}" scope="page"/>
+							<option value="${addressKey}" ${address.ID == pdict.SelectedAddressID ? "selected='selected'" : ""}>
+							(
+							<isif condition="${productListTypes.get(addressKey) == dw.customer.ProductList.TYPE_WISH_LIST}">
+								${Resource.msgf( 'singleshipping.wishlist', 'checkout', null, owners.get(addressKey).profile.firstName )}
+							<iselseif condition="${productListTypes.get(addressKey) == dw.customer.ProductList.TYPE_GIFT_REGISTRY}">
+								${Resource.msgf( 'singleshipping.giftregistry', 'checkout', null, owners.get(addressKey).profile.firstName )}
+							<iselse>
+								<isprint value="${address.ID}"/>
+							</isif>
+							) <isprint value="${address.address1}"/>, <isprint value="${address.city}"/>, <isprint value="${address.stateCode}"/>, <isprint value="${address.postalCode}"/></option>
+						</isloop>					
+					</select><isif condition="${productListAddresses.size() > 0}"><div class="hidden json">${addressesJsonStr}</div></isif>
+				</div><!-- END: addresslist -->
+			<iselse>
+				<isif condition="${productListAddresses.size() > 0}">
+					<div class="addresslist">	
+						<div class="selectaddress">
+							<select class="selectbox" name="${pdict.CurrentForms.singleshipping.addressList.htmlName}">
+							<isif condition="${productListAddresses.size() > 1}">		
+								<option value="">${Resource.msg('forms.address.list.select','forms',null)}</option>
+							</isif>
+							<isloop items="${productListAddresses.keySet()}" var="addressKey">
+								<isset name="address" value="${productListAddresses.get(addressKey)}" scope="page"/>									
+								<option value="${addressKey}" ${address.ID == pdict.SelectedAddressID ? "selected='selected'" : ""}>
+								(
+								<isif condition="${productListTypes.get(addressKey) == dw.customer.ProductList.TYPE_WISH_LIST}">
+									${Resource.msgf( 'singleshipping.wishlist', 'checkout', null, owners.get(addressKey).profile.firstName )}
+								<iselseif condition="${productListTypes.get(addressKey) == dw.customer.ProductList.TYPE_GIFT_REGISTRY}">
+									${Resource.msgf( 'singleshipping.giftregistry', 'checkout', null, owners.get(addressKey).profile.firstName )}
+								<iselse>
+									<isprint value="${address.ID}"/>
+								</isif>
+								) <isprint value="${address.address1}"/>, <isprint value="${address.city}"/>, <isprint value="${address.stateCode}"/>, <isprint value="${address.postalCode}"/></option>
+							</isloop></select><div class="hidden json">${addressesJsonStr}</div>
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+						</div><!-- END: selectaddress -->
+					</div><!-- END: addresslist -->
+				</isif>
+				
+			</isif>	
+			<iscomment><!--  TODO:8/02/2011 these new fields need Validation rules added. see the trunk/requirements/BRDs/validation file--></iscomment>
+				
+			<!--  BEGIN: NEW FORM FIELDS -->
+			<div class="formfield required requiredmessagewrapper">
+				<div class="mMessage"><span class="requiredmessage">${Resource.msg('global.requiredfield','locale',null)}</span><span class="requiredindicator">*</span></div>
+				<div class="value"><!-- Empty Value Container --></div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div><!-- END: required -->
+			<div class="formfield storeId" style="display: none">
+			   	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID}" type="input" label="false"/>
+			   	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storeCollectionDate}" type="input" label="false"/>
+			   	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storePickupTime}" type="input" label="false"/>
+			   	<div class="clear"><!-- FLOAT CLEAR --></div>
+		    </div><!-- END: lastname -->
+			<div class="formfield title">
+				<label for="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}" class="label">
+					<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span>
+					<span class="requiredindicator">*</span>
+				</label>							
+				<isscript>
+					importScript('checkout/Utils.ds');
+					var titleMap : dw.util.Map = getTitleMap();					
+				</isscript>
+				<div class="value">
+				<select id="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}" class="selectbox title required">					
+					<option value="">${Resource.msg('forms.select','forms',null)}</option>
+					<isloop items="${titleMap.keySet().iterator()}" var="key">
+						<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+					</isloop>
+				</select>
+				</div>
+			</div><!-- END: title -->
+		    <div class="formfield firstname">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName}" type="input" label="false"/>
+		    </div><!-- END: firstname -->
+		   <div class="formfield lastname">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName}" type="input" label="false"/>
+		    </div><!-- END: lastname -->
+		   <div class="formfield address1">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1}" type="input" label="false"/>			
+		    </div><!-- END: address1 -->
+		
+		    <iscomment><!--
+		      <!--TODO:08/03/2011 replace Street name HTML with functioning field
+		    <div class="formfield streetname">
+			<label for="TODO_1" class="label">
+					<span class="labeltext">Street Name:</span>
+					<span class="requiredindicator">*</span>
+			</label><!-- END: label 
+			<div class="value">
+				 <input type="text" maxlength="35" value="" name="TODO_1" id="TODO_1" class="textinput required" />
+			</div>
+		    	<div class="clear"></div>
+		    </div> -->
+		   </iscomment>
+		    
+		    <div class="formfield address2 norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2}" type="input" label="false"/>
+		    </div><!-- END: address2 -->
+		    <div class="formfield address3 norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3}" type="input" label="false"/>
+		    </div><!-- END: address3 -->
+		    <div class="formfield city">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city}" type="input" label="false"/>
+		    </div><!-- END: city -->
+		    <div class="formfield state">
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state}" type="input" value="false"/>
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state}" type="input" label="false"/>
+			</div><!-- END: state -->
+			    
+			 <div class="formfield postcode_fr">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip}" type="input" label="false"/>
+		    	<div class="formfieldtooltip ziptip">
+			    	<istooltip content_id="help-shippingPostCode"/>
+			    </div>
+		    	<div class="clear"><!-- FLOAT CLEAR --></div>		
+		    </div><!-- END: zip -->
+			    <iscomment>  
+		     <div class="formfield postbox norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox}" type="input" label="false"/>
+		    </div>
+		      
+		  <div class="formfield residence">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence}" type="input" label="false"/>	
+		    </div>
+		   <div class="formfield streetname">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.streetName}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.streetName}" type="input" label="false"/>	
+		    </div></iscomment>
+		   <!--TODO:08/03/2011 replace postcode HTML with functioning field -->
+		    
+		    
+		    
+		 
+		     
+		     <!-- TODO: 9/03/2011 integrate the Country variable. -->
+		     <!--  NEW Country field. Was a select. now is a disabled="disabled" text field -->
+		     <iscomment><!-- commented as per form.xlsx --></iscomment>
+		      
+		    <isscript>
+		    	var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+		    </isscript>
+		    <div class="formfield country">
+		    	<label for="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}" class="label">
+					<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+					<span class="requiredindicator">*</span>
+				</label>
+				<div class="value">
+		    		<select id="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}" name="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}" class="selectbox country required">
+						<option value="">${Resource.msg('forms.select','forms',null)}</option>
+						<isloop items="${countryCodes}" var="countryCode">
+							<isif condition="${countryCode.getValue() != 'GB'}"> <iscomment>added this if condition for CR 810 </iscomment>
+								<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+							</isif>
+						</isloop>
+					</select>
+				</div>
+		    </div><!-- END: country -->
+		   <iscomment> 
+		    <!-- 
+		    <div class="formfield country">
+			    	<!--  <isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country}" type="text" disabled="disabled" value="false"/>
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country}" type="text"  disabled="disabled" label="false"/>
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country}" type="input" disabled="disabled" class="textinput disabled_textfield"/>
+					<div class="clear"><!-- FLOAT CLEAR </div>
+			 </div><!-- END: country --></iscomment>
+			   
+		    
+		    <div class="formfield phone">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone}" type="input" label="false" xhtmlclass="phone"/>
+		    	<div class="formfieldtooltip">
+		    	<istooltip content_id="help-telephone"/>
+		    	</div> 			
+		    </div><!-- END: phone -->
+		    <div class="formfield alternatecontactnumber norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber}" type="input" label="false" xhtmlclass="phone"/>
+		    </div>
+		    
+		   <div class="formfield addressoptions">
+		    	<fieldset class="fieldSet">
+		    		<legend>
+			    		<iscomment>Add address to Address Book</iscomment>
+			    		<isif condition="${pdict.CurrentCustomer.authenticated}">
+			    			
+			    			<iscomment>Commenting the code for eliminating the checkbox and setting the 'addToAddressBook' to true
+			    			<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addToAddressBook}" type="checkbox"/></iscomment>
+			    			<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addToAddressBook}" type="hidden" value="${true}"/>
+			    		</isif>
+			    		<iscomment>Use address for Billing Address</iscomment>
+			    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress}" type="checkbox" />
+		    		</legend>
+		    		<div class="formfieldtooltip formfieldtooltipAdjust">
+			    			<istooltip content_id="help-usesameaddress"/>
+					</div>
+		    		<div class="actions">
+  						
+  						<span class="radio"><input type="radio" id="sameBillingAddressYes" name="xyz" onclick="javascript:useSameaddressButton('Yes')" checked="checked" /> <label for="sameBillingAddressYes">${Resource.msg('forms.yes','forms',null)}</label></span>
+  						<span class="radio"><input type="radio" id="sameBillingAddressNo" name="xyz" onclick="javascript:useSameaddressButton('No')"/> <label for="sameBillingAddressNo">${Resource.msg('forms.no','forms',null)}</label></span>
+  						<div class="clear"></div>  
+				   </div>
+		    		
+		    	</fieldset>
+
+		    	<div class="clear">&nbsp;</div>
+		    </div><!-- END: addressoptions -->
+		    <div class="clear">&nbsp;</div>
+		    
+		    <div id="shippingmethodform"></div>
+		    <!-- END: shippingmethodform -->
+  </div><!-- END: userAddressDetails -->
+
+<!--TODO:09/03/2011 replace "Door code" HTML with functioning field -->
+
+		<div class="delivery_instructions">
+			<iscomment> Form Field is added in singleshipping.xml | Naveen Kumar</iscomment> 
+				<label for="dwfrm_singleshipping_shippingmethod_deliveryInstructions" class="label">
+					${Resource.msg('forms.deliveryinstructions','forms',null)}:
+					<span class="cLimit">${Resource.msg('forms.110character','forms',null)}</span>
+				</label><!-- END: label -->
+				<iscomment> <div class="value">
+				 	<textarea cols="10" rows="4" onclick="return maxLength(this);" onpaste="return maxLengthPaste(this);" name="deliveryInstructions"  class="textbox" ></textarea>
+				</div>
+			</iscomment>
+			<iscomment><isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingmethod.deliveryInstructions}" type="textarea" value="false"/></iscomment>
+	    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingmethod.deliveryInstructions}" type="textarea" label="false" attribute1="rows" value1="4" attribute2="cols" value2="10" xhtmlclass="textbox" />				
+			<div class="formfieldtooltip">
+	    		<istooltip content_id="help-deliveryinstruction"/>
+			</div>
+	    	<div class="clear"></div>
+	    </div>
+	    <div class="giftMessageDiv">
+	  	    <div class="formfield giftmessage">
+		    	<div class="label">
+		    		<isprint value="${Resource.msg(pdict.CurrentForms.singleshipping.shippingAddress.isGift.label,'forms',null)}">:
+		    		<span class="cLimit">${Resource.msg('forms.240character','forms',null)}</span>
+		    	</div>
+	    		<div class="giftmessagetext"><iscomment>INT 963: to initialise id of textarea</iscomment>
+	    		<!--span class="giftmessagecaption">${Resource.msg('singleshipping.enteryourmessage','checkout',null)}</span-->
+		    	<label for="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlName}" class="hideLabel">
+					${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlName}
+		        </label>
+		    	<iscomment><isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage}" type="textarea" value="false"/></iscomment>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage}" type="textarea" label="false" attribute1="rows" value1="4" attribute2="cols" value2="10" attribute3="onblur" value3="javascript:parseGiftMessage();"/>
+		    	<div class="formfieldtooltip"><istooltip content_id="help-giftmessage"/></div><div class="clear"><!-- FLOAT CLEAR --></div>
+	    		
+	   			<iscomment><input style="display:none" class="isgiftyes" type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}" id="isgiftyes" value="true" <isif condition="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}">checked="checked"</isif>/>
+	   			<input style="display:none" class="isgiftno" type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}" id="isgiftno" value="false" <isif condition="${!pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}">checked="checked"</isif>/></iscomment>
+				</div><!-- END: giftmessagetext -->
+			 </div><!-- END: giftmessage -->
+			
+			    	
+			
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div>
+		<div class="continuecheckoutbutton floatright btn-green-flat">
+		<button class="" type="button" onclick="submitShippingForm();" name="${pdict.CurrentForms.singleshipping.shippingAddress.save.htmlName}" value="${Resource.msg('global.continue','locale',null)}">
+		<span class="btn-ic-lock">${Resource.msg('global.continue','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>
+	
+	</div><!-- END: continuecheckoutbutton -->
+	<div class="clear"></div>
+
+</div></div>
+
+<script>
+$(".postcode_fr input").focus(function () {
+    jQuery('.ziptip .tooltip').trigger('mouseover');            
+});
+$(".zip input").blur(function () {
+    jQuery('.ziptip .tooltip').trigger('mouseout');            
+});
+
+var limitNum = 110; //Bug:1805762, Character limit for delivery instruction Text Area
+function createStoreAddress(){	
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}]").val("${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}");
+	jQuery("textarea[name=${pdict.CurrentForms.singleshipping.shippingmethod.deliveryInstructions.htmlName}]").val('');
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val(false);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addToAddressBook.htmlName}]").val(false);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName.htmlName}]").val('');
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.htmlName}]").val(selectedStore.storeName);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.htmlName}]").val(selectedStore.address2);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.htmlName}]").val(selectedStore.address3);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").val(selectedStore.city);
+	changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]")[0], selectedStore.countryCode);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val(selectedStore.storeId);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storeCollectionDate.htmlName}]").val(selectedStore.collectionDate);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storePickupTime.htmlName}]").val(selectedStore.pickUpTime);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName.htmlName}]").val('');
+	//changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]")[0], selectedStore.stateCode);	
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").val(selectedStore.stateCode);	
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").val(selectedStore.zip);
+	changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}]")[0], '');
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber.htmlName}]").val('');
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone.htmlName}]").val('');
+	
+}
+
+
+var updateAddressFormFields = function(data, addressID) {
+
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName.htmlName}]").val(data.address.firstName);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName.htmlName}]").val(data.address.lastName);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.htmlName}]").val(data.address.address1);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.htmlName}]").val(data.address.address2);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").val(data.address.city);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").val(data.address.postalCode);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.htmlName}]").val(data.address.postBox);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.htmlName}]").val(data.address.address3);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence.htmlName}]").val(data.address.residence);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber.htmlName}]").val(data.address.alternateContactNumber);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").val(data.address.stateCode);
+	changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}]")[0],data.address.title);
+	//changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]")[0], data.address.stateCode);
+	changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]")[0], data.address.countryCode);
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone.htmlName}]").val(data.address.phone);
+}
+</script>

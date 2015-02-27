@@ -1,0 +1,47 @@
+<iscomponent pipeline="RichRelevance-IncludeCommon">
+<script>
+	var R3_PURCHASED = new r3_purchased();	
+	R3_PURCHASED.setOrderNumber('${pdict.Order.orderNo}');
+</script>
+<isloop items="${pdict.Order.allProductLineItems}" var="pli">
+		<isif condition="${pli.product != null}">
+		
+		<iscomment>Christina: add this code to get correct prices to checkout page</iscomment>
+		<isscript>
+	   	var priceAdjustments : dw.util.Collection =pli.getPriceAdjustments();
+	   	var iterator : dw.util.Iterator = priceAdjustments.iterator();
+	   	var apportionedPrice :dw.order.PriceAdjustment = null;
+	   	var promoId : String = null;
+	   	if(iterator != null)
+	   	{
+	    	while(iterator.hasNext())
+	    	{
+	    		promoId = iterator.next().getPromotionID();
+	    		if(promoId.indexOf("OL_") == 0)
+	    		{
+	    			apportionedPrice = pli.getPriceAdjustmentByPromotionID(promoId);
+	    		}  
+	    	
+	    	}
+	    }
+	    </isscript>
+	  
+	   	<isif condition="${!empty(apportionedPrice)}">
+	   		<isset name="price" value="${pli.adjustedPrice.subtract(apportionedPrice.getPrice()).value}" scope="page"/>
+	   	<iselse>
+	   		<isset name="price" value="${pli.adjustedPrice.value}" scope="page"/>
+		</isif>	
+		<iscomment>Christina: end price code here</iscomment>			            
+  
+		<script>
+			R3_PURCHASED.addItemIdPriceQuantity('${(pli.product.variant ? pli.product.variationModel.master.ID : pli.product.ID)}', '${price}', '${pli.quantityValue.toFixed()}');
+		</script>
+	</isif>
+</isloop>
+<script>
+	r3();
+	
+	function jsCallBack(obj) {}
+</script>
+
+

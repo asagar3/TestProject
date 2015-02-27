@@ -1,0 +1,110 @@
+/**
+
+*  @input Basket : dw.order.Basket
+*  @input ShippingMethods : dw.util.Collection The list of applicable shipping methods.
+*  @input ShippingCosts : dw.util.HashMap
+*  @output customObject : Object
+*  @output errorCode : String
+*/
+
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.order );
+importPackage( dw.util );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var details = new Object() ;
+	
+	try{
+		
+		var basket:Basket = pdict.Basket ;
+		if (basket == null){
+			pdict.errorCode = "GSD_SE_004" ; 	
+			return PIPELET_ERROR ;
+		}		
+		var shipment : Shipment = basket.defaultShipment;
+		
+		var shippingModel : ShipmentShippingModel = ShippingMgr.getShipmentShippingModel( shipment );
+		
+		var applicableShippingMethods : Collection = pdict.ShippingMethods ;
+		
+		details.shippingDetails = new Array() ;
+		if(applicableShippingMethods.size() > 0){		
+			var shippingMethod:ShippingMethod = null ;
+			var shipmentMethod : Object = null ;	
+			var shippingCost:Object = null ;
+			for each (shippingMethod in applicableShippingMethods){ 
+				shipmentMethod = new Object() ;
+				shippingCost =  pdict.ShippingCosts.get(shippingMethod.ID) ;
+				
+				shipmentMethod.ID = shippingMethod.ID ;
+				shipmentMethod.name = shippingMethod.displayName ;
+		    	shipmentMethod.description = shippingMethod.description ;
+		    	shipmentMethod.baseShipping = StringUtils.formatMoney(shippingCost.baseShipping) ;
+		    			    	
+		    	if (shippingCost.shippingPriceAdjustmentsTotal.value != 0 ){			
+					shipmentMethod.discountShipping = StringUtils.formatMoney(shippingCost.baseShippingAdjusted) ;				
+		    	}
+				/*
+				if (shippingCost.surchargeAdjusted.value > 0){
+					shipmentMethod.surchargeAdjusted = shippingCost.surchargeAdjusted.value ;
+				}*/
+				
+				//if (shippingCost.productShippingCosts.length > 0){
+					/*		
+					var productShipCost:dw.value.Money = 0.0 ; 
+			    	for each(var productShipping:Object in shippingCost.productShippingCosts) {
+			    		if (productShipping.shippingCost != null && 
+			    			productShipping.shippingCost.amount != null && 
+			    				productShipping.shippingCost.amount.value > 0){
+			    			productShipCost = (productShipCost.value).add(productShipping.shippingCost.amount.value) ;
+			    			
+			    		}				    				
+			    	} */
+			    	/*
+			    	shipmentMethod.shippingMethodCost = shippingModel.getShippingCost(shippingMethod).getAmount().value ;
+			    		if( shippingCost.shippingPriceAdjustments!= null && shippingCost.shippingPriceAdjustments.length > 0 ){
+				    		
+							shipmentMethod.shippingPriceAdjustments = new Array() ;
+							for each(var shippingPA : Object in shippingCost.shippingPriceAdjustments ){
+				    				if (shippingPA.calloutMsg.markup != null){
+				    					var shippingPriceAdjustment = new Object() ;
+										shippingPriceAdjustment.calloutMsg = shippingPA.calloutMsg.markup ;
+										shippingPriceAdjustment.price = shippingPA.price.value ;	
+										shipmentMethod.shippingPriceAdjustments.push(shippingPriceAdjustment);									
+									}
+							}
+			    		}
+						
+					if(shippingCost.productShippingDiscounts != null && shippingCost.productShippingDiscounts.size() > 0 ) {
+						shipmentMethod.productShippingDiscounts = new Array() ;
+						for each(var productShippingDiscount:Object in shippingCost.productShippingDiscounts){
+		    					var shippingPromo = new Object() ;
+		    					var shippingPromotion = productShippingDiscount.calloutMsg ;	    					
+								if(shippingPromotion != null){
+										shippingPromo.promoMsg = shippingPromotion.markup ;
+										shippingPromo.price = productShippingDiscount.price.value ;							
+								}
+								
+								shipmentMethod.productShippingDiscount(shippingPromo);
+						}
+						
+					}						
+			    		shipmentMethod.totalPrice = shippingCost.shippingInclDiscounts.value ;			    						
+				} */    	
+				details.shippingDetails.push(shipmentMethod); 
+			}		
+		}else {
+			pdict.errorCode = "GSD_SE_003" ; 	
+			return PIPELET_ERROR ;
+		}
+	}catch(e){	
+		Logger.error("GetShippingDetails: CreateShippingDetails JSON Script Error:::"+e.message) ;
+		pdict.errorCode = "GSD_SE_002" ;
+		return PIPELET_ERROR ;
+	}	
+	pdict.customObject = details ;
+	
+   return PIPELET_NEXT;
+}

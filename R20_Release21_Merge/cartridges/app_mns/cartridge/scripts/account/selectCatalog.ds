@@ -1,0 +1,54 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*-   @input pathin : dw.system.Request 
+*    @output catalogID : dw.catalog.Catalog 
+*- 	 @output totalProds : dw.util.List 
+*	 @output file : String
+*/
+importPackage( dw.system );
+importPackage( dw.io);
+importPackage(dw.object);
+importPackage(dw.util);
+
+importPackage( dw.system );
+importPackage( dw.catalog );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.object );
+importPackage( dw.customer );
+
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var file : String;
+	var masterCatalog : dw.catalog.Catalog;
+	try{	
+		var filePattern : String = dw.system.Site.getCurrent().preferences.custom.MasterCatalogFilePattern;
+		var currentDate = new Date();
+		file = filePattern + currentDate;
+		Logger.error(" The Master Catalog FILE name is::::::::" + file);
+		masterCatalog = dw.catalog.CatalogMgr.getCatalog('master-catalog'); 
+		Logger.error(" The Master Catalog ID is::::::::" + masterCatalog.ID);
+	} catch (e){
+		Logger.error("Error while Preparing the List of Customers to be Exported: " + e.message);
+		return PIPELET_ERROR;	
+	}
+		args.file = file;
+		args.catalogID = masterCatalog;
+   return PIPELET_NEXT;
+}
+
+

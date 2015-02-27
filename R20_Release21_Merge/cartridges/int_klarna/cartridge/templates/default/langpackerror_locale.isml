@@ -1,0 +1,7 @@
+<!--- TEMPLATENAME: langpackerror.isml --->
+<div class="wrapper">
+<div class="klarna_box">
+<div class="klarna_box_bottom_languageInfo"/>
+<div class="error">Choosen locale is not enabled for this site</div>
+</div>
+</div>

@@ -1,0 +1,100 @@
+//This object is used for the Cybersource BillTo xsd complex type
+
+function MerchantDefinedData_Object() {
+
+	this.field1 = "";
+	this.setField1 = setField1;
+	this.getField1 = getField1;
+	
+	this.field2 = "";
+	this.setField2 = setField2;
+	this.getField2 = getField2;
+	
+	this.field3 = "";
+	this.setField3 = setField3;
+	this.getField3 = getField3;
+	
+	this.field4 = "";
+	this.setField4 = setField4;
+	this.getField4 = getField4;
+	
+	// INT-663 field 5 to add store email address 
+	this.field5 = "";
+	this.setField5 = setField5;
+	this.getField5 = getField5;
+	
+	// INT-846 PayPal - fields 6,7,8 for fraud checking
+	this.field6 = "";
+	this.setField6 = setField6;
+	this.getField6 = getField6;
+	
+	this.field7 = "";
+	this.setField7 = setField7;
+	this.getField7 = getField7;
+	
+	this.field8 = "";
+	this.setField8 = setField8;
+	this.getField8 = getField8;
+}
+
+function setField1(value){
+	this.field1 = value;
+	}
+function getField1(){
+	return this.field1;
+	}
+	
+	function setField2(value){
+	this.field2 = value;
+	}
+function getField2(){
+	return this.field2;
+	}
+	
+	function setField3(value){
+	this.field3 = value;
+	}
+function getField3(){
+	return this.field3;
+	}
+	
+	function setField4(value){
+	this.field4 = value;
+	}
+function getField4(){
+	return this.field4;
+	}
+	
+	function setField5(value){
+	this.field5 = value;
+	}
+	function getField5(){
+	return this.field5;
+	}
+	
+	function setField6(value){
+	this.field6 = value;
+	}
+	function getField6(){
+	return this.field6;
+	}
+	
+	function setField7(value){
+	this.field7 = value;
+	}
+	function getField7(){
+	return this.field7;
+	}
+	
+	function setField8(value){
+	this.field8 = value;
+	}
+	function getField8(){
+	return this.field8;
+	}
+		
+		
+				
+						
+						
+																																		

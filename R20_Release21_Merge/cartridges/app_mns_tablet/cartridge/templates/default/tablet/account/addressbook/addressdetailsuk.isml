@@ -1,0 +1,42 @@
+<!--- CR 810 : TEMPLATENAME: addressdetailsuk.isml --->
+
+<isinclude template="tablet/util/modules"/>
+
+<div class="formfield addressline1">
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.addressline1}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.addressline1}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+
+<div class="formfield addressline2">
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.addressline2}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.addressline2}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+
+<div class="formfield address3">
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.address3}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.address3}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+  
+  <!-- END: state --> 
+<div class="formfield city">
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.city}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.city}" type="input" label="false"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+
+<!-- END: city -->
+<div class="formfield state">
+    <isinputfield formfield="${pdict.CurrentForms.profile.address.county}" type="input" value="false"/>
+    <isinputfield formfield="${pdict.CurrentForms.profile.address.county}" type="input" label="false"/>
+    <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+  <!--QC 3174 -->
+<div class="formfield zip uk_postcode">
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.zip}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.profile.address.zip}" type="input" label="false" xhtmlclass="billingpage"/>
+  <div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+<!-- END: zip -->

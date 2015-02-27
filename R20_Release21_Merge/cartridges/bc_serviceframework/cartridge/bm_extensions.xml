@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<extensions xmlns="http://www.demandware.com/xml/bmmodules/2007-12-11" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.demandware.com/xml/bmmodules/2007-12-11 bmext.xsd">
+	<!-- =============================================================== -->
+	<!-- ==                                                           == -->
+	<!-- ==  SITE   MENU   EXTENSIONS                                 == -->
+	<!-- ==                                                           == -->
+	<!-- =============================================================== -->
+
+<!-- 
+	<menuaction id="product_advisors" menupath="search" position="9999" site="true">
+		<name xml:lang="x-default">Product Advisors</name>
+		<short_description xml:lang="x-default">
+			View, create, and edit product advisors.
+	  </short_description>
+		<description xml:lang="x-default">
+			View, create, and edit product advisors.
+	  </description>
+		<exec pipeline="ProductAdvisor" node="Start" />
+		<sub-pipelines>
+			<pipeline name="ProductAdvisor-Start" />
+			<pipeline name="ProductAdvisor-AdvisorsJSON" />
+			<pipeline name="ProductAdvisor-AdvisorJSON" />
+			<pipeline name="ProductAdvisor-QuestionsJSON" />
+			<pipeline name="ProductAdvisor-QuestionJSON" />
+			<pipeline name="ProductAdvisor-AnswersJSON" />
+			<pipeline name="ProductAdvisor-DoTestRun" />
+			<pipeline name="ProductAdvisor-TriggersJSON" />
+			<pipeline name="ProductAdvisor-TriggerJSON" />
+			<pipeline name="ProductAdvisor-UpdateObject" />
+			<pipeline name="ProductAdvisor-UpdateAnswers" />
+			<pipeline name="ProductAdvisor-GetRefineableAttributes" />
+			<pipeline name="ProductAdvisor-DoTestRun" />
+		</sub-pipelines>
+		<parameters></parameters>
+		<permissions>
+		</permissions>
+		<icon>icons/star_yellow_new.gif</icon>
+	</menuaction>
+ -->
+	<menuitem id="site_monitoring" position="20000" site="true">
+		<name xml:lang="x-default">Monitoring</name>
+		<short_description xml:lang="x-default">Module for monitoring the site</short_description>
+		<description xml:lang="x-default">Here you can get different views of services and reports.</description>
+		<icon>icons/search_ico.gif</icon>
+	</menuitem>
+	
+	
+	<menuaction id="service_overview" menupath="site_monitoring" position="500" site="true">
+		<name xml:lang="x-default">Service overview</name>
+		<short_description xml:lang="x-default">
+			Click here to see all configured webservices and their current state
+		</short_description>
+		<description xml:lang="x-default">
+			Click here to see all configured webservices and their current state
+		</description>
+		<exec pipeline="Services" node="Overview" />
+		<sub-pipelines>
+			<pipeline name="Services-Overview" />
+			<pipeline name="Services-Delete" />
+			<pipeline name="Services-RemoveLocks" />
+			<pipeline name="CustomObjectExtensions" />
+		</sub-pipelines>
+		<parameters>
+			<parameter name="menuname" value="Service overview" />
+			<parameter name="mainmenuname" value="Custom Objects" />
+		</parameters>
+		<permissions>
+		</permissions>
+		<icon>icons/import_export_ico.gif</icon>
+	</menuaction>
+
+	
+
+</extensions>
+

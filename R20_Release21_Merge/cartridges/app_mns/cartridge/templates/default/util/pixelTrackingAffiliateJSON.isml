@@ -1,0 +1,140 @@
+ 	<isscript>
+        var saleParts : String = "";
+		var amtList : String = "";
+		var qtyList : String = "";
+		var skuList : String = "";
+		var ppData : String = "";
+		var awBasket : String = "";
+		var promoName : String = "";
+		var nopromotion:String="NoPromotion";
+		var orderPromotions : dw.util.Collection;
+		 var orderPromotionsItr : dw.util.Iterator;
+		var productLineItem : dw.order.ProductLineItem = null;
+		var productLevelPromotion:dw.campaign.Promotion=null;
+		var productLineItems1 : dw.util.Collection= pdict.Order.productLineItems;	
+		var productLineItemsItr : dw.util.Iterator=productLineItems1.iterator();
+		var currentpromoId : String = "";
+				  
+		while(productLineItemsItr.hasNext())
+		{	
+	
+		      productLineItem = productLineItemsItr.next();
+		      if(empty(saleParts))
+		      {	
+			  	saleParts = "EXISTING_" + productLineItem.custom.tNumber.substring(0,3) + ":" + (productLineItem.basePrice.value * productLineItem.quantity.value);
+              }
+              else
+              {
+              	if (saleParts.indexOf(productLineItem.custom.tNumber.substring(0,3)) > -1) {
+              	var variable1 : String = saleParts.substring(0,saleParts.indexOf(productLineItem.custom.tNumber.substring(0,3))+4);
+              	var variable2 : String = saleParts.substring(saleParts.indexOf(productLineItem.custom.tNumber.substring(0,3))+4);
+              	var priceLength : Number = variable2.indexOf("|"); 
+              	if (variable2.indexOf("|")==-1) {
+              	    priceLength = variable2.length;
+              	}
+              	var variable3 : Number = Number(variable2.substring(0,priceLength));
+              	var variable4 : String = ""; 
+              	if (variable2.indexOf("|")>0) {
+              		variable4 = variable2.substring(variable2.indexOf("|"));
+              	}
+              	var sumvalue : Number = (productLineItem.basePrice.value * productLineItem.quantity.value) + variable3;
+              	saleParts = variable1 + sumvalue + variable4;
+              	} 
+              	else {
+              		saleParts =saleParts+"|"+ "EXISTING_" + productLineItem.custom.tNumber.substring(0,3) + ":" + (productLineItem.basePrice.value * productLineItem.quantity.value);
+              	}
+              }           
+			  
+			  if (empty(skuList)) {
+			  skuList = productLineItem.custom.tNumber.replace("/", "");
+			  } else {
+				skuList = skuList + "|" + productLineItem.custom.tNumber.replace("/", "");
+			  }	
+			   
+			  if (empty(qtyList)) {
+				qtyList = productLineItem.quantity.value;
+			  } else {
+				qtyList = qtyList + "|" + productLineItem.quantity.value;
+			  }				  
+
+			  
+			   if (empty(amtList)) {
+				amtList = productLineItem.grossPrice.value;
+			  } else {
+				amtList = amtList + "|" + productLineItem.grossPrice.value;
+			  }	  
+					 if (empty(awBasket)) {					 
+			  
+				awBasket = "AW:P|1402|"+ pdict.Order.orderNo + "|"  +productLineItem.custom.UPCID+ "|" + productLineItem.productName + "|" + productLineItem.basePrice.value + "|" + productLineItem.quantity.value + "|" +productLineItem.custom.tNumber.replace("/", "") + "|" +"EXISTING_" + productLineItem.custom.tNumber.substring(0,3);
+			  } else {
+				awBasket = awBasket + "," + "AW:P|1402|"+ pdict.Order.orderNo + "|" +productLineItem.custom.UPCID+ "|" + productLineItem.productName + "|" 
+				+ productLineItem.basePrice.value + "|" + productLineItem.quantity.value + "|" +productLineItem.custom.tNumber.replace("/", "") + "|" +"EXISTING_" + productLineItem.custom.tNumber.substring(0,3);
+			  }  
+			 
+			  
+		    if (empty(ppData)) {
+				ppData = productLineItem.custom.tNumber.substring(0,3) + ":" +productLineItem.custom.tNumber.replace("/", "") + "@" + productLineItem.quantity.value + "x" + productLineItem.basePrice.value;
+			 } else {
+				ppData= ppData + "," + productLineItem.custom.tNumber.substring(0,3) + ":" +productLineItem.custom.tNumber.replace("/", "") + "@" + productLineItem.quantity.value + "x" + productLineItem.basePrice.value;
+			 }	
+			 
+			 
+			  orderPromotions=productLineItem.priceAdjustments;			  
+			  if(!empty(orderPromotions))
+			  {
+		          orderPromotionsItr = orderPromotions.iterator(); 	        
+		          while(orderPromotionsItr.hasNext())
+			      { 
+			        currentpromoId = orderPromotionsItr.next().promotionID;
+			        if (promoName.indexOf(currentpromoId)==-1) {
+	              		if (empty(promoName)) {
+							promoName = currentpromoId;
+						  } else {
+						  	promoName = promoName + "|" + currentpromoId;
+						  }
+	              	}
+				  } 
+			   }
+
+		}
+	</isscript>
+
+<script  type="text/javascript">
+
+var pixelTrackingAffiliateJSON = {
+
+	    "testMode": "0",
+
+	    "merchantID":  "1402",
+
+	    "pixelTrackingOrderDetails": [{
+
+	        "orderID": "${pdict.Order.orderNo}",
+
+	        "showAffWinImage": "0",
+
+	        "saleParts": "${saleParts}",
+
+	        "showLinkshareImage": "0",
+
+	        "orderGrandTotal": "${pdict.Order.totalGrossPrice.value}",
+
+	        "amtList": "${amtList}",
+
+	        "qtyList": "${qtyList}",
+
+	        "skuList":"${skuList}" ,
+
+	        "promoName":"${promoName}",
+
+	        "awBasket":"${awBasket}", 
+	        
+	        "ppData":"${ppData}"
+
+	    }],
+
+	   "currency": "${pdict.Order.currencyCode}"
+
+	};
+
+</script>

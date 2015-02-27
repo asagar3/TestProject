@@ -1,0 +1,2 @@
+<!--- TEMPLATENAME: mns_logo.isml --->
+<a href="${URLUtils.httpHome()}" title="${Resource.msg('global.storename','locale',null)}" class="logo">Marks &amp; Spencer</a>

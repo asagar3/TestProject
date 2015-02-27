@@ -1,0 +1,381 @@
+/**
+* Demandware Script File: WebServiceUtils
+*
+*/
+importPackage( dw.util );
+importPackage( dw.system );
+importPackage( dw.io );
+
+importScript("util/libJSON.ds");
+/**
+ * Class which represents the status of a webservice call
+ * @constructor
+ */
+function CallStatus (code, error){
+	this.code = code ? code : '';
+	this.error = error ? error : '';
+	this.msg = '';
+	this.requestId = '';
+	this.clarification = new Array();
+	this.site = Site.getCurrent().getID();
+	this.duration = 0;
+}
+
+
+/**
+* @namepace
+* Helper namespace, that encapsulates common functionality
+*/
+function WebServiceUtilities () {}
+
+/**
+*	converts a arguments object to a full fledged array
+*/
+WebServiceUtilities.getArgumentsAsArray = function(arguments) {
+	var args : Array = [];
+	for(var i = 0; i < arguments.length; i++) {
+		args.push(arguments[i]);
+	}
+	return args;
+}
+
+function getWebserviceLogger() {
+	return WebserviceLogger;
+}
+
+
+/** @namespace */
+var WebserviceLogger = {
+	
+	logInFileWithLogging : function(status, callFrom, logStatus) : Object {
+		// Logging //
+		if (logStatus && !empty(callFrom)) {
+			var currentCalendar : Calendar = Site.getCalendar();
+			
+			var timestamp : String = StringUtils.formatCalendar(currentCalendar, "dd.MM.yyyy HH:mm:ss.SSS");
+			// push all given response attributes in an array //
+			var logEntries : Array = new Array();
+			for (var name in status) {
+				if (typeof(status[name]) != "function") {
+					logEntries.push(new String(name + "=" + status[name]));
+				}
+			}
+			
+			var filename : String = callFrom + "_" + StringUtils.formatCalendar(currentCalendar, "yyyyMMdd") + ".log";
+			var foldername : String = File.IMPEX + "/customLogs/calls/";
+			
+			new File(foldername).mkdirs();
+			var file : File = new File(foldername + filename);
+			
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			
+			// write reponse attributes to logfile //
+			var writer : FileWriter = new FileWriter(file, true);
+			writer.write(timestamp + ": " + logEntries.toString() + "\r\n");
+			writer.close();
+		}
+	},
+	 
+	 logRestXML : function (request, response, serviceName) {
+	 	try {
+	 		var timestamp : String = new String(StringUtils.formatCalendar(Site.getCalendar(), "yyyyMMdd_HHmmss_SSS"));
+		 	var folder_file : File =new File(File.IMPEX + "/customLogs/calls/" + serviceName + "/" + Site.getCurrent().getID() + "/" + serviceName + "_" + timestamp + "/");
+		 	folder_file.mkdirs();
+		 	var request_file : File = new File(folder_file, serviceName + "_" + timestamp + "_request.xml");
+		 	var response_file : File = new File(folder_file, serviceName + "_" + timestamp + "_response.xml");
+		 	
+		 	var writer : FileWriter = null;
+		 	
+		 	request_file.createNewFile();
+		 	writer = new FileWriter(request_file, "UTF-8");
+			writer.write(request);
+			writer.close();
+			
+			// response //	
+		 	xml_obj = object2XmlObject("response", response);
+		 	response_file.createNewFile();
+		 	writer = new FileWriter(response_file, "UTF-8");
+			writer.write(response);
+			writer.close();
+			
+			// zip files //
+			var zip_folder : File =new File(File.IMPEX + "/customLogs/calls/" + serviceName + "/" + Site.getCurrent().getID() + "/");
+			var zip_file : File = new File(zip_folder, serviceName + "_" + timestamp + ".zip");
+			folder_file.zip(zip_file);
+			request_file.remove();
+			response_file.remove();
+			folder_file.remove();
+			new File(File.IMPEX + "/customLogs/calls/" + serviceName + "/").remove();
+		} catch (e) {
+			Logger.error('WebServiceUtils.ds: Logging the Rest communication failed: ' + e);
+		}
+	 },
+	 
+	 logFTPCommunication : function (request, response, serviceName, webserviceConfiguration : Object) {
+	 	try {
+	 		if (empty(webserviceConfiguration)
+		 		|| !('isFullCommunicationLogEnabled' in webserviceConfiguration)
+		 		|| !webserviceConfiguration.isFullCommunicationLogEnabled()) {
+		 		return;
+		 	}
+	 		
+	 		var timestamp : String = new String(StringUtils.formatCalendar(Site.getCalendar(), "yyyyMMdd_HHmmss_SSS"));
+		 	var folder_file : File =new File(File.IMPEX + "/customLogs/calls/" + serviceName + "/" + Site.getCurrent().getID() + "/" + serviceName + "_" + timestamp + "/");
+		 	folder_file.mkdirs();
+		 	var request_file : File = new File(folder_file, serviceName + "_" + timestamp + "_request.json");
+		 	var response_file : File = new File(folder_file, serviceName + "_" + timestamp + "_response.json");
+		 	
+		 	var writer : FileWriter = null;
+		 	
+		 	request_file.createNewFile();
+		 	writer = new FileWriter(request_file, "UTF-8");
+			writer.write(getJSON().encode(request));
+			writer.close();
+			
+			// response //	
+		 	response_file.createNewFile();
+		 	writer = new FileWriter(response_file, "UTF-8");
+			writer.write(getJSON().encode(response));
+			writer.close();
+			
+			// zip files //
+			var zip_folder : File = new File(File.IMPEX + "/customLogs/calls/" + serviceName + "/" + Site.getCurrent().getID() + "/");
+			var zip_file : File = new File(zip_folder, serviceName + "_" + timestamp + ".zip");
+			folder_file.zip(zip_file);
+			request_file.remove();
+			response_file.remove();
+			folder_file.remove();
+			new File(File.IMPEX + "/customLogs/calls/" + serviceName + "/").remove();
+		} catch (e) {
+			Logger.error('WebServiceUtils.ds: Logging the Rest communication failed: ' + e);
+		}
+	 },
+	 
+	 logSoapXmlWithLogging : function(request, response, callfrom : String, webserviceConfiguration : Object) {
+	 	// Check if Logging is enabled //
+	 	try {
+		 	if (empty(webserviceConfiguration)
+		 		|| !('isFullCommunicationLogEnabled' in webserviceConfiguration)
+		 		|| !webserviceConfiguration.isFullCommunicationLogEnabled()) {
+		 		return;
+		 	}
+		 	
+		 	var timestamp : String = new String(StringUtils.formatCalendar(Site.getCalendar(), "yyyyMMdd_HHmmss_SSS"));
+		 	var folder_file : File = new File(File.IMPEX + "/customLogs/calls/" + callfrom + "/"+ Site.getCurrent().getID() + "/" + callfrom + "_" + timestamp + "/");
+		 	folder_file.mkdirs();
+		 	var request_file : File = new File(folder_file, callfrom + "_" + timestamp + "_request.xml");
+		 	var response_file : File = new File(folder_file, callfrom + "_" + timestamp + "_response.xml");
+		 	
+		 	var writer : FileWriter = null;
+		 	
+		 	var xml_obj : XML = null; 
+		 	// request //
+		 	if(isString(request)){
+		 		xml_obj = new XML(request);
+		 	}else if(request instanceof XML){
+		 		xml_obj = request;
+		 	}else{
+		 		xml_obj = object2XmlObject("request", request);
+		 	}
+		 	request_file.createNewFile();
+		 	writer = new FileWriter(request_file, "UTF-8");
+			writer.write('<?xml version="1.0" encoding="UTF-8"?>\n' + xml_obj.toXMLString());
+			writer.close();
+			
+			// response //	
+		 	if(isString(request)){
+		 		xml_obj = new XML(response);
+		 	}else if(response instanceof XML){
+		 		xml_obj = response;
+		 	}else{
+		 		xml_obj = object2XmlObject("response", response);
+		 	}
+		 	response_file.createNewFile();
+		 	writer = new FileWriter(response_file, "UTF-8");
+			writer.write('<?xml version="1.0" encoding="UTF-8"?>\n' + xml_obj.toXMLString());
+			writer.close();
+			
+			// zip files //
+			var zip_folder : File = new File(File.IMPEX + "/customLogs/calls/" + callfrom + "/" + Site.getCurrent().getID() + "/");
+			var zip_file : File = new File(zip_folder, callfrom + "_" + timestamp + ".zip");
+			folder_file.zip(zip_file);
+			request_file.remove();
+			response_file.remove();
+			folder_file.remove();
+			new File(File.IMPEX + "/customLogs/calls/" + Site.getCurrent().getID() + "/" + callfrom + "/").remove();
+		} catch (e) {
+			Logger.error('WebServiceUtils.ds: Logging the SOAP communication failed: ' + e);
+		}
+	 }
+};
+
+/*
+* Creates an xml objects of the given object.
+*
+* rootName: The Name of the root node of the created xml object.
+* object: The object which should be converted to an xml object.
+*
+* returns: The created xml object.
+*/
+function object2XmlObject(rootName : String, object : Object, typeSolver) : XML {
+	var xmlObject : XML = new XML('<' + rootName + '></' + rootName + '>');
+	
+	object2XmlObject2(xmlObject, object, typeSolver ? typeSolver : null);
+	
+	return xmlObject;
+}
+
+/*
+* A recursive helper function for object2XmlObject.
+*
+* xmlObject: the current xml object.
+* object: The object which should be converted to an xml object.
+*/
+function object2XmlObject2(xmlObject : XML, object : Object, typeSolver) {
+	for (var property in object) {
+		if (property == null) {
+			continue;
+		}
+		
+		try {
+			// For some reason the access will throw an exception if the property is of a special date type.
+			var value = object[property];
+			var type = typeof value;
+			if(value == null) {
+				continue;
+			}
+		} catch (e) {
+			continue;
+		}
+		
+		// If the values were created via the new operator, then the typof always returns object!
+		// So we recheck what type it really is.
+		if (value instanceof Number) {
+			type = 'number';
+		} else if (value instanceof Boolean) {
+			type = 'boolean';
+		} else if (value instanceof String) {
+			type = 'string';
+		}
+		
+		if (isDate(value)) {
+			var calendar : Calendar = dw.system.Site.getCalendar();
+			calendar.setTimeZone('GMT+00');
+			calendar.setTime(value);
+			
+			xmlObject[property] = StringUtils.formatCalendar(calendar, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+			xmlObject[property].@type = 'date';
+		} else if (value instanceof dw.value.Money) {
+			xmlObject[property] = '';
+			object2XmlObject2(xmlObject[property], value, typeSolver ? typeSolver : null);
+			xmlObject[property].@type = 'dw.value.Money';
+		} else if (value instanceof dw.value.Quantity) {
+			xmlObject[property] = '';
+			object2XmlObject2(xmlObject[property], value, typeSolver ? typeSolver : null);
+			xmlObject[property].@type = 'dw.value.Quantity';
+		} else if (type == "object") {
+			var valueIsArray = isArray(value);
+			
+			// This is an absolutely speacial case. These attributes were created with newNativeArray and MUST be
+			// handled as arrays.
+			// Unfortunately it is not possible to identify such arrays.
+			if (property == 'mboBasketDataEntryArray'
+				|| property == 'newsletterCategories') {
+				valueIsArray = true;
+			}
+			
+			xmlObject[property] = '';
+			if (value instanceof ArrayList || valueIsArray) {
+				var i = 0;
+				for each (var arrayObject in value) {
+					var arrayObjectType = typeof arrayObject;
+					xmlObject[property]['entry' + i] = '';
+					if (arrayObjectType == "object") {
+						object2XmlObject2(xmlObject[property]['entry' + i], arrayObject, typeSolver ? typeSolver : null);
+					} else {
+						xmlObject[property]['entry' + i] = arrayObject;
+						xmlObject[property]['entry' + i].@type = arrayObjectType;
+					}
+					
+					i++;
+				}
+				xmlObject[property].@type = (valueIsArray ? 'array' : 'dw.util.ArrayList');
+			} else {
+				object2XmlObject2(xmlObject[property], value, typeSolver ? typeSolver : null);
+			}
+		} else if (type != "function") {
+			xmlObject[property] = value;
+			xmlObject[property].@type = type;
+		} else if (type == 'function' && property == 'get') {
+			// This is hack to log quantity and money interface objects.
+			try {
+				xmlObject[property] = object.get();
+				xmlObject[property].@type = typeof(xmlObject[property]);
+			} catch (e) {
+				// Some objects are not interface objects, but support the get function too! But some of them
+				// need parameters, so the call will fail.
+			}
+		}
+	}
+	if (typeSolver) {
+		xmlObject.@type = typeSolver(object);
+	} else {
+		xmlObject.@type = 'object';
+	}
+}
+
+function isString(string) {
+	var isString = string instanceof String;
+	
+	if (!isString) {
+		// This is an absolutely ugly fallback. For some reason, the instanceof operator does not return
+		// true sometimes. So we test if the substring function is available. If true, then the value is a String.
+		try {
+			string.substring(0, 0);
+			
+			isString = true;
+		} catch (e) {
+			// Nothing.
+		}
+	}
+	
+	return isString;
+}
+
+function isArray(array) {
+	var isArray = array instanceof Array;
+	
+	if (!isArray) {
+		// This is an absolutely ugly fallback. For some reason, the instanceof operator does not return
+		// true sometimes. So we test if the unshift function is available. If true, then the value is an Array.
+		try {
+			array.unshift();
+			
+			isArray = true;
+		} catch (e) {
+			// Nothing.
+		}
+	}
+	
+	return isArray;
+}
+
+function isDate(date) {
+	var isDate = date instanceof Date;
+	
+	if (!isDate) {
+		// This is an absolutely ugly fallback. For some reason, the instanceof operator does not return
+		// true sometimes. So we test if the getUTCFullYear function is available. If true, then the value is a Date.
+		try {
+			date.getUTCFullYear();
+			
+			isDate = true;
+		} catch (e) {
+			// Nothing.
+		}
+	}
+	
+	return isDate;
+}

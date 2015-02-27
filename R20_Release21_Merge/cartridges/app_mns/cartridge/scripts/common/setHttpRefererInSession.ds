@@ -1,0 +1,64 @@
+/**
+* Demandware Script File
+* This script takes the current request and session as input parameters.It sets the referer URL from the page the request was sent in the session.
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+* 	@input CurrentRequest : dw.system.Request
+* 	@input CurrentSession : dw.system.Session
+*
+*/
+importPackage( dw.system );
+importPackage( dw.web );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	//Setting the current request and session in a variable from the pipeline dictionary.
+  var currRequest : Request = args.CurrentRequest;
+  var currSession : Session = args.CurrentSession;
+  
+  //Setting the referer URL in a custom variable from the current request. 
+  var refererURL : String = currRequest.httpReferer;
+  
+  
+  if(empty(refererURL))
+  {
+  	//Redirect to the home page if httpReferer returns null
+  	 refererURL = dw.web.URLUtils.httpHome()/currRequest.locale;
+  }
+  else if (refererURL.indexOf("Account-SignIn") != -1)
+  {
+  	//If the request is sent from the signin page, then set the referer URL from the session.
+  	refererURL = currSession.custom.lastRefererSigninURL;
+  }
+  
+  else if (refererURL.indexOf("Bazaarvoice-SubmissionContainer") != -1)
+  {
+  	//If the request is sent from the BV review page, then set the referer URL from of the corresponding PDP page.
+  	var startIndex : Number = refererURL.indexOf("?pid");
+  	var endIndex : Number = refererURL.indexOf("&", startIndex);
+  	if(startIndex>0 && endIndex >0)
+  	{
+  		var pid : String = refererURL.substring(startIndex+5,endIndex);
+  		var urlAction : URLAction = new URLAction("Product-Show");
+  		refererURL = URLUtils.http(urlAction,URLParameter("pid",pid)).toString();
+  	}
+  	else
+  	{
+  		//Redirect to the home page 
+  		 refererURL = dw.web.URLUtils.httpHome()/currRequest.locale;
+  	}
+  } 
+
+	//Set the value of refereURL in session.
+	currSession.custom.lastRefererSigninURL = refererURL;
+	return PIPELET_NEXT;
+}

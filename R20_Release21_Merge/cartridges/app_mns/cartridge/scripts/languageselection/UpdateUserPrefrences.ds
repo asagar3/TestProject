@@ -1,0 +1,25 @@
+/**
+ * This script will be used to create/update cookie & to get the browser settings.
+ *
+ * 
+ * @input preferencepreferenceLocaleStr : String
+ * @output redirectURL : String
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript('languageselection/CookieUtils.ds');
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var preferenceLocaleStr : String = pdict.preferenceLocaleStr;
+	//If Request has locale available
+	
+	createOrUpdateCookie(preferenceLocaleStr);
+	//setSessionVar(preferenceLocaleStr);
+	pdict.redirectURL = updateURL(request.httpPath,browserLocale,preferenceLocaleStr);
+	
+	
+    return PIPELET_NEXT;
+}
+

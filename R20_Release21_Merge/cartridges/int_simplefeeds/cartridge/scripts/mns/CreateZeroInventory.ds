@@ -1,0 +1,80 @@
+/**
+*<inventory xmlns="http://www.demandware.com/xml/impex/inventory/2007-05-31">
+*<inventory-list>
+*<header list-id="inventory">
+*<default-instock>false</default-instock>
+*</header>
+*<records>
+*<record product-id="000000022079741002">
+*<allocation>0.0</allocation>
+*</record>
+*</records>
+*</inventory-list>
+*</inventory>
+* @input inventoryWriter : dw.io.XMLStreamWriter
+* @input productSearchHit : dw.catalog.ProductSearchHit
+* @output Message : String
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.order);
+
+function execute( args : PipelineDictionary ) : Number
+{
+	// read parameters
+	var inventoryWriter : XMLStreamWriter = args.inventoryWriter;
+	var productSearchHit: ProductSearchHit = args.productSearchHit;
+	
+	// check parameters
+	if ( empty( inventoryWriter ))
+	{		
+		args.Message = "XmlStreamWriter is set to null";
+		return PIPELET_ERROR;
+	}
+	if ( empty( productSearchHit ))
+	{		
+		args.Message = "Product is empty or null";
+		return PIPELET_ERROR;
+	}
+	
+	var product : Product = productSearchHit.getProduct();
+	if (product.isMaster()) {		
+		var productList:List = productSearchHit.getRepresentedProducts();
+		for each ( var varProduct : Product in productList )
+		{
+			if (varProduct.isOnline() && varProduct.isSearchable()){
+				createProductXml(varProduct,inventoryWriter);
+			}
+		}
+	} 
+	else {			
+			createProductXml(product,inventoryWriter);	
+	}
+
+    return PIPELET_NEXT;
+}
+ 
+function createProductXml( product : Product, inventoryWriter : XMLStreamWriter ) 
+{
+	try{
+		if(product.getAvailabilityModel()==null || product.getAvailabilityModel().getInventoryRecord()==null) {
+			Logger.getLogger("CreateZeroInventory.ds").debug("Zero Inventory Allocated Product ID: " + product.getID());				
+			inventoryWriter.writeStartElement("record");
+			inventoryWriter.writeAttribute("product-id",product.getID());
+			inventoryWriter.writeAttribute("mode","add");
+			inventoryWriter.writeStartElement( "allocation" );
+			inventoryWriter.writeCharacters("0.0");
+			inventoryWriter.writeEndElement();
+			inventoryWriter.writeEndElement();				
+		}	
+	}
+	catch(e) {
+		inventoryWriter.close();
+		args.Message = e.message;
+		return PIPELET_ERROR;
+	}
+}
+
+

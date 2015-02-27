@@ -1,0 +1,158 @@
+<!--- TEMPLATENAME: printedBillingAddress.isml --->
+<isinclude template="tablet/util/modules"/>
+<iscomment> Nadeem: as per vd there is no need to display street name and housenumber in tablet </iscomment>
+<isset name="ShippingAddress" value="${pdict.Basket.defaultShipment.shippingAddress}" scope="page"/>
+<iscomment>
+	There are some addresses without an ID, catch this here and make this include
+	more universal usable therefore.
+</iscomment>
+<isif condition="${'ID' in ShippingAddress && !empty(ShippingAddress.ID)}">
+	<div class="addressname">
+		<isprint value="${ShippingAddress.ID}"/>
+	</div>
+</isif>
+<div class="name klarna newForm">
+	<isset name="ShippingAddress" value="${pdict.Basket.defaultShipment.shippingAddress}" scope="page"/>
+	<div class="formfield">
+		<div class="label">
+			<span class="labeltext">&nbsp;</span>
+		</div>
+		<div class="fullLine">
+			<span class="bold">${Resource.msg('billing.paybyklarna','checkout',null)}</span><br>
+			<span>${Resource.msg('billing.klarnacustomerstablet','checkout',null)}</span>
+		</div>
+		<div class="clear"></div>
+	</div>
+	
+	<div class="formfield name">
+		<div class="fullLine">
+			<span class="bold">
+				<isprint value="${ShippingAddress.title}"/> <isprint value="${ShippingAddress.firstName}"/> <isprint value="${ShippingAddress.lastName}"/>
+			</span><br>
+			<isif condition="${!empty(ShippingAddress.address1)}">
+				<span><isprint value="${ShippingAddress.address1}"/></span><br>
+			</isif>
+			<isif condition="${!empty(ShippingAddress.address2)}">
+				<span><isprint value="${ShippingAddress.address2}"/></span><br>
+			</isif>
+			<iscomment>aliddl : defect id 4575</iscomment>
+			
+			<isif condition="${!empty(ShippingAddress.custom.address3)}">
+				<span><isprint value="${ShippingAddress.custom.address3}"/></span><br>
+			</isif>
+			
+			<isif condition="${!empty(ShippingAddress.city)}">
+				<span><isprint value="${ShippingAddress.city}"/></span><br>
+			</isif>
+			<isif condition="${!empty(ShippingAddress.stateCode)}">
+				<span><isprint value="${ShippingAddress.stateCode}"/></span><br>
+			</isif>
+			<isif condition="${!empty(ShippingAddress.postalCode)}">
+				<span><isprint value="${ShippingAddress.postalCode}"/></span><br>
+			</isif>
+			<isif condition="${!empty(ShippingAddress.countryCode)}">
+				<span><isprint value="${ShippingAddress.countryCode}"/></span>
+			</isif>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="formfield gender">
+		<label class="label">
+			<span class="labeltext">${Resource.msg('billing.kGender','checkout',null)}</span><span class="requiredindicator">*</span></label>
+		<div class="value">
+			<div id="klarnaGender" class="switchButton">
+				<div class="sprite switch switchYes">
+					<span>${Resource.msg('billing.kGenderMale','checkout',null)}</span>
+				</div>
+				<div class="sprite switch switchNo">
+					<span>${Resource.msg('billing.kGenderFemale','checkout',null)}</span>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<input type="radio" name="klarnagender" value="M" class="hide" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.gender.value=='M'}">checked="checked"</isif>/> 
+			<input type="radio" name="klarnagender" value="F" class="hide" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.gender.value=='F'}">checked="checked"</isif>/>
+        </div>
+        <div class="clear"></div>
+	</div>
+	<iscomment>Praveen: Code for splitting day, month & year. To set the value on page load.</iscomment>
+	<isscript>
+		var dob : String = pdict.CurrentForms.billing.billingAddress.addressFields.dateofbirth.htmlValue;
+		var savedDay = new Number(dob.substring(0,2));
+		var savedMonth = new Number(dob.substring(2,4));
+		var savedYear = new Number(dob.substring(4,8));
+	</isscript>
+	<div class="formfield klarnaDoB">
+		<label class="label">
+			<span class="labeltext">${Resource.msg('billing.kDateOfBirth','checkout',null)}</span><span class="requiredindicator">*</span></label>
+		<isset name="day" value="${1}" scope="page" />
+	   	<isset name="month" value="${1}" scope="page" />
+	   	<isset name="year" value="${dw.system.Site.getCurrent().preferences.custom.dobStartYear}" scope="page" />
+	   	<div class="day">
+	   		<label class="label" for="birthday_day">	
+				<span>${Resource.msg('klarna.dateofbirth.day','checkout',null)}:</span>
+			</label>
+			  <div class="value">
+			  <span class="tablet-selectbox">
+			  	<select class="selectbox day required" id="birthday_day" name="birthday_day">			
+					<option value="">${Resource.msg('klarna.dateofbirth.day','checkout',null)}</option>	
+						<isloop begin="${day}" end="31">
+							<option value="${day.toString()}" <isif condition="${savedDay !=null && savedDay == day}">selected</isif>><isprint value="${day}" formatter="00"></option>
+							<isset name="day" value="${day=day+1}" scope="page" />
+				   		</isloop>
+			    </select>
+			    </span>
+			  </div>
+		</div>
+		<div class="month">
+			<span class="datedivider">/</span>
+			<label class="label" for="birthday_month">	
+				<span>${Resource.msg('klarna.dateofbirth.month','checkout',null)}:</span>
+			</label>
+			  <div class="value">
+			  <span class="tablet-selectbox">
+			  	<select class="selectbox month required" id="birthday_month" name="birthday_month">			
+					<option value="">${Resource.msg('klarna.dateofbirth.month','checkout',null)}</option>
+						<isloop  begin="${month}" end="12" >
+							<option value="${month.toString()}" <isif condition="${savedMonth !=null && savedMonth == month}">selected</isif>><isprint value="${month}" formatter="00"></option>
+							<isset name="month" value="${month=month+1}" scope="page" />
+						</isloop>
+				</select>
+				</span>
+			  </div>
+		</div>
+		<div class="year">
+			<span class="datedivider">/</span>
+			<label class="label" for="birthday_year">	
+				<span>${Resource.msg('klarna.dateofbirth.year','checkout',null)}:</span>
+			</label>
+			  <div class="value">
+			  <span class="tablet-selectbox">
+			  	<select class="selectbox year required" id="birthday_year" name="birthday_year">			
+					<option value="">${Resource.msg('klarna.dateofbirth.year','checkout',null)}</option>
+						<isloop begin="${year}" end="${new Date().getFullYear()}">
+							<option value="${year.toString()}" <isif condition="${savedYear !=null  && savedYear == year}">selected</isif>><isprint value="${year.toString()}"></option>
+							<isset name="year" value="${year=year+1}" scope="page" />
+						</isloop>
+											
+				</select>
+				</span>
+			  </div>
+		</div>
+		<div class="dobError">
+		</div>
+		<isif condition="${pdict.isDobMissing}">
+			<span class="errorIcon"></span>
+		</isif>						
+		<isif condition="${pdict.CurrentSession.custom.isDobMissing}">
+			<div class="errormessage">
+				${Resource.msg('global.invalidBirthDate','locale',null)}
+			</div>
+		</isif>				
+	</div>
+	<iscomment>Praveen: Setting the session variables to false</iscomment>
+	<isset name="isDobMissing" value="${false}" scope="session"/>
+	<isset name="isGenderMissing" value="${false}" scope="session"/>
+	<div class="clear"></div>
+	
+</div>
+

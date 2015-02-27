@@ -1,0 +1,30 @@
+<isinclude template="util/modules"/>
+<isset name="isDefault" value="${pdict.CurrentHttpParameterMap.isDefault.stringValue}" scope="page" />
+<isset name="isStoreColl" value="${pdict.CurrentHttpParameterMap.isStoreColl.stringValue}" scope="page"/>
+<isset name="isQuickView" value="${pdict.CurrentHttpParameterMap.isQuickView.stringValue}" scope="page"/>
+<isset name="deliveryLeadTime" value="${pdict.CurrentHttpParameterMap.deliveryLeadTime.stringValue}" scope="page"/>
+<isset name="shippingMethodID" value="${pdict.CurrentHttpParameterMap.shippingMethodID.stringValue}" scope="page"/>
+
+<isif condition="${!empty(isDefault)}">
+	<iscomment>INT-552 oformby # Removed arguement that filters the default option to allow it to be processed</iscomment>
+	<isif condition="${('false'.equalsIgnoreCase(isStoreColl) || pdict.CurrentSession.custom.isStoreCollActive )}">
+		<isscript>
+			expressShipping = true;
+			var classValue : String = "delivery_link_" + shippingMethodID.toLowerCase();
+		</isscript>
+		<span class="${classValue}">
+			<isprint value="${deliveryLeadTime}"/>	
+			<isif condition="${'false'.equalsIgnoreCase(isQuickView)}">
+				<a onclick="rqaTabSelectAction(0,'');" href="#pdpShipMethodsTab" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+			</isif>
+		</span>
+	</isif>
+<iselse>
+
+	<isif condition= "${pdict.CurrentSession.custom.isStoreCollActive}">
+	    <iscontentasset aid = "CA_MS_REGULAR_AND_EXPRESS_SHIPPING_STORE_DELIVERY">
+	<iselse>
+		<iscontentasset aid = "CA_MS_REGULAR_AND_EXPRESS_SHIPPING">	
+	</isif>
+</isif>
+						

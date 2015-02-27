@@ -1,0 +1,25 @@
+<!--- TEMPLATENAME: GenerateCustomEmailErrorPage.isml --->
+
+<iscomment>
+<isscript>
+dw.system.Logger.error("There has been a error while processing , Please see the details :: " + pdict.errorCode + " :: " + pdict.errorDesc);
+
+</isscript>
+</iscomment>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<head>
+<title>Generate Custom Email Error Page</title>
+</head>
+<body>
+<Center>
+	<h1>There has been a error while processing the request , Please see the Details </h1>
+	<br>
+	<isscript>
+	var errordesc = "Description :: " + pdict.Description;
+	out.print(errordesc);
+    </isscript>
+    </h1>
+ </Center>   		
+</body>

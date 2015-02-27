@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Webservice Demo</title></head>
+<body style="margin:100px;">
+	Input a sentence:
+	<form action="${URLUtils.url('WebserviceDemo-Spellchecker')}" method="post">
+		<textarea name="text" cols="40" rows="7"><isprint value="${pdict.CurrentHttpParameterMap.text}"></textarea>
+		<input type="submit" value="Spellcheck"></input>
+	</form>
+	
+	<isif condition="${pdict.CurrentHttpParameterMap.text.submitted}">
+		<div>Your spellcheck result:</div>
+		<div>Misspelled Words: ${pdict.Result.misspelledWordCount}</div>
+		<isloop items="${pdict.Result.misspelledWords}" var="wordObject">
+			<ul>
+				<li>Suggestions for <i><isprint value="${wordObject.word}"></i> (<isprint value="${wordObject.suggestionCount}">)</li>
+				<isloop items="${wordObject.suggestions}" var="suggestion">
+					<ul>
+						<li><isprint value="${suggestion}"></li>
+					</ul>				
+				</isloop>
+			</ul>
+		</isloop>
+		<div>&nbsp;</div>
+		<div><strong>Technical Information:</strong></div>
+		<div>ScriptLog:</div>
+		<div><textarea name="nosubmit1" cols="40" rows="7"><isprint value="${pdict.ScriptLog}"></textarea></div>
+		<div>Webservice Status:</div>
+		<div><textarea name="nosubmit2" cols="40" rows="7"><isprint value="${JSON.stringify(pdict.Status, null, '\t')}"></textarea></div>
+		
+	</isif>
+</body>
+</html>

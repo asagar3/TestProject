@@ -1,0 +1,95 @@
+<isdecorate template="account/giftregistry/pt_giftregistry">
+<isinclude template="util/modules"/>
+
+<script type="text/javascript"><!--
+	jQuery(document).ready(function(){
+		jQuery("#giftRegistryTabsDiv").tabs({ selected: 1 });
+	});
+//--></script>
+
+<div class="giftregistry giftregistryevent">
+	<isslot id="registry-header" description="Banner for Gift Registry" context="global" />
+	<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.giftregistry.event.htmlName}_navigation">	
+		<isif condition="${pdict.ProductList != null}">
+			<isinclude template="account/giftregistry/navigation"/>
+		</isif>
+	</form>
+	<h4>${Resource.msg('eventparticipant.eventinfo','account',null)}</h4>
+	<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.giftregistry.event.htmlName}">
+		<fieldset>
+			<div class="formfields giftregistryeventform">		
+				<div class="requiredcaption"><span class="requiredindicator">*</span><strong>${Resource.msg('global.requiredfield','locale',null)}</strong></div>	
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.type}" type="select"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.name}" type="input"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.date}" type="input"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.eventaddress.country}" type="select"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.eventaddress.states.state}" type="select"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.town}" type="input"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+			</div><!-- END: giftregistryeventform -->
+			<h4>${Resource.msg('eventparticipant.participants','account',null)}</h4>
+			<div class="formfields giftregistryparticipateform">
+				<h2>${Resource.msg('eventparticipant.first','account',null)}</h2>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.participant.role}" type="select"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>					
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.participant.firstName}" type="input"/>									
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>	
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.participant.lastName}" type="input"/>					
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.participant.email}" type="input"/>					
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<h2>${Resource.msg('eventparticipant.second','account',null)}</h2>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.coParticipant.role}" type="select"/>					
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">	
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.coParticipant.firstName}" type="input"/>				
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.coParticipant.lastName}" type="input"/>					
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.giftregistry.event.coParticipant.email}" type="input"/>							
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formactions">
+					<isif condition="${pdict.ProductList == null}">
+						<button type="submit" name="${pdict.CurrentForms.giftregistry.event.confirm.htmlName}" value="${Resource.msg('global.continue','locale',null)}"><span>${Resource.msg('global.continue','locale',null)}</span></button>
+					<iselse>
+						<button type="submit" name="${pdict.CurrentForms.giftregistry.event.confirm.htmlName}" value="${Resource.msg('global.apply','locale',null)}"><span>${Resource.msg('global.apply','locale',null)}</span></button>
+					</isif>
+				</div>	
+			</div><!-- END: giftregistryparticipateform -->	
+		</fieldset>
+	</form>
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: giftregistry -->
+</isdecorate>

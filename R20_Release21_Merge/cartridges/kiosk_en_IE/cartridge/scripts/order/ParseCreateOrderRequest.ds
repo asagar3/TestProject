@@ -1,0 +1,137 @@
+/**
+ * This script takes a json string, derives the corresponding object and 
+ * puts the contained information into address objects for further usage.
+ * 
+ *- @input CredentialsJson : String The json string.
+ * @input JsonString : String The json string.
+ * @input  sessionID : String
+ *- @input BillingAddressJson : String The json string.
+ * @output CredentialsObject : Object An address object
+ * @output DelAddressObject : Object An address object
+ * @output BillingAddressObject : Object An address object
+ * @output DelDetailsObject : Object 
+ * @output BillingDetailsObject : Object 
+ * @output CardObject : Object 
+ * @output orderChannel : String 
+ * @output orderPoint : String 
+  * @output deviceID : String 
+ * 
+ */
+importPackage( dw.system );
+importPackage( dw.customer );
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+	try{
+	var reqObject : Object = JSON.parse(args.JsonString,removeNullValues);
+	if(reqObject==null){
+		//Logger.error("CreateOrder::Error"+ e.message);
+		throw new Error("reqObject is null") ;
+		//Logger.error("CreateOrder::Request"+ args.JsonString);
+		//return PIPELET_ERROR;
+	}
+	var CredentialsObject : Object =reqObject.credentials;
+	
+	var DelDetailsObject : Object = reqObject.deliveryDetails;
+	var BillingDetailsObject : Object = reqObject.billingDetails;
+	var BillingAddressObject : Object =BillingDetailsObject.billingAddress;
+	var cardObject : Object = BillingDetailsObject.cardDetails;
+    var DelAddressObject : Object = DelDetailsObject.delAddressDetails;
+  
+    //FIX ME: this code checks for null values in the input
+    if(reqObject.orderPoint==null||reqObject.orderChannel==null || reqObject.DeviceID==null ){
+    	//Logger.error("CreateOrder::Error"+ e.message);
+		throw new Error("order point,order channel or Deviceid is null") ;
+		
+    }
+    
+    if (DelAddressObject.deliveryStoreID != null){ 
+    	
+    	if(DelAddressObject.city==null 
+	    	 || DelAddressObject.countryCode==null || DelAddressObject.address1==null || DelAddressObject.county==null){
+	    		    		
+	       // Logger.error("CreateOrder::Error"+ e.message);
+			 throw new Error("city name,countryCode name, address1 or county is null in Delivery Address") ;
+	     }
+	     else if(-1 != DelAddressObject.address1.indexOf("$and$")){
+	     		DelAddressObject.address1 = DelAddressObject.address1.replace("$and$", "&");
+	     }
+    	
+    }else {
+    	
+	    if(DelAddressObject.title==null || DelAddressObject.firstName==null 
+	    ||DelAddressObject.lastName==null||DelAddressObject.city==null
+	    ||DelAddressObject.phone==null || DelAddressObject.countryCode==null 
+	    || DelAddressObject.address1==null || DelAddressObject.county==null){
+	    		    		
+	       // Logger.error("CreateOrder::Error"+ e.message);
+			throw new Error("first name,last name, Phone,countryCode is null in Delivery Address") ;
+	     }
+     
+    }
+    if(BillingAddressObject.title==null || BillingAddressObject.email==null ||BillingAddressObject.firstName==null ||BillingAddressObject.lastName==null||BillingAddressObject.city ==null
+     	 ||BillingAddressObject.phone==null || BillingAddressObject.countryCode==null || BillingAddressObject.address1==null|| BillingAddressObject.county==null){
+   		//Logger.error("CreateOrder::Error"+ e.message);
+		throw new Error("email,first name,last name, Street,Phone is null in billing address") ;
+    }  
+    if(cardObject.paymentCardID==null){  
+    if(cardObject.creditCardNumber==null ||cardObject.creditCardSecurityCode==null ||cardObject.creditCardExpirationMonth==null ||cardObject.creditCardExpirationYear ==null
+    	||cardObject.creditCardType==null ||cardObject.creditCardHolder==null){
+      	//Logger.error("CreateOrder::Error"+ e.message);
+		throw new Error("Incomplete card details") ;
+      	
+    	}
+      }else{
+      	if(cardObject.creditCardSecurityCode==null){
+      	throw new Error("Security Code is null") ;
+      	
+      }
+      
+      } 
+	}catch(e){
+		Logger.error("CreateOrder::Error"+ e.message);
+		return PIPELET_ERROR;
+	}
+	
+	DelAddressObject.postBox = DelAddressObject.address3 ;
+	BillingAddressObject.postBox = BillingAddressObject.address3 ;
+	DelAddressObject.postalCode= ".";
+	
+	if (DelAddressObject.deliveryStoreID != null){
+		DelAddressObject.title = BillingAddressObject.title ;	
+		DelAddressObject.firstName = BillingAddressObject.firstName ;
+		DelAddressObject.lastName = BillingAddressObject.lastName ;	
+	}
+	
+	
+	 
+	BillingAddressObject.postalCode = "."; 
+	
+	if (BillingAddressObject.countryCode == "UK"){
+		BillingAddressObject.countryCode = "GB" ;
+	} 
+	
+	args.CredentialsObject = CredentialsObject;	//user name and password 
+	args.DelAddressObject = DelAddressObject;  // shipping address object
+	args.BillingAddressObject = BillingAddressObject; //billing address object
+	args.CardObject = cardObject; // credit card object
+	args.BillingDetailsObject = BillingDetailsObject;
+	args.DelDetailsObject = DelDetailsObject;
+	args.orderChannel = reqObject.orderChannel;
+	args.orderPoint = reqObject.orderPoint;
+	args.deviceID=reqObject.DeviceID;
+	
+	return PIPELET_NEXT;
+}
+function removeNullValues(key:String, val:String):String{
+	
+	if(val=="null"){
+		
+	}
+	else{
+		return val;
+	}
+}
+
+	

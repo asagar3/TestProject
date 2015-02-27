@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<isinclude template="util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<head>
+	<isscript>
+		var protocol : String = request.httpProtocol;
+	</isscript>
+	<iscomment>Dkumar :INC000007254412 canonical tag for homepage</iscomment>
+	<isif condition="${!dw.system.Site.getCurrent().preferences.custom.disableCanonicalTag}">
+	<link rel="canonical"  href="${protocol}://${dw.system.Site.getCurrent().preferences.custom.httpHostRedirection}" />
+	</isif>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+	
+	<iscomment>Add page specific header information here.</iscomment>
+</head>
+
+<body>
+<iscomment>INT-152 - Lucy/Christina - add RichRelevance Recommendations</iscomment>
+<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('rrIsEnabled')}">
+	<isinclude template="RichRelevance/r3_home" />
+</isif>
+<div id="container" class="pt_storefront">
+    <isinclude template="components/header/header"/>		
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+	<script type="text/javascript">
+		s.pageName = "${pdict.omniPageName}" ;
+		s.server = "${dw.system.System.getInstanceHostname()}" ;
+		s.prop24 = "${Resource.msg('omniture.prop24.home','omniture',null)}" ;
+		s.channel = "${Resource.msg('omniture.channel.home','omniture',null)}" ;
+		s.prop1 = "${Resource.msg('omniture.channel.home','omniture',null)}" ;
+		s.prop18 = "${Resource.msg('omniture.channel.home','omniture',null)}" ;		
+		s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"
+	</script>
+    <div id="main">
+        <div id="content">
+            <isreplace/>
+            <div class="clear"><!-- FLOAT CLEAR --></div>
+        </div><!-- END: content -->	
+        <iscomment><div id="rightcolumn">
+        	<isslot id="home-right" description="Product Scroller on right side of homepage" context="global" />
+        	<div class="clear"><!-- FLOAT CLEAR --></div>
+        </div><!-- END: rightcolumn --></iscomment>
+        <div class="clear"><!-- FLOAT CLEAR --></div>
+    <isinclude template="components/footer/footer"/>
+    </div><!-- END: main -->
+    <iscomment><!-- Asha | Moved down the footer --></iscomment>
+</div><!-- END: container -->
+</body>
+</html>

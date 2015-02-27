@@ -1,0 +1,67 @@
+/**
+*
+* @input CustomObject : dw.object.CustomObject
+* @input Config : Object
+* @input CurrentHttpParameterMap : dw.web.HttpParameterMap
+* @input Type : String
+*
+*/
+importPackage( dw.system );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var typeDefinitions : dw.util.ArrayList =  new dw.util.ArrayList();
+	var typeGroups =  dw.object.CustomObjectMgr.describe(pdict.Type).getAttributeGroups();
+	for each (var group in typeGroups) {
+		for each (var property in group.getAttributeDefinitions()) {
+			typeDefinitions.add(property);
+		} 
+	}
+	
+	var autoGenerate : dw.util.ArrayList = new dw.util.ArrayList(); 
+	if (!empty(pdict.Config) && !empty(pdict.Config.custom) && !empty(pdict.Config.custom.autoGenerateProperties)) {
+		for each (var id in pdict.Config.custom.autoGenerateProperties) {
+				autoGenerate.add(id);
+		}
+	}
+
+	for each (var typeDefinition in typeDefinitions) {
+		if (!(typeDefinition.isSystem() || autoGenerate.contains(typeDefinition.ID))) {
+			if (	typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_STRING || 
+					typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_TEXT || 
+					typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_EMAIL ||
+					typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_ENUM_OF_STRING ||
+					typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_PASSWORD) {
+				pdict.CustomObject.custom[typeDefinition.ID] = pdict.CurrentHttpParameterMap[typeDefinition.ID].value;
+			}
+			
+			if ( typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_INT ||
+				typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_ENUM_OF_INT) {
+				pdict.CustomObject.custom[typeDefinition.ID] = pdict.CurrentHttpParameterMap[typeDefinition.ID].intValue;					
+			}
+			
+			if (	typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_DATE || 
+					typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_DATETIME){
+				pdict.CustomObject.custom[typeDefinition.ID] = pdict.CurrentHttpParameterMap[typeDefinition.ID].dateValue;
+			}
+			if (	typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_BOOLEAN ) {
+				if (pdict.CurrentHttpParameterMap[typeDefinition.ID].submitted) {
+					pdict.CustomObject.custom[typeDefinition.ID] = pdict.CurrentHttpParameterMap[typeDefinition.ID].booleanValue;
+				} else {
+					pdict.CustomObject.custom[typeDefinition.ID] = false;
+				}
+			}
+			if (	typeDefinition.valueTypeCode == dw.object.ObjectAttributeDefinition.VALUE_TYPE_SET_OF_STRING ) {
+				var array = new Array();
+				var subMap = pdict.CurrentHttpParameterMap.getParameterMap(typeDefinition.ID);
+				for each (var parameter in subMap) {
+					if (!empty(parameter.value)){
+						 array.push(parameter.value);
+					}
+				}
+				pdict.CustomObject.custom[typeDefinition.ID] = array;
+			}
+		}
+	}
+    return PIPELET_NEXT;
+}

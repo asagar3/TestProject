@@ -1,0 +1,381 @@
+/**
+* 
+* ImportFromOrders.ds
+*
+* process OrderStatus xml
+* 
+*   
+* 
+*<?xml version="1.0" encoding="UTF-8"?>
+<orders-shipping xmlns="http://www.demandware.com/xml/impex/order/2006-10-31">
+	<order order-no="00000001">
+	    <status>
+	    	<shipping-status>SHIPPED</shipping-status>
+	    </status>
+	    
+	    <product-lineitems>
+		    <product-lineitem>
+			    <product-id>882763789497</product-id>
+			    <product-color>grey</product-color>
+			    <product-size>Medium</product-size>
+			    <product-name>Mens coat</product-name>
+			    <quantity unit="" >2</quantity>
+			    <quantity-Processed unit="">2</quantity-Processed>
+			    <shipment-id>SHP123</shipment-id>
+		    </product-lineitem>
+	    </product-lineitems>
+	    
+	    <giftcertificate-lineitems>
+		    <giftcertificate-lineitem>
+			    <gc-merchant-id>AAA</gc-merchant-id>
+			    <giftcertificate-id>1111</giftcertificate-id>
+			    <shipment-id>SHP111</shipment-id>
+		    </giftcertificate-lineitem>
+	    </giftcertificate-lineitems>
+	    
+	    <shipments>
+		    <shipment shipment-id= "SHP123">
+			    <status>
+			    	<shipping-status>SHIPPED</shipping-status>
+			    </status>
+			    <shipping-method>USPS</shipping-method>
+			    <shipping-date>2010-12-28</shipping-date>
+			    <tracking-number>1Z059R031261826846</tracking-number>
+		    </shipment>
+		    <shipment shipment-id= "SHP111">
+			    <status>
+			   	<shipping-status>SHIPPED</shipping-status>
+			    </status>
+			    <shipping-method>USPS</shipping-method>
+			    <shipping-date>2010-12-28</shipping-date>
+			    <tracking-number>1Z059R031261826846</tracking-number>
+		    </shipment>
+	    </shipments>
+	</order>
+</orders-shipping>
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* 
+* @input file : dw.io.File 
+* @output Processed : String number of Records Successfully processed
+* @output Failed : String number of records failed  
+* @output notifyToEmailId : String 
+* @output message : String
+* @output customerEmailId : String
+* @output sendMailToCustomer : Boolean
+* @output Order : dw.order.Order
+* @output fileName : String
+* @output fileLocation : String
+* @output ArchiveFolder : String
+* @output StatusMessage : String
+* @output origShippingMethod : String
+*/
+ 
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.web );
+importPackage( dw.net );
+importPackage( dw.catalog );
+importPackage( dw.object );
+importPackage(dw.customer);
+importPackage( dw.net ); 
+importPackage( dw.io );
+//importScript (order/archive.ds);
+ /**
+ * Function: execute
+ *
+ * Main function of the script. 
+ */
+function execute( pdict : PipelineDictionary ) : Number
+{	
+	
+	//Logger.error("Email to which the email will be sent is : " + Site.getCurrent().getCustomPreferenceValue("m&sAdminEmail"));
+	pdict.notifyToEmailId = Site.getCurrent().getCustomPreferenceValue("mnsAdminEmail"); //: This will read the site preference object: 
+	
+    var xmlFile : dw.io.File = pdict.file;
+    var fileProcessed : Number;
+	fileProcessed= processFile(xmlFile,pdict);
+	pdict.fileName = xmlFile.name;
+	//pdict.fileLocation = "/orderUpdate/modifiedStatus/";
+	pdict.fileLocation =  File.SEPARATOR + Site.getCurrent().getCustomPreferenceValue("orderExportLocation") +  File.SEPARATOR;
+ 	if (fileProcessed != 2){
+ 		pdict.ArchiveFolder = "/orderUpdate/archive/success/";
+ 		return PIPELET_NEXT;
+ 	}
+ 	else {
+ 		pdict.ArchiveFolder = "/orderUpdate/archive/failure/";
+ 		return PIPELET_ERROR;
+ 	}
+		
+	}
+			
+	function processFile(xmlFile : File,pdict : PipelineDictionary) : Number {
+		
+		//var filePath:String="/src/00000016.xml";
+	//	var file:String = "samplestatus.xml";
+	//	var xmlFile : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + file);
+	//	var xmlFile : dw.io.File=new File(File.IMPEX + File.SEPARATOR + "src"+ File.SEPARATOR+"orderUpdate121.xml");
+	//	var readFile:FileReader= new FileReader(xmlFile);//read file 
+//		var content : String = readFile.getString(); //get the file content 
+		var readFile:FileReader = new FileReader(xmlFile);//read file 
+		var content : String = readFile.getString(); //get the file content 
+    	var origShippingMethod = "";
+		
+	  try{
+	  	XML.setSettings();
+		content=normalizeXMLTags(content);
+		var ordersXML : XML = new XML(content);
+	  	var attrio =ordersXML.children();
+	    var ns : Namespace = new Namespace(ordersXML.namespace());
+	  	
+	  	
+	    for each ( var orderXML : XML in ordersXML.ns::order) 
+	    {
+			var orderUpdated:Boolean=false; 
+	  	    var orderID=ordersXML.ns::order.attribute("orderno").toString();
+			//orderID=orderXML.attribute("orderno").toString();
+			var order : dw.order.Order =OrderMgr.queryOrder("orderNo = {0}", orderID);
+			var origShippingMethod = order.getShipments()[0].getShippingMethodID();
+			var effectiveDateTime=orderXML.ns::effectiveDateTime.toString();		
+			/**
+			* check if the received XML is an old file 
+			* to do this we get the effective date from the XML and compare it with the stored effective date.
+			* if the effective date from XML is before the stored effective date, the script will return with ERROR			 
+			*/
+			var newUpdDate =new Calendar(new Date(effectiveDateTime));		// Date from XML file
+			var oldUpdDate = null;
+			if (null != order.custom.effectiveDateTime){
+				oldUpdDate = new Calendar(order.custom.effectiveDateTime);	// Stored effective Date
+				var checkDate = newUpdDate.compareTo(oldUpdDate);
+				if(checkDate<0){
+					Logger.error("The checkdate coming from the XML is less than the effective date that exists in the Order " + orderID);
+					pdict.StatusMessage="The checkdate coming from the XML is less than the effective date that exists in the Order " + orderID;
+					return PIPELET_ERROR;
+				}			
+			}			
+			var customerEmail=order.getCustomerEmail();
+			var sendemail=orderXML.ns::sendemail.toString();
+	  	    var orderFinalTotal:String=orderXML.ns::orderFinalTotal.toString();
+			var shippingStatus=orderXML.ns::status.toString();
+			var updateReasonCode=orderXML.ns::updateReasonCode.toString();
+			
+			var ordersubTotal=orderXML.ns::ordersubTotal.toString();			
+			if (shippingStatus!=null){
+				shippingStatus=dw.util.StringUtils.trim(shippingStatus);
+			    order.custom.orderStatus=shippingStatus;
+				}
+			 if(Site.getCurrent().preferences.custom.paidOrderStatusList!=null){ 
+ 			 for each(var compareStatus in Site.getCurrent().preferences.custom.paidOrderStatusList) {
+  				if(shippingStatus!=null && shippingStatus.equalsIgnoreCase(compareStatus)){
+				order.custom.displayCancelButton=true;
+  				}
+ 			 }
+			 }
+			if (sendemail=='true')
+				order.custom.sendEmail=true;
+			else
+				order.custom.sendEmail=false;
+			 	
+			
+			 order.custom.updateReasonCode=updateReasonCode;
+			 order.custom.orderSubTotal=ordersubTotal;
+			 order.custom.orderFinalTotal=orderFinalTotal;
+			 //var testDate:Date=new Date(effectiveDateTime);
+			 order.custom.effectiveDateTime=new Date(effectiveDateTime);
+			var shipmentsXML:XML=orderXML.ns::shipments;
+			for each(var shipmentXML:XML in shipmentsXML.ns::shipment){
+					
+			var shipmentid:String=shipmentXML.attribute("shipmentid").toString();
+					var shipmentStatus:String=shipmentXML.ns::status.toString();
+				  	var shippingMethodID:String=shipmentXML.ns::shippingmethod.toString();
+				  	var shipmentUpdDate:String=shipmentXML.ns::shippingdate.toString();
+				  	var trackingnumber:String=shipmentXML.ns::trackingnumber.toString();
+				  	
+				  	//TO DO:Change the  to carriername
+				  	var carriername:String=shipmentXML.ns::carriername.toString();
+				  	var refundedShippingCharge=shipmentXML.ns::refundedShippingCharge.toString();
+				  	var shipmentShippingCharge=shipmentXML.ns::shippingcharge.toString();
+				  	
+				  	var shipment:dw.order.Shipment=null;
+				  	var shipmentLineItems : Collection = order.getShipments();
+					var shipmentLineItemsItr : Iterator = shipmentLineItems.iterator();
+		
+					while(shipmentLineItemsItr.hasNext())
+					{
+						var shipmentCntr : dw.order.Shipment =  shipmentLineItemsItr.next();
+						if(shipmentCntr.shipmentNo==shipmentid){
+							shipment=shipmentCntr;
+							break;
+						}
+					
+					}	
+		
+				 	//var shipment:dw.order.Shipment=order.getShipments().getShipment("00000201");				 	
+			 		shipment.custom.shipmentStatus=shipmentStatus;			 	
+			 		shipment.custom.shipmentShippingCharge=shipmentShippingCharge;
+			 		//shipment.custom.shippingDate=shippingDate.getTime();			 		
+			 		var shippingDate :dw.util.Calendar =new Calendar();
+			 		shippingDate.parseByFormat(shipmentUpdDate,  "yyyy-MM-dd");
+				 	shipment.custom.shippingDate=shippingDate.getTime();				 
+				 	shipment.custom.carrierName=carriername;				 	
+				 	shipment.trackingNumber=trackingnumber;
+				 	shipment.custom.refundedShippingCharge=refundedShippingCharge;
+				 	
+			//TO DO: The below null check can be removed if the selected shipping method is saved in Order Obj.	 	
+				 	if (shipment.getShippingMethodID() != null){
+				 	//update shipping method if changed
+					 	if(!(shipment.getShippingMethodID().equalsIgnoreCase(shippingMethodID)))
+					 	
+					 	{
+					 		var shippingMethod : dw.order.ShippingMethod = null;
+					 		var shippingMethods: Collection  = ShippingMgr.getShipmentShippingModel(shipment).getApplicableShippingMethods();
+					 		var shippingMethodsIter : Iterator = shippingMethods.iterator();
+							while( shippingMethodsIter.hasNext() )
+							{
+								var method : ShippingMethod = shippingMethodsIter.next();
+								if ((method.ID).equalsIgnoreCase(shippingMethodID))
+								{
+									shippingMethod=method;
+									break;
+								}
+							}	
+			
+							// set this shipping method
+							shipment.setShippingMethod( shippingMethod );
+					 		
+					 	}
+			}	
+				 	//shipment.shippingMethod=shippingmethod;
+				 	
+			}	
+			var productLineItem:ProductLineItem=null;
+			var plisXML:XML=orderXML.ns::productlineitems;
+			for each(var pliXML:XML in plisXML.ns::productlineitem){
+					var productid:String=pliXML.ns::productid.toString();
+					
+					var quantityProcessed:String=pliXML.ns::quantity.toString();
+					var pliShipmentid:String=pliXML.ns::shipmentid.toString();
+					var lineStatus:String=pliXML.ns::status.toString();
+					var orderLineValue:String=pliXML.ns::orderlinevalue.toString();
+					var returnedQuantity:String=pliXML.ns::returnedquantity.toString();
+					var refundedQuantity:String=pliXML.ns::refundedquantity.toString();
+					var refundValue:String=pliXML.ns::refundvalue.toString();
+		//			var productVATRate:String=pliXML.ns::productVATRate.toString();
+					
+					
+					var shipmentLineItems : Collection =  order.getShipments();
+					var shipmentLineItemsItr : Iterator = shipmentLineItems.iterator();
+					var productFound = false;
+				while(shipmentLineItemsItr.hasNext())
+				{
+						var shipmentCntr : dw.order.Shipment =  shipmentLineItemsItr.next();
+						var productLineItems : Collection  =  shipmentCntr.getProductLineItems();
+						var productLineItemsItr : Iterator = productLineItems.iterator();
+						var productLineItemx : ProductLineItem = null;
+						while(productLineItemsItr.hasNext())
+						{
+			
+								var productLineItemx : ProductLineItem = productLineItemsItr.next();
+								//TODO:replace productID by UPCID ,currently using productID instead of UPCID 
+								if(productLineItemx.custom.UPCID==productid && shipmentCntr.getShipmentNo()==pliShipmentid){
+									productFound = true;
+										
+									productLineItemx.custom.status=lineStatus;
+									productLineItemx.custom.processedQuantity=quantityProcessed;
+									productLineItemx.custom.orderLineValue=orderLineValue;
+									productLineItemx.custom.returnedQuantity=returnedQuantity;
+									productLineItemx.custom.refundedQuantity=refundedQuantity;
+									productLineItemx.custom.refundValue=refundValue;
+			//						productLineItemx.custom.productVATRate=productVATRate;
+									break;
+								}
+						}	
+						if (productFound==true)
+						break;	
+				}
+			}	
+				
+			//var orderShipmentStatus:Boolean=updateShipmentInOrder(orderXML,order);
+			//var pliStatus:Boolean=updateProductLineItemInOrder(orderXML,order);
+			orderUpdated=true;
+			if(orderUpdated)
+			{
+				//pdict.sendMailToCustomer=true;
+				pdict.customerEmailId=customerEmail;
+				pdict.Order=order;
+				pdict.origShippingMethod = origShippingMethod;
+			}
+	    }
+		return PIPELET_NEXT;
+	} catch ( e)
+	{
+		Logger.error("Error occurred while consuming the Order Status XMl from ICOS "+ e.message);
+		pdict.StatusMessage="Error occurred while consuming the Order Status XMl from ICOS "+ e.message;
+		return PIPELET_ERROR;
+	}
+	
+}
+
+ function normalizeXMLTags(content:String):String
+ 
+ {
+   
+    var listOfTags:dw.util.ArrayList= getAllTags(content);
+   
+   var num :Number= content.split("-").length;
+   
+   for(var i=0;i<listOfTags.length;i++)
+   {
+   
+   var tagName :String=listOfTags.get(i);
+   tagName=tagName.replace("-", "");
+   content=content.replace(listOfTags.get(i),tagName);
+   
+   }
+ 
+ return content;
+}
+
+	function getAllTags(content:String):dw.util.ArrayList
+	{
+     var arrSplit:Array=content.split("<");
+     
+     var arrTagsList:dw.util.ArrayList= new dw.util.ArrayList();
+  
+  
+     for(var i=0;i<arrSplit.length;i++)
+   {
+   
+   var strTaGname:String = arrSplit[i];
+   strTaGname = strTaGname.substring(0,strTaGname.indexOf(">"));
+   arrTagsList.add(strTaGname);
+   }
+
+return arrTagsList;
+}
+
+ /* function updateShipmentInOrder(orderXML:XML, order: dw.order.Order):Boolean
+
+       {
+
+            var updateStatus :Boolean = false;
+			var shipmentsXML:XML=orderXML.ns::shipments;
+           //for each (var shipmentXML:XML in orderXML.ns::shipments.ns::shipment)
+ 	//{
+					
+				 	
+ 	//}
+
+             updateStatus = true;
+
+             return updateStatus;
+
+       }
+
+  */ 	  

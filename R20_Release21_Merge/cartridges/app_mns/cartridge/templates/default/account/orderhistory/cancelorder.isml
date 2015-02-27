@@ -1,0 +1,46 @@
+<!--- TEMPLATENAME: cancelorder.isml --->
+<isinclude template="util/modules"/>
+<p class="linetxt">${Resource.msg('order.cancelconfirm','account',null)}</p>
+<div class="separator">&nbsp;</div>
+<isset name="confirmCancellation" value="false" scope="pdict"/>
+<div class="button_wrapper">
+			<div class="floatright btn-grey-dark">
+				<div class="grey_border">
+						<button value="Confirm" name="Confirm" class="confirmdeletion" onclick="javascript:submitMyForm();">
+							<span>${Resource.msg('delete.yes','account',null)}</span>
+						</button>
+					</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="floatright btn-grey-flat">
+				<div class="grey_border">
+						<button value="Cancel" name="Cancel" type="submit" class="canceldeletion" id="cancelBtn">
+							<span>${Resource.msg('delete.no','account',null)}</span>
+						</button>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+	<iscomment>[485]: QC defect fixing</iscomment>
+	<form method="post" name="cancelOrderForm" id="cancelOrderForm" action="${URLUtils.url('Order-CallCancelPipeline')}">
+		<fieldset>
+			<input type="hidden" name="emailAddress" value="${pdict.CurrentHttpParameterMap.emailAddress}"/>
+			<input type="hidden" name="orderNo" value="${pdict.CurrentHttpParameterMap.orderNo}"/>
+		</fieldset>
+	</form>
+
+<script type="text/javascript">
+	
+		function submitMyForm(){
+		//[485]: QC defect fixing
+		//var cancelURL = app.util.appendParamToURL("${URLUtils.url('Order-Cancel')}", "orderNo", "${pdict.CurrentHttpParameterMap.orderNo}");
+		//var cancelURL = app.util.appendParamToURL(cancelURL, "emailAddress", "${pdict.CurrentHttpParameterMap.emailAddress}");
+		document.cancelOrderForm.submit();
+		//window.location.href = cancelURL;						
+	}	
+
+	jQuery(".canceldeletion").click(function(){
+		app.dialog.close();							
+	});	
+</script>

@@ -1,0 +1,22 @@
+<!--- TEMPLATENAME: banktransfer.isml --->
+<iscomment><div class="paymenttype">${Resource.msg('orderdetails.paymentmethod.banktransfer','components',null)}</div></iscomment>
+	  <div class="paymentamount">
+		<iscomment><span class="label">${Resource.msg('global.paymenttype','locale',null)}:</span></iscomment>
+		<span class="value"><isprint value="${paymentInstr.custom.paymentType}"/></span>
+	</div><!-- END: paymenttype -->
+	<iscomment><isif condition="${paymentInstr.custom.paymentType=='IDEAL-SSL'}">
+	<div class="paymentamount">
+		<span class="label">${Resource.msg('global.bank','locale',null)}:</span>
+		<span class="value"><isprint value="${paymentInstr.custom.bankName}"/></span>
+	</div>
+	</isif><!-- END: paymentbank -->
+	<isif condition="${paymentInstr.paymentTransaction.custom.paymentType=='SOFORT-SSL'}">
+	<div class="paymentamount">
+		<span class="label">${Resource.msg('global.bankcountry','locale',null)}:</span>
+		<span class="value"><isprint value="${paymentInstr.custom.shoppersBank}"/></span>
+	</div>
+	</isif><!-- END: bankcountry -->
+	<div class="paymentamount">
+		<span class="label">${Resource.msg('global.amount','locale',null)}:</span>
+		<span class="value"><isprint value="${paymentInstr.paymentTransaction.amount}"/></span>
+	</div><!-- END: paymentamount --></iscomment>

@@ -1,0 +1,51 @@
+/**
+*
+*  @input QueryKeys : dw.util.ArrayList
+*  @input QueryValues : dw.util.ArrayList
+*  @input GetAll : Boolean
+*  @input Type : String
+*  @input NewKey : String
+*  @input NewValue : String
+*  @input SortKey : String
+*  @input SortDirection : String
+*  @output CustomObjects : dw.util.SeekableIterator
+*  @output ObjectCount : Number
+*
+*/
+importPackage( dw.system );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var customObjectIterator;
+	
+	if (pdict.GetAll) {
+		customObjectIterator = dw.object.CustomObjectMgr.getAllCustomObjects(pdict.Type);
+	} else {
+		if (!empty(pdict.NewKey)) {		
+			pdict.QueryKeys.add(pdict.NewKey);
+		}
+		if (!empty(pdict.NewValue)) {
+			pdict.QueryValues.add(pdict.NewValue);
+		}
+		var values = new Array();
+		var queryKeysString = '';
+		var i = 0;
+		for each (var key in pdict.QueryKeys) {
+			if (i == 0) {
+				queryKeysString = key + ' ILIKE {' + i + '}';
+			} else {
+				queryKeysString += ' AND ' + key + ' ILIKE {' + i + '}';
+			}
+			values.push(pdict.QueryValues.get(i));
+			i++; 	
+		}
+		var sortstring = null;
+		if (!empty(pdict.SortKey)) {
+			sortstring = 'custom.' + pdict.SortKey + ' ' + pdict.SortDirection;	
+		}
+		customObjectIterator = dw.object.CustomObjectMgr.queryCustomObjects(pdict.Type, queryKeysString, sortstring, values);
+	}
+	pdict.CustomObjects = customObjectIterator;
+	pdict.ObjectCount = customObjectIterator.count;
+    return PIPELET_NEXT;
+}

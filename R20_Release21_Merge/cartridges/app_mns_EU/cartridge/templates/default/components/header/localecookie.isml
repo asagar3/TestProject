@@ -1,0 +1,15 @@
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<script type="text/javascript">	
+jQuery(function(){	
+	var cookieName = "LocaleCookie_EU";
+	//Read the Cookie 
+	var cookieLocale = jQuery.cookie(cookieName);
+	//Read Session Variable
+	//var sessionLocale = "${session.custom.localeStr}";
+	var requestLocale = "${request.locale}";
+	if (requestLocale != "null" && cookieLocale != requestLocale ) {
+		//Write the Cookie
+		jQuery.cookie(cookieName, requestLocale, {expires: 90, path: '/'});
+	}
+});
+</script>

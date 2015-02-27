@@ -1,0 +1,6 @@
+function ServiceBase() {}
+ServiceBase.prototype = {
+	initFromWebservice : function() {},
+	getDummyResponse : function() {},
+	dummy : function() {}
+}

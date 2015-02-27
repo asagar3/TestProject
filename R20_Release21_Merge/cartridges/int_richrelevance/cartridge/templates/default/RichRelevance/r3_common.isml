@@ -1,0 +1,17 @@
+<!--- TEMPLATENAME: rr_common.isml --->
+<script chartset="utf-8" type="text/javascript">
+var r3commonincluded = true;
+</script>
+<script chartset="utf-8" type="text/javascript" src="//media.richrelevance.com/rrserver/js/1.0/p13n.js"></script>
+<script chartset="utf-8" type="text/javascript">
+var R3_COMMON = new r3_common();
+R3_COMMON.setApiKey('${dw.system.Site.current.preferences.custom.rrAPIKey}');
+R3_COMMON.setBaseUrl(window.location.protocol+'//${dw.system.Site.current.preferences.custom.rrServerMode}.richrelevance.com/rrserver/');
+R3_COMMON.setSessionId('${pdict.CurrentSession.sessionID}');
+
+<isif condition="${pdict.CurrentCustomer != null && pdict.CurrentCustomer.getProfile()!=null}">
+	R3_COMMON.setUserId('${pdict.CurrentCustomer.getProfile().getCustomerNo()}');
+<iselse>
+	R3_COMMON.setUserId('${pdict.CurrentCustomer.ID}');
+</isif>
+</script>

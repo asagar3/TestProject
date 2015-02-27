@@ -1,0 +1,174 @@
+/**
+ * Move local file into archive folder. If no archive folder is specified, the file is
+ * just deleted.
+ *
+ * Inside the archive folder day specific subfolders with yyyy-MM-dd naming convention
+ * are created. Feeds are moved into these subfolders. The UTC day is used as reference.
+ * Day specific subfoldes are deleted after a week.
+ *
+ * If ArchiveFolder does not exist it is created.
+ *
+ * @input FilesNames : dw.util.ArrayList , this list is to capture the names of the files to be archived
+ * @input archiveFolder : String , folder where files to be archived
+ * @output errorStep : String , will be used in error email
+ */
+
+importPackage( dw.io );
+importPackage( dw.system );
+importPackage( dw.util );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	// read parameters
+	var fileNames : ArrayList = args.FilesNames;
+	var archiveFolder : String = args.archiveFolder;
+	var result : boolean;
+    // check parameters
+    if ( empty( archiveFolder ) )
+    {
+    	Logger.getLogger("ArchiveGoldenFeed").error( "archiveFolder: Parameter File empty" );
+    	return PIPELET_ERROR;
+    }
+	
+    //Logger.getLogger("ArchiveGoldenFeed").error( "archiveFolder: File: " + fileString + ", ArchiveFolder: " + ( !empty( archiveFolderString ) ? archiveFolderString : "(empty)" ) );
+	var itr : Iterator = fileNames.iterator();
+	
+	if ( !createFolder( archiveFolder ) )
+	{
+		// error message written in createFolder
+		return PIPELET_ERROR;
+	}
+	
+	while(itr.hasNext()){
+			var fileName : String = itr.next();
+			try{
+				var file : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR +  fileName);
+	
+				if ( !file.exists() )
+				{
+					Logger.getLogger("ArchiveGoldenFeed").error( "ArchiveFeed: File " + file.fullPath + " does not exist.");
+					return PIPELET_ERROR;
+				}
+				
+				var currDate : String = dw.util.StringUtils.formatCalendar(new dw.util.Calendar(), "yyyy-MM-dd");
+				//creating the date folder
+				createFolder( archiveFolder + File.SEPARATOR + currDate );
+				var archiveFile : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + archiveFolder + File.SEPARATOR + currDate + File.SEPARATOR +  fileName.substring(fileName.indexOf("/")+1, fileName.length));
+		
+				Logger.getLogger("ArchiveGoldenFeed").error( "ArchiveFeed: Moving " + file.fullPath + " to " + archiveFile.fullPath );
+		
+				result = file.renameTo( archiveFile );
+				
+				if ( !result )
+				{
+					Logger.getLogger("ArchiveGoldenFeed").error( "ArchiveGoldenFeedFeed: Couldn't move " + file.fullPath + " to " + archiveFile.fullPath );
+					return PIPELET_ERROR;
+				}
+			}catch(ex){
+				
+				Logger.getLogger("ArchiveGoldenFeed").error( "Exception while moving the file to archive, exception: "+ex);
+				args.errorStep="Archive Feeds";
+				return PIPELET_ERROR;
+			}
+				
+		
+	}
+	//Delete folders older than 7 days
+	if(!cleanupArchive(archiveFolder)){
+		args.errorStep="ArchiveGoldenFeed: While deleting the archived folders ";
+	}
+	return PIPELET_NEXT;
+}
+
+function createFolder( folder : String ) : boolean
+{
+	var localFolder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + folder );
+
+	if ( localFolder.exists() )
+	{
+		// nothing to do
+		return true;
+	}
+
+	Logger.getLogger("simplefeeds").error( "ArchiveFeed: Creating folder " + localFolder.fullPath );
+
+	// create folder	
+	var result : boolean = localFolder.mkdirs();
+	if ( !result )
+	{
+		Logger.getLogger("simplefeeds").error( "ArchiveFeed: Error creating folder " + localFolder.fullPath );
+		return false;
+	}
+	
+	return true;
+}
+
+function cleanupArchive( archiveFolder : String ) : boolean
+{
+	
+	var localArchiveFolder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + archiveFolder + File.SEPARATOR );
+
+	if ( !localArchiveFolder.exists() )
+	{
+		Logger.getLogger("simplefeeds").error( "ArchiveFeed: Folder " + localArchiveFolder.fullPath + " does not exist." );			
+		return false;	
+	}
+	
+	Logger.getLogger("simplefeeds").error( "ArchiveFeed: Cleaning up folder " + localArchiveFolder.fullPath );
+	
+	// everything that's older than purgeDate gets deleted
+	var purgeDate : Calendar = new Calendar();
+	purgeDate.timeZone = "GMT";
+	// keep archives for 7 days
+	purgeDate.add(Calendar.DATE, -7);
+	
+	Logger.getLogger("simplefeeds").error( "ArchiveFeed: Purging archives before " + StringUtils.formatCalendar( purgeDate, "yyyy-MM-dd" ) );
+	
+	var calendar : Calendar = new Calendar();
+	calendar.timeZone = "GMT";
+
+	// iterate over archiveDayFolders	
+	for each ( var archiveDayName : String in localArchiveFolder.list() )
+	{
+		try
+		{		
+			calendar.parseByFormat( archiveDayName, "yyyy-MM-dd" );
+		}
+		catch ( ex )
+		{
+			Logger.getLogger("simplefeeds").error( "ArchiveFeed: Unexpected name format in folder " + localArchiveFolder.fullPath + ": " + archiveDayName );
+			continue;
+		}
+		
+		if ( calendar.before( purgeDate ) )
+		{
+			var archiveDayString : String = archiveFolder + File.SEPARATOR + archiveDayName;
+			var archiveDayFolder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + archiveDayString );
+		
+			Logger.getLogger("simplefeeds").error( "ArchiveFeed: Purging folder " + archiveDayFolder.fullPath );
+			
+		 	// Delete files in folder. We do not expect subfolders in that folder.
+			for each ( var filename : String in archiveDayFolder.list() )
+			{
+				var file : File = new File(
+					File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR +
+					archiveDayString + File.SEPARATOR + filename );
+				if ( !file.remove() )
+				{
+					Logger.getLogger("simplefeeds").error( "ArchiveFeed: Couldn't delete file " + file.fullPath );
+					return false;
+				}
+			}		 	
+		 	
+		 	// delete the empty folder
+		 	if ( !archiveDayFolder.remove() )
+		 	{
+		 		Logger.getLogger("simplefeeds").error( "ArchiveFeed: Couldn't delete folder " + archiveDayFolder.fullPath );
+		 		return false;
+		 	}
+		}
+	}
+	
+	return true;	
+}
+

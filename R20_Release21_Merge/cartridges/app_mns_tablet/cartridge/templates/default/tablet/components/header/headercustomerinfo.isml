@@ -1,0 +1,7 @@
+<iscomment><!-- Added class "ms_text_2"--></iscomment>
+<isif condition="${pdict.CurrentCustomer.registered}">
+	<li><a title="${Resource.msg('headercustomerinfo.signout','components',null)}" href="${URLUtils.url('Login-Logout')}">${Resource.msg('headercustomerinfo.signout','components',null)}</a></li>
+	<li><a href="${URLUtils.https('Account-Show')}" title="${Resource.msg('header.myaccount','components',null)}">${Resource.msg('header.myaccount','components',null)}</a></li>
+<iselse>
+	<li><a href="${URLUtils.https('Account-Show')}" title="${Resource.msg('header.myaccount','components',null)}">${Resource.msg('header.myaccount_tablet','components',null)}</a></li>
+</isif>

@@ -1,0 +1,64 @@
+/**
+
+*   @input vbObject : Object
+*   @input currentCustomer : dw.customer.Customer
+*   @input orderChannel : String
+*   @input deviceID : String
+*-   @output ExampleOut : Number
+*
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+	 var basketId : String =args.vbObject.BasketId;
+	 var vbURL : String = Site.getCurrent().getCustomPreferenceValue("VBServiceURL");
+	 
+	var orderChannel = request.httpHeaders.get("channel") ;
+    var deviceID = request.httpHeaders.get("deviceid") ;
+
+    
+    if(empty(orderChannel) && empty(args.orderChannel)) {
+    	orderChannel = "non-store" ; 
+    }else if(empty(orderChannel) && !empty(args.orderChannel)) {
+    	orderChannel = args.orderChannel ;
+    }
+    
+    var paramsToAppend:String = "?channel="+orderChannel ;
+    
+    
+   	if(empty(deviceID) && !empty(args.deviceID)) {
+    	deviceID = args.deviceID ;
+    }
+    
+    if(deviceID != null ) {
+    	paramsToAppend = paramsToAppend + "&device="+deviceID ; 
+    }
+    
+    
+    
+	 var url : String = vbURL + basketId + paramsToAppend ;
+	 Logger.error("VBServiceURL URL is "+url);
+	 
+	 var httpService : HTTPClient = new HTTPClient();	
+	 try {
+		
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+		httpService.open('DELETE', url);
+		httpService.send();
+		if (httpService.statusCode == 200){
+			if(args.currentCustomer.authenticated){
+				args.currentCustomer.profile.custom.isVirtualBasket = false;
+			}
+		} else {
+			Logger.error("Error in DeleteVirtualBasket.ds, basket-ID"+basketId+" httpCode :" + httpService.statusCode+", errorMsg: "+httpService.text);
+		}
+	} catch ( ex ) {
+		Logger.error("Error in DeleteVirtualBasket.ds, details : basket-ID" + basketId + " error" + ex);
+	}
+	return PIPELET_NEXT;
+}

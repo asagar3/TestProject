@@ -1,0 +1,14 @@
+Cufon.replace('.newHomePage .cufonIt',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.htmlAlign .cufonIt',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.cufonIt',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.htmlAlign #section-heading-mod28 .offer',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.helveticaNeueLTStd',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.chronicle',{fontFamily: 'Chronicle Display Semi'});
+Cufon.replace('.whitney',{fontFamily: 'Whitney'});
+Cufon.replace('.newSlots .quote p',{fontFamily: 'Helvetica Neue LT St'});
+Cufon.replace('.ms_header_4, .ms_header_1, .ms_header_cart, .ui-dialog-title, .ms_header_3, .ms_header_login, .ms_header_cartlinks, .content_grey_header',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.ms_header_bottomsection2, .ms_header_bottomsection3, .content_grey_header2, .overviewHead, .content_checkout_header, .account_heading span',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.ms_header_account_login, .banner_head h2, .banner_head p, .top_banner_txtimg h3, .sitemap h1, .sitemap h2, h3.faqHead, .contentArea h1, .flTitleHolder .title',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('.secondary_cat .headerHolder div.captionwhite h2, .pt_productsearchresult_body .producthits .headerHolder div.captionwhite h2, .pt_productsearchresult_body .producthits .headerHolder div.caption h2, .secondary_cat .headerHolder div.caption h2, .category_banner_2_headerSifr h2, div.secondary_cat div.secondary_cat_style2 .promo_ad p, .category_banner_3_header h3, #homeSmallCarousel h3',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('#catBannerSlotContainer .plpContent h2, #catBannerSlotContainer .plpContent h3',{fontFamily: 'Helvetica Neue LT Std'});
+Cufon.replace('#dialog #map div.gm-style-iw h3, #dialog #map div.gm-style-iw p, #dialog #side_bar a.locationDetails address, .checkout #addressform .storeListDiv .collectionPointAddress span',{fontFamily: 'Whitney'}); // ,{fontFamily: 'Helvetica Neue LT Std'});

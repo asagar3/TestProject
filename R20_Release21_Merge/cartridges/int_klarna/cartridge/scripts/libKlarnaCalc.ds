@@ -1,0 +1,338 @@
+/*
+ *  Copyright 2010 KLARNA AB. All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without modification, are
+ *  permitted provided that the following conditions are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright notice, this list of
+ *        conditions and the following disclaimer.
+ *
+ *     2. Redistributions in binary form must reproduce the above copyright notice, this list
+ *        of conditions and the following disclaimer in the documentation and/or other materials
+ *        provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY KLARNA AB "AS IS" AND ANY EXPRESS OR IMPLIED
+ *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ *  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KLARNA AB OR
+ *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *  The views and conclusions contained in the software and documentation are those of the
+ *  authors and should not be interpreted as representing official policies, either expressed
+ *  or implied, of KLARNA AB.
+ *
+ */
+var KRED_LIMIT_COST : Number = 0;
+var KRED_ACTUAL_COST : Number = 1;
+
+var KRED_ANNUITY_PCLASS : Number = 0;
+var KRED_DIVISOR_PCLASS : Number = 1;
+var KRED_FIXED_PCLASS : Number = 3;
+
+// This constant tells the irr function when to stop.
+// If the calculation error is lower than this the calculation is done.
+//protected accuracy = 0.01;  //use this if 100.00 SEK is 100.00
+var accuracy : Number = 0.01;   //use this if 100.00 SEK is 10000 (counting öres)
+
+/**
+ *
+ * @param <int> sum The sum for the order/product in ören/cents
+ * @param <array> pclass
+ * @param <int> flags Indicates if it is the checkout or a product page
+ * @param <int> currency The Klarna currency
+ * @return <int> The monthly cost in ören/cents
+ */
+function calc_monthly_cost(sum, pclass, flags, country) {
+	var months : Number = pclass['months'];
+	var monthsfee : Number = (flags == 0 ? pclass['invoiceFee'] : 0);
+	var type : Number = pclass['type'];
+	var rate : Number = pclass['interest'];
+	var startfee : Number = (flags == 0 ? pclass['startFee'] : 0);
+	sum += startfee; //include start fee in sum
+	var account : Boolean = (pclass['type'] == 1);
+	var minpay = 0;
+	if(flags == 0) {
+		minpay = type == 1 ? get_lowest_payment_for_account(pclass['country']) : 0;
+	}
+	var payment : Number = annuity (sum, months, rate)+monthsfee; //add monthly fee
+	var payarr : Array = fulpacc(sum, rate, monthsfee, minpay, payment, months, account);
+
+	return (payarr.length > 0) ? payarr[0] : 0;
+}
+
+ /**
+ * Returns the lowest monthly payment for Klarna Account.
+ *
+ * @param   int  country
+ * @return  int
+ */
+function get_lowest_payment_for_account(country) : Number {
+	switch (country) {
+	case 209:
+		return 50.00; //Sweden
+		break;
+	case 164:
+		return 95.00; //Norway
+		break;
+	case 73:
+		return 8.95; //Finland
+		break;
+	case 59:
+		return 89.00; //Denmark
+		break;
+	case 81: //Germany
+	case 154:
+		return 6.95; //Netherlands
+		break;
+	default:
+		return -2;
+	}
+}
+
+function midpoint (a, b)
+{
+        return ((a+b)/2);
+}
+
+function npv (pval, payarray, rate, fromdayone)
+{
+        var month : Number = fromdayone;
+        for each (var payment : Number in payarray )
+        {
+                pval -= payment / Math.pow (1 + rate/(12*100.0), month++);
+        }
+        return (pval);
+}
+
+function irr (pval, payarray, fromdayone)
+{
+        var low : Number = 0.0;
+        var mid : Number = 0.0;
+        var high : Number    = 100.0;
+        var midval : Number = 0.0;
+        var lowval : Number  = npv (pval, payarray, low, fromdayone);
+        var highval  : Number = npv (pval, payarray, high, fromdayone);
+
+        // The sum of payarray is smaller than pval, impossible!
+        if (lowval > 0.0)
+        {
+                return (-1);
+        }
+
+        // Standard divide and conquer.
+        while(high < 1000000) {
+                mid = midpoint (low, high);
+                midval  = npv (pval, payarray, mid, fromdayone);
+                if (Math.abs(midval) < accuracy)
+                {
+                        //we are close enough
+                        return (mid);
+                }
+
+                if (highval < 0.0)
+                {
+                        // we are not in range, so double it
+                        low = high;
+                        lowval = highval;
+                        high *= 2;
+                        highval = npv (pval, payarray,
+                                        high, fromdayone);
+                } else if (midval >= 0.0)
+                {
+                        // irr is between low and mid
+                        high = mid;
+                        highval = midval;
+                } else
+                {
+                        // irr is between mid and high
+                        low = mid;
+                        lowval = midval;
+                }
+        }
+        // bad input, insanely high interest. APR will be INSANER!
+        return (-2);
+}
+
+function irr2apr (irr)
+{
+        return (100 * (Math.pow (1 + irr / (12 * 100.0), 12) - 1));
+}
+
+/**
+ *
+ * @param <type> pval The sum to lend
+ * @param <type> rate The interest rate
+ * @param <type> fee The monthly fee
+ * @param <type> minpay Minimum amount to pay
+ * @param <type> payment The monthly payment
+ * @param int months Number of months
+ * @param <type> base If it is a base account
+ * @return <array>
+ */
+function fulpacc (pval : Number, rate : Number, fee : Number, minpay : Number, payment : Number, months : Number, base : Boolean)
+{
+
+        var bal : Number = pval;
+        var interest : Number = 0.0;
+        var newbal : Number = 0.0;
+        var newpay : Number = 0.0;
+        var payarray : Array = new Array();
+        while ( months != 0 && bal > accuracy)
+        {
+
+            interest = bal * rate / (100.0 * 12);
+                newbal = bal + interest + fee;
+
+
+                if (minpay >= newbal || payment >= newbal)
+                {
+
+                        payarray.push(newbal);
+
+
+                        return payarray;
+                }
+
+                newpay = Math.max (payment,
+                               minpay);
+                if (base)
+                {
+                    newpay = Math.max (newpay,
+                                       bal/24.0 + fee + interest);
+                }
+
+                bal = newbal - newpay;
+                payarray.push(newpay);
+                months -= 1;
+        }
+
+        return payarray;
+}
+
+function annuity (pval, months, rate)
+{
+		var p : Number = 0.0;
+        if(months <= 0)
+            return pval;
+        if(rate <= 0)
+            return pval/months;
+        p = rate / (100.0*12);
+        return pval * p / (1 - Math.pow((1+p), -months));
+}
+
+function fixed (pval, monthly, rate, fromdayone)
+{
+        var p : Number = rate / (100.0*12);
+        var f : Number = 1 + p;
+        if (fromdayone == 0)
+        {
+                if ( f < pval * p / monthly )
+                {
+                        return -1;
+                }
+                // this might be wrong. check it.
+                return 1 - Math.log(f - pval * p / monthly) /
+                           Math.log(f);
+        } else if (fromdayone == 1)
+        {
+                if (1.0 < pval * p / monthly )
+                {
+                        return -1;
+                }
+                return -Math.log(1.0 - pval * p / monthly) /
+                        Math.log(f);
+        } else
+        {
+                return -2;
+        }
+}
+
+function calc_apr(pval, months, rate, fee, minpay, type, free) {
+	var payment : Number = 0.0;
+    switch(type) {
+        case 0:
+        case 1:
+            return apr_annuity(pval, months, rate, fee, minpay);
+                break;
+        case 2:
+			payment = annuity(pval, months, rate);
+            return apr_payin_X_months(pval, payment, rate, fee, minpay, free);
+            break;
+        case 3:
+			payment = annuity(pval, months, rate);
+            return apr_fixed(pval, payment, rate, fee, minpay);
+            break;
+    }
+}
+
+function total_credit_purchase_cost(pval, rate, fee, minpay, months, startfee, base) {
+
+
+    var credit_cost : Number = 0.0;
+    var payment : Number = annuity (pval, months, rate) + fee;
+    var payarr : Array = fulpacc(pval, rate, fee, minpay, payment, months, base);
+
+    for each(var pay : Number in payarr) {
+        credit_cost += pay;
+    }
+
+    return (credit_cost)+startfee;
+}
+
+function apr_annuity (pval, months, rate, fee, minpay)
+{
+        var payment : Number = annuity (pval, months, rate) + fee;
+        if(payment < 0) { return payment; }
+
+        var payarray : Array = fulpacc (pval, rate, fee, minpay, payment, months);
+        var apr : Number = irr2apr (irr (pval, payarray, 1));
+        return apr;
+}
+
+function apr_fixed (pval, payment, rate, fee, minpay)
+{
+        var months : Number = fixed (pval, payment-fee, rate, 1);
+        if(months < 0) { return months; }
+        months = Math.ceil (months);
+
+        var payarray : Array = fulpacc (pval, rate, fee, minpay, payment, months);
+        var apr : Number = irr2apr (irr (pval, payarray, 1));
+        return apr;
+}
+
+function apr_min (pval, rate, fee, minpay)
+{
+        var payarray : Array = fulpacc (pval, rate, fee, minpay, 0.0, -1);
+        var apr : Number = irr2apr (irr (pval, payarray, 1));
+        return apr;
+}
+
+//kinda untested against real life.
+function apr_payin_X_months (pval, payment, rate, fee, minpay, free)
+{
+        var firstpay : Number = payment + fee;
+        var months : Number = fixed (pval, payment-fee, rate, 0);
+        if(months < 0) { return months; }
+        months = Math.ceil (months);
+
+        var newpval : Number = pval - firstpay;
+        var farray : Array = new Array();
+        while (free--)
+        {
+                farray.push(0.0);
+        }
+        pval += fee;
+        farray.push(firstpay);
+        pval -= firstpay;
+        var payarray : Array = fulpacc (pval, rate, fee, minpay, payment, months);
+        for each (var val : Number in payarray ) {
+			farray.push(val);
+        }
+
+        var apr : Number = irr2apr (irr (pval, farray, 1));
+        return apr;
+}

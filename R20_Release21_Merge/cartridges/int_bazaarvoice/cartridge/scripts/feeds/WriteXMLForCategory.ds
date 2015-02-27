@@ -1,0 +1,126 @@
+ /**
+* @output Message : String
+* @output FileName : String
+* @output XmlStreamWriter:dw.io.XMLStreamWriter
+*/
+ importPackage( dw.system );
+ importPackage( dw.util );
+ importPackage( dw.web );
+ importPackage( dw.net );
+ importPackage( dw.catalog );
+ importPackage( dw.io );
+
+importScript("int_bazaarvoice:/lib/libBazaarvoice.ds");
+importScript("int_bazaarvoice:/lib/libConstants.ds");
+ 
+var bvHelper = getBazaarVoiceHelper();
+ 
+function execute( pdict : PipelineDictionary ) : Number {
+  pdict.Message = "";
+  var date : Date = new Date();
+  var filename : String = Site.getCurrent().ID + "-ExportProductFeed-" + date.getFullYear() + bvHelper.insertLeadingZero(date.getMonth()+1) + bvHelper.insertLeadingZero(date.getDate()+1) + bvHelper.insertLeadingZero(date.getHours()+1) + bvHelper.insertLeadingZero(date.getMinutes()+1) + bvHelper.insertLeadingZero(date.getMilliseconds()) + ".xml"; 
+  var file : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + filename);
+  var xsw : XMLStreamWriter;
+  
+  try {
+  	  //----------------init and write category details into XML------------
+		  xsw = initFeed(file);
+		  file = null;
+		  writeCategories(xsw);
+		  xsw.writeCharacters("\n");
+		  xsw.writeStartElement("Products"); //products start
+	  //-------------------------------- -------------------------------------
+	       	
+	 } catch(ex) {
+	        Logger.error("Error Message While WriteXMLForCategory in BV product export flow :", ex.message);
+	        pdict.Message = "Exception caught during category data export: "+ ex.message;       
+			xsw.flush();
+			xsw.close();	            
+	        return PIPELET_ERROR;    
+	 }   
+  	  pdict.FileName = filename;
+	  pdict.XmlStreamWriter=xsw; 
+	  return PIPELET_NEXT;    
+}
+
+//start writing into XML.
+function initFeed(file : File) : XMLStreamWriter {
+	var fw : FileWriter = new FileWriter(file, "UTF-8", false);
+	var xsw : XMLStreamWriter = new XMLStreamWriter(fw);    
+	var date : Date = new Date();
+	var extractDate : String = date.getFullYear()+"-"+bvHelper.insertLeadingZero(date.getMonth()+1)+"-"+bvHelper.insertLeadingZero(date.getDate())+"T00:00:00.000000";    
+
+	   xsw.writeStartDocument("UTF-8", "1.0");
+	   xsw.writeCharacters("\n");
+	   xsw.writeStartElement("Feed");
+	   xsw.writeAttribute("xmlns", BV_Constants.XML_NAMESPACE_PRODUCT);
+	   xsw.writeAttribute("name", bvHelper.getCustomerName());
+	   xsw.writeAttribute("incremental", BV_Constants.XML_INCREMENTAL);
+	   xsw.writeAttribute("extractDate", extractDate);
+	   xsw.writeAttribute("generator", BV_Constants.XML_GENERATOR);
+    return xsw;
+}
+
+function writeCategories(xsw : XMLStreamWriter) {
+    xsw.writeCharacters("\n");
+    xsw.writeStartElement("Categories");
+    var siteCatalog : Catalog = CatalogMgr.getSiteCatalog();
+    var rootCategory : Category = siteCatalog.getRoot();
+    var subRoots : Collection = rootCategory.getSubCategories();
+    for each(var subRoot : Category in subRoots) {
+    	if(subRoot.online){
+        getCategory(xsw, subRoot); 
+    	}   
+    }
+    xsw.writeCharacters("\n");
+    xsw.writeEndElement(); //</Categories>
+}
+
+function getCategory(xsw : XMLStreamWriter, category : Category) {
+
+   	writeCategory(xsw, category);
+    var subCats : Collection = category.getSubCategories();
+    if(subCats != null && subCats.size()>0)    {
+        for each(var subCat : Category in subCats) {
+        	if(subCat.online){
+            getCategory(xsw, subCat);
+        	}
+        }
+    }
+
+}
+
+function writeCategory(xsw : XMLStreamWriter, category : Category){
+    xsw.writeCharacters("\n");
+    xsw.writeStartElement("Category");
+    
+    xsw.writeCharacters("\n");
+    writeElement(xsw, "ExternalId", bvHelper.replaceIllegalCharacters(category.ID));//this will write entire category ID tag along with closing
+    
+    var parent : Category = category.getParent();
+    if(parent != null) {
+        //We don't want to set our ParentExternalId to "root", so make sure the parent of this parent is non-null
+        var parentOfParent = parent.getParent();    
+        if(parentOfParent!=null) {
+        	xsw.writeCharacters("\n");
+            writeElement(xsw, "ParentExternalId", parent.ID);//this will write entire category parenet Id tag along with closing
+        }
+    }
+    
+    xsw.writeCharacters("\n");
+    writeElement(xsw, "Name", category.displayName);  //this will write entire name tag along with closing
+    
+    //closing category tag
+    xsw.writeCharacters("\n");
+    xsw.writeEndElement();
+}
+function writeElement(xsw : XMLStreamWriter, elementName : String, chars : String) {
+    xsw.writeStartElement(elementName);
+    xsw.writeCharacters(chars);
+    xsw.writeEndElement();
+}
+
+
+
+
+	

@@ -1,0 +1,73 @@
+/**
+
+*   @input currentCustomer : String
+*   @input orderChannel : String
+*   @input deviceID : String
+*   @output vbObject : Object
+*   @output customObject : Object
+*
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+     var emailData: Object = new Object();
+    if(empty(args.currentCustomer)){
+    	args.customObject= "VB_SE_001";
+    	return PIPELET_ERROR;	
+    }
+    emailData.Email = args.currentCustomer;
+    
+    var orderChannel = request.httpHeaders.get("channel") ;
+    var deviceID = request.httpHeaders.get("deviceid") ;
+    
+    if(empty(orderChannel) && empty(args.orderChannel)) {
+    	orderChannel = "non-store" ; 
+    }else if(empty(orderChannel) && !empty(args.orderChannel)) {
+    	orderChannel = args.orderChannel ;
+    }
+    
+    var paramsToAppend:String = "&channel="+orderChannel ;
+    
+    
+   	if(empty(deviceID) && !empty(args.deviceID)) {
+    	deviceID = args.deviceID ;
+    }
+    
+    if(deviceID != null ) {
+    	paramsToAppend = paramsToAppend + "&device="+deviceID ; 
+    }
+    
+    
+    
+	var url : String =Site.getCurrent().getCustomPreferenceValue("GetVBServiceURL");
+	url = url + paramsToAppend ;
+	Logger.error("GetVBServiceURL URL is "+url);
+    var httpService : HTTPClient = new HTTPClient();	
+	try {
+		
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+		httpService.open('POST', url);
+		httpService.send(JSON.stringify(emailData));
+		if (httpService.statusCode == 200){
+			args.vbObject = JSON.parse(httpService.text);
+		}else if (httpService.statusCode == 404){
+			args.customObject= "VB_BE_001";
+			return PIPELET_ERROR;
+		}
+		 else {
+		 	args.customObject= "VB_BE_002";
+			Logger.error("GerVirtualBasket.ds, virtual-rail serice response is non-200, code: " + httpService.statusCode+", error: "+httpService.getText());
+			return PIPELET_ERROR;
+		}
+	} catch ( ex ) {
+		Logger.error("Error in GerVirtualBasket.ds, details :" + ex);
+		return PIPELET_ERROR;
+	}
+    
+	return PIPELET_NEXT;
+}

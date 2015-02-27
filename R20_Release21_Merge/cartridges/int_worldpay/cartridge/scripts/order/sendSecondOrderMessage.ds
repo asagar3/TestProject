@@ -1,0 +1,44 @@
+/**
+* Demandware Script File
+*
+*   @input Basket : dw.order.Basket
+* 	@input Request : dw.system.Request
+*   @output OrderNo : String
+*   @output WorldPayLastEvent : String
+*   @output WorldPayRiskScore : String
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importScript("int_worldpay:lib/worldPay.ds");
+importScript("int_worldpay:lib/responseData.ds");
+importScript("int_worldpay:lib/worldPayPreferences.ds");
+
+function execute( pdict : PipelineDictionary ) : Number {
+	var preferences : WorldPayPreferences = new WorldPayPreferences();
+	var request : Request = pdict.Request;
+	var basket : Basket = pdict.Basket;  
+	var params : Map = request.getHttpParameters();
+
+	var paRes : String = 
+		(params.containsKey("PaRes"))? params.get("PaRes")[0] : null;
+	//md - merchant supplied data contains the OrderNo
+	var md : String = 
+		(params.containsKey("MD"))? params.get("MD")[0] : null;
+	var orderNo : String = md;
+
+	var order : XML = createSecondOrderMessage(basket, orderNo, request);	
+	if (order == null) {
+		return PIPELET_ERROR;
+	}
+	
+ 	var result : String = send3DRequest(order, preferences.paymentServiceURL, 
+		preferences.merchantCode, preferences.XMLPassword);
+   	var response : ResponseData = parseResponse(result);
+	if (response.isError()) {
+		return PIPELET_ERROR;		
+	}
+	pdict.WorldPayLastEvent = response.lastEvent.toString();
+	pdict.WorldPayRiskScore = response.riskScore.toString();
+	pdict.OrderNo = orderNo;
+   	return PIPELET_NEXT;
+}

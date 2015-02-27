@@ -1,0 +1,21 @@
+<extensions xmlns="http://www.demandware.com/xml/bmmodules/2007-12-11" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.demandware.com/xml/bmmodules/2007-12-11 bmext.xsd">
+<menuaction id="customsubmenu_id01" menupath="orders" position="999" site="true">
+  <name xml:lang="x-default">Klarna</name>
+  <short_description xml:lang="x-default">
+	  Here you can see your campaigns and update them
+  </short_description>
+  <description xml:lang="x-default">
+	  Here you can see your campaigns and update them
+  </description>
+  <exec pipeline="KlarnaPayment" node="ViewSettings"/>
+  <sub-pipelines>
+     <pipeline name="KlarnaPayment-ViewSettings" />
+     <pipeline name="KlarnaPayment-ViewPclasses" />
+     <pipeline name="KlarnaPayment-UpdatePclasses" />
+  </sub-pipelines>
+  <parameters>
+  </parameters>
+  <icon>favicon.ico</icon>
+  
+	</menuaction>
+</extensions>

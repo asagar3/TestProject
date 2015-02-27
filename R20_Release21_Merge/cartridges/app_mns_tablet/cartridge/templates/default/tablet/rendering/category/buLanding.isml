@@ -1,0 +1,87 @@
+<isset name="CategorgyRenderTemplate" value="landing" scope="page" />
+<script src="${URLUtils.staticURL('/js/ampliencetracking.js')}"></script> 
+<isset name="DecoratorTemplate"
+	value="tablet/search/pt_productsearchresult_categorylanding"
+	scope="page" />
+<isif
+	condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+<isset name="DecoratorTemplate" value="util/pt_empty" scope="page" /> </isif>
+<isdecorate template="${DecoratorTemplate}"> <iscache
+	type="relative" minute="30" varyby="price_promotion" /> <isinclude
+	template="util/modules" /> <iscomment> Configured as
+rendering template for the general category landing page. Displays two
+category specific slots containing static html with promotional banner
+in the first slot and either up to four featured products or promotional
+content in the second slot. </iscomment>
+
+<h1 class="pageHeading">${pdict.ProductSearchResult.category.displayName}</h1>
+		
+<div class="overlay"></div>
+<div class="newTier2 htmlAlign tabletCSS">
+	
+	<iscomment> INT-384 - Christina - Amplience integration </iscomment>
+	<isslot id="buLanding_Module_amplience" description="Amplience Content" 
+	context="category" context-object="${pdict.ProductSearchResult.category}"/>
+	<iscomment>INT-384 - end </iscomment>
+
+	<isslot id="buLanding_Module_6" description="Hero Image Inspiration"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+		<isslot id="buLanding_Module_7" description="Large Tiles"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+<isinclude template="tablet/search/components/categoryNavigation"/>
+	<isslot id="buLanding_Module_8"
+		description="Large Banner: Sale OR Trends" context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_13" description="Engaging Content"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_14" description="Engaging Content"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_9" description="Shop by Products"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_25" description="Shop by Category"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_11" description="Guides 4 thumbs"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_12" description="Guides 3 thumbs"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_31" description="Brands carousel x4"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_10" description="Brands Banners"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isslot id="buLanding_Module_15" description="T&C text panel"
+		context="category"
+		context-object="${pdict.ProductSearchResult.category}" />
+
+	<isif condition="${pdict.createSlotForKiosk != null }"> <iscomment>This
+	slot is created only for content slots for Kiosk</iscomment> <isslot
+		id="cat-landing-banner-kiosk" context="category"
+		description="Kiosk Category Landing Banner"
+		context-object="${pdict.ProductSearchResult.category}" /> <isslot
+		id="cat-listing-banner-kiosk" context="category"
+		description="Kiosk Category Listing Banner"
+		context-object="${pdict.ProductSearchResult.category}" /> </isif>
+	<div class="clear"></div>
+	
+</div>
+
+
+</isdecorate>

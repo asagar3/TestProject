@@ -1,0 +1,87 @@
+/**
+* This script is used for creation of TSOP custom objects instances. These instance are read by another TSOP service named "GetCategory-Show". 
+*  @input customObject : Object
+*/
+importPackage( dw.system ); 
+importPackage( dw.object);
+
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var prodCategoryDetail : String = JSON.stringify(pdict.customObject);
+	try {
+		//create instances of KioskCategoryDetails	
+		createCustomObject(JSON.stringify(pdict.customObject), "KioskCategoryDetails", "categoryJSON");		
+		prodCategoryDetail = replaceAll(prodCategoryDetail, System.getInstanceHostname(), dw.system.Site.getCurrent().preferences.custom.httpHostRedirection);
+		
+		//create instances of KioskProdCategoryDetails and populate modified Image URLs in those instances	
+		createCustomObject(prodCategoryDetail, "KioskProdCategoryDetails", "categoryProdJSON");
+	}
+	catch(e)
+	{
+		Logger.error("CreateCategoryCustomObject :: CreateCategoryCustomObject Script Error:::"+e.message);
+		return PIPELET_ERROR;	
+	}
+   return PIPELET_NEXT;
+}
+
+/**
+*This function will create instances in a custom object.
+* @param customObjData : String The entire custom object data which will be splitted and further stores into multiple instances
+* @param customObjectName : String The name of custom object 
+* @param customObjectInstanceName : String Instance name to be created in custom object
+*/
+function createCustomObject( customObjData : String, customObjectName : String, customObjectInstanceName : String) 
+{
+		var limit:Number = Site.current.preferences.custom.categoryObjLimit;
+		var start:Number =0;
+		var categoryResponse : String =  customObjData;
+		var count:Number =(categoryResponse.length)/limit;
+		var numOfObject:Number = count/10;
+		numOfObject=numOfObject + 1;
+		for(var i=1;i<=numOfObject;i++){
+			var categoryCustomObject = CustomObjectMgr.createCustomObject(customObjectName, customObjectInstanceName+i);		
+		   	storeResponse(categoryCustomObject,categoryResponse,start,limit);	
+		   	start=start+limit*(10);
+		}
+}
+
+/**
+* This function stores data in custom object instance attributes.
+* @param categoryCustomObject : CustomObject The entire custom object 
+* @param categoryResponse : String The name of custom object 
+* @param start : Number Start index in a string from where data to insert in a custom object attribute
+* @param limit : Number Max limit of custom object attribute
+*/
+function storeResponse(categoryCustomObject:CustomObject,categoryResponse:String,start:Number,limit:Number) {
+    categoryCustomObject.custom.details1 = categoryResponse.substr(start, limit);
+	categoryCustomObject.custom.details2 = categoryResponse.substr(start+limit, limit);
+	categoryCustomObject.custom.details3 = categoryResponse.substr( start+(2)*limit,limit);
+	categoryCustomObject.custom.details4 = categoryResponse.substr(start+(3)*limit,limit);
+	categoryCustomObject.custom.details5 = categoryResponse.substr(start+(4)*limit,limit);
+	categoryCustomObject.custom.details6 = categoryResponse.substr(start+(5)*limit,limit);
+	categoryCustomObject.custom.details7 = categoryResponse.substr(start+(6)*limit,limit);
+	categoryCustomObject.custom.details8 = categoryResponse.substr(start+(7)*limit,limit);
+	categoryCustomObject.custom.details9 = categoryResponse.substr(start+(8)*limit,limit);
+	categoryCustomObject.custom.details10 = categoryResponse.substr(start+(9)*limit,limit);
+}
+
+/**
+ * This function will simply act for replaceAll in a string
+* @param orginalString : String The Original string
+* @param replaceTo : String The string after replace 
+* @param replaceWith : String The string to be replaced
+*/
+function replaceAll(orginalString : String, replaceTo : String, replaceWith : String) : String
+ {
+ 
+	while(orginalString.indexOf(replaceTo) >=0)
+	{
+		orginalString = orginalString.replace(replaceTo, replaceWith);
+	}	
+	return orginalString;
+	
+}
+
+
+

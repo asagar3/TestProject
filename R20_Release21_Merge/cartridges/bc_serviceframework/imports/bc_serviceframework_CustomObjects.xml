@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<custom-objects xmlns="http://www.demandware.com/xml/impex/customobject/2006-10-31">
+	<custom-object object-id="WebserviceConfiguration" type-id="CustomObjectViewConfig">
+		<object-attribute attribute-id="foreignKeyProperties">
+			<value>{"propertyID":"targetEnvironment", "objectType":"WebserviceCredentials"}</value>
+		</object-attribute>
+		<object-attribute attribute-id="startWithAllObjects">false</object-attribute>
+	</custom-object>
+	
+</custom-objects>

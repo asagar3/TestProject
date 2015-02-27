@@ -1,0 +1,85 @@
+/**
+*
+*  @input XmlFile : dw.io.File
+*  @input RemoteFileName : String
+*  @input RemoteFilePath : String
+*  @output Message : String
+*  @output ArchiveFolder : String
+*  @output File : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.io );
+importPackage( dw.net )
+
+function execute( args : PipelineDictionary ) : Number {
+	
+	args.Message = "";
+	
+	var catalogFeedEnabled : Boolean = Site.getCurrent().getCustomPreferenceValue("rrIsEnabledCatalogFeed");
+	
+	
+	if (!catalogFeedEnabled) {
+	   Logger.error("Feed Upload to RR isn't enabled on this site");
+	   return PIPELET_NEXT;
+	}
+	
+	var xmlFile : File = args.XmlFile;
+	var fileName : String = args.RemoteFileName;
+	var filePath : String = args.RemoteFilePath;
+	var zipFile : File;
+	
+	var zipName : String = fileName +  '.xml.zip';
+	
+	
+		
+	try {
+		
+		if(empty(filePath)) {
+			
+			throw new Error("filePath is empty!");
+		}
+		
+		if(empty(fileName)) {
+			
+			throw new Error("fileName is empty!");
+		}
+		
+		if(xmlFile == null) {
+			throw new Error("xmlFile is null!");
+		}
+	
+	
+		//.zip
+		
+		zipFile  = new dw.io.File(filePath + zipName);
+		xmlFile.zip(zipFile);
+		
+		var req : FTPClient = new FTPClient();
+    
+		if(req.connect(dw.system.Site.current.preferences.custom.rrFTPHost, dw.system.Site.current.preferences.custom.rrFTPUsername, dw.system.Site.current.preferences.custom.rrFTPPassword)) {
+			if(!req.putBinary(zipName, zipFile)) {
+				Logger.error("(RichRelevance Catalog Upload) Could not upload zipName " + zipName+ " to " + dw.system.Site.current.preferences.custom.rrFTPHost);
+				return PIPELET_ERROR;
+			}
+			req.disconnect();
+		} else {
+			Logger.error("(RichRelevance Catalog Upload) Could not connect to" + dw.system.Site.current.preferences.custom.rrFTPHost);
+			return PIPELET_ERROR;
+		}
+    } catch(e) {
+      Logger.error("(RichRelevance ExportCatalogZipAndFTPUpload.ds:  Error uploading catalog: " +  e.message);
+      args.Message = "RichRelevance ExportCatalogZipAndFTPUpload.ds: Error uploading catalog: "+ e.message; 
+      return PIPELET_ERROR;
+    }
+    finally {
+		if (xmlFile!=null && xmlFile.exists()) {
+            xmlFile.remove();
+        }
+	}
+	args.ArchiveFolder = "archive/rich_relevance";
+	args.File = "rr/" + zipName; //make fileName available to archiver
+  	return PIPELET_NEXT;
+}
+ 

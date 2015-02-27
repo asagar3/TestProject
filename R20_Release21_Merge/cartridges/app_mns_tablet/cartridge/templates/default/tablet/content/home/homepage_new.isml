@@ -1,0 +1,121 @@
+<iscache type="relative" hour="24" varyby="price_promotion"/>
+<isdecorate template="tablet/content/home/pt_storefront">
+<iscomment>this is the template rendering the homepage</iscomment>
+<div class="homepage clearfix newHomePage">
+	<div id="content_homepage_landing">
+		<isslot id="newHome-main" description="jQuery Banner on new Homepage" context="global" />
+		<div class="sectHolder clearfix">
+			<iscomment>Added by Davinder</iscomment>
+			<div class="tabletCategories">
+			<ul class="first">
+				<!-- loop starts -->
+				<isset name="scene7ImageForSearchBar" value="" scope="page"/>
+			<isset name="scene7ImageType" value="" scope="page"/>
+			<isloop items="${dw.system.Site.getCurrent().preferences.custom.ImageTypesDimension}" alias="ImageTypeDimensionObj">	
+				<isscript>
+					if (ImageTypeDimensionObj.getValue() == 'carousel') {
+						scene7ImageForSearchBar = ImageTypeDimensionObj.getDisplayValue();
+						scene7ImageType = ImageTypeDimensionObj.getValue();
+						scene7ImageTypeDimension = ImageTypeDimensionObj.getDisplayValue();
+					}
+				</isscript>	
+			</isloop>
+				<isscript>
+					var assignedCatalog : dw.catalog.Catalog = dw.catalog.CatalogMgr.getSiteCatalog();
+					var rootCatalog : dw.catalog.Category = null;
+					if(assignedCatalog!=null) {rootCatalog = assignedCatalog.getRoot();}					
+					importScript('app_mns:tablet/Utils.ds');
+					var sortingRule : SortingRule = dw.catalog.CatalogMgr.getSortingRule("New Arrival");
+				</isscript>
+				<isif condition="${rootCatalog != null}">					
+					<isset name="catCount" value="${new Number('0')}" scope="page"/>
+					<isloop items="${rootCatalog.getOnlineSubCategories()}" var="topCat" status="loopstate">
+						<isif condition="${('showInMenu' in topCat.custom) && topCat.custom.showInMenu.valueOf() && !topCat.custom.notInLaunchPad}">
+							<iscomment>### Top Level Categories : PRINT #####</iscomment>
+							<isscript>
+							
+							var scene7ImageUrl :String ="";
+							
+							var catImageUrl  = topCat.thumbnail;
+								  		if(empty(topCat.thumbnail)){
+										var thumbnailUrl : String = getFirstProductImage(topCat,sortingRule);	
+														
+										scene7ImageUrl = thumbnailUrl + scene7ImageForSearchBar;
+										}else{
+										scene7ImageUrl = catImageUrl.URL;
+										}
+							
+							<iscomment>var imgPath : String = getFirstProductImage(topCat, sortingRule);	
+						var scene7ImageUrl : String = imgPath + scene7ImageForSearchBar;		</iscomment>									
+							</isscript>										
+							<li>
+								<div class="tcCont">
+									<div class="tcImg"><a href="${URLUtils.http('Search-Show', 'cgid', topCat.getID())}"><img src="${scene7ImageUrl}" alt="${topCat.displayName}"></a></div>
+									<h3><a href="${URLUtils.http('Search-Show', 'cgid', topCat.getID())}">${topCat.displayName}</a></h3>
+								</div>
+							</li>
+							<isset name="catCount" value="${catCount+1}" scope="page">
+						</isif>
+					</isloop>
+				</isif>
+
+				<!-- loop ends -->
+				<isif condition="${catCount%3!=0}">
+					<isslot id="filler_promotions_home" description="Filler Promotioins for Home Page" context="global" />
+					<isslot id="filler_promotions_home_2" description="Filler Promotioins for Home Page Two" context="global" />
+				</isif>
+			</ul>
+			<div class="cl"></div>
+			</div>
+			
+			<isslot id="newHomeModule_5" description="Home large tiles" context="global" />
+			<isslot id="newHomeModule_3" description="Home engaing content" context="global" />
+			<isslot id="newHomeModule_4" description="Home small tiles" context="global" />
+			
+		</div>
+		<isslot id="home-infoslot" description="Third content below middle content" context="global" />		
+		
+	</div>	
+</div>
+
+</isdecorate>
+<script>
+var setCatHeight = function ()
+{
+var max = 0,
+$catImg = $(".tcCont").find(".tcImg a").children('img'),
+$mainCat = $(".tabletCategories").find(".tcCont");
+//get height
+$catImg.each(function() {
+    var h = $(this).height(); 
+    max = h > max ? h : max;
+});
+//set height
+$mainCat.each(function() {
+	$(this).css('height',max+'px');	
+	});
+};
+
+jQuery(document).ready(function() {
+setCatHeight();
+
+// Orientation Change Logic For Sub Category - Anoop
+var mql = window.matchMedia("(orientation: portrait)");
+// Add a media query change listener
+mql.addListener(function(m) {
+var catHeight,
+subCatHeight;
+  if(m.matches) {
+   
+   //Portrait orientation 
+   setCatHeight();   
+    }
+  else {
+  
+  //Portrait orientation 
+   setCatHeight();      
+  }
+});
+// Orientation Change Logic For Sub Category - Anoop Ends
+});
+</script>

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+
+	<field formid="firstName" label="profile.firstname" type="string" mandatory="true" binding="firstName" max-length="20" missing-error="forms.address.firstname.missing" range-error="forms.address.field.invalid" />
+	<field formid="lastName" label="profile.lastname" type="string" mandatory="true" binding="lastName" max-length="30" missing-error="forms.address.lastname.missing" range-error="forms.address.field.invalid" />
+	<field formid="address1" label="forms.address1" type="string" mandatory="true" binding="address1" max-length="35" missing-error="forms.addresserror" range-error="forms.address.field.invalid" />
+	<field formid="address2" label="forms.address2" type="string" mandatory="false" binding="address2" max-length="35" range-error="forms.address.field.invalid" />
+	<field formid="city" label="forms.city" type="string" mandatory="true" binding="city" max-length="35" missing-error="forms.address.city.missing" range-error="forms.address.field.invalid" />
+	<field formid="zip" label="forms.zippostalcode" type="string" mandatory="false" binding="postalCode" missing-error="forms.errorzip" range-error="forms.address.field.invalid" parse-error="forms.address.field.invalid" default-value="."/>
+	<field formid="postBox" label="forms.address3" type="string" mandatory="false" binding="postBox" max-length="35" missing-error="forms.address.city.missing" range-error="forms.address.field.invalid" />
+	<field formid="title" label="forms.title" type="string" mandatory="true" binding="title">
+		<options>
+			<option optionid="" label="forms.select.title" value=""/>
+			<option optionid="Mr" value="Mr" label="title.Mme" />
+			<option optionid="Mrs" value="Mrs" label="title.Mlle" />
+			<option optionid="Ms" value="Ms" label="title.Ms" />
+			<option optionid="Miss" value="Miss" label="title.M" />
+			<option optionid="Dr" value="Dr" label="title.Dr" />
+		</options>
+	</field>
+	<!-- Custom Fields -->
+	<!-- Praveen:Changes made for CR105-->
+	<field formid="streetName" label="forms.streetName" type="string" mandatory="false" binding="custom.streetName" max-length="35" missing-error="forms.addresserror" range-error="forms.address.field.invalid" />
+	<field formid="residence" label="forms.residence" type="string" mandatory="false" binding="custom.residence" max-length="29" missing-error="forms.addresserror" range-error="forms.address.field.invalid" />
+	<field formid="alternateContactNumber" label="forms.alternateContactNumber" type="string" mandatory="false" binding="custom.alternateContactNumber" max-length="15" missing-error="forms.addresserror" range-error="forms.address.field.invalid" />
+	<field formid="deliveryStoreID" label="Store ID" type="string" mandatory="false" binding="custom.deliveryStoreID"/>
+	<!--END Custom Fields -->
+	
+	
+	
+	
+	
+	<!-- Commenting the country list because we are using a country text box.-->
+		
+ 	<field formid="country" label="forms.country" type="string" mandatory="true" binding="countryCode" max-length="10" />
+	<field formid="storeCollectionDate" label="forms.checkout.storecollectiondate" type="string" mandatory="false" />
+	<field formid="storePickupTime" label="forms.checkout.storePickupTime" type="string" mandatory="false" />
+		
+	<include formid="states" name="states"/>
+	
+	<!-- phone is mandatory for shipping addresses -->
+	<field formid="phone" label="profile.phone" type="string" mandatory="true" binding="phone" max-length="15" missing-error="forms.address.phone.missing" range-error="forms.address.field.invalid" />
+
+	<!-- actions provided by the edit shipping address dialog -->
+	<action formid="apply" valid-form="true"/>
+	<action formid="remove" valid-form="false"/>
+</form>

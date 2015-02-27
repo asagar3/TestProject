@@ -1,0 +1,60 @@
+/**
+ * Script representation of the account transactions webservice
+ *
+ * If a Service implementation needs to override a method, the overridden method can always be
+ * called using this._super();
+ */
+
+importPackage(dw.system);
+importPackage(dw.object);
+importPackage(dw.util);
+
+importScript("util/libInheritance.ds");
+importScript("util/WebServiceUtils.ds");
+importScript("util/WebserviceConfiguration.ds");
+importScript("services/AbstractBaseService.ds");
+
+// Hack, because vars cannot be imported in DW, only functions
+function getAbstractXMLBaseService() {
+	return AbstractXMLBaseService;
+}
+
+var AbstractBaseService = getAbstractBaseService();  
+
+/**
+ * Base class of all web services.
+ *
+ * @class
+ * @augments AbstractBaseService
+ */
+var AbstractXMLBaseService = AbstractBaseService.extend(
+/** @lends AbstractXMLBaseService.prototype */
+{
+	
+	/**
+	 * Sends XML request with the configured parameters
+     *
+     * It is assumed that a credentials object is present which defines url, username and password
+	 */
+	executeServiceCall : function() {
+		var httpClient : dw.net.HTTPClient = new dw.net.HTTPClient();
+		this.service = httpClient;
+
+		Logger.debug("AbstractXMLService: try to connect " + this.serviceName + " calling " + this.credentials.url + " credentials " + this.credentials.username + " / " + this.credentials.password);
+		httpClient.setRequestHeader("Content-Type", "text/xml");
+		httpClient.open("POST", this.credentials.url, this.credentials.username, this.credentials.password);
+		httpClient.send(this.request);
+		return new XML (httpClient.text);
+	},
+
+	initStatusFromResponse : function(){
+		if(this.service.statusCode == 200){
+			this.status.code = 'OK';
+		}else{
+			this.status.code = 'ERROR';
+			this.status.error = this.service.statusCode;
+		}
+		this.status.message = this.service.statusMessage;
+	}
+
+});

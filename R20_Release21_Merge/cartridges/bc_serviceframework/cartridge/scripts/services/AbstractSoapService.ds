@@ -1,0 +1,73 @@
+/**
+ * Service wrapper for all ESB Services, which share the same call url and response header structure
+ *
+ * If a Service implementation needs to override a method, the overridden method can always be
+ * called using this._super();
+ *
+ * @author hnes
+ */
+
+importPackage( dw.system );
+
+importScript( "bc_serviceframework:services/AbstractBaseService.ds" );
+importScript( "bc_serviceframework:util/libInheritance.ds" );
+importScript( "bc_serviceframework:util/WebServiceUtils.ds" );
+
+var AbstractBaseService = getAbstractBaseService();
+ 
+// Hack, because vars cannot be imported in DW, only functions
+function getAbstractSoapService() {
+	return AbstractSoapService;
+}
+
+/**
+ * Base class for all SAP SOAP webservice implementations
+ */
+var AbstractSoapService =  AbstractBaseService.extend(
+/** @lends AbstractSoapService.prototype */
+{
+
+    /** 
+     * Create a new SAP SOAP web service.
+     * It will be used to 
+     * @constructs
+     * @augments AbstractBaseService
+	 * @param callFrom the service name
+	 * @param  serviceObject object
+	 */ 
+	init : function(callFrom : String, serviceObject : Object) {
+		this._super(callFrom, serviceObject);
+		this.initServiceClient();
+		this.initSoapStub();
+		this.serviceClient.setTimeout(this.configuration.getTimeout());
+	},
+
+	/** 
+	 * fetches url from credentials custom object
+	 */ 
+	initSoapStub : function () {
+		var url : String = this.serviceClient._getProperty(dw.rpc.Stub.ENDPOINT_ADDRESS_PROPERTY);
+		var newUrl : String = null;
+		
+		if (this.configuration.getCredentials().getCredentialsType() == "URL" ) {
+			newUrl = this.configuration.getCredentials().getUrl();
+		} 
+		
+		this.serviceClient.setUsername(this.configuration.getCredentials().getUser());
+		this.serviceClient.setPassword(this.configuration.getCredentials().getPassword());
+
+		if(!empty(newUrl)){
+			var matches : Array = url.match(/(https?[:]\/\/)?[^\/]*\/(.*)/);
+			
+			if (matches && matches.length >= 3) {
+				newUrl += '/' + matches[2];
+			}
+			
+			this.serviceClient._setProperty(dw.rpc.Stub.ENDPOINT_ADDRESS_PROPERTY, newUrl);
+		}
+		this.serviceClient.setTimeout(this.configuration.getTimeout());
+		
+		Logger.debug("Webservice URL: " + this.serviceClient._getProperty(dw.rpc.Stub.ENDPOINT_ADDRESS_PROPERTY));
+	}
+
+});

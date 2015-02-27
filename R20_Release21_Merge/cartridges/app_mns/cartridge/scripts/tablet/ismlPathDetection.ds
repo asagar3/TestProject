@@ -1,0 +1,24 @@
+/**
+ * @input ismlPath : String default ISML path
+ * @output dynamicPath : String dynamically created path
+ * 
+ */
+ 
+importPackage( dw.system );
+
+// User Agent Constants; in lowercase
+var UA_TABLET= "tablet";
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var channel : String = session.custom.channel;	
+	var dynamicPath : String = pdict.ismlPath;
+	
+	if (!empty(channel) && channel.equalsIgnoreCase(UA_TABLET)){
+		dynamicPath = channel + "/" + dynamicPath;
+	}
+  
+  	pdict.dynamicPath = dynamicPath;
+  	
+   	return PIPELET_NEXT;
+}

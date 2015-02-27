@@ -1,0 +1,6 @@
+<iscontent type="application/html" charset="UTF-8" compact="true"/>
+  <isinclude template="util/modules"/>
+  <div class="waitingIcon"></div>
+  <isif condition="${pdict.CurrentHttpParameterMap.paymentMethod == null}">
+   <iscontentasset aid="please-wait"/>
+  </isif>

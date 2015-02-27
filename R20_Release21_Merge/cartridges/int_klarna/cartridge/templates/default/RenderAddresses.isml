@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<getAddress>
+<isloop iterator="${pdict.CustomerAddresses}" alias="address">
+	<address>
+		<isif condition="${address['is_company']}">
+			<companyName>${address['company']}</companyName>
+		<iselse>
+			<first_name>${address['fname']}</first_name>
+			<last_name>${address['lname']}</last_name>
+		</isif>
+
+		<street>${address['street']}</street>
+		<zip>${address['zip']}</zip>
+		<city>${address['city']}</city>
+		<countryCode>${address['country']}</countryCode>
+	</address>
+</isloop>
+</getAddress>

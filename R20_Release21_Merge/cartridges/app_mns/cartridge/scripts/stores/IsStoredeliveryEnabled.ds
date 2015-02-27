@@ -1,0 +1,54 @@
+/**
+*  @input shipingMethodList : dw.util.Collection
+*  @input requestCountry : String
+*
+*/
+importPackage( dw.system );
+importPackage(dw.util);
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var requestCountry : String= args.requestCountry;
+	
+	if(empty(requestCountry))
+	{
+	 	requestCountry = dw.util.Locale.getLocale(request.locale).country;
+	}else{
+		requestCountry = dw.util.Locale.getLocale(requestCountry).country;
+	}
+	session.custom.isStoreCollActive = false;
+	session.custom.isCollectionPointActive = false;
+   	for each (var shippingMethod in args.shipingMethodList )
+    {
+    	if("STORE_COLLECTION".equalsIgnoreCase(shippingMethod.ID))
+    	{
+    		//errorCode = null;
+	    	var countryArray : List = shippingMethod.custom.includedCountries;
+			for each(var includedCountry:String in countryArray){
+				if(requestCountry.equalsIgnoreCase(includedCountry)){
+					session.custom.isStoreCollActive=true;
+					break;	
+				}
+			 }				
+		}
+		 if("COLLECTION_POINT".equalsIgnoreCase(shippingMethod.ID))
+    	{
+    		//errorCode = null;
+	    	var countryArray : List = shippingMethod.custom.includedCountries;
+			for each(var includedCountry:String in countryArray){
+				if(requestCountry.equalsIgnoreCase(includedCountry)){
+					session.custom.isCollectionPointActive = true;
+					break;	
+				}
+			 }				
+		}
+	}
+	    
+   return PIPELET_NEXT;
+    
+}
+    	
+  
+
+    
+

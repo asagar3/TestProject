@@ -1,0 +1,139 @@
+<isif condition="${empty(pdict.showbutton) || pdict.showbutton == 'true' }" >
+	<isset name="ShowOnlyButton" value="true" scope="page"/>
+<iselse>
+	<isset name="ShowOnlyButton" value="false" scope="page"/>
+</isif>
+
+<isif condition="${empty(pdict.showtoggle) || pdict.showtoggle == 'false' }" >
+	<isset name="ShowToggleButton" value="false" scope="page"/>
+<iselse>
+	<isset name="ShowToggleButton" value="true" scope="page"/>
+</isif>
+
+<isif condition="${!pdict.pagingmodel.empty}">
+	<isscript>
+		MinPageSize = 60;	// Minimum number of products on one page
+		MaxPageSize = 180;	// Maximum number of products on one page
+		
+		current = pdict.pagingmodel.start;
+		totalCount = pdict.pagingmodel.count;
+		pageSize = pdict.pagingmodel.pageSize;
+		pageSizeTobe = (pageSize==MinPageSize) ? MaxPageSize : MinPageSize;
+		pageURL = pdict.pageurl;
+		currentPage = pdict.pagingmodel.currentPage;
+		maxPage = pdict.pagingmodel.maxPage;
+
+		lr = 2; // number of explicit page links to the left and right
+		if ( maxPage <= 2*lr )
+		{
+			rangeBegin = 0;
+			rangeEnd = maxPage;
+		}
+		else
+		{
+			rangeBegin = Math.max( Math.min( currentPage - lr, maxPage - 2*lr ), 0 );
+			rangeEnd = Math.min( rangeBegin + 2*lr, maxPage );
+		}
+				
+		noOfNextPageItems = totalCount - ((currentPage + 1) * pageSize);
+				
+		if(noOfNextPageItems > pageSize){
+			noOfNextPageItems = pageSize;
+		}
+	</isscript>	
+	
+	<iscomment>QC Defect 882 | UAT - Page pagination not returning user to the top of the next/previous page | Naveen Kumar</iscomment>
+	<script type="text/javascript">
+		function gotoFirstProduct(){
+			  $("html,body").scrollTop(150);
+		}
+	</script> 
+<iscomment>Display the toggle button at the top</iscomment>	
+<isif condition="${ShowToggleButton != 'false'}">
+	<isif condition="${totalCount > MinPageSize}">
+		<div class="resultshits borderLeft">	
+			<a href="${pdict.pagingmodel.appendPageSize(pageURL, pageSizeTobe)}">		
+			<isif condition="${totalCount > MaxPageSize || totalCount < pageSize}">	
+				${Resource.msgf('global.toggleText','locale',null, pageSizeTobe.toFixed())}
+			<iselse/>
+				${Resource.msg('searchrefinebar.viewall','search',null)}				
+			</isif>
+			</a>
+		</div>			
+</isif>
+</isif>
+
+	<isif condition="${ShowOnlyButton != 'false'}">	
+		<isif condition="${pdict.pagingmodel.pageCount > 1}">
+			<isif condition="${(current < totalCount - pageSize) && (maxPage > 0)}">				
+					<iscomment>for carousel append view in the paging URL</iscomment>					
+					<isif condition= ${empty(view)}>
+						<a class="pagelast" id="pageShowMore" onclick="javascript: void(0);" href="${pdict.pagingmodel.appendPaging(pageURL, current + pageSize)}">${Resource.msg('global.showText','locale',null)}&nbsp;${noOfNextPageItems.toFixed()}&nbsp;${Resource.msg('global.moreText','locale',null)}</a>
+					<iselse>
+						<a class="pagelast" id="pageShowMore" onclick="javascript: void(0);" href="${pdict.pagingmodel.appendPaging(pageURL.append('view', view), current + pageSize)}">${Resource.msg('global.showText','locale',null)}&nbsp;${noOfNextPageItems.toFixed()}&nbsp;${Resource.msg('global.moreText','locale',null)}</a>
+					</isif>
+					<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+							
+			</isif>
+		</isif> 
+	<iselse>	
+		<isif condition="${pdict.pagingmodel.pageCount > 1}">
+			<isif condition="${pdict.comingFromOrderHistory}">
+				<div class="orderhistorypagination">
+			<iselse>
+				<div class="pagination">
+			</isif>
+				<ul>
+					
+						
+						<iscomment><li class="firstlast">
+							<a class="pagefirst" href="${pdict.pagingmodel.appendPaging( pageURL, 0)}"><span>&lt;&lt;</span></a>
+						</li></iscomment>
+						<li class="background_arrowlesser">
+							<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+							<iscomment>Anoop:- Design Changes Tablet Pagination</iscomment>
+							<isif condition="${(currentPage >= 1) }">
+							<a class="pagefirst" onclick="javascript: gotoFirstProduct();" href="${pdict.pagingmodel.appendPaging( pageURL, current - pageSize)}"> ${Resource.msg('paginginformation.previous','search',null)} </a>
+							<iselse>
+							<a class="pagefirst disable"  href="javascript: void(0);"> ${Resource.msg('paginginformation.previous','search',null)} </a>
+							
+							</isif>
+							<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+						</li>
+					
+	
+					<isif condition="${maxPage >= 1}">
+						<isloop status="i" begin="${rangeBegin}" end="${rangeEnd}">
+							<isif condition="${i.index != currentPage}">
+								<li>
+									<iscomment>This long line is needed to avoid extra whitespaces in the link text</iscomment>
+									<a class="page-<isprint value="${i.index + 1}" style="0"/>" onclick="javascript: gotoFirstProduct();" href="${pdict.pagingmodel.appendPaging( pageURL, current + (i.index - currentPage) * pageSize)}"><isprint value="${i.index + 1}" style="0"/></a>																
+								</li>
+							<iselse>
+								<li class="currentpage"><a href="javascript:void(0)"><isprint value="${i.index + 1}" style="0"/></a></li>
+							</isif>
+						</isloop>
+						
+							
+							<li class="background_arrowgreater">
+								<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>	
+								<iscomment>Anoop:- Design Changes tablet</iscomment>
+								<isif condition="${(current < totalCount - pageSize)}">						
+								<a class="pagelast" onclick="javascript: gotoFirstProduct();" href="${pdict.pagingmodel.appendPaging( pageURL, current + pageSize)}">${Resource.msg('paginginformation.next','search',null)} </a>
+								<iselse>
+								<a class="pagelast disable"  href="javascript:void(0);">${Resource.msg('paginginformation.next','search',null)} </a>
+								</isif>
+								<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+							</li>
+							<iscomment><li class="firstlast">
+								<a class="pagelast" href="${pdict.pagingmodel.appendPaging( pageURL, current + (maxPage - currentPage) * pageSize)}"><span>&gt;&gt;</span></a>
+							</li></iscomment>
+						
+					</isif>
+					<iscomment>To Do | ASHA | Add Next when required. I've added at temporary place
+					<li class="background_arrowgreater"><a href="${pdict.pagingmodel.appendPaging( pageURL, current + 1)}">${Resource.msg('paginginformation.next','search',null)}  </a></li></iscomment>
+				</ul>
+			</div>
+		</isif>	
+	</isif>
+</isif>

@@ -1,0 +1,121 @@
+<iscache type="relative" hour="24" varyby="price_promotion"/>
+
+<iscomment>
+	This template displays a 3-level category tree as top navigation.
+	Only categories marked with showInMenu are shown.
+</iscomment>
+
+<isscript>
+	// get root category of current site's navigation catalog
+	var siteCatalog = dw.catalog.CatalogMgr.getSiteCatalog();
+	var root = null;
+	if(siteCatalog!=null) {root = siteCatalog.getRoot();}
+
+	// get the "sale" category
+	var saleCategory = dw.catalog.CatalogMgr.getCategory('sale');
+	
+	//code for category grouping  
+	
+	var categoryType : String=null;
+	var isUpdatedCategoryType : Boolean = false;
+	var defaultDisplayed : Boolean = false;
+	
+</isscript>
+<isif condition="${root != null}">
+<div class="catMenuHeight">
+<div class="categorymenu al">
+	<ul>
+		<iscomment>### Top Level Categories : LOOP START #####</iscomment>				
+		<isloop items="${root.getOnlineSubCategories()}" var="topCat" status="loopstate">
+			<iscomment>Praveen: Setting a variable to track the occurence of different groups</iscomment>
+			<isset name="groupOccurence" value="${0}" scope="page">
+			<isscript>categoryType = null;</isscript>
+			<isif condition="${('showInMenu' in topCat.custom) && topCat.custom.showInMenu.valueOf()}">
+				<isset name="defaultDisplayed" value="${true}" scope="page"/> 
+				<isscript>
+					var categoryList : dw.util.ArrayList = new dw.util.ArrayList();
+					var catGroupSet : dw.util.HashSet = new dw.util.HashSet();
+				</isscript>
+				<iscomment>### Top Level Categories : PRINT #####</iscomment>				
+				<li>
+				<iscomment>INT-575: added intid to implement Omniture tracking on gbnav </iscomment>		
+				<a href="${URLUtils.http('Search-Show','intid',"gnav_"+topCat.getDisplayName(), 'cgid', topCat.getID())}"  style='<isprint value="${topCat.custom.categoryStyle}"/>' <isif condition="${loopstate.first}" > title="${topCat.getDisplayName()}" class="highlight"</isif>><isprint value="${topCat.getDisplayName()}"/></a>
+					<isloop items="${topCat.getOnlineSubCategories()}" var="subCat">						
+						<isif condition="${('showInMenu' in subCat.custom) && subCat.custom.showInMenu.valueOf()}">
+							<isscript>
+								categoryList.add(subCat);
+								catGroupSet.add(subCat.custom.categoryType);								
+							</isscript>
+						</isif>
+					</isloop>					
+					<isscript>
+						var  propCompare : dw.util.PropertyComparator = new dw.util.PropertyComparator("custom.categoryType");
+						categoryList.sort(propCompare);
+					</isscript>					
+					<isif condition="${categoryList.size()>0}"><ul class="dropnavholder <isif condition="${catGroupSet.size() <= 4}">cols${catGroupSet.size()}<iselse>cols4</isif>"></isif>
+					<iscomment>### Second Level Categories : LOOP START #####</iscomment>				
+					<isloop items="${categoryList}" var="subCat" status="loopstateSubCat">
+						<isscript>
+							if(null == categoryType || categoryType!=subCat.custom.categoryType)
+							{															
+								categoryType = subCat.custom.categoryType;
+								isUpdatedCategoryType = true;
+							}
+						</isscript>
+						
+						<isif condition="${isUpdatedCategoryType==true}">
+							<iscomment>### Categories Group Name : PRINT #####</iscomment>							
+							<isif condition="${null == categoryType && !defaultDisplayed}">
+								<isif condition="${!loopstateSubCat.first}"></ul></li></isif>
+								<li><ul class="subUL" style="">
+									<li class="header"><h3>${dw.system.Site.current.preferences.custom.defaultCategoryType.toString()}</h3></li>
+									<isset name="defaultDisplayed" value="${true}" scope="page"/>	
+							<iselseif condition="${null != categoryType}"/>
+								<isif condition="${!loopstateSubCat.first}"></ul></li></isif>
+								<iscomment>Praveen: Checking the value of 'groupOccurence'to start a new row of categories</iscomment>
+								<isif condition="${groupOccurence % 4 == 0}">
+									<li class="clear" style="height:1px; width:100%; float:none!important;"></li>
+								</isif>
+								<li><ul class="subUL" style="">
+								<li class="header"><h3> 
+									<iscomment>Praveen: Changes made for Category Ordering changes CR</iscomment>
+									<isprint value="${categoryType.slice(categoryType.indexOf(' ')+1,categoryType.length)}"/>
+								</h3></li>
+							</isif>
+							<isscript>
+								isUpdatedCategoryType = false;
+								groupOccurence++;
+							</isscript>
+						</isif>
+							<iscomment>### Second Level Categories : PRINT #####</iscomment>	
+							<isscript>
+								var subCategoryName = subCat.getDisplayName();
+								if(subCategoryName != null && subCategoryName.length > 30) {
+									subCategoryName = subCategoryName.substring(0,27) + "...";
+								}
+							</isscript>					
+							<li><a href="${URLUtils.http('Search-Show', 'cgid', subCat.getID())}" title="${subCategoryName}"  style='<isprint value="${subCat.custom.categoryStyle}"/>'><isprint value="${subCategoryName}"/></a></li> 
+					</isloop>
+					
+					<isif condition="${categoryList.size()>0}"></ul>
+					
+					</li>
+					<isprint value="${topCat.custom.categoryGlobalNavSlot}" encoding="off"/>
+					</ul>
+					
+					</isif>                    
+	            	<iscomment>following anchor tag is added to keep the Global Navigation in proper look and feel on IE-8 | HTMLs are not ready yet | Naveen Kumar</iscomment>
+	            	
+	            	<a style="display:none;" href="javascript:;">&nbsp;</a>	            	
+	            </li>
+	    	</isif>
+		</isloop>
+	<isif condition="${saleCategory != null && saleCategory.online}">
+		<li>
+			<a title="${saleCategory.displayName}" href="${URLUtils.http('Search-Show','cgid',saleCategory.ID)}" class="salecatmenu"><isprint value="${saleCategory.displayName}"/></a>
+		</li>
+	</isif>
+	</ul>
+    <div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: categorymenu -->
+</isif>

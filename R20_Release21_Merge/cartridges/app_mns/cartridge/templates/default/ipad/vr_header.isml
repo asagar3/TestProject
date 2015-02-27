@@ -1,0 +1,45 @@
+<!--- TEMPLATENAME: vr_header.isml --->
+	<div class="retrieveVR_background">
+		<div class="retrieveVirtualRail" onClick="showpopup(this)">
+			<p>${Resource.msg('header.action.getbasket','virtualbasket',null)}</p>
+		</div>
+		<isif condition="${pdict.CurrentHttpParameterMap.omniPageName.stringValue == Resource.msg('omniture.title.cart','omniture',null)}">
+			<div class="emailBasket" onClick="showEmailBasket(this)">
+				<p>${Resource.msg('header.action.sendbasket','virtualbasket',null)}</p>
+			</div>
+		</isif>
+	</div>
+	
+	<script type="text/javascript"><!--
+		//Added by Shashi for IPAD extension
+		function showpopup(obj){
+			var url = "${URLUtils.url('VRMgr-GetVREmailList')}" ;
+			url = app.util.appendParamToURL(url, "orderPoint","${pdict.orderPoint}");
+			url = app.util.appendParamToURL(url, "deviceID","${pdict.deviceID}");
+			url = app.util.appendParamToURL(url, "orderChannel","${pdict.orderChannel}");
+			
+			app.dialog.open(url,"${Resource.msg('getbasket.email.title','virtualbasket',null)}","retrieveVR","retrieveVR_dialog");
+			//Praveen :- Setting the Omniture variables
+			s.linkTrackVars = "${Resource.msg('omniture.basketList.refresh.linkTrackVars','omniture',null)}";
+			s.linkTrackEvents = "${Resource.msg('omniture.basketList.refresh.linkTrackEvents','omniture',null)}";
+			s.events = "${Resource.msg('omniture.basketList.refresh.event','omniture',null)}";			
+			s.tl(obj,'o', "value");	
+			//Omniture end
+		}
+			
+		function showEmailBasket(obj){
+
+			var url = "${URLUtils.url('VRMgr-SendBasket')}" ;
+			url = app.util.appendParamToURL(url, "orderPoint","${pdict.orderPoint}");
+			url = app.util.appendParamToURL(url, "deviceID","${pdict.deviceID}");
+			url = app.util.appendParamToURL(url, "orderChannel","${pdict.orderChannel}");
+			
+			app.dialog.open(url,"${Resource.msg('sendbasket.email.title','virtualbasket',null)}","emailBasket","emailBasket_dialog");
+			//Praveen :- Setting the Omniture variables
+			s.linkTrackVars = "${Resource.msg('omniture.basketHeader.sendEmail.linkTrackVars','omniture',null)}";
+			s.linkTrackEvents = "${Resource.msg('omniture.basketHeader.sendEmail.linkTrackEvents','omniture',null)}";
+			s.events = "${Resource.msg('omniture.basketHeader.sendEmail.event','omniture',null)}";			
+			s.tl(obj,'o', "value");	
+		}		
+	--></script> 
+    

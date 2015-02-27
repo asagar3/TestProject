@@ -1,0 +1,506 @@
+/*
+* This library supplies several calculation functions needed for Klarna.
+*/
+
+importPackage( dw.system );
+importPackage( dw.net );
+importPackage(dw.crypto);
+importPackage ( dw.util );
+importPackage ( dw.web );
+importPackage (dw.value);
+
+// The current module version
+var MODULE_VERSION : String = "Demandware:1.0";
+var PROTO_VSN : String = "4.1";
+
+// Create a map of the country details. The array contains
+// the currency, country, language, pno_encoding
+var countryDetails : Map = new HashMap();
+countryDetails.put("SE", new Array(0, 209, 138, 2));
+countryDetails.put("FI", new Array(2, 73, 37, 4));
+countryDetails.put("DK", new Array(3, 59, 27, 5));
+countryDetails.put("NO", new Array(1, 164, 97, 3));
+countryDetails.put("DE", new Array(2, 81, 28, 6));
+countryDetails.put("NL", new Array(2, 154, 101, 7));
+countryDetails.put("AT", new Array(2, 15, 28, 8));
+
+function Flag() {}
+Flag.TEST_MODE = 2;
+Flag.IS_SHIPMENT = 8;
+Flag.IS_HANDLING = 16;
+Flag.INC_VAT = 32;
+
+function Status() {}
+Status.ACCEPTED = 1;
+Status.PENDNIG = 2;
+Status.DENIED = 3;
+
+function Address() {}
+Address.ALL = 1;
+Address.LAST = 2;
+Address.GIVEN = 5;
+
+//var logger : Log = dw.system.Logger.getLogger("klarna", "klarna_library");
+
+
+//TODO Fix docs
+function sendDataToKlarna(data: String) : String {
+	var client : HTTPClient = new HTTPClient();
+	client.open("POST", getSetting("KLARNA_TARGET_SYSTEM"));
+    client.setRequestHeader("Content-Type", "text/xml");
+    client.setRequestHeader("User-Agent", "Demandware Client");
+    client.setRequestHeader("Connection", "Close");
+	client.setRequestHeader("Content-Length", data.length);
+	client.send(data, "ISO-8859-1");
+
+	if(client.statusCode == 200) {
+		return client.getText("ISO-8859-1");
+	} else {
+		Logger.error("Error sending data to Klarna.URL:" + getSetting("KLARNA_TARGET_SYSTEM") + ".Data:<<" + data + ">>.HTTP Error " + client.statusCode);
+		throw new Error("HTTP Error, error returned from Reserve Amount API, HTTP Status Code: " + client.statusCode);
+	}
+}
+
+function buildXMLValue(value) {
+	if(value == null) {
+		return "<value><string></string></value>";
+
+	}
+	else if(value.constructor === String) {
+		return "<value><string>" + StringUtils.encodeString(value, StringUtils.ENCODE_TYPE_XML) + "</string></value>";
+
+	} else if (value.constructor === Number) {
+		return "<value><int>" + value + "</int></value>";
+
+	} else if (value.constructor === Array || value.constructor === List) {
+		var out = "<value><array><data>";
+		for(var i in value) {
+			out += buildXMLValue(value[i]);
+		}
+		return out += "</data></array></value>";
+
+	} else if (value.constructor === Object) {
+		// Treat Object as a associative array
+		var out = "<value><struct>\n";
+		for(var key in value) {
+
+			if("vat".equals(key) || "discount".equals(key)){
+				out += "\t\t<member><name>" + key + "</name>" + "<value><double>" + value[key] + "</double></value>" + "</member>\n";
+				
+			}else{
+				out += "\t\t<member><name>" + key + "</name>" + buildXMLValue(value[key]) + "</member>\n";
+			}
+		}
+		return out + "\t</struct></value>";
+
+	} else {
+		throw new Error("libKlarnaAPI:buildXMLValue: Unknown param type " + typeof value + " " + value.constructor);
+	}
+}
+
+/**
+ * Builds a RPC method call XML.
+ *
+ * First argument is the method name and the remaining the arguments to the remote method
+ */
+function buildXML() : String {
+	var xmldata = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
+	xmldata += "<methodCall><methodName>" + arguments[0] + "</methodName>\n";
+
+	xmldata += "<params>\n";
+	for(var i = 1; i < arguments.length; i++) {
+		var param = arguments[i];
+		xmldata += "\t<param>" + buildXMLValue(param) + "</param>\n";
+	}
+	xmldata += "</params></methodCall>";
+
+	return xmldata;
+}
+
+function Klarna() {
+	this.merchantId = Number(getSetting("KLARNA_MERCHANT_ID"));
+	this.secret = getSetting("KLARNA_SHARED_SECRET");
+
+	this.shipinfo = {'delay_adjust' : 1};
+	this.travelinfo = {};
+	this.incomeinfo = {};
+	this.bankinfo = {};
+	this.extrainfo = {};
+	this.sid = {};
+
+	this.products = [];
+	this.comment = "";
+
+	this.shipping = null;
+	this.billing = null;
+
+	this.reference_person = "";
+	this.reference_code = "";
+	this.orderid1 = "";
+	this.orderid2 = "";
+
+	if(!this.merchantId) {
+		throw new Error("No Klarna Merchant ID set");
+	}
+}
+
+//CR 3079 : select merchant_id on the basis of Country and shipping method
+function Klarna(klarnaCountryCode : String, shipping_Method : String) {
+	
+	//this.merchantId = Number(getSetting("KLARNA_MERCHANT_ID"));
+//	this.secret = getSetting("KLARNA_SHARED_SECRET");
+
+	this.shipinfo = {'delay_adjust' : 1};
+	this.travelinfo = {};
+	this.incomeinfo = {};
+	this.bankinfo = {};
+	this.extrainfo = {};
+	this.sid = {};
+
+	this.products = [];
+	this.comment = "";
+
+	this.shipping = null;
+	this.billing = null;
+
+	this.reference_person = "";
+	this.reference_code = "";
+	this.orderid1 = "";
+	this.orderid2 = "";
+
+   var merchant_map : dw.util.Collection = dw.system.Site.getCurrent().getCustomPreferenceValue("KLARNA_MERCHANT_ID_MAP");
+   var secret_map : dw.util.Collection = dw.system.Site.getCurrent().getCustomPreferenceValue("KLARNA_SHARED_SECRET_MAP");
+   var merchant_code : String = "";
+				
+	if(System.getInstanceType()==System.PRODUCTION_SYSTEM){
+		merchant_code = klarnaCountryCode + "_" + "PRODUCTION"+"_"+shipping_Method; 
+   	}			
+	else{
+		merchant_code = klarnaCountryCode + "_" + shipping_Method;
+	}	
+		for each (var merchant_id : EnumValue in merchant_map) {
+			if(merchant_id.getValue().equalsIgnoreCase(merchant_code)){
+				var m_id : Number =  Number(merchant_id.getDisplayValue());
+				this.merchantId = m_id;
+				break;
+			}		
+		}	
+	
+	for each (var secret_id : EnumValue in secret_map) {
+			if(secret_id.getValue().equalsIgnoreCase(merchant_code)){
+				//var s_id : Number =  Number(secret_id.getDisplayValue());
+				this.secret = secret_id.getDisplayValue();
+				break;
+			}		
+		}
+		
+	if(!this.merchantId) {
+		throw new Error("No Klarna Merchant ID set");
+	}
+}
+
+
+Klarna.prototype.set_estore_info = function(orderid1, orderid2, user) {
+	this.extrainfo['estore_user'] = user || "";
+	this.orderid1 = orderid1 || "";
+	this.orderid2 = orderid2 || "";
+}
+
+/**
+ *	This method makes a call to Klarna to retreive all the
+ *	addresses the customer has stored. This method can only be
+ *	used for swedish customers.
+ *
+ *	@ssn (String) The customers entered birthdate plus four last
+ *	digits.
+ *	@returns Array containing an array with the addresses
+ */
+Klarna.prototype.get_addresses = function(ssn : String) {
+	// The array that will hold the addresses
+	var addrArray : Array = new Array();
+
+	// Create the string that are used to create the digest
+	var digestString : String = this.merchantId + ":" + ssn + ":" + this.secret;
+
+	// Build XML-RPC request
+	var encoding = 2;
+	var type = Address.ALL;
+	var xmlToSend : String = buildXML("get_addresses", PROTO_VSN, MODULE_VERSION, ssn, this.merchantId, createDigest(digestString),
+		encoding, type, request.getHttpRemoteAddress());
+	// Send the data to Klarna and get the response. The
+	// resonse will be in XML format.
+	var responseXML : String = sendDataToKlarna(xmlToSend);
+	var response : XML = new XML(responseXML);
+	// Validate the response sent from Klarna
+	validateResponse(response);
+
+	// Only used for sweden atm, extend accordingly
+	var countryCodes = {
+		"209" : 'SE'
+	}
+
+	// Get all addresses in a XMLList
+	var addresses : XMLList = response.descendants("array").descendants("array").descendants("data");
+
+	for each ( var address : XMLList in addresses ) {
+		// Sort out all string values
+		address = address.descendants("value").descendants("string");
+		var cc = countryCodes[address[5]];
+		if(address[0] == '') {
+			addrArray.push({'is_company' : true, 'company' : address[1],
+				'street' : address[2],
+				'zip' : address[3],
+				'city' : address[4],
+				'country' : cc});
+		} else {
+			addrArray.push({'is_company' : false, 'fname' : address[0], 'lname' : address[1],
+				'street' : address[2],
+				'zip' : address[3],
+				'city' : address[4],
+				'country' : cc});
+		}
+	}
+
+	return addrArray;
+}
+
+
+Klarna.prototype.add_article = function(qty, artno, title, price, vat, discount, flags) {
+	this.products.push({
+		'goods' : {
+			'artno'    : artno,
+			'title'    : title,
+			'price'    : Math.round(price*100),
+			'vat'      : vat,
+			'discount' : discount,
+			'flags'    : flags
+		},
+		'qty' : qty
+	});
+}
+
+Klarna.prototype.add_transaction = function(pno : String, gender : String, flags : Number, countryCode : String, pclass : Number) : Object {
+	var sharedSecret : String = "";
+	for each ( var product in this.products ) {
+		sharedSecret += product['goods']['title'] + ":";
+	}
+	sharedSecret += this.secret;
+	var digest = createDigest(sharedSecret);
+
+	var countrySettings : Array = getCountryDetails(countryCode);
+
+	if(gender != null) {
+		gender = Number(gender);
+	}
+
+	var xmlToSend : String = buildXML("add_invoice", PROTO_VSN, MODULE_VERSION, pno,
+		gender, this.reference_person, this.reference_code, this.orderid1, this.orderid2,
+		this.shipping, this.billing, request.getHttpRemoteAddress(), flags, countrySettings[0], countrySettings[1],
+		countrySettings[2], this.merchantId, digest, countrySettings[3], Number(pclass), this.products,
+		this.comment, this.shipinfo, this.travelinfo, this.incomeinfo, this.bankinfo, this.sid, this.extrainfo);
+		Logger.error("Klarna Request:::::"+xmlToSend);
+	// Make sure a valid response was returned
+	var responseXML : String = sendDataToKlarna(xmlToSend);
+	var response : XML = validateResponse(new XML(responseXML));
+
+	// Grab result
+	response = response['params']['param']['value']['array']['data']['value'];
+	return {
+		'invno' : String(response['string']),
+		'status' : String(response['int'])
+	};
+}
+
+//Klarna.prototype.reserve_amount = function(pno : String, gender : String, amount : Number, flags : Number, countryCode : String, pclass : Number) : Object {
+Klarna.prototype.reserve_amount = function(pno : String, gender : Number, amount : Number, flags : Number, countryCode : String, pclass : Number) : Object {
+	
+	var countrySettings : Array = getCountryDetails(countryCode);
+	var currency = countrySettings[0];
+	var country = countrySettings[1];
+	var language = countrySettings[2];
+	var pnoencoding = countrySettings[3];
+
+	if(amount == -1) {
+		amount = 0;
+		for each( var product in this.products) {
+			amount += product['goods']['price'] * product['qty'];
+		}
+	}
+
+	var digest = createDigest(this.merchantId + ":" + pno + ":" + amount + ":" + this.secret);
+
+	var xmlToSend : String = buildXML("reserve_amount", PROTO_VSN, MODULE_VERSION,
+		pno, gender, amount, this.reference_person, this.reference_code, this.orderid1, this.orderid2,
+		this.shipping, this.billing, request.getHttpRemoteAddress(), flags, currency, country, language,
+		this.merchantId, digest, pnoencoding, Number(pclass), this.products, this.comment,
+		this.shipinfo, this.travelinfo, this.incomeinfo, this.bankinfo, this.sid, this.extrainfo);
+	//dw.system.Logger.getLogger("klarna", "klarna").error(xmlToSend);
+	// Make sure a valid response was returned
+
+	Logger.debug("Klarna Request : "+xmlToSend);
+	var responseXML : String = sendDataToKlarna(xmlToSend);
+	var response : XML = validateResponse(new XML(responseXML));
+	//Praveen: If response is null means this is a Rejection scenario or ERROR
+	//Else REVIEW or APPROVED
+	if(null != response){
+	//dw.system.Logger.getLogger("klarna", "klarna").error(response);
+	// Grab result
+	response = response['params']['param']['value']['array']['data']['value'];
+	return {
+		'rno' : String(response['string']),
+		'status' : String(response['int'])
+	};}
+	
+	else{
+		var faultCode : String = extractFaultCode(responseXML);
+		
+		return {
+		'rno' : null,
+		'status' : null,
+		'faultCode' : faultCode
+	};
+	}
+	
+}
+
+//Praveen: Method for extracting the fault code and message from the response
+function extractFaultCode(response) : String {
+
+	var xmlResponse : XML = new XML(response);
+    var faults : XMLList = xmlResponse.descendants("fault");
+	
+	var faultMessage : String = faults.descendants("string");
+	var faultCode : String = faults.descendants("int");
+	
+	Logger.error("Decision from Klarna is Denied, fault code is : "+faultCode);
+	
+	return faultCode;
+}
+
+
+/**
+ * Returns the current order status for a specific reservation or invoice.
+ * Order status can be (1 ACCEPTED, 2 PENDING, 3 DENIED)
+ *
+ * type should be 0 if `id` is an invoice or reservation and 1 if id is an order id
+ */
+Klarna.prototype.check_order_status = function(id : String, type : Number) : Number {
+	var digest = createDigest(this.merchantId + ":" + id + ":" + this.secret);
+
+	var xmlToSend : String = buildXML("check_order_status", PROTO_VSN, MODULE_VERSION, this.merchantId, digest, id, type);
+
+	// Make sure a valid response was returned
+	var responseXML : String = sendDataToKlarna(xmlToSend);
+	var response : XML = validateResponse(new XML(responseXML));
+
+	// Grab result
+	var status = response['params']['param']['value']['int'];
+	return Number(status);
+}
+
+Klarna.prototype.fetch_pclasses = function(currency : Number, country : Number, language : Number) : Array {
+	var pclasses : Array = new Array();
+
+	var digest = createDigest(this.merchantId + ":" + currency + ":" + this.secret);
+	var xmlToSend = buildXML("get_pclasses", PROTO_VSN, MODULE_VERSION, this.merchantId, currency, digest, country, language);
+	var responseText : String = sendDataToKlarna(xmlToSend);
+	var response : XML = new XML(responseText);
+	validateResponse(response);
+
+	response = response["params"]["param"]["value"]["array"]["data"]["value"];
+	var pclass : XMLList;
+	// Loop through all the pclasses
+	for each (var list : XMLList in response) {
+		// Get a collection of the pclass data
+		pclass = list.descendants("data").descendants("value").children();
+		pclasses.push(new Array(pclass[0], pclass[1], pclass[2], pclass[3], pclass[4], pclass[5], pclass[6], pclass[7], pclass[8]));
+	}
+
+	return pclasses;
+}
+
+function getAllCountryDetails() : Array {
+	return countryDetails;
+}
+
+function getCountryDetails(countryCode : String) : Array {
+	var countryInfo : Array = countryDetails.get(countryCode);
+	if(countryInfo == null)
+		throw new Error(Resource.msg("klarna.invalid_country", "klarna", null));
+	return countryInfo;
+}
+
+/**
+ *	This method returns the requested
+ *	custom setting.
+ *
+ *	@setting (String) The key for the setting.
+ *	@returns The requested setting
+ *
+ */
+function getSetting(setting : String) : String {
+	return Site.getCurrent().getCustomPreferenceValue(setting);
+}
+
+/**
+ *	This method creates the digest that are used 
+ *	in calls to Klarna to authenticate the call.
+ *
+ *	@input (String) The string to encode.
+ *	@returns The encoded string
+ *
+ */
+function createDigest(input : String) : String {
+	var md : MessageDigest = new MessageDigest(MessageDigest.DIGEST_MD5);
+	var bytes : Bytes = md.digest(MessageDigest.DIGEST_MD5, new Bytes(input, "ISO-8859-1"));
+	return Encoding.toBase64(bytes);
+}
+
+/**
+ *	This methods validates the response and raises an exception if invalid
+ *
+ *	@response (XML) The response sent from Klarna
+ *	@returns the response
+ */
+ //Praveen: Changing this method so that it will not throw exception in case of Denied status
+function validateResponse(resp : XMLList) : Array {
+	var faults : XMLList = resp.descendants("fault");
+	// If we do not have a response containing
+	// the element fault it is an OK call.
+	if(faults.length() == 0)
+		return resp;
+
+	else{
+		return null;
+	}
+
+	//throw new Error(faultCode[0]+": "+faultMessage[0])
+}
+
+/*
+ * Praveen: Creating cance_reservation mrthod, will be used for cancelling the order
+ * @input: reservation number
+ * @output: status or will throw an exception
+*/
+Klarna.prototype.cancel_reservation = function(id : String) : Number {
+	var digest = createDigest(this.merchantId + ":" + id + ":" + this.secret);
+
+	//var xmlToSend : String = buildXML("cancel_reservation", PROTO_VSN, MODULE_VERSION, this.merchantId, digest, id);
+	var xmlToSend : String = buildXML("cancel_reservation", PROTO_VSN, MODULE_VERSION, id, this.merchantId, digest);
+	// Make sure a valid response was returned
+	Logger.debug("Klarna Cancel Request:- " + xmlToSend);
+	var responseXML : String = sendDataToKlarna(xmlToSend);
+	var response : XML = validateResponse(new XML(responseXML));
+	var status = null;
+	// Grab result
+	if(null != response){
+		status = response['params']['param']['value']['string'];
+	}
+	else{
+		//Logger.error("============================");
+		Logger.error("No Response received from Klarna");
+	//	Logger.error(response);
+	//	Logger.error("============================");	
+	}
+	return status;
+}

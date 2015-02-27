@@ -1,0 +1,37 @@
+<html>
+<head>
+	<isinclude template="components/header/htmlhead"/>
+
+</head>
+<body onload="load()">
+<form action="${URLUtils.continueURL()}" method="POST" name="RedirectForm" target="_parent">
+	</form>
+	<script type="text/javascript">
+		<!--
+					jQuery(document).ready(function() {
+						 
+						 var $jParent = window.parent.jQuery.noConflict();
+						 var dlg1 = $jParent('#dialogcontainer');
+						 dlg1.dialog('open');
+								
+						 
+						
+				   
+			});
+		var loaded = false;
+		
+		function load()  {  
+		       
+			 document.RedirectForm.submit();
+			loaded = true;
+			
+		}
+		load();
+//-->
+	</script>
+</body>
+</html>
+	
+
+	
+	

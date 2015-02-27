@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<iscomment><!-- TODO | Fixed Web Acc. | Please make sure "fr" should appear from properties file |Asha | 10-mar-2011--></iscomment>
+
+<iscomment>This includes global utilities into the pages</iscomment>
+<isinclude template="util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+
+<head>
+	<iscomment>
+		Include all important information globally , e.g. meta-data, link information, and
+		javascript.
+	</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+
+	<iscomment>Add page specific header information here.</iscomment>	
+</head>
+
+<body>
+
+<isinclude template="components/header/headerlogin"/>
+<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+<script>
+	s.server = "${dw.system.System.getInstanceHostname()}" ;
+	s.prop24 = "${Resource.msg('omniture.prop24.checkout','omniture',null)}" ;
+	s.channel = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+	s.prop1 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+	s.prop18 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+	if ("${pdict.checkoutPageStatus}" == "onShippingPage"){
+		s.pageName = "${dw.web.Resource.msg('omniture.checkout.shippingdetailspagetitle','omniture',null)}" + " : " + "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.pt_cart.registeredcheckout','omniture',null) : dw.web.Resource.msg('omniture.pt_cart.guestcheckout','omniture',null)}";
+		s.events = "${Resource.msg('omniture.events.checkout','omniture',null)}" ;
+		//evar22 added for CR154 (only for checkout pages:Shipping,Billing,OrderConfirmation)| KPI | Ability to distinguish between guest checkout & sign in checkout
+		s.eVar22 = "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.evar22.registered','omniture',null) : dw.web.Resource.msg('omniture.evar22.guest','omniture',null)}";		
+	} else if ("${pdict.checkoutPageStatus}" == "onBillingPage"){
+		s.pageName = "${dw.web.Resource.msg('omniture.checkout.paymentdetailspagetitle','omniture',null)}" + " : " + "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.pt_cart.registeredcheckout','omniture',null) : dw.web.Resource.msg('omniture.pt_cart.guestcheckout','omniture',null)}";
+		s.events = "${Resource.msg('omniture.events.payment','omniture',null)}" ;
+		//evar22 added for CR154 (only for checkout pages:Shipping,Billing,OrderConfirmation)| KPI | Ability to distinguish between guest checkout & sign in checkout
+		s.eVar22 = "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.evar22.registered','omniture',null) : dw.web.Resource.msg('omniture.evar22.guest','omniture',null)}";	
+	}
+	s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"
+</script>
+
+<div id="container" class="pt_checkout">
+<iscomment><!-- Web acc fix |  asha | 10-mar-2011 --></iscomment>
+<a class="accessible" href="#main">.</a>
+	<div id="main">
+		<div id="content">
+			<isbreadcrumbs bcurl1="${URLUtils.url('Cart-Show')}" bctext1="${Resource.msg('pt_checkout.breadcrumb','checkout',null)}"/>
+<div class="checkout secure3d">
+	<h5 class="grey_block_header"><span><strong class="content_grey_header">Payment card authorisation</strong></span></h5>
+	<div class="under_shadow_dark"></div>
+<h2>Please enter details requested by your bank</h2>
+<div class="payerauth">
+<div class="processing">
+</div>
+<div class="message">
+</div>
+<iframe name="PAFrame" src="" style="border: medium none;" height="500" width="400" frameborder="0"></iframe>
+<form action="https://testcustomer34.cardinalcommerce.com/merchantacsfrontend/pareq.jsp?vaa=b&amp;gold=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" method="POST" name="PAInfoForm" target="PAFrame">
+<input name="TermUrl" value="https://dev02.store.mns.demandware.net/on/demandware.store/Sites-FranceSite-Site/default/Cart-Show/C1568280400" type="hidden">
+<input name="PaReq" value="eNpVUstuwjAQvPsrIs5VbIcEErRYAkJVDq14I+VmHAsimgdOUqBfXzuB0vq0M/Z4d8aG9VFJGa6kqJVk8C7Lkh+klcTDTv46n9GuFJPFbnQIJ/n0too6DOajpTwz+JKqTPKMUZvYDuAHRPoKJY48qxhwcR7PPpjbCxzaA3yHCFKpZiHz3CBw+g4l7QLc0ggynkqWcnUqLZ7FVlnITEgFuOERiLzOKnVjjqc1D4CgVp/sWFVFOcD4crnYqdaWtsjt+gTYbCLAz9HmtalK7fiaxGxPosVqPf2Odh/hZhuPI7IM92TrbWg+BGxOIIh5JZlDKKUOCSxKBtQfONp4wyPgqZmETTdL138J9GR3AkFhWo1a5Ppm6y+j/dRKaYc3FvR9beiBEMhrkWdSn9Fdfmvt4jn75M2ELCodW88L+l2TcYMacaJzoV3aqpMmJGwU+P6C+P7Yuvr3CX4AAHCqtw==" type="hidden"/>
+<input name="MD" value="2BI5c7Rroc_vMl-gyzitN2hF_b1p1oVDfUs=" type="hidden"/>
+</form>
+<script language="javascript">
+var loaded = false;
+function load(){
+document.PAInfoForm.submit();
+loaded = true;
+}
+load();
+</script>
+</div>
+<div class="formactions">
+  <div class="floatleft btn-grey-flat">
+    <div class="link_button"> <a class="back-icon" href="#"><span>Back</span></a> </div>
+  </div>
+  <div class="clear"><!-- FLOAT CLEAR --></div>
+</div>
+</div>
+</div><!-- END: content -->
+<div id="rightcolumn">
+	<div class="checkoutminisummary">
+		
+		
+		<div class="faqBox">
+<div class="faqheader">
+<h5>Why are these details needed?</h5>
+</div>
+<div class="faqBoxContent">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi rhoncus dui ut enim commodo bibendum. In et libero id orci porttitor hendrerit at a augue. Integer id porttitor urna. Quisque aliquet </p>
+</div>
+</div>
+<div class="shadowRight">&nbsp;</div>
+
+
+		<div class="faqBox">
+<div class="faqheader">
+<h5>How does it work?</h5>
+</div>
+<div class="faqBoxContent">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi rhoncus dui ut enim commodo bibendum. In et libero id orci porttitor hendrerit at a augue. Integer id porttitor urna. Quisque aliquet </p>
+</div>
+</div>
+<div class="shadowRight">&nbsp;</div>
+
+		<div class="faqBox">
+<div class="faqheader">
+<h5>How do I register?</h5>
+</div>
+<div class="faqBoxContent">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi rhoncus dui ut enim commodo bibendum. In et libero id orci porttitor hendrerit at a augue. Integer id porttitor urna. Quisque aliquet </p>
+</div>
+</div>
+<div class="shadowRight">&nbsp;</div>
+
+		<div class="faqBox">
+<div class="faqheader">
+<h5>I’m already registered</h5>
+</div>
+<div class="faqBoxContent">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi rhoncus dui ut enim commodo bibendum. In et libero id orci porttitor hendrerit at a augue. Integer id porttitor urna. Quisque aliquet </p>
+</div>
+</div>
+<div class="shadowRight">&nbsp;</div>
+
+		<div class="faqBox">
+<div class="faqheader">
+<h5>I’ve forgotten my password</h5>
+</div>
+<div class="faqBoxContent">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi rhoncus dui ut enim commodo bibendum. In et libero id orci porttitor hendrerit at a augue. Integer id porttitor urna. Quisque aliquet </p>
+</div>
+</div>
+<div class="shadowRight">&nbsp;</div>
+		
+		
+			<div class="helpBox"><iscomment><!--TODO: MattS - Sort out Header Content and make variable content&gt; --></iscomment>
+				<div class="header">
+				<h5 class="grey_block_header"><span>
+				<strong class="content_grey_header2">Need help?</strong>
+				</span></h5>
+				</div>
+				<div class="helpBoxContent">
+				<p class="customerService">Customer service: 0800 555 1212</p>
+				<p>If you have any questions or need help 
+with your account, contact <a href="#">customer support.</a></p>
+				</div>
+				</div>
+				<div class="shadowRight">&nbsp;</div>
+				</div>
+		</div><!-- END: rightcolumn -->
+		
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<isinclude template="components/footer/footer_checkout"/>
+	</div> <!-- END: main -->
+	
+</div><!-- END: container -->
+
+</body>
+</html>

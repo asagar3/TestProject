@@ -1,0 +1,50 @@
+/**
+* @input FileName : String
+* @input xsw : dw.io.XMLStreamWriter;
+* @output Message : String
+* @output File : dw.io.File
+* @output RemotePath : String
+* @output RemoteFileName : String
+* @output Enabled : Boolean
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+ importScript( "int_bazaarvoice:/lib/libBazaarvoice.ds" );
+  var bvHelper = getBazaarVoiceHelper();
+ function execute( pdict : PipelineDictionary ) : Number{
+	try{
+		var xsw:XMLStreamWriter=pdict.xsw;
+	    xsw.writeCharacters("\n");    
+	    xsw.writeEndElement();  //</Products>
+	    xsw.writeCharacters("\n");    
+	    xsw.writeEndElement();  //</Feed>
+	    xsw.writeEndDocument();
+	   
+	    xsw.flush();
+	    xsw.close();
+	    
+	    var file : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + pdict.FileName);
+    	pdict.File = file;
+
+		var productFeedEnabled : Boolean = Site.getCurrent().getCustomPreferenceValue("bvEnableProductFeed");
+		pdict.Enabled = productFeedEnabled;
+
+    	var destinationPath : String = Site.getCurrent().getCustomPreferenceValue("bvProductFeedExportPath");
+		if(empty(destinationPath)) {
+			throw new Error("bvProductFeedExportPath site preference is null or empty!");
+		}
+		pdict.RemotePath = destinationPath;
+		
+		var destinationFilename : String = Site.getCurrent().getCustomPreferenceValue("bvProductFeedExportFileName");
+    	if(empty(destinationFilename)) {
+			throw new Error("bvProductFeedExportFileName site preference is null or empty!");
+		}
+		pdict.RemoteFileName = destinationFilename;
+	} catch(ex) {
+	    Logger.error("Error Message While exporting Product Feed:", ex.message);
+	    pdict.Message = "Exception caught during localized catalog export: "+ ex.message;        
+	    return PIPELET_ERROR;    
+	}   
+	return PIPELET_NEXT;    
+}
+

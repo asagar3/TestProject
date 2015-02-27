@@ -1,0 +1,22 @@
+<isinclude template="tablet/util/modules"/>
+<iscomment>
+	This template renders an order's status.
+	There must be an object called 'Order' in page scope.
+</iscomment>
+<div class="orderstatus">
+	<isset name="statusProgress" value="false" scope="page"/>
+	<isif condition="${!empty(Order.custom.orderStatus)}">
+	<isset name="status" value="${Order.custom.orderStatus}" scope="page"/>
+		<isif condition="${Resource.msg('orderstatusinclude.'+ status.toLowerCase() + '','account',null)==Resource.msg('orderstatusinclude.orderprocessed','account',null)}">
+		<isset name="statusProgress" value="true" scope="page"/>
+		</isif>
+	<span class="value<isif condition="${statusProgress=='true'}"> progress</isif>" ><isprint value="${Resource.msg('orderstatusinclude.'+ status.toLowerCase() + '','account',null)}"/></span>
+	<iselse>
+		<span class="value progress">${Resource.msg('orderstatusinclude.orderprocessed','account',null)}</span>
+	<iscomment><iselseif condition="${Order.status==dw.order.Order.ORDER_STATUS_CANCELLED}">
+		<span class="value order_canceled">${Resource.msg('orderstatusinclude.ordercanceled','account',null)}</span>
+	</iscomment>
+		
+	</isif>
+	<div class="clear"><!--  FLOAT CLEAR --></div>
+</div><!-- END: orderstatusinclude -->

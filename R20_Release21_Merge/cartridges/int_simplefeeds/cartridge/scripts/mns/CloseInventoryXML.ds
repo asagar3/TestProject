@@ -1,0 +1,48 @@
+/**
+*<inventory xmlns="http://www.demandware.com/xml/impex/inventory/2007-05-31">
+*<inventory-list>
+*<header list-id="inventory">
+*<default-instock>false</default-instock>
+*</header>
+*<records>
+*<record product-id="000000022079741002">
+*<allocation>0.0</allocation>
+*</record>
+*</records>
+*</inventory-list>
+*</inventory>
+* @input inventoryWriter : dw.io.XMLStreamWriter
+* @output message : String 
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	// read parameters
+	var inventoryWriter : XMLStreamWriter = args.inventoryWriter;
+	if ( empty( inventoryWriter ))
+	{
+		args.message = "inventoryWriter null";
+		return PIPELET_ERROR;
+	}
+	try{	
+		// close root element and document
+		inventoryWriter.writeEndElement();
+		inventoryWriter.writeEndElement();
+		inventoryWriter.writeEndElement();
+		inventoryWriter.writeEndDocument();
+		}
+	catch (e){
+		args.message = e.message;
+		return PIPELET_ERROR;
+		}
+	finally
+	{
+		inventoryWriter.close();	
+	}
+	Logger.getLogger("CloseInventory.ds").debug("Closing the xml file");		
+    return PIPELET_NEXT;
+}
+

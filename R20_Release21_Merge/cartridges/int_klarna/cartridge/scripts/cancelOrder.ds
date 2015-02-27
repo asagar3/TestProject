@@ -1,0 +1,64 @@
+/**
+ * Grab Order Number from http GET arguments and export as OrderNo on pipeline dictionary
+ *
+* @input order : dw.order.Order
+* @output KlarnaError : String
+ */
+
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.net );
+importPackage ( dw.crypto );
+importPackage ( dw.util );
+importPackage( dw.catalog );
+importPackage ( dw.object );
+ 
+importPackage( dw.system );
+importScript("int_klarna:libKlarnaAPI.ds");
+function execute( args : PipelineDictionary ) : Number
+{
+	//CR 3079 : select merchant_id on the basis of Country and shipping method
+	//var klarna = new Klarna();
+	
+	var order : dw.order.Order = args.order;
+	var orderNo : String = order.getOrderNo();
+	
+	//CR 3079 : select merchant_id on the basis of Country and shipping method
+	var shipmentLineItems : Collection =  order.getShipments();
+	var shipmentlineItem : Shipment =  shipmentLineItems[0];
+	var shippingAddress : OrderAddress =  shipmentlineItem.getShippingAddress();
+	var KlarnaCountry : String = shippingAddress.getCountryCode().value;
+	var shipping_Method : String = shipmentlineItem.getShippingMethod().ID;
+	var klarna = new Klarna(KlarnaCountry,shipping_Method);
+		
+	var paymentInstruments : Collection = order.getPaymentInstruments();
+	var paymentInstr : OrderPaymentInstrument = null;
+	
+	for each (var paymentInstrument : OrderPaymentInstrument in paymentInstruments) {
+			if(paymentInstrument.getPaymentMethod().equals(dw.order.PaymentInstrument.METHOD_BML)) {
+ 				paymentInstr = paymentInstrument;
+				break;	
+			}	
+		}
+	
+	
+	var orderPaymentTransaction : PaymentTransaction = paymentInstr.getPaymentTransaction();
+ 	var reservationNumber : String = orderPaymentTransaction.getTransactionID();
+	try{
+		var result = klarna.cancel_reservation(reservationNumber);
+		if(null == result){
+			return PIPELET_ERROR;
+		}
+	}
+	catch(e) {
+		var error: Error = e;
+		Logger.error("========================================");
+		Logger.error("Klarna Cancellation call got exception, details below:-");
+		Logger.error("Order Number:- "+orderNo+"Reservation Number:- "+reservationNumber);
+		Logger.error(error.toString());
+		Logger.error("========================================");
+		args.ErrorMessage = error.toString();
+		return PIPELET_ERROR;	
+	}
+	return PIPELET_NEXT;
+}

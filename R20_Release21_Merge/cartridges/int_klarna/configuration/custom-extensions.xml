@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <custom-type type-id="Pclasses">
+        <display-name xml:lang="sv-SE">Pclasses</display-name>
+        <description xml:lang="sv-SE">A custom object type to hold the pclasses from Klarna</description>
+        <staging-mode>no-staging</staging-mode>
+        <storage-scope>site</storage-scope>
+        <key-definition attribute-id="pclassID">
+            <type>int</type>
+        </key-definition>
+        <attribute-definitions>
+            <attribute-definition attribute-id="country">
+                <display-name xml:lang="sv-SE">Country</display-name>
+                <description xml:lang="sv-SE">The Klarna country code for this PClass</description>
+                <type>int</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="description">
+                <display-name xml:lang="sv-SE">Description</display-name>
+                <description xml:lang="sv-SE">The description of the PClass</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="interest">
+                <display-name xml:lang="sv-SE">Interest rate</display-name>
+                <description xml:lang="sv-SE">The interest rate the customer has to pay</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="invoiceFee">
+                <display-name xml:lang="sv-SE">Invoice fee</display-name>
+                <description xml:lang="sv-SE">The monthly fee the customer is charged.</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="minAmount">
+                <display-name xml:lang="sv-SE">Minumum amount</display-name>
+                <description xml:lang="sv-SE">The lower amount this PClass can be used with</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="months">
+                <display-name xml:lang="sv-SE">Months</display-name>
+                <description xml:lang="sv-SE">Number of months for the PClass</description>
+                <type>int</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="startFee">
+                <display-name xml:lang="sv-SE">Start fee</display-name>
+                <description xml:lang="sv-SE">The start fee the customer is charged when chosing this PClass.</description>
+                <type>int</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="type">
+                <display-name xml:lang="sv-SE">Type</display-name>
+                <description xml:lang="sv-SE">The type of campaign</description>
+                <type>int</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </attribute-definitions>
+    </custom-type>
+
+</metadata>

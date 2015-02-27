@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+  <type-extension type-id="SitePreferences"/>
+  <custom-type type-id="WebserviceConfiguration">
+    <staging-mode>no-staging</staging-mode>
+    <storage-scope>site</storage-scope>
+    <key-definition attribute-id="ID">
+      <display-name xml:lang="x-default">service name</display-name>
+      <description xml:lang="x-default">the service for which this configuration applies</description>
+      <type>string</type>
+      <searchable-flag>true</searchable-flag>
+    </key-definition>
+    <attribute-definitions>
+      <attribute-definition attribute-id="usableSchedule">
+        <display-name xml:lang="x-default">usable schedule</display-name>
+        <description xml:lang="x-default">determines in which way usablefrom and usable to can be updated</description>
+        <type>enum-of-string</type>
+        <value-definitions>
+          <value-definition>
+            <display xml:lang="x-default">perHour</display>
+            <value>perHour</value>
+          </value-definition>
+          <value-definition>
+            <display xml:lang="x-default">daily</display>
+            <value>daily</value>
+          </value-definition>
+          <value-definition>
+            <display xml:lang="x-default">weekly</display>
+            <value>weekly</value>
+          </value-definition>
+          <value-definition>
+            <display xml:lang="x-default">monthly</display>
+            <value>monthly</value>
+          </value-definition>
+        </value-definitions>
+      </attribute-definition>
+      <attribute-definition attribute-id="usableTo">
+        <display-name xml:lang="x-default">usable to</display-name>
+        <description xml:lang="x-default">determines to which time this service is usable</description>
+        <type>datetime</type>
+      </attribute-definition>
+      <attribute-definition attribute-id="usableFrom">
+        <display-name xml:lang="x-default">usable from</display-name>
+        <description xml:lang="x-default">determines from which time this service is usable</description>
+        <type>datetime</type>
+      </attribute-definition>
+      <attribute-definition attribute-id="timeout">
+        <display-name xml:lang="x-default">timeout</display-name>
+        <description xml:lang="x-default">determines after how many milliseconds this service times out with a sockettimeout</description>
+        <type>int</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="maximumAttempts">
+        <display-name xml:lang="x-default">maximum attempts</display-name>
+        <description xml:lang="x-default">determines after how many tries this service will be locked</description>
+        <type>int</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="logStatus">
+        <display-name xml:lang="x-default">log status</display-name>
+        <description xml:lang="x-default">if this flag is set, the status will be logged to customLogs directory</description>
+        <type>boolean</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="logSoap">
+        <display-name xml:lang="x-default">log soap</display-name>
+        <description xml:lang="x-default">if this flag is set, the response xml will be logged to customLogs directory</description>
+        <type>boolean</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="targetEnvironment">
+        <display-name xml:lang="x-default">target environment</display-name>
+        <description xml:lang="x-default">can be dummy, test, prouction or qa</description>
+        <type>string</type>
+      </attribute-definition>
+      <attribute-definition attribute-id="lockedFor">
+        <display-name xml:lang="x-default">locked for</display-name>
+        <description xml:lang="x-default">determines how long this service will be locked</description>
+        <type>int</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="serviceEnableLocking">
+        <display-name xml:lang="x-default">Lock failed services</display-name>
+        <description xml:lang="x-default">Enable/Disable locking of services after several failed tries.</description>
+        <type>boolean</type>
+      </attribute-definition>
+    </attribute-definitions>
+    <group-definitions>
+      <attribute-group group-id="Attributes">
+        <display-name xml:lang="x-default">Attributes</display-name>
+        <display-name xml:lang="de-DE">Attributes</display-name>
+        <attribute attribute-id="ID"/>
+        <attribute attribute-id="usableSchedule"/>
+        <attribute attribute-id="usableTo"/>
+        <attribute attribute-id="usableFrom"/>
+        <attribute attribute-id="timeout"/>
+        <attribute attribute-id="maximumAttempts"/>
+        <attribute attribute-id="logStatus"/>
+        <attribute attribute-id="logSoap"/>
+        <attribute attribute-id="targetEnvironment"/>
+        <attribute attribute-id="lockedFor"/>
+        <attribute attribute-id="serviceEnableLocking"/>
+      </attribute-group>
+    </group-definitions>
+  </custom-type>
+  <custom-type type-id="WebserviceLocked">
+    <staging-mode>no-staging</staging-mode>
+    <storage-scope>site</storage-scope>
+    <key-definition attribute-id="ID">
+      <display-name xml:lang="x-default">ID</display-name>
+      <display-name xml:lang="de-DE">ID</display-name>
+      <description xml:lang="x-default">ID</description>
+      <description xml:lang="de-DE">ID</description>
+      <type>string</type>
+      <searchable-flag>true</searchable-flag>
+    </key-definition>
+    <attribute-definitions>
+      <attribute-definition attribute-id="validTo">
+        <display-name xml:lang="x-default">valid to</display-name>
+        <display-name xml:lang="de-DE">gueltig bis</display-name>
+        <description xml:lang="x-default">determines to which time this item is valid</description>
+        <description xml:lang="de-DE">bis wann ist dieser eintrag gueltig</description>
+        <type>datetime</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="requestID">
+        <display-name xml:lang="x-default">requestId</display-name>
+        <display-name xml:lang="de-DE">RequestId</display-name>
+        <description xml:lang="x-default">The requestid - set only if available</description>
+        <description xml:lang="de-DE">die reuqestid - kann leer sein, wenn der esb nicht antwortet</description>
+        <type>string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="errorCause">
+        <display-name xml:lang="x-default">Error cause</display-name>
+        <display-name xml:lang="de-DE">Fehlercode</display-name>
+        <description xml:lang="x-default">the cause of this failure (0 ... Unknownhost, 1 ... Sockettimeout, 2 ... internal server error, 3 ... backend system unavailable, 4 ... mq unavailable )</description>
+        <description xml:lang="de-DE">der grund des item schreibens (0 ... Unknownhost, 1 ... Sockettimeout, 2 ... internal server error, 3 ... backend system unavailable, 4 ... mq unavailable )</description>
+        <type>int</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="serviceName">
+        <display-name xml:lang="x-default">service name</display-name>
+        <display-name xml:lang="de-DE">Webservicename</display-name>
+        <description xml:lang="x-default">the service from which this item is written</description>
+        <description xml:lang="de-DE">der webservice fuer den dieser eintrag gilt</description>
+        <type>string</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+    </attribute-definitions>
+    <group-definitions>
+      <attribute-group group-id="Attributes">
+        <display-name xml:lang="x-default">Attributes</display-name>
+        <display-name xml:lang="de-DE">Attributes</display-name>
+        <attribute attribute-id="ID"/>
+        <attribute attribute-id="validTo"/>
+        <attribute attribute-id="requestID"/>
+        <attribute attribute-id="errorCause"/>
+        <attribute attribute-id="serviceName"/>
+      </attribute-group>
+    </group-definitions>
+  </custom-type>
+  <custom-type type-id="WebserviceCredentials">
+    <staging-mode>source-to-target</staging-mode>
+    <storage-scope>organization</storage-scope>
+    <key-definition attribute-id="ID">
+      <display-name xml:lang="x-default">ID</display-name>
+      <description xml:lang="x-default">The ID of this credential package should be in format "TARGETSYSTEM_TARGETENVIRONMENT" e.g. "PAYPAL_TEST"</description>
+      <type>string</type>
+      <searchable-flag>true</searchable-flag>
+    </key-definition>
+    <attribute-definitions>
+      <attribute-definition attribute-id="credentialsType">
+        <display-name xml:lang="x-default">credentials type</display-name>
+        <description xml:lang="x-default">the type of the credentials, used to determine if a real call has to be made and if the url is maintained on this object or in the wsdl</description>
+        <type>enum-of-string</type>
+        <mandatory-flag>false</mandatory-flag>
+        <value-definitions>
+          <value-definition>
+            <display xml:lang="x-default">URL</display>
+            <value>URL</value>
+          </value-definition>
+          <value-definition>
+            <display xml:lang="x-default">WSDL</display>
+            <value>WSDL</value>
+          </value-definition>
+          <value-definition>
+            <display xml:lang="x-default">SYSTEM_UNAVAILABLE</display>
+            <value>SYSTEM_UNAVAILABLE</value>
+          </value-definition>
+          <value-definition>
+            <display xml:lang="x-default">DUMMY</display>
+            <value>DUMMY</value>
+          </value-definition>
+        </value-definitions>
+      </attribute-definition>
+      <attribute-definition attribute-id="url">
+        <display-name xml:lang="x-default">URL</display-name>
+        <description xml:lang="x-default">The URL to the targetsystem. if empty a fallback to soap endpoint is made</description>
+        <type>string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="user">
+        <display-name xml:lang="x-default">User</display-name>
+        <description xml:lang="x-default">The username of the target environment</description>
+        <type>string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="password">
+        <display-name xml:lang="x-default">Password</display-name>
+        <description xml:lang="x-default">The password of the target environment</description>
+        <type>password</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+    </attribute-definitions>
+    <group-definitions>
+      <attribute-group group-id="Attributes">
+        <display-name xml:lang="x-default">Attributes</display-name>
+        <display-name xml:lang="de-DE">Attributes</display-name>
+        <attribute attribute-id="ID"/>
+        <attribute attribute-id="credentialsType"/>
+        <attribute attribute-id="url"/>
+        <attribute attribute-id="user"/>
+        <attribute attribute-id="password"/>
+      </attribute-group>
+    </group-definitions>
+  </custom-type>
+  <custom-type type-id="CustomObjectViewConfig">
+    <staging-mode>source-to-target</staging-mode>
+    <storage-scope>organization</storage-scope>
+    <key-definition attribute-id="customObjectType">
+      <display-name xml:lang="x-default">Custom Object Type</display-name>
+      <description xml:lang="x-default">The type of the Custom Object</description>
+      <type>string</type>
+      <searchable-flag>false</searchable-flag>
+    </key-definition>
+    <attribute-definitions>
+      <attribute-definition attribute-id="primaryKey">
+        <display-name xml:lang="x-default">Primary Key</display-name>
+        <description xml:lang="x-default">The primary key - used to determine which attribute should be used in create custom object method</description>
+        <type>string</type>
+        <mandatory-flag>true</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="startWithAllObjects">
+        <display-name xml:lang="x-default">Start with all objects</display-name>
+        <description xml:lang="x-default">if true a query is done, which fetches all objects initially</description>
+        <type>boolean</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="pagingSize">
+        <display-name xml:lang="x-default">Paging Size</display-name>
+        <description xml:lang="x-default">controls how many items are shown on one page</description>
+        <type>int</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="description">
+        <display-name xml:lang="x-default">Description</display-name>
+        <description xml:lang="x-default">the description on table header</description>
+        <type>string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="jsonProperties">
+        <display-name xml:lang="x-default">json Properties</display-name>
+        <description xml:lang="x-default">the properties, that contain a json string</description>
+        <type>set-of-string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="itemViewConfig">
+        <display-name xml:lang="x-default">item view config</display-name>
+        <description xml:lang="x-default">holds json strings to set special properties to several fields. E.g non deletable or readonly</description>
+        <type>set-of-string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="foreignKeyProperties">
+        <display-name xml:lang="x-default">Properties that are hold ids of different custom object types</display-name>
+        <description xml:lang="x-default">the properties, that will be autogenerated and are not shown in edit form / listing</description>
+        <type>set-of-string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+      <attribute-definition attribute-id="autoGenerateProperties">
+        <display-name xml:lang="x-default">Properties autogenerate</display-name>
+        <description xml:lang="x-default">the properties, that will be autogenerated and are not shown in edit form / listing</description>
+        <type>set-of-string</type>
+        <mandatory-flag>false</mandatory-flag>
+      </attribute-definition>
+    </attribute-definitions>
+    <group-definitions>
+      <attribute-group group-id="Attributes">
+        <display-name xml:lang="x-default">Attributes</display-name>
+        <display-name xml:lang="de-DE">Attributes</display-name>
+        <attribute attribute-id="customObjectType"/>
+        <attribute attribute-id="primaryKey"/>
+        <attribute attribute-id="startWithAllObjects"/>
+        <attribute attribute-id="pagingSize"/>
+        <attribute attribute-id="description"/>
+        <attribute attribute-id="jsonProperties"/>
+        <attribute attribute-id="itemViewConfig"/>
+        <attribute attribute-id="foreignKeyProperties"/>
+        <attribute attribute-id="autoGenerateProperties"/>
+      </attribute-group>
+    </group-definitions>
+  </custom-type>
+</metadata>

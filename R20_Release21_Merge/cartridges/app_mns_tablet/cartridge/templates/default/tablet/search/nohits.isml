@@ -1,0 +1,65 @@
+<isdecorate template="tablet/search/pt_productsearchresult">
+
+
+<iscache type="relative" minute="30" varyby="price_promotion"/>
+<isinclude template="util/modules"/>
+<iscomment> create reporting event</iscomment>
+<isinclude template="util/reporting/ReportSearch.isml"/>
+
+<isobject object="${pdict.ProductSearchResult}" view="none">
+
+<iscomment><!-- this is the static HTML for zero results page. Please integrate accordingly --></iscomment>
+<iscomment>Please remove the left column as it is not required here as per visuals.</iscomment>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".simplesearchinput").click(function(){
+		if($(this).val() === "${Resource.msg('search.defaultText','search',null)}"){		
+		$(this).val("");
+		}
+	});
+
+});
+</script>
+<div class="zeroresults">
+	<div class="search">
+			<div class="searchbox">
+				<div class="content">
+					<p>${Resource.msg('nohits.message','search',null)} <!-- Search Term --><span class="bold"><isprint value="${pdict.ProductSearchResult.searchPhrase}"/></span></p>
+					<iscomment>render a link to execute the search with an alternative suggested search phrase</iscomment>
+					<isif condition="${!empty(pdict.ProductSearchResult.getSuggestedSearchPhrase())}">
+						<div class="didyoumean">
+							<p>
+								${Resource.msg('nohits.didyoumean','search',null)}
+								<a class="hint" title="${pdict.ProductSearchResult.suggestedSearchPhrase}" href="Search-Show?q=<isprint value="${pdict.ProductSearchResult.suggestedSearchPhrase}"/>"><isprint value="${pdict.ProductSearchResult.suggestedSearchPhrase}"/></a>?
+							</p>
+						</div><!-- END: didyoumean -->
+					</isif>
+					<iscomment>render a link to content search results if any content was found</iscomment>
+					<isif condition="${!empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+						<div class="searchcontenthits">
+							${Resource.msg('nohits.found','search',null)} <a href="${pdict.ContentSearchResult.url('Search-ShowContent')}">${Resource.msgf('nohits.contenthits','search',null,pdict.ContentSearchResult.count)}</a>
+						</div><!-- END: searchcontenthits -->
+					</isif>
+					
+					<form class="simplesearch" id="simplesearchID">
+						<fieldset>
+							<label for="searchinputID">${Resource.msg('nohits.search','search',null)}</label>
+							<input type="text" id="searchinputID" class="simplesearchinput" value="${Resource.msg('search.defaultText','search',null)}" name="q"/>
+							<button title="Search" name="simplesearch" value="Go" type="submit"><span>${Resource.msg('nohits.go','search',null)}</span></button>
+						</fieldset>
+					</form>
+				</div>
+			</div>
+			<img class="under_shadow" alt="" src="${URLUtils.staticURL('themes/demandwarestore/images/under_shadow.png')}" style="display:block; margin:auto;" />
+			<iscontentasset aid="ZeroResults_Tips"/>
+			<iscomment><!-- please use the same content slot for promo ad as on secondary category landing page --></iscomment>
+
+			
+			<iscontentasset aid="cs-contact-number"/>
+		<div class="clear"></div>
+	</div>
+</div>
+
+
+
+</isdecorate>

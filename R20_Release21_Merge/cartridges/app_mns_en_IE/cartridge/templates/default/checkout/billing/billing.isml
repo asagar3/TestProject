@@ -1,0 +1,1009 @@
+<isdecorate template="checkout/pt_checkout"/>
+<isinclude template="util/modules"/>
+
+<iscomment>
+	This template visualizes the billing step of both checkout scenarios.
+	It provides selecting a payment method, entering gift certificates and
+	specifying a separate billing address.
+	Depending on the checkout scenario (single or multi shipping) it is
+	either the second or third checkout step.
+</iscomment>
+
+<iscomment>Report this checkout step</iscomment>
+<isset name="checkoutstep" value="${4}" scope="page"/>
+<isset name="checkoutname" value="${'Billing'}" scope="page"/>
+
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+
+<div class="waitingIconHidden"></div>
+<div class="checkout newPaymentPage">
+	<div id="paymentmethodform" class="paymentmethodform">
+		<isinclude template="checkout/billing/paymentmethods"/>
+	</div>
+	<div class="checkoutbilling">
+		<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.htmlName}" autocomplete="off">
+			<fieldset>
+				<iscomment>hidden input with action to trigger for the address form</iscomment>
+				<input type="hidden" name="${pdict.CurrentForms.billing.save.htmlName}" value="true" />
+				<div id="addressform" class="addressform">
+					<div class="newGrey">			
+					<div id="billingAddressFields" class="billingAddressFields"></div>
+						<h5 class="grey_block_header_checkout"><span><strong class="content_grey_header">${Resource.msg('billing.contactdetails','checkout',null)}</strong></span></h5>		
+           				<isif condition="${pdict.CurrentCustomer.authenticated}">
+              				<div class="formfield email">
+                				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.emailAddress}" type="input" value="false" xhtmlclass="emailnum"/>
+                				<div class="value">
+                  					<input type="text" value="${pdict.CurrentForms.billing.billingAddress.email.emailAddress.value}" disabled="disabled" name="${pdict.CurrentForms.billing.billingAddress.email.emailAddress.htmlName}" id="${pdict.CurrentForms.billing.billingAddress.email.emailAddress.htmlName}" class="textinput disabled_textfield" />
+                				</div>
+              				</div>
+              			<iselse>
+              				<div class="formfield email">
+                				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.emailAddress}" type="input" value="false" xhtmlclass="emailnum"/>
+                				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.emailAddress}" type="input" label="false" xhtmlclass="emailnum"/>
+                				<div class="formfieldtooltip">
+                					<istooltip content_id="help-email"/>
+              					</div>                
+              				</div>
+             			</isif>
+						<isif condition="${!pdict.CurrentCustomer.authenticated}">
+            				<div class="formfield confirmEmail">
+                				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.confirmEmailAddress}" type="input" value="false" xhtmlclass="confirmemailnum CONFIRM_EMPTY"/>
+                				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.email.confirmEmailAddress}" type="input" label="false" xhtmlclass="confirmemailnum CONFIRM_EMPTY"/>
+              				</div>
+            			</isif>
+            			<div class="formfield phone">
+             				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.phone}" type="input" value="false"/>
+              				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.phone}" type="input" label="false"/>
+              				<div class="formfieldtooltip">
+                				<istooltip content_id="help-telephone"/>
+              				</div>
+           				</div>
+           				<div class="formfield phone">
+             				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber}" type="input" value="false" xhtmlclass="phone"/>
+              				<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber}" type="input" label="false" xhtmlclass="phone" />
+            			</div>
+            			<!-- END: phone -->
+  						<iscomment>provide option to add address to address book if customer is authenticated</iscomment>
+		    			<isif condition="${pdict.CurrentCustomer.authenticated}">
+             	           <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addToAddressBook}" type="hidden" value="${true}"/>
+            			</isif>
+						<div class="formfield mailList">
+		    				<div class="label contactpref">
+		    					&nbsp;
+		    				</div><!-- END: label -->
+		    				<div class="value checkbox">
+		    					<isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addToEmailList}" type="checkbox" label="false" xhtmlclass="floatleft" attribute1="checked" value1="checked" />		    		
+		    					<label for="${pdict.CurrentForms.billing.billingAddress.addToEmailList.htmlName}" class="chkContent">
+									${Resource.msg('global.email.policy1','locale',null)} <br/> ${Resource.msg('global.email.policy1.bold','locale',null)} <br/>
+									${Resource.msg('global.email.policy2','locale',null)}
+									<a target="_blank" href="${URLUtils.http('Page-Show', 'cid', 'privacy-policy')}" title="${Resource.msg('global.privacypolicy','locale',null)}" id="privacyPolicy">${Resource.msg('global.privacypolicy','locale',null)}</a>
+								</label>
+							</div>		    		
+						</div>
+						<div class="clear"></div>
+					</div>
+					<div class="formfield emailsignup"> 
+						<div class="tnc-header">${Resource.msg('global.termsandconditions.read','locale',null)}</div>
+            			<div class="terms_conditions">
+              				<div class="label">${Resource.msg('global.tnc.general.title','locale',null)} <span class="requiredindicator">*</span> </div>
+                            <div class="value checkbox radio">
+                				<label for="terms_condition_checkbox_general" class="hideLabel"> ${Resource.msg('forms.termsAndConditionsLabel','forms',null)} </label>
+                				<input type="checkbox" class="tncerror floatleft" name="terms_condition_checkbox_general" id="terms_condition_checkbox_general" value="${Resource.msg('global.termsandconditions','locale',null)}">
+                				</input>
+                				<div class="chkContent"> ${Resource.msg('global.tnc.general','locale',null)} <a id="toDO" target="_blank" title="${Resource.msg('forms.termsAndConditionsLabel','forms',null)}" href="${URLUtils.http('Page-Show', 'cid', 'terms')}">${Resource.msg('global.tnc.general.link','locale',null)}</a> ${Resource.msg('global.tnc.agree','locale',null)} </div>
+              					<div class="clear"></div>
+              				</div>
+             			<div class="clear"></div>
+            			</div>
+           				<!-- **** Delivery Terms and Condition ***** -->
+          			</div>
+				</div>
+				<!-- END: addressform -->
+				<input type="hidden" name="${pdict.CurrentForms.billing.secureKeyHtmlName}" value="${pdict.CurrentForms.billing.secureKeyValue}"/>
+        		<iscomment>Praveen: Adding a hidden field for DOB</iscomment>
+        		<input type="hidden" name="${pdict.CurrentForms.billing.billingAddress.addressFields.dateofbirth.htmlName}" />
+        		<input type="hidden" name="${pdict.CurrentForms.billing.billingAddress.addressFields.gender.htmlName}" />
+      		</fieldset>
+      	</form>
+		<isset name="gcApplicable" value="${'false'}" scope="page"/>
+		<isif condition="${dw.order.PaymentMgr.getPaymentMethod(dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE).isActive()}">
+			<isset name="gcApplicable" value="${'true'}" scope="page"/>
+		</isif>
+		<iscomment>coupon code / gift certificate area</iscomment>
+		<isset name="gcPITotal" value="${0}" scope="page"/>
+		<div class="formactions">
+			<div class="floatright btn-green-flat">
+				<button type="submit" id="billingShoppingButton" name="${pdict.CurrentForms.billing.save.htmlName}" value="${Resource.msg('billing.submitorder','checkout',null)}"><span class="btn-ic-lock">${Resource.msg('billing.submitorder','checkout',null)}</span><span class="forward-icon">&nbsp;</span></button>
+			</div><!--  END : floatright -->
+			<div class="floatleft btn-grey-flat">
+				<div class="link_button">
+					<a href="${URLUtils.url('COShipping-Start')}" class="back-icon"><span>${Resource.msg('singleshipping.back','checkout',null)}</span></a>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+		</div><!-- END: formactions -->
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+	</div><!-- END: checkoutbilling -->
+</div><!-- END: checkout -->
+
+<isset name="orgID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue("csOrgIDForDeviceFingerprint")}" scope="page"/>
+<isset name="merchantID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue("CsMerchantId")}" scope="page"/>
+<isset name="sessionID" value="${pdict.CurrentSession.sessionID}" scope="page"/>
+
+<!-- Image Code -->
+
+	<p style="background:url(https://h.online-metrix.net/fp/clear.png?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}&amp;m=1)"></p>
+	<img src="https://h.online-metrix.net/fp/clear.png?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}&amp;m=2" alt=" "/>
+
+<!-- Image Code -->
+
+<!-- Flash Code -->
+
+	<object type="application/x-shockwave-flash" data="https://h.online-metrix.net/fp/fp.swf?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}" width="1" height="1" id="thm_fp">
+	<param name="movie" value="https://h.online-metrix.net/fp/fp.swf?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}" />
+	<div>
+		<span class="hideLabel">
+			${Resource.msg('profile.title','forms',null)}
+		</span>
+	</div>
+	</object>
+
+<!-- Flash Code -->
+
+<!-- JS Code -->
+	<script src="https://h.online-metrix.net/fp/check.js?org_id=${orgID}&amp;session_id=${merchantID}${sessionID}" type="text/javascript">
+	</script>
+<!-- JS Code -->
+<!-- Device Finger Print Code -->
+<div id="dialogcontainer"></div>
+
+
+<script type="text/javascript">
+//Praveen:[362]QC defect fixing
+jQuery(document).ready(function() {
+	
+	
+	
+	$(document).ajaxComplete(function() {
+		$('.dynamicFields .tooltip').bt({
+			trigger: ['focus mouseover', 'blur mouseout'],
+			contentSelector: "jQuery(this).find('.tooltip-body').html()", 
+			fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1}
+		});//.attr('tabindex', '0');
+		
+		$(".zip input").focus(function () {
+		    jQuery(this).parents(".zip").find(".tooltip").trigger("mouseover");            
+		});
+		$(".zip input").blur(function () {
+			jQuery(this).parents(".zip").find(".tooltip").trigger("mouseout"); 
+		});
+		
+	});	
+	
+	addressdata = null;
+	var expiryMonth = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}').value;
+	
+	if(expiryMonth != null && expiryMonth != "" && expiryMonth < 10){
+		var expiryMonth = "0"+ expiryMonth;
+		jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val(expiryMonth);
+	}
+
+	
+});
+//Praveen:END
+
+
+
+function applyCouponCode(couponCode) {
+	setCouponError(null);
+	// nothing entered
+	if(!couponCode) {
+		setCouponError("${Resource.msg('billing.couponinvalid','checkout',null)}");
+		return;
+	}
+	// attempt to apply
+	var url = app.util.appendParamToURL("${URLUtils.https('COBilling-ApplyCoupon')}","couponCode", couponCode);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			updateSummary();
+			if(!data) {
+				setCouponError("${Resource.msg('billing.couponinvalid','checkout',null)}");
+				return false;
+			}
+			if(data.redemptionErrorMsg) {
+				setCouponError(data.redemptionErrorMsg);
+				return false;
+			}
+			if(!data.redemption)
+			{
+				setCouponError("${Resource.msg('billing.couponinvalid','checkout',null)}");
+				return false;
+			}
+			// empty input field and display redemption in UI
+			jQuery("input[name=${pdict.CurrentForms.billingcoupon.couponCode.htmlName}]").val("");
+			setCouponRedemptionInfo(data.redemption);
+			// update gift card redemptions as amounts might have changed after coupon
+			jQuery.each(data.redemption.gcRedemptions, function(){
+				setGiftCertRedemptionInfo(this.giftCertificateID, this.amount);
+			});
+			var countryCode = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+			updatePaymentMethods( countryCode );
+		}
+	});
+}
+
+function redeemGiftCert(giftCertificateId) {
+	setGiftCertError(null);
+	setGiftCertBalanceInfo(null);
+	// nothing entered
+	if(!giftCertificateId) {
+		setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+		return;
+	}
+	// attempt to redeem
+	var url = app.util.appendParamToURL("${URLUtils.https('COBilling-RedeemGiftCertificate')}", "giftCertificateID", giftCertificateId);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data) {
+				setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+				return false;
+			}
+			if(data.redemptionErrorMsg) {
+				setGiftCertError(data.redemptionErrorMsg);
+				return false;
+			}
+			if(!data.redemption)
+			{
+				setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+				return false;
+			}
+			// empty input field and display redemption in UI
+			jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").val("");
+			setGiftCertRedemptionInfo(data.redemption.giftCertificateID, data.redemption.amount);
+
+			if(data.redemption.orderBalance <= 0)
+			{
+				setPaymentSection(data.redemption.orderBalance);
+			}
+			else
+			{
+				var countryCode = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+				updatePaymentMethods( countryCode );
+			}
+			
+			updateSummary();
+		}
+	});
+}
+
+function checkGiftCertBalance(giftCertificateId) {
+	setGiftCertError(null);
+	setGiftCertBalanceInfo(null);
+	// nothing entered
+	if(!giftCertificateId) {
+		setGiftCertError("${Resource.msg('billing.giftcertidmissing','checkout',null)}");
+		return;
+	}
+	// load gift certificate details
+	var url = app.util.appendParamToURL("${URLUtils.https('COBilling-GetGiftCertificateBalance')}", "giftCertificateID", giftCertificateId);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data || !data.giftCertificate) {
+				setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+				return false;
+			}
+			// display details in UI
+			setGiftCertBalanceInfo(data.giftCertificate.balance);
+		}
+	});
+}
+
+function removeGiftCertificate(giftCertificateId) {
+	jQuery(".balance").empty();
+	// remove gift certificate
+	var url = app.util.appendParamToURL("${URLUtils.https('COBilling-RemoveGiftCertificate')}", "giftCertificateID", giftCertificateId);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data || !data.giftCertificate || !data.giftCertificate.removed) {
+				setGiftCertError("${Resource.msg('billing.giftcerterror','checkout',null)}");
+				return false;
+			}
+			// remove message in UI
+			jQuery("${'#'}gc-"+giftCertificateId).remove();
+			// reinstate payment methods section which might have been hidden if the whole order was paid with gift certs
+			jQuery("${'#'}paymentmethods").show();
+			// hide gift cert used for otder total message
+			jQuery(".giftcertused").hide();
+
+			var countryCode = jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val();
+			updatePaymentMethods( countryCode );
+
+			updateSummary();
+		}
+	});
+}
+
+function setCouponError(msg) {
+	if(!msg) {
+		jQuery("${'#'}couponentry span.errormessage").remove();
+		return;
+	}
+	jQuery("input[name=${pdict.CurrentForms.billingcoupon.couponCode.htmlName}]").parent().append("<span class=\"errormessage\">" + msg + "<\/span>");
+}
+
+function setGiftCertError(msg) {
+	if(!msg) {
+		jQuery("${'#'}giftcertentry span.errormessage").remove();
+		return;
+	}
+	jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").parent().append("<span class=\"errormessage\">" + msg + "<\/span>");
+}
+
+function setGiftCertBalanceInfo(amountExpr) {
+	if(!amountExpr) {
+		jQuery(".balance").empty();
+		return;
+	}
+	jQuery(".balance").text("${Resource.msg('billing.giftcertbalance','checkout',null)}" + amountExpr);
+}
+
+function setCouponRedemptionInfo(redemption) {
+	if(!redemption) return;
+	var redeemMsg = "${Resource.msg('billing.couponnotapplied','checkout',null)}";
+	if(redemption.applied) redeemMsg = "${Resource.msg('billing.couponapplied','checkout',null)}";
+	jQuery("${'#'}couponentry .redemption").append("<div class=\"success\">${Resource.msg('billing.couponlabel','checkout',null)} <span class=\"submitedcoupon\">" + redemption.couponCode + "</span> " + redeemMsg + "<\/div>");
+}
+
+function setGiftCertRedemptionInfo(giftCertificateId, amountExpr) {
+	if(!giftCertificateId || !giftCertificateId) {
+		return;
+	}
+	jQuery("${'#'}gc-"+giftCertificateId).remove();
+	jQuery("${'#'}giftcertentry .redemption").append("<div class=\"success giftcertpi\" id=\"gc-" + giftCertificateId + "\">" + amountExpr + " ${Resource.msg('billing.giftcertredeemed','checkout',null)} <a id=\"rgc-" + giftCertificateId + "\" class=\"remove\" href=\"${'#'}\"><img src=\"${URLUtils.staticURL('/images/icon_remove.gif')}\" alt=\"${Resource.msg('global.remove','locale',null)}\"\/><span>${Resource.msg('global.remove','locale',null)}<\/span><\/a><\/div>");
+	bindGiftCertificateRemoval();
+}
+// if the whole order total was paid with gift certs then hide other payment methods and show a message
+function setPaymentSection(orderBalance) {
+	
+	if(!orderBalance) {
+		return;
+	}
+	
+	if (orderBalance <= 0) {
+		// if the whole order total was paid with gift certs then hide other payment methods and show a message
+		jQuery("${'#'}paymentmethods").hide();
+		// if the order total is zero, determine was it because of the gift certificate use or a promotion? and show appropriate message		
+		jQuery(".giftcertused").html(jQuery(".giftcertpi").length > 0 ? "${Resource.msg('billing.giftcertnomethod','checkout',null)}" : "${Resource.msg('billing.zerobalance','checkout',null)}").show();
+	}
+}
+
+function bindGiftCertificateRemoval() {
+	jQuery("${'#'}giftcertentry a.remove").unbind("click").bind("click", function() {
+		var gcId = app.util.trimPrefix(jQuery(this).attr("id"), "rgc-");
+		removeGiftCertificate(gcId);
+		return false;
+	});
+}
+
+// updates the address form with the attributes of a given address
+function populateAddressForm(addressID)
+{
+	// load address details
+	var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+	var result = app.ajax.getJson({
+		url: url,
+		
+		callback: function(data1) {
+			if(!data1 || !data1.address) {
+				return false;
+			}
+			// fill the form		
+			var url = app.util.appendParamToURL("${URLUtils.https('COBilling-GetBillingAddressFields')}","country", data1.address.countryCode);
+				jQuery.ajax({
+					   url: url,
+					   success: function(data){
+						   jQuery("#billingAddressFields").html(data);
+						   jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val(data1.address.firstName);
+							jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val(data1.address.lastName); 
+							if(data1.address.countryCode == "GB") {
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline1.htmlName}]").val(data1.address.address1);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.addressline2.htmlName}]").val(data1.address.address2);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val(data1.address.address3);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.county.htmlName}]").val(data1.address.stateCode);
+							}else {
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val(data1.address.address1);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val(data1.address.address2);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val(data1.address.address3);
+								changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]")[0], data1.address.stateCode);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.streetName.htmlName}]").val(data1.address.streetName);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.residence.htmlName}]").val(data1.address.residence);
+								jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.postBox.htmlName}]").val(data1.address.postBox);
+							}
+							jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val(data1.address.city);
+							jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val(data1.address.postalCode);
+							jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.phone.htmlName}]").val(data1.address.phone);
+							jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.alternateContactNumber.htmlName}]").val(data1.address.alternateContactNumber);
+							changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]")[0], data1.address.title);
+							jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val(data1.address.countryCode);
+							jQuery(".addresslist select").val(addressID);
+							// remove error messaging
+							jQuery("#addressform span.errormessage").remove();
+							jQuery("#addressform input.errormessage").removeClass("errormessage");
+							jQuery("#addressform .errorlabel").removeClass("errorlabel");
+						
+							$("div.ui-widget-overlay, div.pleaseWaitDialog").remove();
+					   },
+					   failure: function(data) {
+					   		alert("${Resource.msg('global.serverconnection','locale',null)}");
+					   }
+					}
+				);
+			
+			
+		
+		}
+	});
+}
+
+function populateAddressFormFromShippingAddress() //@TODO: Use proper if condition
+{
+	//var paymentMethod = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").val();	
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address1.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address2.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.address3.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.city.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.zip.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.value}");
+	jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.value}");
+	changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]")[0], "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value}");
+	
+	if("${pdict.Basket.defaultShipment.shippingMethodID}" != "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}]")[0], "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.value}");
+		jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.firstName.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName.value}");
+		jQuery("input[name=${pdict.CurrentForms.billing.billingAddress.addressFields.lastName.htmlName}]").val("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName.value}");	
+		
+	}
+		
+}
+
+// updates the credit card form with the attributes of a given card
+function populateCreditCardForm(cardID)
+{
+	// load card details
+	var url = app.util.appendParamToURL("${URLUtils.https('COBilling-SelectCreditCard')}", "creditCardUUID", cardID);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data || !data.creditCard) {
+				return false;
+			}
+						
+			// fill the form / clear the former cvn input
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}]").val(data.creditCard.holder);
+			changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]")[0], data.creditCard.type);
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val(data.creditCard.maskedNumber);
+			var expYearValue = "";
+			
+			
+		
+			var finalYearValue = "";
+			if(data.creditCard.expirationYear.indexOf(",") > -1)
+			{
+				finalYearValue = data.creditCard.expirationYear.replace(/,/g,'');
+			}
+			if(data.creditCard.expirationYear.indexOf(".") > -1)
+			{
+				finalYearValue = data.creditCard.expirationYear.replace(/\./g,'');
+			}
+			
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val(data.creditCard.expirationMonth);
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val(finalYearValue);
+			
+			changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]")[0], data.creditCard.expirationMonth);
+			changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]")[0], data.creditCard.expirationYear);
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").val("");
+			// remove error messaging
+			jQuery("#PaymentMethod_CREDIT_CARD span.errormessage").remove();
+			jQuery("#PaymentMethod_CREDIT_CARD input.errormessage").removeClass("errormessage");
+			jQuery("#PaymentMethod_CREDIT_CARD .errorlabel").removeClass("errorlabel");
+		
+		}
+	});
+}
+
+// changes the selection of the given form select to the given value
+function changeFormSelection(selectElem, selectedValue)
+{
+	if(!selectElem) return;
+	var options = selectElem.options;
+	if(options.length > 0) {
+		// find index of value to select
+		var idx = 0;
+		for(var i=0; i<options.length; i++) {
+			if(options[i].value != selectedValue) continue;
+			idx = i; break;
+		}
+		selectElem.selectedIndex = idx;
+	}
+}
+
+//changes the payment method form
+function changePaymentMethod(paymentMethodID)
+{
+	
+	jQ('#terms_condition_checkbox_general').attr('checked', false);
+	jQuery(".tnc-header").show();
+	jQuery(".paymentform").hide();
+	jQuery(".klarnaCondition").hide().find("div.value input").removeClass("tncerror");
+	if(paymentMethodID=='IDEAL-SSL' || paymentMethodID=='SOFORT-SSL' ){
+		showBank(paymentMethodID);
+		jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.banktransfer.paymentType.htmlName}]").val(paymentMethodID);
+		paymentMethodID ="${dw.order.PaymentInstrument.METHOD_BANK_TRANSFER}";
+	}
+	jQuery("#billingAddressFields").hide();
+	jQuery("${'#'}PaymentMethod_" + paymentMethodID).show();
+	if( jQuery("${'#'}PaymentMethod_" + paymentMethodID).length == 0 )
+		
+	{
+		jQuery("${'#'}PaymentMethod_" + paymentMethodID).show();
+	}
+
+	// ensure checkbox of payment method is checked
+	jQuery("${'#'}is-" + paymentMethodID).attr("checked", true);
+	
+	if(paymentMethodID=="CREDIT_CARD" || paymentMethodID=="BML" || paymentMethodID=="CREDIT_CARD_MISTERCASH"){
+		
+		addAddressFields(paymentMethodID,"billingAddressFields");
+		jQuery("#idealSpecificFields").hide().empty();
+
+		}else{
+			jQuery("#billingAddressFields").hide().empty();
+		}
+	
+		eMail = "";
+		phoneNo = "";
+		authenticated = "${pdict.CurrentCustomer.authenticated}";
+	
+		
+	if(oldSelectedID != 'PayPal'){
+		if(authenticated == "true"){
+			eMail = jQuery('#dwfrm_billing_billingAddress_email_emailAddress').val();
+		}
+		phoneNo = jQuery('#dwfrm_billing_billingAddress_addressFields_phone').val();
+	}
+
+	if(paymentMethodID == "PayPal"){
+		jQuery('.mandatoryMsg').hide();
+		jQuery('.grey_block_header_checkout').hide();
+		jQuery('.email').hide();
+		jQuery('.confirmEmail').hide();
+		jQuery('.phone').hide();
+		jQuery('.btn-ic-lock').html("${Resource.msg('billing.paypalorder','checkout',null)}");
+		jQuery('.contactpref').html("${Resource.msg('billing.contactpreferences','checkout',null)}");
+		if(authenticated == "false"){
+			jQuery('#dwfrm_billing_billingAddress_email_emailAddress').val("abc@abc.com");
+			jQuery('#dwfrm_billing_billingAddress_email_confirmEmailAddress').val("abc@abc.com");
+		}
+		jQuery('#dwfrm_billing_billingAddress_addressFields_phone').val("12345678901");
+		jQuery('#dwfrm_billing_billingAddress_addressFields_alternateContactNumber').val("");
+	
+	} else{
+			jQuery('.mandatoryMsg').show();
+			jQuery('.grey_block_header_checkout').show();
+			jQuery('.email').show();
+			jQuery('.confirmEmail').show();
+			jQuery('.phone').show();
+			jQuery('.btn-ic-lock').html("${Resource.msg('billing.submitorder','checkout',null)}");
+			jQuery('.contactpref').html("&nbsp;");
+			if("${pdict.CurrentCustomer.authenticated}" == "false"){
+				jQuery('#dwfrm_billing_billingAddress_email_emailAddress').val(eMail);
+				jQuery('#dwfrm_billing_billingAddress_email_confirmEmailAddress').val("");
+			}
+			jQuery('#dwfrm_billing_billingAddress_addressFields_phone').val(phoneNo);
+			jQuery('#dwfrm_billing_billingAddress_addressFields_alternateContactNumber').val("");
+
+	}
+	
+
+	//Praveen:-Changes for NL-IDEAL issue, where first and last names not getting set
+	if(("${pdict.Basket.defaultShipment.shippingMethodID}" == "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}") && paymentMethodID=="BANK_TRANSFER"){
+		addAddressFields(paymentMethodID,"idealSpecificFields");
+	}
+	if(paymentMethodID=="BML"){
+		jQuery(".klarnaCondition").show().find("div.value input").addClass("tncerror");
+		jQuery(".tnc-header").hide();
+		
+	}
+	oldSelectedID = paymentMethodID;
+	
+
+}
+
+// initializes the payment method forms
+function initPaymentMethodSelection() {
+		
+		// get selected payment method from payment method form
+		var paymentMethodID = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]:checked").val();
+		if( !paymentMethodID )
+		{
+			// if necessary fall back to default payment method (first non-gift-certificate method)
+		    paymentMethodID = getDefaultPaymentMethod();
+		}
+		oldSelectedID = paymentMethodID;
+
+		// show payment method section
+
+		changePaymentMethod(paymentMethodID);
+
+}
+
+// returns the default payment method
+function getDefaultPaymentMethod() {
+	<isloop items="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.options}" var="pm">
+	<iscomment>Ignore GIFT_CERTIFICATE method, GCs are handled separately before other payment methods.</iscomment>
+	<isif condition="${pm.value.equals(dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE)}"><iscontinue/></isif>
+		return "${pm.value}";<isbreak/>
+	</isloop>
+}
+
+function addAddressFields(paymentMethodID,divClass){
+
+	jQuery.ajax({
+		
+		dataType: "html",
+		//TODO - this url needs to be made dynamic MattS 7.June 2011
+		url		: app.util.appendParamToURL("${URLUtils.url('COBilling-GetBillingAddressFields')}", "paymentMethod", paymentMethodID),
+		cache	: true,
+		beforeSend: function(){
+			jQuery(document.body).append("<div id=\"dialogcontainer\"></div>");
+			var options = {
+					minWidth:513,
+					minHeight:220,
+					title: pleaseWaitText,
+					zIndex:90210,
+					resizable:false,
+					modal:true,
+					dialogClass:'pleaseWaitDialog',
+					closeText:'close',
+					close: function(ev, ui) { $(this).remove(); },
+					stack:true,
+					closeOnEscape: false,
+				   	open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); } // Hides close button 
+			}
+			$('#dialogcontainer').dialog(options);
+			jQuery.ajax({
+				dataType: "html",
+				url		: "${URLUtils.url('COBilling-GetImage','paymentMethod','true')}",
+				cache	: true,		
+				success: function(response, textStatus) {
+						jQuery('#dialogcontainer').html(response);									
+				}
+			});
+		},
+		success: function(response, textStatus) {
+			//Praveen:-Changes for NL-IDEAL issue, where first and last names not getting set
+			divClass = "#"+divClass;
+			jQuery(divClass).html(response).show();
+			$("div.ui-widget-overlay, div.pleaseWaitDialog, div#dialogcontainer").remove();
+			/*aliddl: klarna address tooltip fix*/
+			if(paymentMethodID == 'BML'){
+				$('#billingAddressFields .tooltip').bt({
+      				trigger: ['focus mouseover', 'blur mouseout'],
+      				contentSelector: "jQuery(this).find('.tooltip-body').html()", 
+      				fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1}
+      			}).attr('tabindex', '0');
+			}
+		},
+
+		error: function(request, textStatus, error) {
+
+			
+			if (textStatus === "parsererror") {								
+				
+			}
+		}
+	});			
+
+}
+
+// updates the current address list entry with the updated address details
+function updateAddressListEntry() {
+	// get the current address ID and load address details
+	var addressID = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}]").val();
+	var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data || !data.address) {
+				return false;
+			}
+			// update the address select entry
+			var addressLine = "(" + data.address.ID + ") " + data.address.address1 + ", " + data.address.city +
+				", " + data.address.stateCode + ", " + data.address.postalCode;
+
+			// update address list entry
+			var optionElem = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}] > option[value=" + data.address.ID + "]");
+			optionElem.html(addressLine);
+		}
+	});
+}
+
+// removes the current address list entry
+function removeAddressListEntry() {
+	// get the current address ID
+	var addressID = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}]").val();
+	// remove the option element
+	var optionElem = jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}] > option[value=" + addressID + "]");
+	optionElem.remove();
+	// reset selection to first entry
+	jQuery("select[name=${pdict.CurrentForms.billing.addressList.htmlName}]")[0].selectedIndex = 0;
+}
+
+// updates the order summary based on a possibly recalculated 
+// basket after a coupon code has been applied (possibly added
+// bonus products and order discounts are rendered along with
+// the updated basket)
+function updateSummary() {
+	var url = "${URLUtils.url('COBilling-UpdateSummary')}";
+
+	// indicate progress
+	jQuery("#rightcolumn").html(app.showProgress());
+
+	// load the updated summary area
+	jQuery("#rightcolumn").load( url, function() {
+		jQuery("#rightcolumn").fadeIn("fast");
+	});
+}
+
+//updates the state label depending on the given contry code
+//if the flag updateSelection is set to true the state selection
+//changes to the first possible select option based on the country
+function updateStateLabel(countryCode, updateSelection) {
+	var label = "${Resource.msg('forms.state','forms',null)}:";
+	if(countryCode == "CA") {
+		label = "${Resource.msg('forms.province','forms',null)}:";
+	}
+	jQuery("div.state > .label > .labeltext").html(label);
+
+	if(updateSelection) {
+		var initialOption = "##";
+		if(countryCode == "US") {
+			initialOption = "";
+		} else if(countryCode == "CA") {
+			initialOption = "AB";
+		}
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.states.state.htmlName}]")[0], initialOption);
+	}
+}
+
+jQuery(document).ready(function() {
+
+
+	// update state label upon entering page
+	updateStateLabel(jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").val(), false);
+
+	// update state label upon country selection
+	jQuery("select[name=${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}]").change(function() {
+		updateStateLabel(jQuery(this).val(), true);
+	});
+
+	// bind coupon redemption
+	jQuery("${'#'+pdict.CurrentForms.billingcoupon.htmlName}").submit(function() {
+		var couponCode = jQuery("input[name=${pdict.CurrentForms.billingcoupon.couponCode.htmlName}]").val();
+		applyCouponCode(couponCode);
+		return false;
+	});
+	
+	// bind gift cert redemption
+	jQuery("${'#'+pdict.CurrentForms.billinggiftcert.htmlName}").submit(function() {
+		var gcId = jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").val();
+		redeemGiftCert(gcId);
+		return false;
+	});
+
+	// bind gift cert balance check
+	jQuery(".checkbalance a").click(function() {
+		var gcId = jQuery("input[name=${pdict.CurrentForms.billinggiftcert.giftCertCode.htmlName}]").val();
+		checkGiftCertBalance(gcId);
+		return false;
+	});
+
+	// bind gift cert removal
+	bindGiftCertificateRemoval();
+
+	// bind country code change handler
+   // bindCountryChangeHandler();
+	
+	// bind payment method change handler
+    bindPaymentMethodChangeHandler();
+
+	// initialize payment method selection
+	
+	//Praveen-Commenting this for billing page late load issue
+	initPaymentMethodSelection();
+
+	// select credit card from list
+	bindCreditCardPopulationHandler();
+
+	// handle whole form submit (bind click to continue checkout button)
+	// append form fields of current payment form to this submit
+	// in order to validate the payment method form inputs too
+	jQuery("button[name=${pdict.CurrentForms.billing.save.htmlName}]").click(function() {
+		// determine the current payment method form
+		var selectedPaymentMethodID = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]:checked").val();
+		
+		// payment method could be absent if the total is 0 (perhaps because of promotion(s)
+		// - 0 is needed otherwise the expression won't return a valid number in non-default locales e.g. in de_DE (decimal point is , which doesn't work)
+		//if(!selectedPaymentMethodID && ${pdict.Basket.getTotalGrossPrice() - 0} > 0) return false;
+
+		// reset payment insturment flag, false when order total is 0 (becuase of promotion perhaps)
+		var resetPayIns = true;
+		
+		// get the main form
+		var mainForm = jQuery("${'#' + pdict.CurrentForms.billing.htmlName}");
+
+		// set the payment method at the main form
+		mainForm.append("<input type=\"hidden\" name=\"${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}\" />");		
+
+		// determine if the order total was paid using gift cert or a promotion
+		if (jQuery(".giftcertused").css("display") == "none") {
+			jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").val(selectedPaymentMethodID);
+			
+			// append inputs of payment method form as hidden elements to main form (all inputs except checkboxes)
+			jQuery("${'#'}PaymentMethod_" + selectedPaymentMethodID + " form :input").filter(":not(:checkbox)").each(function(i, elem) {
+				var input = jQuery(this);
+				mainForm.append("<input type=\"hidden\" name=\"" + input.attr("name") + "\" />");
+				jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=" + input.attr("name") + "]").val(input.val());
+			});
+			// checkboxes are only appended if checked
+			//jQuery("${'#'}PaymentMethod_" + selectedPaymentMethodID + " form :checkbox:checked").each(function(i, elem) {
+			jQuery("${'#'}PaymentMethod_" + selectedPaymentMethodID + " form :input[type='checkbox']:checked").each(function(i, elem) {
+				var input = jQuery(this);
+				mainForm.append("<input type=\"hidden\" name=\"" + input.attr("name") + "\" />");
+				jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=" + input.attr("name") + "]").val(input.val());
+			});
+		}
+		else {
+			// determine if the order total was paid using gift cert or it was 0 because of promotion(s)
+			jQuery(".giftcertpi").length > 0 ? jQuery("${'#' + pdict.CurrentForms.billing.htmlName} input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").val("${dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE}") : (resetPayIns=false);
+		}
+		// reset the remaining payment forms (synchronous) only when a method is specified i.e. there is no payment method when order total is 0 perhaps due to promotion(s)
+		if (resetPayIns) {
+			app.ajax.getJson({
+				url: app.util.appendParamToURL("${URLUtils.url('COBilling-ResetPaymentForms')}", "paymentMethodID", selectedPaymentMethodID),
+				async: false,
+				callback: function(data) {}
+			});
+		}
+	// submit the main form - check to see if form is valid - if so, overlay 
+		// please wait dialogue box
+		//* COMMENTED OUT PAYMENT WAIT STORY | TEMPORARY 
+		//INC000006341662 Missing validation message for payment section 
+		var payMethodForm = jQuery("${'#' + pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}");
+		var confirmPayMethodValid = payMethodForm.valid();
+		var confirmValid = mainForm.valid();
+		 if(confirmValid==true && confirmPayMethodValid==true){
+			// show loading spinner
+			//	open a modal window - this has been used instead of the 
+			//	app.dialog version - more room for customisation
+				if(!$("#dialogcontainer").get(0)){
+							jQuery(document.body).append("<div id=\"dialogcontainer\"></div>");
+						}
+						var options = {
+								minWidth:513,
+								minHeight:220,
+							
+								title: pleaseWaitText,
+								zIndex:90210,
+								resizable:false,
+								modal:true,
+								dialogClass:'pleaseWaitDialog',
+								closeText:'close',
+								close: function(ev, ui) { $(this).remove(); },
+								stack:true,
+								closeOnEscape: false,
+							   	open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); } // Hides close button 
+						}
+						$('#dialogcontainer').dialog(options);
+					jQuery.ajax({
+						
+							dataType: "html",
+							//TODO - this url needs to be made dynamic MattS 7.June 2011
+							url		: "${URLUtils.url('COBilling-GetImage')}",
+							cache	: true,
+													
+							success: function(response, textStatus) {
+									jQuery('#dialogcontainer').html(response);
+								
+									setPaymentTypeForOmniture()
+									mainForm.submit();									
+							},
+	
+							error: function(request, textStatus, error) {
+								if (textStatus === "parsererror") {								
+									
+								}
+							}
+						});						
+		} else {		
+			// submit form if validation errors.
+			setPaymentTypeForOmniture()
+			mainForm.submit();
+		}
+		//*/
+		// submit the main form
+		//mainForm.submit();
+	});
+
+	jQuery("#privacy").click(function() {
+		jQuery(this).attr("target", "_blank");
+	});
+	// see if we need to show/hide payment methods if the order was paid with gc
+	setPaymentSection("${pdict.Basket.getTotalGrossPrice() - gcPITotal}");
+	
+});
+
+function bindPaymentMethodChangeHandler()
+{
+	
+	// bind payment method change handler
+	jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]").click(function() {
+		var selectedID = jQuery(this).val();
+		changePaymentMethod(selectedID);
+	});
+}
+
+function bindCreditCardPopulationHandler()
+{
+	// select credit card from list
+	jQuery(".creditcardlist select").change(function() {
+		var cardUUID = jQuery(this).val();
+		if(!cardUUID) return false;
+	
+		populateCreditCardForm(cardUUID);
+		return false;
+	});
+}
+
+
+
+//updates the payment method section after billing address country-code changed, coupon code was entered or
+//or gift certificate was redeemed
+function updatePaymentMethods(countryCode) 
+{
+	if (jQuery(".giftcertused").css("display") != "none") return;
+		
+	var url = app.util.appendParamToURL("${URLUtils.url('COBilling-RefreshPaymentMethods')}", "countryCode", countryCode);
+
+	// indicate progress
+	jQuery("#paymentmethodform").html(app.showProgress());
+
+	// load the updated payment method area
+	jQuery("#paymentmethodform").load( url, function() {
+		jQuery("#paymentmethodform").fadeIn("fast");
+		initPaymentMethodSelection();
+	    bindPaymentMethodChangeHandler();
+	    bindCreditCardPopulationHandler();
+	});
+
+	app.execUjs();
+}
+
+
+function setPaymentTypeForOmniture(){
+	var paymentMethodID = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]:checked").val();
+	if(paymentMethodID=='PayPal')
+	{
+		s.events="${Resource.msg('omniture.events.paypalbilling','omniture',null)}";
+		s.linkTrackEvents="${Resource.msg('omniture.events.paypalbilling','omniture',null)}";
+		s.tl(true,'o',paymentMethodID);
+
+	}
+}
+
+</script>
+
+</isdecorate>

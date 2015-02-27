@@ -1,0 +1,34 @@
+<iscontent type="application/json" charset="UTF-8" compact="true"/>
+<iscache type="relative" minute="3"/>
+<isscript>
+	var product:dw.catalog.Product = pdict.Product;
+	var variants : dw.util.Collection = product.getVariationModel().getMaster().getVariants();
+	var variantsItr : dw.util.Iterator = variants.iterator();
+	
+	var variantsWithGivenValue : dw.util.Collection = new dw.util.ArrayList(); 
+
+	while(variantsItr.hasNext()){
+		var variant : dw.catalog.Product = variantsItr.next();
+		if(variant.custom.color == pdict.CurrentHttpParameterMap.colorId){
+			variantsWithGivenValue.add(variant);
+		}   
+	}
+</isscript>
+
+{
+"inventory":[
+<isloop items="${variantsWithGivenValue}" var="variant" status="loopstate">
+{
+	<isset name="AVM" value="${variant.availabilityModel}" scope="page"/>
+	<isset name="priceModel" value="${variant.priceModel}" scope="page"/>
+	<isset name="qty" value="${empty(pdict.CurrentHttpParameterMap.Quantity.stringValue) ? 1 : pdict.CurrentHttpParameterMap.Quantity.stringValue}" scope="page"/>
+	"ProductId": "${variant.ID}",
+	"Sizeid": "${variant.custom.size}",
+	"avStatus": "${AVM.availabilityStatus}",
+	"variantPrice": "<isprint value="${priceModel.getPrice()}"/>",
+	"inStock": ${AVM.inStock},
+	"ATS": <isif condition="${!empty(AVM.inventoryRecord)}">${AVM.inventoryRecord.ATS.value}<iselse>0</isif>,
+	"inStockDate": "${!empty(AVM.inventoryRecord) ? AVM.inventoryRecord.inStockDate : ''}"
+}<isif condition="${!loopstate.last}">,</isif>
+</isloop>
+]}

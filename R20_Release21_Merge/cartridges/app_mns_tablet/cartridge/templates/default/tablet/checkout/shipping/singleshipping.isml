@@ -1,0 +1,1242 @@
+<isdecorate template="tablet/checkout/pt_checkout">
+<isinclude template="tablet/util/modules"/>
+
+<iscomment>
+	This template visualizes the first step of the single shipping checkout
+	scenario. It renders a form for the shipping address and shipping method
+	selection. Both are stored at a single shipment only.
+</iscomment>
+
+<iscomment>Report this checkout step (we need to report two steps)</iscomment>
+<isset name="checkoutstep" value="${2}" scope="page"/>
+<isset name="checkoutname" value="${'ShippingAddress'}" scope="page"/>
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+
+<isset name="checkoutstep" value="${3}" scope="page"/>
+<isset name="checkoutname" value="${'ShippingMethod'}" scope="page"/>
+<isset name="miniSummaryHeader" value="${Resource.msg('summary.deliverytext','checkout',null)}" scope="page"/>
+<isset name="miniSummarySubHeader" value="${Resource.msg('summary.orderdetails','checkout',null)}" scope="page"/>
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+<isscript>
+	var productListAddresses : dw.util.HashMap 	= new dw.util.HashMap(),
+		owners : dw.util.HashMap 				= new dw.util.HashMap(),
+		productListTypes : dw.util.HashMap 		= new dw.util.HashMap(),
+		addressesJsonStr 						= "";
+		
+	if (pdict.Basket != null && pdict.Basket.productLineItems.size() > 0) {
+		addressesJsonStr = "{";
+		var lineItemsIt = pdict.Basket.productLineItems.iterator(),		
+			lineitem 	= null, 
+			productList = null, 
+			address 	= null;
+		
+		while (lineItemsIt.hasNext()) {
+			lineitem = lineItemsIt.next();
+			
+			if (lineitem.productListItem != null 		&& 
+				lineitem.productListItem.list != null 	&& 
+				( lineitem.productListItem.list.type == dw.customer.ProductList.TYPE_WISH_LIST || lineitem.productListItem.list.type == dw.customer.ProductList.TYPE_GIFT_REGISTRY) ) {
+				
+				productList = lineitem.productListItem.list;
+				
+				if (productList != null && pdict.CurrentCustomer != productList.owner) {
+					address = productList.shippingAddress;
+					
+					if (address != null) {	
+						productListAddresses.put(productList.owner.profile.credentials.login+'??'+address.ID, address);
+						owners.put(productList.owner.profile.credentials.login+'??'+address.ID, productList.owner);
+						productListTypes.put(productList.owner.profile.credentials.login+'??'+address.ID, lineitem.productListItem.list.type);
+						addressesJsonStr += "'"+productList.owner.profile.credentials.login+'??'+address.ID+"':"+"{address:{ID:'"+address.ID+"',firstName:'"+address.firstName+"',lastName:'"+address.lastName+"',address1:'"+address.address1+"',address2:'"+address.address2+"',postalCode:'"+address.postalCode+"',city:'"+address.city+"',stateCode:'"+address.stateCode+"',countryCode:'"+address.countryCode.value+"',phone:'"+address.phone+"'}}";
+						if (lineItemsIt.hasNext()) {
+							addressesJsonStr += ",";
+						}
+					}
+				}
+			}
+		}
+		addressesJsonStr +="}";
+		// get rid of null vals 
+		addressesJsonStr = addressesJsonStr.replace(new RegExp('null', 'g'), '');
+	}
+	
+ </isscript>
+<isset name="isStoreDelActive" value="${pdict.CurrentSession.custom.isStoreCollActive}" scope="page"/>
+<isset name="currentShippingMethod" value="${pdict.Basket.defaultShipment.shippingMethodID}" scope="page"/>
+<div class="checkout">
+
+    <iscomment>checkout progress indicator</iscomment>
+
+    <div class="checkoutshipping">
+	<form action="${URLUtils.continueURL()}" name="ShippingForm" method="post" id="${pdict.CurrentForms.singleshipping.shippingAddress.htmlName}" class="checkoutshippingform" autocomplete="off">
+		<input type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}" id="isGiftValue" style="display:none" />
+		<iscomment>
+		<input type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.isStoreGift.htmlName}" id="isStoreGiftValue"/>
+		</iscomment>
+		<iscomment>shipping address area</iscomment>
+		<div id="addressform" class="addressform">
+			<iscomment><h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('singleshipping.deliveryaddress','checkout',null)}</strong></span></h5>
+			<img class="under_shadow_dark" alt="" src="${URLUtils.staticURL('themes/demandwarestore/images/under_shadow_dark.png')}" />
+			<br /></iscomment>
+			
+			<iscomment>Entry point for Multi-Shipping (disabled on purpose)</iscomment>
+			<isif condition="${pdict.Basket.productLineItems.size() > 1 && false}">
+				<div class="shiptomultiple">
+					${Resource.msg('singleshipping.multiple','checkout',null)} <button class="shiptomultiplebutton textbutton" type="submit" name="${pdict.CurrentForms.singleshipping.shipToMultiple.htmlName}" value="${Resource.msg('global.yes','locale',null)}"><span>${Resource.msg('global.yes','locale',null)}</span></button>
+				</div><!-- END: shiptomultiple -->
+			</isif>
+			<iscomment>Praveen: If store-collection is active then display 'collapsibleArea' otherwise include 'HomeDelivery'</iscomment>
+			<div class="collapsibleArea">
+				<isif condition="${isStoreDelActive}">
+					<isif condition="${('STANDARD'.equalsIgnoreCase(currentShippingMethod))}">
+						<iscomment>Praveen : Refactored the store collection code</iscomment>
+						<div class="collapse"  id="storeCollection" data-val="${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}">
+							<h5 class="grey_block_header">
+								<span class="sprite plusminus plus"></span>
+								<span class="sprite store"></span>
+								<span>
+									<strong class="content_grey_header">${Resource.msg('singleshipping.storecollection.name','checkout',null)}</strong>
+								</span>
+								
+							</h5>
+						</div>
+						<isinclude template="tablet/checkout/shipping/storeCollection"/>
+						<div class="collapse accordionOpen" id="homeDelivery" data-val="STANDARD">
+							<h5 class="grey_block_header">
+								<span class="sprite plusminus minus"></span>
+								<span class="sprite truckGreen"></span>
+								<span>
+									<strong class="content_grey_header">${Resource.msg('singleshipping.homedelivery.name','checkout',null)}</strong>
+								</span>
+							</h5>
+						</div>
+						<isinclude template="tablet/checkout/shipping/HomeDelivery"/>
+					<iselse>
+						<div class="collapse" id="homeDelivery" data-val="STANDARD">
+							<h5 class="grey_block_header">
+								<span class="sprite plusminus plus"></span>
+								<span class="sprite truckGreen"></span>
+								<span>
+									<strong class="content_grey_header">${Resource.msg('singleshipping.homedelivery.name','checkout',null)}</strong>
+								</span>
+							</h5>
+						</div>
+						<isinclude template="tablet/checkout/shipping/HomeDelivery"/>
+						<iscomment>Praveen : Refactored the store collection code</iscomment>
+						<div class="collapse accordionOpen"  id="storeCollection" data-val="${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}">
+							<h5 class="grey_block_header">
+								<span class="sprite plusminus minus"></span>
+								<span class="sprite store"></span>
+								<span>
+									<strong class="content_grey_header">${Resource.msg('singleshipping.storecollection.name','checkout',null)}</strong>
+								</span>
+							</h5>
+						</div>
+						<isinclude template="tablet/checkout/shipping/storeCollection"/>
+					</isif>
+				<iselse>
+					<div class="noStore">
+					<div class="collapse accordionOpen" id="homeDelivery" data-val="STANDARD">
+						<h5 class="grey_block_header">
+							<span class="sprite plusminus minus"></span>
+							<span class="sprite truckGreen"></span>
+							<span>
+								<strong class="content_grey_header">${Resource.msg('singleshipping.deliveryaddress','checkout',null)}</strong>
+							</span>
+						</h5>
+					</div>
+					<isinclude template="tablet/checkout/shipping/HomeDelivery"/>
+					</div>
+				</isif>
+			<!-- TODO: 9/03/2011 attach tooltip text -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: shippingaddress -->
+		<div class="formactions">
+			
+			
+			<iscomment>Entry point for Multi-Shipping (disabled on purpose)</iscomment>
+			<isif condition="${pdict.Basket.productLineItems.size() > 1 && false}">
+				<div class="shiptomultiple">
+					${Resource.msg('singleshipping.multiple','checkout',null)} <a href="${URLUtils.https('COShippingMultiple-Start')}">${Resource.msg('global.yes','locale',null)}</a>
+				</div><!-- END: shiptomultiple -->
+			</isif>
+			<div class="floatleft btn-grey-flat">
+				<div class="link_button">
+					<a href="${URLUtils.url('Cart-Show')}" class="back-icon"><span>${Resource.msg('singleshipping.back','checkout',null)}</span></a>
+				</div>
+			</div><!-- END: checkoutshipping -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+			<input type="hidden" name="${pdict.CurrentForms.singleshipping.secureKeyHtmlName}" value="${pdict.CurrentForms.singleshipping.secureKeyValue}"/>
+		</div><!-- END: continuecheckout -->
+		
+	</form>
+	<!-- TODO: 9/03/2011 add "Back" actio to the form flow. -->
+		
+</div>
+<div class="clear"><!-- FLOAT CLEAR --></div>
+</div>
+</div><!-- END: checkout -->
+<div id="dialogcontainer"></div>
+<script type="text/javascript">
+var isStoreActive = ${isStoreDelActive};
+var currShippingMethod = "${currentShippingMethod}";
+var currentSelectedShippingMethod = currShippingMethod; 
+function submitShippingForm() {
+	if((currentSelectedShippingMethod == "STANDARD")||(currentSelectedShippingMethod == "EXPRESS")||(typeof(currentSelectedShippingMethod)=='undefined')){
+		var tempFormsValid = true,
+			tempInvalidElem = null;
+		jQ('body form').find('input.required, select.required').each(function(){
+		    if(!$(this).valid()){
+		        tempFormsValid = false;
+		        tempInvalidElem = jQ(this);
+		    }
+		});
+		if(!tempFormsValid){
+			//check to see if the elem is visible
+			if(!jQ(tempInvalidElem).is(':visible')){
+				//now check to see if its in a dialog or accordion	
+				var tempDialogId = jQ(tempInvalidElem).parents('.ui-dialog-content').attr('id');
+				if(!jQuery('#' + tempDialogId).dialog('isOpen')){
+					jQuery('#dialogcontainerCard').dialog('option', 'title', "${Resource.msg('billing.enteranewcard','checkout',null)}");
+					jQuery('#' + tempDialogId).dialog('open');
+					 
+				}
+				
+			}
+			jQ(tempInvalidElem).focus().blur();
+			return;
+		}
+	}else{
+		//store collection
+	}
+	
+	
+		var submitDialogURL = "${URLUtils.url('COShipping-StartBillingProcess')}";
+		action = "${pdict.CurrentForms.singleshipping.shippingAddress.save.htmlName}";
+		jQuery('#continuecheckoutbutton').append("<input name='" + action + "' type='hidden' />");
+		var optionCounter = $("#storeList").find("option").length;
+		var proceedCheckout = false;
+		if(isStoreActive){//if the storedelivery is active for this site
+			var selectedIndex = ($("#storeList option").index($("#storeList option:selected")));
+			
+			//Praveen : If there is only one store active, then selectedIndex will be 0 and optionCounter 1, hence 
+			//this condition sould run. For multiple stores, optionCounter will not be 1 and if selectedIndex is 0, following condition will block the processing.
+			if((jQuery("#storeCollection").hasClass('accordionOpen') && !(selectedIndex ==0 && optionCounter != 1))){
+				
+				proceedCheckout = true;
+				createStoreAddress();	
+				jQuery("#delivery_gift_message").val(jQuery("#store_gift_message").val())
+			}
+			if(jQuery("#homeDelivery").hasClass('accordionOpen') && jQuery(".checkoutshippingform").valid()){
+				proceedCheckout = true;
+				jQuery("#store_gift_message").val(jQuery("#delivery_gift_message").val());
+				jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val('');
+			}
+		}else{//store delivery is not active
+			if(jQuery(".checkoutshippingform").valid()){
+			proceedCheckout = true;
+			jQuery("#store_gift_message").val(jQuery("#delivery_gift_message").val());
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val('');
+			}
+		}		
+		
+		var giftValue = jQuery("#store_gift_message").val();
+		if (giftValue == null || giftValue == ""){
+			giftValue = jQuery("#delivery_gift_message").val();
+		}		
+		if(giftValue != null && jQuery.trim(giftValue) != ""){
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}]").val(true);
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}]").attr('checked', true);
+		}else{
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}]").val(false);
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}]").attr('checked', false);
+		}
+		if(proceedCheckout){
+			var post = jQuery("${'#' + pdict.CurrentForms.singleshipping.shippingAddress.htmlName}").serialize();
+  		
+			/*INT-463*/
+			var options = {
+					minWidth:513,
+					minHeight:220,
+					title: pleaseWaitText,
+					zIndex:90210,
+					resizable:false,
+					modal:true,
+					dialogClass:'pleaseWaitDialog',
+					closeText:'close',
+					close: function(ev, ui) { $(this).remove(); },
+					stack:true,
+					closeOnEscape: false,
+					open: function(event, ui) { $(".pleaseWaitDialog .ui-dialog-titlebar-close").hide(); } // Hides close button 
+				}
+			
+				$('#dialogcontainer').dialog(options);
+				
+				jQuery.ajax({
+					dataType: "html",
+					url		: "${URLUtils.url('COStoreShipping-GetWaitDeliveryImage')}",
+					cache	: true,		
+					success: function(response, textStatus) {
+						jQuery('#dialogcontainer2').html(response);									
+					},
+				});
+			  /*INT-463*/
+			
+			
+  		jQuery.ajax({
+		   type: "POST",
+		   url: submitDialogURL,
+		   data: post,
+		   dataType: 'html',
+		   success: function(data){
+			   if (data.indexOf("failure") < 0) { 
+					var showurl = "${URLUtils.https('COBilling-Start')}";				
+					window.location.href = showurl;
+		   		} else {
+		   			var showurl = "${URLUtils.https('COShipping-Start')}";				
+					window.location.href = showurl;
+		   		}
+		   },
+		   failure: function(data) {
+		   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+		   }
+		});
+
+		}else {
+			jQuery(".required.errorclient:first").focus();
+		}
+
+			
+		}
+
+
+// init gift message box
+function initGiftMessageBox() {
+	
+	/*jQuery(".giftmessagetext:last textarea").attr('id',"delivery_gift_message");
+	jQuery(".giftmessagetext:last label").attr('for',"delivery_gift_message");
+	*/
+	
+	jQuery(".storeListDiv .giftmessagetext textarea").attr('id',"store_gift_message");
+	jQuery(".storeListDiv .giftmessagetext  label").attr('for',"store_gift_message");
+	/*********** detect QC:- 3918 start********/
+	if(jQuery(".homeDelivery .giftmessagetext textarea").length > 0 ){									
+		jQuery(".homeDelivery .giftmessagetext textarea").attr('id',"delivery_gift_message")
+		jQuery(".homeDelivery .giftmessagetext label").attr('for',"delivery_gift_message");
+	}	
+	else{
+		jQuery(".homeDelivery .giftmessage textarea").attr('id',"delivery_gift_message")
+		jQuery(".homeDelivery .giftmessage label").attr('for',"delivery_gift_message");
+	}
+	
+	if(jQuery("#giftMessageShow .switchyes").not('.active')) {
+		jQuery(".homeDelivery .giftmessagetext:last").hide();
+	} else {
+		jQuery(".homeDelivery .giftmessagetext:last").show();
+	}
+	
+	if(jQuery("#giftMessageShowStore .switchyes").not('.active')) {
+		jQuery(".homeDelivery .giftmessagetext:last").hide();
+	} else {
+		jQuery(".homeDelivery .giftmessagetext:last").show();
+	}
+	
+	
+	
+	// show gift message box, if shipment is gift
+	//jQuery(".giftmessagetext:last textarea").attr('id',"delivery_gift_message");
+	//jQuery(".giftmessagetext:last label").attr('for',"delivery_gift_message");
+	//jQuery(".giftmessagetext:first textarea").attr('id',"store_gift_message");
+	//jQuery(".giftmessagetext:first label").attr('for',"store_gift_message");
+	
+	//jQuery(".homeDelivery .giftmessagetext:last textarea").attr('id',"delivery_gift_message");
+	//jQuery(".homeDelivery .giftmessagetext:last label").attr('for',"delivery_gift_message");
+	//jQuery(".storeListDiv .giftmessagetext:first textarea").attr('id',"store_gift_message");
+	//jQuery(".storeListDiv .giftmessagetext:first label").attr('for',"store_gift_message");
+	
+	//if(jQuery("input.isgiftno:checked").length === 1) {
+		//jQuery(".giftmessagetext:last").hide();
+		//jQuery(".homeDelivery .giftmessagetext:last").hide();
+	//} else {
+		//jQuery(".giftmessagetext:last").show();
+		//jQuery(".homeDelivery .giftmessagetext:last").show();
+	//}
+
+	//if(jQuery("input.isstoregiftno:checked").length === 1) {
+		//jQuery(".giftmessagetext:first").hide();
+		//jQuery(".storeListDiv .giftmessagetext:first").hide();
+	//} else {
+		//jQuery(".giftmessagetext:first").show();
+		//jQuery(".storeListDiv .giftmessagetext:first").show();
+	//}
+
+	// Defect ID: 872942 | Commented 
+	// init left character count and max characters
+	/*
+	var max = 240;
+	var text = jQuery(".giftmessagetext span.caption").html();
+	jQuery(".giftmessagetext span.caption").html( text.replace("XXX", "<span class=\"count\"><\/span>").replace("YYY", max) );
+	var count = jQuery(".giftmessagetext textarea").val().length;
+	var left = max - count;
+	jQuery(".giftmessagetext span.count").text(left);
+	*/
+}
+
+function initDeliveryInstructionBox() {
+	jQuery(".homeDelivery .deliveryinstructiontext:last textarea").attr('id',"delivery_instruction");
+	jQuery(".homeDelivery .deliveryinstructiontext:last label").attr('for',"delivery_instruction");
+	
+	if(jQuery("#deliveryInstructionsShow .switchyes").not('.active')) {
+		jQuery(".homeDelivery .deliveryinstructiontext:last").hide();
+	} else {
+		jQuery(".homeDelivery .deliveryinstructiontext:last").show();
+	}
+	
+	if(jQuery("#giftMessageShowStore .switchyes").not('.active')) {
+		jQuery(".storeListDiv .deliveryinstructiontext:last").hide();
+	} else {
+		jQuery(".storeListDiv .deliveryinstructiontext:last").show();
+	}
+}
+function useSameaddressButton(userSelection){
+	if(userSelection == "Yes"){
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").attr('checked','checked');
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val("true");
+	}
+	else {
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").attr('checked','');
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val("false");
+	}
+}
+
+
+// updates the address form with the attributes of a given address
+function updateAddressForm(addressID, address)
+{
+	
+	if ( address && typeof address == 'object' )
+	{
+		// we have address data as json
+		updateAddressFormFields( address, addressID );
+	}
+	else { 
+		// load address details
+		var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.address) {
+					return false;
+				}
+				
+				// fill the form
+				updateAddressFormFields( data, addressID );
+				
+				// remove error messaging
+				jQuery("#addressform span.errormessage").remove();
+				jQuery("#addressform input.errormessage").removeClass("errormessage");
+				jQuery("#addressform .errorlabel").removeClass("errorlabel");
+
+				// Check if the list of shipping methods needs to change
+				updateShippingMethodList();
+			}
+		});
+	}
+
+	// update the order summary to reflect the correct tax rate for this state
+	//updateSummary(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").val());
+}
+
+// changes the selection of the given form select to the given value
+function changeFormSelection(selectElem, selectedValue)
+{
+	//single shipping FR
+	//check to see if the title dropdown has the value we want to put in it
+	if((typeof(selectElem)!=undefined) && (jQ.trim(selectedValue)!='')){
+		var tempCheck = false;
+		jQ(selectElem).find("option").each(function(){
+			if(jQ(this).val() == selectedValue){
+				tempCheck = true;
+			}
+		});
+		if(tempCheck){
+			jQ(selectElem).val(selectedValue);
+			//old code deprecated in favour of jQuery
+			/*if(!selectElem) return;
+			var options = selectElem.options;
+			if(options.length > 0) {
+				// find index of value to select
+				var idx = 0;
+				for(var i=0; i<options.length; i++) {
+					if(options[i].value != selectedValue) continue;
+					idx = i; break;
+				}
+				selectElem.selectedIndex = idx;
+			}*/	
+		}/*else{
+			
+			if(!jQ(selectElem).is(':visible')){
+				var tempDialogId = jQ(selectElem).parents('.ui-dialog-content').attr('id'); 
+				if(!jQuery('#' + tempDialogId).dialog('isOpen')){
+					jQuery('#' + tempDialogId).dialog('open');
+				}
+				
+			}
+			jQ(selectElem).focus().blur();
+		}*/
+	}
+}
+
+
+// updates the current address list entry with the updated address details
+function updateAddressListEntry() {
+	
+	// get the current address ID and load address details
+	var addressID = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}]").val();
+	var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data || !data.address) {
+				return false;
+			}
+			// update the address select entry
+			var addressLine = "(" + data.address.ID + ") " + data.address.address1 + ", " + data.address.city +
+				", " + data.address.stateCode + ", " + data.address.postalCode;
+
+			// update address list entry
+			var optionElem = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}] > option[value=" + data.address.ID + "]");
+			optionElem.html(addressLine);
+		}
+	});
+}
+
+// removes the current address list entry
+function removeAddressListEntry() {
+	// get the current address ID
+	var addressID = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}]").val();
+	// remove the option element
+	var optionElem = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}] > option[value=" + addressID + "]");
+	optionElem.remove();
+	// reset selection to first entry
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}]")[0].selectedIndex = 0;
+}
+
+// selects a shipping method for the default shipment
+// and updates the summary section on the right hand side
+function selectShippingMethod(shippingMethodID) {
+	// nothing entered
+	if(!shippingMethodID) {
+		return;
+	}
+	// attempt to set shipping method
+	var url = getShippingMethodURL("${URLUtils.https('COShipping-SelectShippingMethod')}");
+	url = app.util.appendParamToURL(url, "shippingMethodID", shippingMethodID);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			updateSummary();
+			if(shippingMethodID != "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+				/*jQuery("#homeDelivery").val(shippingMethodID);*/
+				jQ("#homeDelivery").attr('data-val', shippingMethodID);
+			}
+			if(!data || !data.shippingMethodID) {
+				return false;
+			}
+			// display promotion in UI and update the summary section,
+			// if some promotions were applied
+			jQuery(".shippingpromotions").empty();
+			if(data.shippingPriceAdjustments && data.shippingPriceAdjustments.length > 0) {
+				for(var i=0; i<data.shippingPriceAdjustments.length; i++) {
+					var spa = data.shippingPriceAdjustments[i];
+					jQuery(".shippingpromotions").append("<div>${Resource.msg('shipment.qualifiesfor','checkout',null)} " + spa.calloutMessage + "<\/div>");
+				}
+			}
+		}
+	});
+}
+
+// updates the order summary based on a possibly recalculated 
+// basket after a shipping promotion has been applied
+function updateSummary() {
+	var url = "${URLUtils.url('COBilling-UpdateSummary')}";
+	// load the updated summary area
+	jQuery("#topContainer").load(url, function() { 
+		// hide edit shipping method link 
+		jQuery("#topContainer").fadeIn("fast"); 
+		jQuery('.checkoutminisummary .minishipment .header a').hide(); 
+		jQuery('.ordertotalstable .ordershipping .label a').hide();
+		/*$("div.ui-widget-overlay, div.pleaseWaitDialog").remove();*/ 
+		
+		
+		//jQuery('#dialogcontainer').dialog('close'); //Change for INT-463
+		$("div.ui-widget-overlay, div.pleaseWaitDialog").remove();  
+		
+		$('#miniSummaryHeader').html("${Resource.msg('summary.deliverytext','checkout',null)}");
+		$('#miniSummarySubHeader').html("${Resource.msg('summary.orderdetails','checkout',null)}");		
+	});
+	
+}
+
+/**
+ * Cached JavaScript array of currently applicable shipping methods.
+ */
+var shippingMethods;
+
+/**
+ * Helper method which constructs a URL for an AJAX request using the 
+ * entered address information as URL request parameters.
+ */
+function getShippingMethodURL(url) 
+{
+	var countryCode = jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").val();
+	var stateCode = jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").val();
+	var postalCode = jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").val();
+	var city = jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").val();
+
+	url = app.util.appendParamToURL(url, "countryCode", countryCode);
+	url = app.util.appendParamToURL(url, "stateCode", stateCode);
+	url = app.util.appendParamToURL(url, "postalCode", postalCode);
+	url = app.util.appendParamToURL(url, "city", city);
+
+	return url;
+}
+
+
+/**
+ * Make an AJAX request to the server to retrieve the list of applicable shipping methods
+ * based on the merchandise in the cart and the currently entered shipping address 
+ * (the address may be only partially entered).  If the list of applicable shipping methods 
+ * has changed because new address information has been entered, then issue another AJAX 
+ * request which updates the currently selected shipping method (if needed) and also updates
+ * the UI.  In particular, the list of available shipping methods and the right hand summary
+ * must change.
+ */
+function updateShippingMethodList() {
+
+	var url = getShippingMethodURL("${URLUtils.https('COShipping-GetApplicableShippingMethodsJSON')}");
+
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data) {
+				
+				return false;
+			}
+			if (shippingMethods != null && shippingMethods.toString() == data.toString())
+			{
+				// No need to update the UI.  The list has not changed.
+				return true;
+			}
+
+			// We need to update the UI.  The list has changed.
+			// Cache the array of returned shipping methods.
+			shippingMethods = data;
+	
+			url = getShippingMethodURL("${URLUtils.https('COShipping-UpdateShippingMethodList')}");
+
+			// indicate progress
+			jQuery("#shippingmethodform").html(app.showProgress());
+
+			// load the shipping method form
+			jQ("#shippingmethodform").load( url, function() {
+				jQ("#shippingmethodform").fadeIn("fast");
+
+				// rebind the radio buttons onclick function to a handler.
+				jQ("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}]").click(function() {
+					var selectedMethodID = jQ(this).val();
+					selectShippingMethod(selectedMethodID);
+				});
+
+				// activate the tooltips in the newly loaded AJAX section
+				app.tooltipDefault();
+				
+				/* new style radio icons for tablet*/
+				jQ('#shippingmethods').find('div.radioButton .sprite').removeClass('checked');
+				if(jQ('#shippingmethods').find('input[type=radio]:checked').length == 0){
+					jQ('#shippingmethods').find('input[type=radio]')[0].click();
+				}
+				jQ('#shippingmethods').find('input[type=radio]').each(function(){
+					if(jQ(this).is(':checked')){
+						jQ(this).parents('.shippingmethod').find('div.radioButton .sprite').addClass('checked');
+					}
+				});
+				jQ('#shippingmethodform').on("click", ".radioSwitch", function(event){
+					jQ('#shippingmethods').find('div.radioButton .sprite').removeClass('checked');
+					jQ(this).addClass('checked').parents('.shippingmethod').find('input[type=radio]').click();
+				});
+				jQ('#shippingmethodform').on("click", "input[type=radio]", function(event){
+					jQ('#shippingmethods').find('div.radioButton .sprite').removeClass('checked');
+					jQ(this).parents('.shippingmethod').find('.radioSwitch ').addClass('checked');
+				});
+				// update the summary	
+				//updateSummary();
+			});
+		}
+	});
+}
+
+// updates the state label depending on the given contry code
+// if the flag updateSelection is set to true the state selection
+// changes to the first possible select option based on the country
+function updateStateLabel(countryCode, updateSelection) {
+	var label = "${Resource.msg('forms.state','forms',null)}:";
+	if(countryCode == "CA") {
+		label = "${Resource.msg('forms.province','forms',null)}:";
+	}
+	jQuery("div.state > .label > .labeltext").html(label);
+
+	if(updateSelection) {
+		var initialOption = "##";
+		if(countryCode == "US") {
+			initialOption = "";
+		} else if(countryCode == "CA") {
+			initialOption = "AB";
+		}
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]")[0], initialOption);
+	}
+}
+
+function updateStoreDetails(obj) {	
+	
+	var store_id = obj.options[obj.selectedIndex].value;
+	if(obj.selectedIndex == 0){
+		$(".slectedStoreDetails").hide();
+		$(".storeListDiv .giftMessageDiv").hide();
+		$(".storeListDiv .continuecheckoutbutton").hide();
+	}else {
+		for(var i=0; i<storesJson.stores.length; i++){
+			if(store_id == storesJson.stores[i].storeId) {
+				selectedStore = storesJson.stores[i];
+				$(".sCollectionDate").html(storesJson.stores[i].collectionDate);
+				$(".spickUpTime").html(selectedStore.pickUpTime);
+				$(".sName").html(storesJson.stores[i].storeName);
+				$(".sAddr1").html(storesJson.stores[i].address2);
+				$(".sAddr2").html(storesJson.stores[i].address3);
+				$(".sTiming").html(storesJson.stores[i].storeHour);
+				$(".sStoreMessage").html(storesJson.stores[i].storeMessage);
+
+				if(selectedStore.zip == null || selectedStore.zip == ''){
+					$(".sCity").html(selectedStore.city);
+				}else if(selectedStore.zip != null && selectedStore.zip != '' && (selectedStore.city == null || selectedStore.city == '')){
+					
+					$(".sCity").html(selectedStore.zip);
+				}else{
+					$(".sCity").html(selectedStore.city + " , " + selectedStore.zip);
+				}
+				//End
+
+
+				
+				$(".sCountyCountry").html(storesJson.stores[i].stateCode+", "+storesJson.stores[i].countryCode);
+				$(".storeMap img").attr('src',storesJson.stores[i].image);
+				$(".storeMap img").attr('alt',storesJson.stores[i].storeName);
+				
+				break;
+			}
+		}
+		
+		$(".slectedStoreDetails").show();
+		/*var url = "${URLUtils.url('COShipping-StoreInfo')}";
+		url = app.util.appendParamToURL(url, "storeID", store_id);
+		jQuery(".slectedStoreDetails").load( url, function() { 
+		});*/
+		$(".storeListDiv .giftMessageDiv").show();
+		$(".storeListDiv .continuecheckoutbutton").show();
+	}
+}
+
+
+
+jQuery(document).ready(function() {
+	
+	jQuery("#storeCollection").click(function() {
+		if(!jQuery(this).hasClass('.accordionOpen')){
+			//updateSingleStoreDetail();
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val(false);
+			
+		}
+	});
+  
+	jQuery("#homeDelivery").click(function() {	
+		if(!jQuery(this).hasClass('.accordionOpen')){
+			updateShippingMethodList();
+		}
+	});
+	useSameaddressButton("Yes");
+	
+	// delivery instructions max length 
+	var limitNum = 110;
+	//Changes made for CR105
+	storesJson = "{[]}";
+	selectedStore = "";
+	nobuttonClicked = false;
+	usergiftselection = false;
+	userstoregiftselection = false;
+	var pageLoad = true;
+	var defaultShippingMethod= "${pdict.Basket.defaultShipment.shippingMethodID}";
+	if("${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.value}" == "true") {
+		$('.smallBtn:first').addClass('activeBtn');
+		nobuttonClicked = false;
+	}else {
+		if(defaultShippingMethod != "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+			nobuttonClicked = true;
+			$('.smallBtn:last').addClass('activeBtn');
+		}else {
+			nobuttonClicked = false;
+		}
+	}
+	$('.smallBtn').click(function() {
+	     $(this).addClass('activeBtn');
+	     $(this).siblings().removeClass('activeBtn');
+	     if($(this).hasClass('marginright')){
+	    	 nobuttonClicked = false;
+	     }else {
+	    	 nobuttonClicked = true;
+	     }
+	 });
+	
+ 
+	//var limitNum = 59; //Bug:1805762, variable has been moved in individial HomeDelivery.isml 
+	/* code shifted to switch click
+	jQuery("textarea#delivery_instruction").bind("keyup",function(){		
+	    if (jQuery(this).val().length > limitNum) {
+	        jQuery(this).val(jQuery(this).val().substring(0, limitNum));	        
+	    } 
+	});
+	*/
+	// select address from list
+	jQuery("#displaySelector select, #dialogcontainerNew .selectAddresses select").change(function() {
+		
+		var addressID = jQuery(this).val(),
+			address = null;
+		
+		if (addressID.indexOf("??") > 0) {
+			// we have address in the select data attr			
+			address = jQuery(this).data("data")[addressID];
+		}
+		if(!addressID) return false;
+		
+		updateAddressForm(addressID, address);
+		jQ('#displaySelector').hide();
+		jQ('#displayAddress').removeClass('hide').show();
+		return false;
+		
+	}).change();
+	
+	
+
+	$('input[name=radioName]:checked', '#myForm').val()
+	
+	$(".collapsibleArea .collapse.accordionOpen").next(".collapseContent").find("div:first").removeClass('hide').show();
+	
+	$("#homeDelivery, #storeCollection").click(function(){
+		//remove validation from the form
+		var validator = $("form[id=${pdict.CurrentForms.singleshipping.shippingAddress.htmlName}]").validate();
+		validator.resetForm();//remove validation
+		$("form[id=${pdict.CurrentForms.singleshipping.shippingAddress.htmlName}]").find('input, select').nextAll('.errorIcon, .errorclient').remove();
+		$("form[id=${pdict.CurrentForms.singleshipping.shippingAddress.htmlName}]").find('input, select').parents('.formfield').find('.errorlabel').removeClass('errorlabel');
+		//removing error messages, error icons and error labels
+		
+		if(!$(this).hasClass('accordionOpen')){
+			$(this).addClass('accordionOpen').find('.sprite.plusminus').removeClass('plus').addClass('minus');
+			$('#homeDelivery, #storeCollection').not(this).removeClass('accordionOpen').find('.sprite.plusminus').removeClass('minus').addClass('plus');
+			
+			$(this).parents(".collapse").siblings(".collapseContent").find("div:first").slideUp();
+			$(this).parents(".collapse").next(".collapseContent").find("div:first").removeClass('hide').slideDown();
+			
+			var selectedMethodID = $(this).attr('data-val');
+			
+			initBillingPage($(this).attr("id"), selectedMethodID);//STANDARD, STORE_COLLECTION
+			currentSelectedShippingMethod =selectedMethodID;// jQuery("#storeCollection").attr('data-val');
+		}else{
+			$("#homeDelivery, #storeCollection").not('.accordionOpen').click();
+		}
+	});
+	
+	function initBillingPage(elemId, selectedMethodID){
+		//Praveen :- Added the code for setting the shipping method in form before the call to selectShippingMethod()
+			//$("input#shipping-method-" + selectedMethodID).parent('div.value.radio').prev('div.radioButton').find('div.radioSwitch').click();
+			if(!pageLoad){
+				
+				//jQuery(document.body).append("<div id=\"dialogcontainer\"></div>");
+				var options = {
+					minWidth:513,
+					minHeight:220,
+					title: pleaseWaitText,
+					zIndex:90210,
+					resizable:false,
+					modal:true,
+					dialogClass:'pleaseWaitDialog',
+					closeText:'close',
+					close: function(ev, ui) { $(this).remove(); },
+					stack:true,
+					closeOnEscape: false,
+					open: function(event, ui) { $(".pleaseWaitDialog .ui-dialog-titlebar-close").hide(); } // Hides close button 
+				}
+				$('#dialogcontainer').dialog(options);
+				jQuery.ajax({
+					dataType: "html",
+					url		: "${URLUtils.url('COStoreShipping-GetWaitDeliveryImage')}",
+					cache	: true,		
+					success: function(response, textStatus) {
+						jQuery('#dialogcontainer').html(response);									
+					}
+				});
+				
+				selectShippingMethod(selectedMethodID);
+			}else {
+				pageLoad = false;
+			}
+			
+			var storeCollectionMethod = "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}";
+			if(elemId == "homeDelivery"){
+				$(this).parents(".collapsibleArea").find("#shipping-method-" + storeCollectionMethod).parent().parent(".shippingmethod").hide();
+				if(usergiftselection){
+					/*$(".isgiftyes").attr("checked","checked");
+					$(".isgiftyes").click();*/
+					jQ('#giftMessageShow').find('.switchYes').click();
+				}else {
+					/*$(".isgiftno").attr("checked","checked");
+					$(".isgiftno").click();*/
+					jQ('#giftMessageShow').find('.switchNo').click();
+				}
+				if(nobuttonClicked){
+					$(".smallBtn:last").click();
+				}else {
+					$(".smallBtn:first").click();
+				}
+				
+			}else{
+				$(this).parents(".collapsibleArea").find("#shipping-method-"+storeCollectionMethod).parent().parent(".shippingmethod").removeClass('hide').show();
+				if(typeof(storesJson.stores) != 'undefined'){ 
+					if($("#storeList").val() == '' && storesJson.stores.length != 1){
+						$(".slectedStoreDetails").hide();
+						$(".storeListDiv .giftMessageDiv").hide();
+						$(".storeListDiv .continuecheckoutbutton").hide();
+						}else {
+						$(".slectedStoreDetails").show();
+					}
+				}
+				if(userstoregiftselection){
+					$(".isstoregiftyes").attr("checked","checked");
+						$(".isstoregiftyes").click();
+					}else {
+						$(".isstoregiftno").attr("checked","checked");
+					$(".isstoregiftno").click();
+				}
+			}
+			//Shifting the code below for setting the shipping method in form above, before the call to selectShippingMethod() 
+			//$(this).parents(".collapsibleArea").find(".shippingmethods input#shipping-method-"+selectedMethodID).attr("checked","checked");
+			
+	}
+	window.onload= function(){
+		if((currShippingMethod == "STANDARD")||(currShippingMethod == "EXPRESS")){
+			if(!jQ('#homeDelivery').hasClass('accordionOpen')){
+				jQ('#homeDelivery').click();
+			}
+		}else{
+			if(!jQ('#storeCollection').hasClass('accordionOpen')){
+				jQ('#storeCollection').click();
+			}
+		}
+		$("input#shipping-method-" + currShippingMethod).parent().prev('div.radioButton').find('div.radioSwitch').click();
+		
+	}
+	
+	//if(isStoreActive){
+
+		var storeIdSelectedBefore = jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val();
+	
+		app.ajax.getJson({
+			url		: "${URLUtils.url('COStoreShipping-getStores')}",
+			callback: function (data){
+				storesJson = data;
+				
+				if(data.stores.length>1 && isStoreActive){//Shashi::isStoreActive added for RS3 defect 1805442 //If there are more than 1 stores 
+					$("#multipleStores").removeClass('hide').show();
+					for(var i=0; i<data.stores.length; i++) {
+						var addedElement = false;
+						var optionElement = document.createElement("option");
+						optionElement.text = data.stores[i].storeName;
+						optionElement.value = data.stores[i].storeId;
+						if(defaultShippingMethod == "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+							if(storeIdSelectedBefore == data.stores[i].storeId){
+								optionElement.selected = "selected";
+								document.getElementById("storeList").options.add(optionElement);
+								$("#storeList").trigger("onchange");
+							addedElement = true;
+							}
+						}
+						if(!addedElement){
+							document.getElementById("storeList").options.add(optionElement);
+						}
+					}
+				}else if(data.stores.length==1){//If there is only 1 store
+					$("#singleStores").removeClass('hide').css('display', 'block');
+					$("#singleStores").html(data.stores[0].storeName);
+					updateSingleStoreDetail(data.stores[0]);
+				}
+				if(currShippingMethod == "STORE_COLLECTION"){
+					if(!jQ('#storeCollection').hasClass('accordionOpen')){
+						jQ('#storeCollection').click();	
+					}
+				}
+					
+			}
+		});	
+//	}
+	if(defaultShippingMethod == "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+		if("${pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}" == "true") {
+			/*$(".isstoregiftyes").attr("checked","checked");*/
+			jQ('#giftMessageShowStore').find('.switchYes').click();
+			userstoregiftselection = true;
+		}else {
+			/*$(".isstoregiftno").attr("checked","checked");*/
+			jQ('#giftMessageShowStore').find('.switchNo').click();
+			userstoregiftselection = false;
+		}
+		usergiftselection = false;
+		
+		initBillingPage('storeCollection', 'STORE_COLLECTION')//STANDARD, 
+		if(!jQuery(this).hasClass('.accordionOpen')){
+			$("#storeCollection").click();
+		}
+	}else {
+		/*jQuery("#homeDelivery").val(defaultShippingMethod);*/
+		jQuery("#homeDelivery").attr('data-val', defaultShippingMethod);
+		if("${pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}" == "true") {
+			/*$(".isgiftyes").attr("checked","checked");*/
+			jQ('#giftMessageShow').find('.switchYes').click();
+			usergiftselection = true;
+		}else {
+			/*$(".isgiftno").attr("checked","checked");*/
+			jQ('#giftMessageShow').find('.switchNo').click();
+			usergiftselection = false;
+		}
+		if(nobuttonClicked){
+			$(".smallBtn:last").click();
+		}else {
+			$(".smallBtn:first").click();
+		}
+
+		userstoregiftselection = false;
+		//$("#homeDelivery").click();
+		initBillingPage('homeDelivery', 'STANDARD')//STANDARD, 
+	}
+
+	if(storeIdSelectedBefore != null && storeIdSelectedBefore != ''){
+		
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val(true);
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addToAddressBook.htmlName}]").val(true);
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.htmlName}]").val('');
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]")[0], '');
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]")[0], '');
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}]")[0], '');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storeCollectionDate.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storePickupTime.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone.htmlName}]").val('');
+		jQuery("textarea[name=${pdict.CurrentForms.singleshipping.shippingmethod.deliveryInstructions.htmlName}]").val('');
+		//Praveen: Setting the additional variables to default value
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.streetName.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence.htmlName}]").val('');
+	}
+	
+	
+	
+	// gift message box toggling
+	/*jQuery(".isgiftyes").click(function() {
+		//jQuery(".giftmessagetext:last").show();
+		jQuery(".homeDelivery .giftmessagetext:last").show();
+		usergiftselection = true;
+	});*/
+	//Praveen: QC defect fixing: 1078
+	/*jQuery(".isgiftno").click(function() {
+		//jQuery(".giftmessagetext:last").hide();
+		//jQuery(".giftmessagetext:last textarea").attr("value", ""); 
+		jQuery(".homeDelivery .giftmessagetext:last").hide();
+		jQuery(".homeDelivery .giftmessagetext:last textarea").attr("value", "");
+		usergiftselection = false;
+	});*/
+
+	// gift message box toggling
+	/*jQuery(".isstoregiftyes").click(function() {
+		//jQuery(".giftmessagetext:first").show();
+		jQuery(".storeListDiv .giftmessagetext:first").show();
+		userstoregiftselection = true;
+	});*/
+	//Praveen: QC defect fixing: 1078
+	/*jQuery(".isstoregiftno").click(function() { 
+		//jQuery(".giftmessagetext:first").hide();
+		//jQuery(".giftmessagetext:first textarea").attr("value", ""); 
+		jQuery(".storeListDiv .giftmessagetext:first").hide();
+		jQuery(".storeListDiv .giftmessagetext:first textarea").attr("value", "");
+		userstoregiftselection = false;
+	});*/
+
+	// gift message character limitation
+	initGiftMessageBox();
+	// Defect ID: 872942 | Commented
+	
+	initDeliveryInstructionBox();
+	
+	jQuery(".giftmessagetext textarea, .giftMessageDiv textarea").bind("keyup keydown", function() {
+	//Bug 1805802: .giftMessageDiv textarea has been added to fix the issue
+		var max = 240;
+		var value = jQuery(this).val();
+		var left = max - value.length;
+		if(left < 0) {
+			jQuery(this).val( value.slice(0, left) );
+			left = 0;
+		}
+	});
+
+	jQuery("#delivery_instructions .switch").click(function(event){
+		if(jQuery(this).not('.active')){
+			jQuery(this).addClass('active').siblings('.switch').removeClass('active');
+			if(jQuery(this).hasClass('switchYes')){
+				jQuery(".homeDelivery .deliveryinstructiontext:last").show();
+				jQuery(".homeDelivery .deliveryinstructiontext:last textarea").bind("keydown",function(){	
+					  if (jQuery(this).val().length > 110) {
+				    	jQuery(this).val(jQuery(this).val().substring(0, 110));	        
+				    } 
+			 });
+			}else{
+				jQuery(".homeDelivery .deliveryinstructiontext:last").hide();
+				jQuery(".homeDelivery .deliveryinstructiontext:last textarea").attr("value", "");
+				
+			}
+		}
+		
+	});
+	if("${!empty(pdict.CurrentForms.singleshipping.shippingmethod.deliveryInstructions.value)}"=="true"){
+	jQuery("#delivery_instructions .switchYes").click();
+	}
+	
+	jQ("#gift_message .switch").on('click', function(event){
+		if(jQuery(this).not('.active')){
+			jQuery(this).addClass('active').siblings('.switch').removeClass('active');
+			if(jQuery(this).hasClass('switchYes')){
+				jQuery(".homeDelivery .giftmessagetext:last").show();
+				jQuery(".homeDelivery .giftmessagetext:last textarea").bind("keydown",function(){	
+					  if (jQuery(this).val().length > 240) {
+				    	jQuery(this).val(jQuery(this).val().substring(0, 240));	        
+				    } 
+				}); 
+				
+				usergiftselection = true;
+				jQ('#isGiftValue').val('true');
+			}else{
+				jQuery(".homeDelivery .giftmessagetext:last").hide();
+				jQuery(".homeDelivery .giftmessagetext:last textarea").attr("value", "");
+				usergiftselection = false;
+				jQ('#isGiftValue').val('false');
+			}
+		}
+		
+	});
+	
+	jQ("#giftMessageShowStore .switch").on('click', function(event){
+		if(jQuery(this).not('.active')){
+			jQuery(this).addClass('active').siblings('.switch').removeClass('active');
+			if(jQuery(this).hasClass('switchYes')){
+				jQuery(".storeListDiv .giftmessagetext:last").show();
+				userstoregiftselection = true;
+				jQ('#isStoreGiftValue').val('true');
+			}else{
+				jQuery(".storeListDiv .giftmessagetext:last").hide();
+				jQuery(".storeListDiv .giftmessagetext:last textarea").attr("value", "");
+				userstoregiftselection = false;
+				jQ('#isStoreGiftValue').val('false');
+			}
+		}
+		
+	});
+	
+	if("${!empty(pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.value)}"=="true"){
+		jQuery("#gift_message .switchYes").click();
+		}
+	// update shipping method list on load
+	updateShippingMethodList();
+	
+	
+
+	// bind shipping method selection
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}]").click(function() {
+		var selectedMethodID = jQuery(this).val();
+		selectShippingMethod(selectedMethodID);
+	});
+
+	// update state label upon entering page
+	updateStateLabel(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").val(), false);
+
+	// update state label upon country selection
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").change(function() {
+		updateStateLabel(jQuery(this).val(), true);
+	});
+
+	// Update shipping method list if country, state, city, or zip changes.
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	//click binding for quick view
+});
+
+
+function updateSingleStoreDetail(){
+	
+	selectedStore = storesJson.stores[0];
+	if(typeof(selectedStore) != 'undefined'){
+		$(".sCollectionDate").html(selectedStore.collectionDate);
+	 	$(".spickUpTime").html(selectedStore.pickUpTime);
+		$(".sName").html(selectedStore.storeName);
+		$(".sAddr1").html(selectedStore.address2);
+		$(".sAddr2").html(selectedStore.address3);
+		$(".sTiming").html(selectedStore.storeHour);
+
+
+
+		$(".sStoreMessage").html(selectedStore.storeMessage);
+
+		if(selectedStore.zip == null || selectedStore.zip == ''){
+			$(".sCity").html(selectedStore.city);
+		}else if(selectedStore.zip != null && selectedStore.zip != '' && (selectedStore.city == null || selectedStore.city == '')){
+			
+			$(".sCity").html(selectedStore.zip);
+		}else{
+			$(".sCity").html(selectedStore.city + " , " + selectedStore.zip);
+		}
+
+		
+		
+		$(".sCountyCountry").html(selectedStore.stateCode+", "+selectedStore.countryCode);
+		$(".storeMap img").attr('src',selectedStore.image);
+		$(".storeMap img").attr('alt',selectedStore.storeName);
+	}
+	$(".slectedStoreDetails").show();
+	$(".storeListDiv .giftMessageDiv").show();
+	$(".storeListDiv .continuecheckoutbutton").show();
+}
+
+
+
+//--></script>
+
+</isdecorate>

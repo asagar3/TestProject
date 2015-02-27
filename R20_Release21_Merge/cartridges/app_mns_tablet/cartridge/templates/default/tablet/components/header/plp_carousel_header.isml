@@ -1,0 +1,147 @@
+<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+<script src="${URLUtils.staticURL('/lib/adobe/omniture/s_code.js')}" type="text/javascript"></script> 
+<script type="text/javascript"><!--
+$(document).ready(function(){
+	$('A[rel="_blank"]').click(function(){
+		window.open($(this).attr('href'));
+        return false;
+    });
+    $("a.skipnav").click(function(){
+		("#main").attr("tabindex",-1).focus();
+		
+    });
+ //on click of Country Overlay Close, call the pipeline to reset the "displayOverLay" to false.
+    $("#countryOverlay .close").click(function(){
+    	var closeDialogURL = "${URLUtils.url('Util-CloseDialog')}";
+   		jQuery.ajax({
+		   type: "POST",
+		   url: closeDialogURL,
+		   success: function(){
+				// DO Nothing
+		   },
+		   failure: function() {		   	
+		   		// Do Nothing		
+		   }
+		});    	
+    });
+ 	
+ 	$("#header ul li.countrySelect").click(function(){
+ 		var header = $(this).parents("#header");
+ 		var restFlags = header.find(".countryFlagsT");
+ 		restFlags.slideDown();
+ 		
+ 		$(".closeT").click(function(){
+ 			restFlags.slideUp();
+ 		});
+ 	});
+ 	
+ 	$("#footer span.fFlag").click(function(e){
+ 		e.preventDefault();
+ 		var header = $("#header"),
+ 			footer = $("#footer");
+ 		var restFlags = '';
+ 		restFlags = footer.find(".countryFlagsT");
+ 		if (restFlags == '' || restFlags == null || restFlags == undefined || restFlags.children().length == 0){
+ 			header.find(".countryFlagsT").clone(true).insertAfter(footer.find('.tLowerFooter'));
+ 			restFlags = $(footer).find(".countryFlagsT");
+ 			
+ 		}
+ 		restFlags.css({ 'position': 'relative' });
+ 		restFlags.slideDown();
+ 		$("html, body").animate({ scrollTop: $(document).height() }, "slow");
+ 		
+ 		restFlags.find(".closeT").bind('click', function(){
+ 			restFlags.slideUp();
+ 		});
+ 	});
+ 	
+ 	$(".countrySelect").each(function(){
+ 		getVal = $(this).find(".varValue").text();
+ 		var sCountry = $("ul.level0 a."+getVal).find('img');
+ 		$(this).find("span.selectedFlag").append(sCountry.clone());
+ 	});
+ 	
+ 	$(".tSelectCountryFooter").each(function(){
+ 		getVal = $(".varValue").text();
+ 		var sCountry = $("ul.level0 a."+getVal).find('img');
+ 		$(this).find("span.fFlag").append(sCountry.clone());
+ 	});
+});
+
+
+	/* Displaying the country selector overlay from JS instead of the session variable */
+	var url = window.location.href;
+	if (url.indexOf("/en") > -1 && url.indexOf("/en_") < 0){
+	    $("#countryOverlayDiv").show();
+	}
+	     
+
+    
+	// Function to change the locale of the site 
+   	function changeLocale(locale, url) {
+   	   	if (url != null && url != "" && url != "#"){
+   	   		document.frmUserLocale.action = url;
+   	   	} else {
+   	   		document.getElementById("txtUserLocale").value = locale;
+   	   	}
+   	 	document.frmUserLocale.submit();
+   	}
+	
+
+//-->
+</script> 
+<!-- Move the condition in pipeline Chk null instead of empty n compare wth site's default locale || DONE --> 
+<!-- isinclude template="jsredirect.isml"/ -->
+<isinclude url="${URLUtils.url('Util-URLWithLocale','queryString',request.httpQueryString)}"/>
+<form name="frmUserLocale" method="post" action="${URLUtils.url('Util-ShowWithLocale')}" >
+	<p><input type="hidden" name="userLocale" id="txtUserLocale"/></p>
+</form>
+<div style="display: none" id="countryOverlayDiv">
+	<iscontentasset	aid="CA_MS_COUNTRY_SELECTOR_OVERLAY" />
+</div>
+<isinclude template="components/header/localecookie.isml"/>
+<a title="${Resource.msg('skip_content.message','common',null)}" href="#main" class="skipnav"><isprint value="${Resource.msg('skip_content.message','common',null)}"></a>
+<div id="header" class="carouselHeader">
+	<iscontentasset	aid="CA_MS_COUNTRY_SELECTOR_TABLET" />
+	<div id="logo">
+		<isinclude template="tablet/components/header/mns_logo.isml"/>
+	</div>
+	<div class="plpTitleAndCount">
+		<h1>
+		<isprint value="${pdict.ProductSearchResult.category.displayName}" />
+		<isprint value="${pdict.ProductSearchResult.searchPhrase}" />
+		</h1>
+		<h4><ispaginginformation pagingmodel="${pdict.ProductPagingModel}" pageurl="${pdict.ProductSearchResult.url('Search-Show')}"/></h4>
+	</div>
+    
+	<div class="hRight">
+		<div class="floatright">
+			<div id="minicart" class="minicart">
+				<isinclude url="${URLUtils.url('Cart-MiniCart')}"/>
+			</div>
+			<!-- END:minicart --> 
+		</div>
+	</div>
+	<div id="change_content_view" class="hRight">
+		<div class="shadow"></div>
+		<span>${Resource.msg('searchHeader.changeView','search',null)}</span>
+		
+		<isif condition="${!empty(pdict.CurrentHttpParameterMap.q.stringValue)}">
+         	<a class="" href="<isprint value="${URLUtils.url('Search-Show','q',pdict.CurrentHttpParameterMap.q.value,'view','grid')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_grid">view grid</a>
+        	 <a class="switched" href="<isprint value="${URLUtils.url('Search-Show','q',pdict.CurrentHttpParameterMap.q.value,'view','carousel')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_carousel"></a></td>
+        <iselse/>
+        	<a class="" href="<isprint value="${URLUtils.url('Search-Show','cgid',pdict.CurrentHttpParameterMap.cgid.value,'view','grid')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_grid">view grid</a>
+        	<a class="switched" href="<isprint value="${URLUtils.url('Search-Show','cgid',pdict.CurrentHttpParameterMap.cgid.value,'view','carousel')}"/><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn1.value)}">&prefn1=${pdict.CurrentHttpParameterMap.prefn1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv1.value)}">&prefv1=${pdict.CurrentHttpParameterMap.prefv1.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefn2.value)}">&prefn2=${pdict.CurrentHttpParameterMap.prefn2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.prefv2.value)}">&prefv2=${pdict.CurrentHttpParameterMap.prefv2.value}</isif><isif condition="${!empty(pdict.CurrentHttpParameterMap.srule.value)}">&srule=${pdict.CurrentHttpParameterMap.srule.value}</isif>" id="view_carousel"></a></td>
+        </isif>  
+	</div>
+	<div class="clear"></div>	
+</div>
+<!-- END: header -->
+
+<script type="text/javascript"><!--
+	// init the search result object
+	app.search.result = new app.search.SearchResult(<isif condition="${!empty(pdict.ProductSearchResult.searchPhrase)}">true<iselse/>false</isif>, <isif condition="${!empty(pdict.ProductSearchResult.categoryID)}">"${pdict.ProductSearchResult.categoryID}"<iselse>null</isif>);
+//--></script>
+
+<iscomment>Cookies and Javascript enabled check</iscomment>
+<isinclude template="components/browsertoolscheck"/>

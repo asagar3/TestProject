@@ -1,0 +1,55 @@
+/**
+ * INT-448 - Calculate product set price for product sets with 
+ * price indicator equals to 2. 
+ *
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.value );
+importPackage( dw.catalog );
+
+/**
+ * Returns the sum price of a product set with price indicator 2.  
+ * The calculation gets the less price of each individual product and creates the sum.
+ */
+function getMinSumPriceForProductSet(product:Product):Money{
+	var products:Collection = product.getProductSetProducts();
+
+	var minVariationPrice:Money =  new Money(0.0, Site.getCurrent().getCurrencyCode());
+
+	for each (var prod : Product in products) {
+		var money:Money = prod.getPriceModel().getMinPrice();
+		minVariationPrice = minVariationPrice.add(money);
+	} 
+	return minVariationPrice;
+}
+
+
+function getProductSetPrice(product:Product):HashMap{
+	var products:Collection = product.getProductSetProducts();
+	var prices : HashMap = new HashMap();
+
+	var minPriceTotal:Money =  new Money(0.0, Site.getCurrent().getCurrencyCode());
+	var listPriceTotal:Money =  new Money(0.0, Site.getCurrent().getCurrencyCode());
+	var minProductPrice:Money = new Money(0.0, Site.getCurrent().getCurrencyCode());
+
+	for each (var prod : Product in products) {
+		var minPrice:Money = prod.getPriceModel().getMinPrice();
+		var minListPrice:Money = prod.getPriceModel().getMinPriceBookPrice(Site.current.preferences.custom.listPriceDefault);				
+			
+		if(minPrice.available &&
+		  (minProductPrice.getValue() > minPrice.getValue() || minProductPrice == 0) )
+			minProductPrice = minPrice;
+		//if(minPrice.available)
+			minPriceTotal = minPriceTotal.add(minPrice);
+		//if(minListPrice.available)
+			listPriceTotal = listPriceTotal.add(minListPrice);	
+	} 
+		
+	prices.put("setListPriceTotal", listPriceTotal);
+	prices.put("setMinPriceTotal", minPriceTotal);
+	prices.put("minProductPrice", minProductPrice);
+	return prices;
+}
+
+

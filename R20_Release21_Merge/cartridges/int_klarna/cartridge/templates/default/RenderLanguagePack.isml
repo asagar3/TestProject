@@ -1,0 +1,16 @@
+<isinclude template="util/klarnamodules"/>
+<isset name="shippingCountry" value="${pdict.Basket.shipments[0].shippingAddress.countryCode.value}" scope="page"/>
+<isset name="merchantID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_MERCHANT_ID')}" scope="page"/>
+<isset name="invoiceFee" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_INVOICEFEE_'+KlarnaCountry)}" scope="page"/>
+<isset name="KlarnaCountry" value="${pdict.Basket.shipments[0].shippingAddress.countryCode.value}" scope="page"/>
+<isset name="KlarnaLanguage" value="${pdict.CurrentRequest.getLocale().split('_')[0]}" scope="page"/>
+<isset name="KlarnaCurrency" value="${pdict.Basket.currencyCode}" scope="page"/>
+<isset name="KlarnaInvoiceFee" value="${invoiceFee}" scope="page"/>
+<isinclude template="klarna_enable"/>
+<isif condition="${KlarnaCountry == null}">
+<isinclude template="langpackerror"/>
+<iselse>
+<isif condition="${pdict.cotype == 'invoice'}"><isinclude template="checkout/invoice_form"/></isif>
+<isif condition="${pdict.cotype == 'part'}"><isinclude template="checkout/partpayment_form"/></isif>
+<isif condition="${pdict.cotype == 'spec'}"><isinclude template="checkout/special_form"/></isif>
+</isif>

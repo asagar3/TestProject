@@ -1,0 +1,405 @@
+<isset name="qtyDisplayOrder" value="0" scope="page"/>
+		
+<div class="product_wrapper_tablet">
+
+		<div class="productdetailimage_tablet setImage-tab" >
+			<isscript>
+				var subProductID = pdict.Product.ID;
+				var masterID = null;
+				if (pdict.Product.isMaster()) {
+					masterID = pdict.Product.ID;
+				} else if (pdict.Product.isVariant()) {
+					masterID = pdict.Product.variationModel.getMaster().ID;
+				} else {
+					masterID = pdict.Product.ID;
+				}
+				subProductID = subProductID.replace(/[^0-9a-z_]+/ig , '_');
+				masterID = masterID.replace(/[^0-9a-z_]+/ig , '_');
+			</isscript>		
+			<div class="productdetailcolumn productimages setImage">
+				<iscomment><!-- TODO: Scene7 viewer: add the whole <div class="productimage"--></iscomment>
+				
+				<div class="productimage ${masterID}"  id="productimage--${masterID}--${subProductID}"><!-- Product Image -->
+					 
+					<isinclude template="tablet/product/components/scene7flyout"/>	
+										 	
+				</div> 
+				<div class="productimage"><!-- Product Thumbnails --></div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				
+				<iscomment> :: Davinder Kumar :: Adding addthis.com sharing :: </iscomment>
+				<!-- AddThis Button BEGIN -->				 
+				<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+					<a class="addthis_button_twitter"></a>
+					<a class="addthis_button_facebook"></a>
+					<a class="addthis_button_pinterest_share"></a>
+					<a class="addthis_button_google_plusone_share"></a>
+					<a class="addthis_button_email"></a>
+				</div>
+				<script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
+				<script type="text/javascript" src="${dw.system.Site.current.preferences.custom.addthis}"></script>
+				<!-- AddThis Button END -->					
+			
+			</div><!-- END: productdetailcolumn -->
+		</div>
+
+
+<iscomment> Code to get the image for subproduct</iscomment>
+<isset name="image" value="${pdict.Product.getImage('catlanding',0)}" scope="page"/>
+<isif condition="${!empty(image)}">
+	<isset name="thumbnailUrl" value="${image.URL}" scope="page"/>
+	<isset name="thumbnailAlt" value="${image.alt}" scope="page"/>
+	<isset name="thumbnailTitle" value="${image.title}" scope="page"/>
+<iselse/>
+	<isset name="thumbnailUrl" value="${URLUtils.staticURL('/images/noimagemedium.png')}" scope="page"/>
+	<isset name="thumbnailAlt" value="${pdict.Product.name}" scope="page"/>
+	<isset name="thumbnailTitle" value="${pdict.Product.name}" scope="page"/>
+</isif>
+
+<div class="productdetailcolumn productinfo" id="miniimage--${masterID}--${subProductID}">
+	<div class="tablet-set-pdp clear">
+		<div class="tablet-set-image floatleft">
+			<a href="javascript:;" ><img src="${thumbnailUrl}" alt="${thumbnailAlt}" title="${thumbnailTitle}" /></a>
+		</div>
+		<div class="pdp-set-info floatleft">
+		<div class="coverRight">
+			<h2 class="productname"><!-- Product Name Display -->
+			
+					<iscomment><!-- Adam's Edit - INT-494  --></iscomment>
+					<isif condition="${pdict.Product.custom.productBrand != null && !empty(pdict.Product.custom.productBrand)}">
+					<div class="ms_header_5"><isprint value="${pdict.Product.custom.productBrand}"/></div>
+					</isif>
+					<div class="ms_header_4">
+					<iscomment>
+					 	<a href="${URLUtils.url('Product-Show','pid', pdict.Product.ID)}" title="${pdict.Product.name}">			 
+							<isprint value="${pdict.Product.name.replace(pdict.Product.custom.productBrand, '')}"/>
+						</a>
+						</iscomment>
+						<span><isprint value="${pdict.Product.name}"/></span>
+					</div>
+			</h2>
+			<div class="itemNo productID floatleft">
+				<span class="itemConstant">${Resource.msg('product.item','product',null)}</span>
+				<span class="itemNumber"><isprint value="${ pdict.Product.custom.tNumber }"/></span>
+				<div class="clear"></div>
+			</div>
+		
+			<isif condition="${!pdict.Product.bundled}">			
+				<iscomment>Praveen: Code changes for CR3007</iscomment>
+				<isset name="minListPrice" value="${pdict.Product.priceModel.getMinPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+				<isset name="maxListPrice" value="${pdict.Product.priceModel.getMaxPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>		
+				<isinclude template="tablet/product/components/pricing"/>
+			</isif>
+				<div class="set-indent-bottom">	
+			<div id="pdpProductSetDiv${pdict.ProductCount}" class="productset">
+				<isif condition="${!pdict.Product.bundled}">
+					 <isinclude template="tablet/product/components/promotions"/>
+				</isif>
+			</div>	
+				</div>
+				
+			<!-- END: productID -->
+		</div></div>
+			<div class="clear"></div>
+	</div>
+	<div>
+	<div id="pdpProductSetDiv${pdict.ProductCount}" class="productset clear">
+		  
+				<isif condition="${pdict.Product.bundled}">
+					<div class="attribute"><span class="label">${Resource.msg('global.quantity','locale',null)}: </span><span class="value"><isprint value="${pdict.ProductBundle.getBundledProductQuantity(pdict.Product)}" /></span></div>
+				</isif>
+			  
+			<div class="productsetdetail"> 
+			<div class="genTab-set">
+				<div class="tab-set">
+					<a>
+						<h3>${Resource.msg('global.chooseoptions','locale',null)}</h3>
+					</a>					 
+				</div>
+			<div class="tabItem-set" id="setdetails">								
+				<div class="productdetailcolumn productdetailcolumnsub productinfo-set">
+					
+				<isinclude template="tablet/product/components/variations"/>	
+				
+				<div class="mainattributes"><!-- Displays Product Main Attributes -->
+					<isset name="pam" value="${pdict.Product.getAttributeModel()}" scope="page"/>
+					<isset name="group" value="${pam.getAttributeGroup('mainAttributes')}" scope="page"/>
+					<isinclude template="tablet/product/components/group"/>
+					<div class="clear"><!-- W3C Clearing --></div>			
+				</div><!-- END: mainattributes -->
+				<isif condition="${!pdict.Product.bundled}">
+					<isinclude template="tablet/product/components/options"/>
+				</isif>
+				<div class="availability hidden">
+					<span class="label">${Resource.msg('global.availability','locale',null)}: </span>
+					<span class="value"><!-- Product Availability Message --></span>
+				</div><!-- END: availability -->
+				<isscript>
+							var pid : String = pdict.Product.ID;
+							var prod : dw.catalog.Product = dw.catalog.ProductMgr.getProduct(pid);
+							var prodShipModel : dw.order.ProductShippingModel = dw.order.ShippingMgr.getProductShippingModel(prod);
+							var shippingMethods : dw.util.ArrayList = prodShipModel.applicableShippingMethods;
+							var regularShipping : boolean = false;
+							var expressShipping : boolean = false;
+				 </isscript>
+				 <isif condition="${!pdict.Product.bundled}">
+						<div id="pdpATCDivsubProduct${pdict.ProductCount}Div" class="addtocartbar">
+							<div class="addtocart">
+								<span class="label"><label for="${pdict.Product.ID}quantity_dropdown">${Resource.msg('global.quantity','locale',null)}:</label><span id="${pdict.Product.ID}qtySpan" class="value pdpqtyshow">1</span></span>
+								 
+								<isscript>	
+									var maxQty: Number = dw.system.Site.getCurrent().getCustomPreferenceValue("maximumQuantity");
+									var qtyValue = new Array(maxQty);
+									var index = 0;
+									while(index< maxQty) {
+										qtyValue[index++] = index;
+									}
+								</isscript>	
+		
+					  <div class="tablet-qty genericinputbox">
+								<button   class="qty-sign disabled pdp-qty-minus" type="button">&minus;</button>
+								<input type="text" readonly="true" class="qty-count" id="${pdict.Product.ID}quantity_dropdown" value="${Number(qty).toFixed()}">				   
+								</input>
+								<button   class="qty-sign pdp-qty-plus" type="button" >&plus;</button>
+							 
+							</div> 
+							
+							<iscomment>	<!-- <select class="quantity_dropdown" id="${pdict.Product.ID}quantity_dropdown" onchange="calledOnChange(this, '${pdict.Product.ID}');">
+									<isloop items="${qtyValue}" var="qty">
+										<option value="${Number(qty).toFixed()}">${Number(qty).toFixed()}</option>
+									</isloop>	
+								</select> --></iscomment>
+								<span style="display:none!important" class="hidden" id="${pdict.Product.ID}quantityErrorIconID"></span>								
+								<div class="floatleft btn-green-flat clear">
+									<button type="button" onclick="setOmnitureVariablesForProductSetAdd(this, '${pdict.Product.ID}');" title="${Resource.msg('global.addtocart','locale',null)}" value="${Resource.msg('global.addtocart','locale',null)}"  class="addtocartbutton"><span class="btn-ic-basket">${Resource.msg('global.addtocart','locale',null)}</span></button>
+								</div>
+								<isif condition="${pdict.ProductCount == 1}">
+									<div class="clear pspFirstProd"><a href="#subProduct2Div" title="${Resource.msg('product.psplinktonextproduct','product',null)}"><isprint value="${Resource.msg('product.psplinktonextproduct','product',null)}" encoding="off"/></a></div>
+								</isif>
+								<iscomment><button type="button" value="${Resource.msg('global.addtocart','locale',null)}" class="addtocartbutton"><span>${Resource.msg('global.addtocart','locale',null)}</span></button></iscomment>
+							</div><!-- END: addtocart -->
+							
+							<div class="clear"></div>
+							<iscomment>quantity Error was not implemented on Product Set Page | Naveen Kumar</iscomment>
+							<div id="${pdict.Product.ID.replace(' ','_')}quantityErrorMessage" class="errorclient clear">
+		     				</div><!-- END: quantityErrorMessage -->
+						</div><!-- END: addtocartbar -->
+						<iscomment><isif condition="${!empty(pdict.Basket) && (pdict.Basket.productLineItems.size() > 0 || pdict.Basket.giftCertificateLineItems.size() > 0)}"></iscomment>
+								<div class="tablet-minicart" >
+								</div>
+						<iscomment></isif></iscomment> 
+					</isif>	
+					
+					 
+					<div style="display:none">
+					  
+	<isscript>
+		var shipmethodtabhref = "#pdpShipMethodsTab" + pdict.ProductCount;
+		var pdpTabhref = "#pdpTab" + pdict.ProductCount;
+		var pdpShipMethodHref = "#pdpShipMethods" + pdict.ProductCount;
+	</isscript>
+	<isloop items="${shippingMethods}" var="shippingMethod" status="shippingMethodLoop">
+		<isif condition="${shippingMethod.defaultMethod}">
+			<isscript>
+				regularShipping = true;
+			</isscript>
+			<span class="delivery_link_std">
+				<isprint value="${shippingMethod.custom.deliveryLeadTime}"/>
+				<isif condition="${!isQuickView && (shippingMethods.size() == 1)}">
+					<a onclick="rqaTabSelectAction(0,${pdict.ProductCount});" href="${shipmethodtabhref}" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+				</isif>
+			</span>
+		</isif>
+	</isloop>
+	<isloop items="${shippingMethods}" var="shippingMethod" status="shippingMethodLoop">
+		<isif condition="${!shippingMethod.defaultMethod}">
+			<isscript>
+				expressShipping = true;
+				var classValue : String = "delivery_link_" + shippingMethod.ID.toLowerCase();
+			</isscript>
+			<span class="${classValue}">
+				<isprint value="${shippingMethod.custom.deliveryLeadTime}"/>	
+				<isif condition="${!isQuickView}">
+					<a onclick="rqaTabSelectAction(0,${pdict.ProductCount});" href="${shipmethodtabhref}" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+				</isif>
+			</span>
+		</isif>
+	</isloop>
+	<iscomment> CR023 | new Content asset is created for extra text on PDP and PSP pages | Naveen Kumar </iscomment>
+	<span class="collect_from_uk"><iscontentasset aid="PDP_COLLECT_FROM_UK"></span>	
+					</div>	
+					
+					
+				</div> 
+	 
+	<isif condition="${!isQuickView}">
+ 
+	<div id="pdpTabsDiv${pdict.ProductCount}">
+			<div class="genTab">
+					<div class="tab"  id="pdpTabItems${pdict.ProductCount}">
+							 <a> 
+								<h3>${Resource.msg('product.tab2','product',null)}</h3>
+							</a> 
+							 
+					</div>
+					<div class="tabItem">
+						<div id="pdpTab${pdict.ProductCount}" >
+						<iscomment>
+						<h3>${Resource.msg('product.tab2','product',null)}</h3>
+						 </iscomment>
+							
+							<iscomment>INTP-24 PIM: Care Instructions and Composition Bullet Attributes, Product details and Bullet points</iscomment>
+								<isif condition="${!empty(pdict.Product.custom.productDetailsBulletPoints) || 
+												   !empty(pdict.Product.custom.careInstructions) || 
+												   !empty(pdict.Product.custom.composition) || 
+												   !empty(pdict.Product.custom.IntlEnglishText) || 
+												   !empty(pdict.Product.custom.IngredientsListing) ||
+												   !empty(pdict.Product.custom.CompositionList) ||
+												   !empty(pdict.Product.custom.Footwear_Sole) ||
+												   !empty(pdict.Product.custom.HomeMaterial)||
+												   !empty(pdict.Product.custom.usageInstructions) ||
+												   !empty(pdict.Product.custom.safetyWarning) ||
+												   !empty(pdict.Product.custom.careInstructions) ||
+												   !empty(pdict.Product.custom.GenericCMSContentID_Panel) ||
+												   !empty(pdict.Product.custom.GenericCMSContentID_Panel2)}">
+								<isinclude template="product/components/productDetailsBulletPoints"/>
+								</isif>
+							
+							<iscomment>INT-493 - TODO remove bullet points</iscomment>
+								<iscomment>
+							<ul class="prodTab_section">
+								
+								
+								<isif condition="${pdict.Product.custom.bullet1 != null}">
+									<isloop items="${pdict.Product.custom.bullet1}" alias="bullet">
+										<li>
+											<isprint value="${bullet}" encoding="off"/>
+										</li>
+									</isloop>
+								</isif>	
+								</iscomment>
+								
+								<iscomment>INTP-24 it has been moved to productDetailsBulletPoints  </iscomment>
+								<iscomment>							
+							 	<isif condition="${pdict.Product.custom.careInstructions != null}">
+									<li>
+										<span class="bold">${Resource.msg('product.careinstruction','product',null)}</span><isprint value="${pdict.Product.custom.careInstructions}" encoding="off"/>
+									</li>
+								</isif>
+								<isif condition="${!empty(pdict.Product.custom.composition)}">
+									<li><span class="bold">${Resource.msg('product.composition','product',null)}</span>
+										<isloop items="${pdict.Product.custom.composition}" alias="composition">
+											<isprint value="${composition}" encoding="off"/>
+										</isloop>
+									</li>
+								</isif>
+								 
+							</ul>
+							<div class="clear"></div>
+							</iscomment>
+						</div>
+						</div>
+							
+					
+				</div>
+	<div class="clear"><!-- FLOAT CLEAR -->	</div>
+	</div><!-- END: productdetailcolumn -->
+	</isif>	
+			</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+	</div><!-- END: productdetail -->
+	</div> 	
+</div>
+
+</div>
+<div class="clear"><!-- FLOAT CLEAR --></div>	
+</div>
+ 
+
+ 
+<script type="text/javascript">
+	jQ(document).ready(function(){	
+	 
+		 		 
+		jQ('.qty-count').focus(function(){
+			jQ('.qty-count').blur();
+		});
+	 
+	var productID = '${pdict.Product.ID}';
+	
+	jQ(".variantdropdown select").on("change", function(){
+		jQ('input#' + productID + 'quantity_dropdown').attr('value', '1');
+		qty1 = 1;
+		 jQ(this).parent().find(".pdp-qty-minus").addClass("disabled");
+	});
+	
+	jQ(".swatchli").on("click", function(){
+		jQ('input#' + productID + 'quantity_dropdown').attr('value', '1');
+		qty1 = 1;
+		 jQ(this).parent().find(".pdp-qty-minus").addClass("disabled");
+		 jQ('.pdp-size').parent().removeClass("red-border-size");
+			jQ('span.selectedvarval').empty();
+	});
+	
+	
+
+	//var qty1 = parseInt(jQ(".qty-count").val());
+	 
+	
+	jQ(".pdp-qty-minus").off('click').on("click", function(e){					  
+		 
+		e.preventDefault();
+		var qty1 = parseInt(jQ(this).parent().find(".qty-count").val());
+		 if(qty1 >1){ 
+											
+			  qty1 = qty1 -1;  
+			  jQ(this).parent().find(".qty-count").attr("value",qty1);
+			  jQ(this).parent().find(".pdp-qty-plus").removeClass("disabled");
+			calledOnChange(qty1, '${pdict.Product.ID}');
+			 
+			if(qty1 == 1)
+			{ 
+				jQ(this).parent().find(".pdp-qty-minus").addClass("disabled");
+				jQ(this).parent().find(".pdp-qty-plus").removeClass("disabled");
+			}
+			  jQ('.pdpqtyshow').empty().html(qty1); 
+		  }
+		 else { 
+			 jQ(this).click(false);
+			 return(false)}
+		 
+		 
+	});
+		
+	jQ(".pdp-qty-plus").off('click').on("click",function(e){
+		 
+		 e.preventDefault();
+		var qty1 = parseInt(jQ(this).parent().find(".qty-count").val());
+	 
+				 if(qty1 < ${maxQty}){ 
+					  
+					  qty1 = qty1 +1;  
+					  
+					  jQ(this).parent().find(".qty-count").attr("value",qty1);											 
+					 calledOnChange(qty1, '${pdict.Product.ID}')
+					  jQ(this).parent().find(".pdp-qty-minus").removeClass("disabled");
+					
+					 
+					  if(qty1 == ${maxQty} )
+						{ 
+						  jQ(this).parent().find(".pdp-qty-plus").addClass("disabled");
+						  jQ(this).parent().find(".pdp-qty-minus").removeClass("disabled");
+						}
+					  jQ('.pdpqtyshow').empty().html(qty1); 
+				  }
+				 else { 
+					  jQ(this).click(false);
+					 
+						 return(false)}
+				
+					
+	}) ;
+		})
+</script>
+ 

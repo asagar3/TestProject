@@ -1,0 +1,236 @@
+<!--- TEMPLATENAME: serviceoverview.isml --->
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<isdecorate template="application/MenuFrame">
+<style type="text/css">
+	.servicetable .table_header {height:40px; width:100px;}
+	.servicetable .actions {width:50px !important;}
+	.servicetable .enabledfrom {width:50px !important;}
+	.servicetable .enabledto {width:50px !important;}
+	.servicetable .headerlog {width:50px !important;}
+	.servicetable .fulllog {width:50px !important;}
+	.servicetable .maxlockitems {width:50px !important;}
+	.servicetable .timeout {width:70px !important;}
+	.servicetable .lockingtime {width:70px !important;}
+	.servicetable .subsystem {width:70px !important;}
+</style>
+<isscript>
+importScript('util/WebserviceConfiguration.ds');
+
+	var errorList : dw.util.HashMap = new dw.util.HashMap();
+
+	errorList.put('0', 'Unknown host');
+	errorList.put('1', 'Socket timeout');
+	errorList.put('2', 'Internal server error');
+	errorList.put('3', 'Backend system unavailable');
+	errorList.put('4', 'MQ unavailable');
+
+</isscript>
+
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<tbody>
+		<tr>
+			<td width="100%" class="table_title aldi">Webservice
+			Configurations</td>
+		</tr>
+
+		<tr>
+			<td class="table_title_description e w s">This page allows you
+			to check the status and configuration of all configured webservices.</td>
+		</tr>
+		<tr>
+			<td class="infobox w e"><!--- Put a serach here ---></td>
+		</tr>
+	</tbody>
+</table>
+
+<!--- Service list --->
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<form name="serviceForm" method="post" action="" />
+	<tbody>
+		<tr>
+			<td>
+
+			<table cellspacing="0" cellpadding="0" border="0" width="100%" class="w servicetable">
+				<tbody>
+					<tr>
+						<td class="table_header e s servicename">Service name</td>
+						<td class="table_header e s targetsystem">Target System</td>
+						<td class="table_header e s subsystem">Subsystem</td>
+						<td class="table_header e s timeout">Timeout (in ms)</td>
+						<td class="table_header e s maxlockitems">Max. # of Active Lockitems</td>
+						<td class="table_header e s lockingtime">Locking time (in ms)</td>
+						<td class="table_header e s enabledfrom">enabled from</td>
+						<td class="table_header e s enabledto">enabled until</td>
+						<td class="table_header e s headerlog">header log</td>
+						<td class="table_header e s fulllog">Full log</td>
+						<td class="table_header e s status">Status</td>
+						<td class="table_header e s lockitems">Active Lock items</td>
+						<td class="table_header e s actions">Actions</td>
+					</tr>
+
+					<isloop iterator="${pdict.ServiceConfigurations}" alias="Service" status="loopstate">
+						<isscript>
+							// as we already have the COs, this should never fail //
+							var Config = new WebserviceConfiguration(Service.custom.ID);
+						 	var lockSize = Config.getLockItemCount();
+						 	var specialColor = '';
+						 	if (Config.isLocked()) {
+						 		specialColor = '#FF4F4F';
+						 	} else {
+						 		if (lockSize > 0) {
+						 			specialColor = '#FFFF88';						 	
+						 		}
+							}
+						 		
+						</isscript>
+						<tr>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>><isprint value="${Config.provideDisplayName()}"></td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>><isprint value="${Config.getTargetSystem()}"></td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>><isprint value="${Config.getTargetRole()}"></td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif> align="right"><isprint value="${Config.getTimeout()}">&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif> align="right"><isprint value="${Config.getMaxAttempts()}">&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif> align="right"><isprint value="${Config.getLockingTime()}">&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>> <isprint value="${Config.getUsableFrom()}" formatter="dd.MM.yyyy HH:mm">&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>> <isprint value="${Config.getUsableTo()}" formatter="dd.MM.yyyy HH:mm">&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>> <isif condition="${Config.isHeaderLogEnabled()}">ON<iselse><span style="color:grey">OFF</span></isif>&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>> <isif condition="${Config.isFullCommunicationLogEnabled()}">ON<iselse><span style="color:grey">OFF</span></isif>&nbsp;</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>>
+								<isif condition="${Config.locked}">
+								<span style="color:black">LOCKED</span>
+								<iselseif condition="${Config.disabled}">
+								<span style="color:grey">DISABLED</span>
+								<iselse>
+								<span style="color:green">WORKING</span>
+								</isif>
+							</td>
+							<td class="table_detail e s" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>>
+								<!--- 
+								<a href="${URLUtils.url('ViewCustomObject_52-Edit','ObjectTypeDefinitionUUID','bcs3oiaagK2dsaaacFUhEFBJYb','CustomObjectUUID',Service.UUID)}">Edit</a>
+								<a onclick="return confirm('Do you really want to delete this configuration?');" href="${URLUtils.url('Services-Delete','CustomObjectUUID',Service.UUID)}">Delete</a>
+								 --->&nbsp;
+								 
+								 <isprint value="${lockSize}" formatter="0">
+								 
+								 <isif condition="${lockSize > 0}">
+								 	<script type="text/javascript">
+								 		function createWindow_${loopstate.index}(){
+								 			var win = new Window({className: 'dialog', resizable: true, width: 400, height: 200, title: 'Lock items of service ${Config.displayName}', draggable:true, wiredDrag: true, destroyOnClose: true}); 
+								 			win.setContent('locks_${Service.UUID}', true, true);
+								 			win.setCloseCallback(function(){
+								 				$('locks_${Service.UUID}').hide();
+								 				return true;
+								 			});
+								 			win.showCenter();
+								 		}
+								 	</script>
+									 <a onclick="createWindow_${loopstate.index}();return false;" href="">Show items</a>
+									 <div id="locks_${Service.getUUID()}" style="display:none; max-height: 500px; width: 700px;"  class="locks">
+									 	<table cellspacing="0" border="0" width="100%" class="w">
+											<tbody>
+												<tr>
+													<td nowrap="nowrap" class="table_header n e s" style="padding: 5px;">Service name</td>
+													<td nowrap="nowrap" class="table_header n e s" style="padding: 5px;">Valid until</td>
+													<td nowrap="nowrap" class="table_header n e s" style="padding: 5px;">Request ID</td>
+													<td nowrap="nowrap" class="table_header n e s" style="padding: 5px;">Error cause</td>
+												</tr>
+												<tr>
+													<isloop iterator="${Config.lockingItems}" alias="LockItem" status="lockLoopstate">
+														<td width="20%" class="table_detail e s" style="padding: 5px;"><isprint value="${LockItem.custom.serviceName}"></td>
+														<td width="20%" class="table_detail e s" style="padding: 5px;"><isprint value="${LockItem.custom.validTo}" formatter="dd.MM.yyyy HH:mm"></td>
+														<td width="30%" class="table_detail e s" style="padding: 5px;"><isprint value="${LockItem.custom.requestID}"></td>
+														<td width="20%" class="table_detail e s" style="padding: 5px;"><isprint value="${errorList.get(LockItem.custom.errorCause.toString())}"></td>
+													</tr>
+												</isloop>
+											</tbody>
+											<tfoot>
+												<tr>
+													<td class="table_header n e s" style="padding: 5px;" colspan="4"><a href="${URLUtils.url('Services-RemoveLocks','serviceName', Service.custom.ID)}" style="float:right;"> Remove Lock Items</a></td>
+												</tr>
+											</tfoot>
+										</table>
+									 </div>
+								</isif>
+							</td>
+							<td class="table_detail s e" <isif condition="${!empty(specialColor)}">style="background-color: ${specialColor}" </isif>>
+												
+	        					<table cellspacing="4" cellpadding="0" border="0">
+									<tbody>
+										<tr>
+											<td class="button">
+												<a id="editLink_${Service.custom.ID}" href="${dw.web.URLUtils.url('CustomObjectExtensions-EditServiceConfig')}?action=edit&oid=${Service.custom.ID}&back=Services-Overview" style="display: none;">[Edit Config]</a>
+												<input type="button" class="button" value="Edit" onclick="location.href = $('editLink_${Service.custom.ID}').href; return false;"/>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								
+							
+							</td>
+						</tr>
+					</isloop>
+
+				</tbody>
+			</table>
+			<table cellspacing="0" cellpadding="0" border="0" width="100%"
+				class="w e s">
+				<tbody>
+					<tr>
+						<td align="right">
+						<table cellspacing="4" cellpadding="0" border="0">
+							<tbody>
+								<tr>
+									<td class="table_detail">
+														
+	        					<table cellspacing="4" cellpadding="0" border="0">
+									<tbody>
+										<tr>
+											<td class="button">
+												<a id="resetLink" href="${dw.web.URLUtils.continueURL()}?action=reload" style="display: none;">[Reset Filter]</a>
+												<a id="newLink" href="${dw.web.URLUtils.url('CustomObjectExtensions-CreateServiceConfig')}?action=create&back=Services-Overview" style="display: none;">[Create Service Config]</a>
+												<input type="button" class="button" value="Create Service Config" onclick="location.href = $('newLink').href; return false;"/>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div><img height="6" border="0" width="1" alt=""
+				src="/on/demandware.static/Sites-Site/-/de_DE/v1244067343055/images/space.gif" /></div>
+			<table width="100%" class="pagecursor">
+				<tbody>
+					<tr>
+						<td align="left" width="40%" class="pagecursortxt"> Showing <!-- <span
+							class="pagecursoritem bold">1</span> - <span
+							class="pagecursoritem bold"><isprint
+							value="${pdict.ServiceConfigurationsCount}"></span> of  --><span
+							class="pagecursoritem bold"><isprint
+							value="${pdict.ServiceConfigurationsCount}"></span> items.    </td>
+
+						<!--- 
+						<td nowrap="nowrap" class="pagecursortxt top">Show <span
+							class="pagecursortxt"> <input type="submit"
+							class="pagecursorbtn" value="50" name="PageSize" /> </span> <span
+							class="pagecursortxt"> <input type="submit"
+							class="pagecursorbtn" value="100" name="PageSize" /> </span> <span
+							class="pagecursortxt"> <input type="submit"
+							class="pagecursorbtn" value="1000" name="PageSize" /> </span> items</td>
+ --->
+						 
+						</td>
+
+					</tr>
+				</tbody>
+			</table>
+
+			</td>
+		</tr>
+
+	</tbody>
+</table>
+</isdecorate>

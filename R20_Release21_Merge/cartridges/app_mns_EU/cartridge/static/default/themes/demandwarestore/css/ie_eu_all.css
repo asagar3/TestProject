@@ -1,0 +1,10 @@
+.checkout .paymentmethods input, .checkout .gender input, .klarnaCondition .checkbox input{background:none;}
+.checkout .radio input[type="radio"]{top:2px;}
+
+.checkout .actions{margin-left:-5px;}
+
+.checkout .shippingmethods .shippngRight .shippingmethod{margin-left:-5px;}
+.shippingmethods input[type="radio"]{
+	margin-top: 2px !important;
+}
+td.action button.textbutton{overflow:visible;/*3090*/}

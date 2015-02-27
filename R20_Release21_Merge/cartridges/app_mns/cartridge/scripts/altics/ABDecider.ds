@@ -1,0 +1,46 @@
+/**
+*
+*
+* @input CurrentHttpParameterMap : dw.web.HttpParameterMap
+* @input CurrentSession : dw.system.Session
+* @input Product : dw.catalog.Product
+* @output eligibleForAlticsPage : String
+*
+*/
+importPackage( dw.catalog);
+importPackage( dw.web );
+importPackage( dw.system );
+importPackage( dw.campaign);
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+
+	
+	var eligibleForAlticsPage:String = "false";
+	
+	if(dw.system.Site.getCurrent().getCustomPreferenceValue("ABTESTPDP")
+	&& pdict.CurrentSession.custom.channel!="tablet" && pdict.CurrentSession.custom.channel!='mobile'
+	&& !pdict.Product.productSet)
+	{
+		
+		var quickView:Boolean = false;
+		if(!empty(pdict.CurrentHttpParameterMap)&& pdict.CurrentHttpParameterMap.source!=null){
+			if(pdict.CurrentHttpParameterMap.source.stringValue == 'quickview'|| pdict.CurrentHttpParameterMap.source.stringValue == 'cart')
+			{
+				quickView = true;
+			}
+		}
+	
+		if(!quickView){
+			   if(ABTestMgr.isParticipant("Altics","Altics_Participant")){
+    				eligibleForAlticsPage = "true";
+    			}
+		}
+		
+		
+	}
+	
+	
+   pdict.eligibleForAlticsPage = eligibleForAlticsPage;
+   return PIPELET_NEXT;
+}

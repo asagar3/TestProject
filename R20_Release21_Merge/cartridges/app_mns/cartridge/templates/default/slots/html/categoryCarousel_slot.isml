@@ -1,0 +1,107 @@
+<iscache type="relative" hour="24"/>
+<!--[if IE ]>
+<style type="text/css">
+                /* css for IE  */
+    .carouseltext-left p{font-size:1.7em;}
+    .carouseltext-center p{font-size:1.7em;}
+    .carouseltext-center{left:29.7%; width:40%;}
+    .carouseltext-center a{}
+    .carouseltext-center h1{}
+    #info-beta .info-box h2{font-size:1.9em !important;}
+    #info-beta .info-box-middle h2{font-size:1.9em !important;}
+    #info-beta .info-box-right h2{font-size:1.9em !important;}
+    #info-beta a{font-weight: normal !important}
+    
+</style>
+<![endif]-->
+
+<style type="text/css">
+	@-moz-document url-prefix() {
+      #info-beta a{font-weight: normal !important}
+      .carouseltext-left a{font-weight:normal}
+	}
+</style>
+
+   <script type="text/javascript">
+  	
+   $(document).ready(function() {	
+		var totalImages = $("#hpslides li").length;
+		var slider = 1;
+		
+		var speed = 5000;
+		var run = setInterval('rotate()', speed);		
+		var item_width = $('#hpslides li').outerWidth(); 
+		var left_value = item_width * (-1);         
+	    $('#hpslides li:first').before($('#hpslides li:last'));	
+		$('#hpslides ul').css({'left' : left_value});
+	   	$('#hpprev_cat').click(function() {
+			var left_indent = parseInt($('#hpslides ul').css('left')) + item_width;
+				$('#hpslides ul:not(:animated)').animate({'left' : left_indent}, 1000,function(){  
+	            $('#hpslides li:first').before($('#hpslides li:last')); 
+				$('#hpslides ul').css({'left' : left_value});	
+				slider = slider - 1;
+				if(slider == 0){slider = totalImages}
+				$('.left h6').html(slider + ' / ' + totalImages );	
+				$('.right h6').html(slider + ' / ' + totalImages );
+			});
+			return false;            
+		}); 
+	   	 $('#hpnext_cat').click(function() {		
+			
+			var left_indent = parseInt($('#hpslides ul').css('left')) - item_width;		
+			$('#hpslides ul:not(:animated)').animate({'left' : left_indent}, 1000, function () {            
+	            $('#hpslides li:last').after($('#hpslides li:first'));         	
+				$('#hpslides ul').css({'left' : left_value});	
+				slider = slider + 1;
+				if(slider == totalImages + 1 ){slider = 1}
+				$('.left h6').html(slider + ' / ' + totalImages);
+				$('.right h6').html(slider + ' / ' + totalImages);	
+			});		         
+			return false;		
+		});
+		$('#hpslides').hover(		
+			function() {
+				clearInterval(run);
+			}, 
+			function() {
+				run = setInterval('rotate()', speed);	
+			}
+		);
+	});
+	function rotate() {
+		$('#hpnext_cat').click();
+	}   
+
+	</script>
+
+<script>
+	$(document).ready(function(){
+		$("#hpprev_cat").hover(function(){$(".left").css('display','block');},
+		function()
+		{$(".left").css('display','none');});
+		$("#hpnext_cat").hover(function(){$(".right").css('display','block');},
+		function()
+		{$(".right").css('display','none'); });
+		
+	});
+	
+</script>
+      <div id="hpcarousel_cat">
+         <div id="hpbuttons">
+        	<a href="#" id="hpprev_cat"></a>
+			<a href="#" id="hpnext_cat"></a>
+            <div class="clear"></div>
+        </div>             
+        <div id='num'> 
+          <div class="left"><h6></h6> </div>        
+          <div class="right" style="left:690px;"><h6></h6></div>
+        </div>  
+          <div class="clear"></div>   
+          
+	<isif condition="${slotcontent != null}">
+		<isloop items="${slotcontent.content}" var="markupText">
+			<isprint value="${markupText.markup}" encoding="off"/>	
+		</isloop>
+	</isif>
+	</div>
+

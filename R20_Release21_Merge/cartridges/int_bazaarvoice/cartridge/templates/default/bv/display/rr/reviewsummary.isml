@@ -1,0 +1,19 @@
+<!--- TEMPLATENAME: reviewsummary.isml --->
+<isscript>
+var IsBazaarVoiceEnabled:Boolean= dw.system.Site.getCurrent().getCustomPreferenceValue("IsBazaarVoiceEnabled");
+</isscript>
+<isif condition="${IsBazaarVoiceEnabled}">
+<div id="BVCustomerRatings" class="BVCustomerRatings"></div>
+</isif>
+<script type="text/javascript">
+<!--
+jQ(function(){
+	jQ(".BVCustomerRatings").on('click', "a[href$='BVRRWidgetID']", function(e){
+		e.preventDefault();
+		jQ('html, body').animate({
+			scrollTop: jQ("#containerReviews").offset().top
+		}, 0);
+	});
+});
+//-->
+</script>

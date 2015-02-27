@@ -1,0 +1,36 @@
+<!--- TEMPLATENAME: mns_lang.isml --->
+<link href="${URLUtils.staticURL('/themes/demandwarestore/css/europe_tablet.css')}" type="text/css" rel="stylesheet" title="Demandware Store" />
+<script src="${URLUtils.staticURL('/themes/demandwarestore/js/pluginsEU.js')}" type="text/javascript"></script>
+
+<script type="text/javascript"><!--
+	// Because the SEO friendly URLs are activated on prodution environment, we will never encounter a situation where query String is needed from the request...
+	// E.g. category landing or product detail pages will have SEO friendly URLs
+	// BRD Requirement:  OSE01 - Ability to specify language and location data for content that is readable by search engines to avoid duplicate content.
+	var requestLocale = "${pdict.CurrentRequest.locale}";
+	//Picking URL from the addressbar of the browser
+	var requestPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+	
+	//Creating JS array from BM/SitePref	
+	var localeList =  "${dw.system.Site.getCurrent().preferences.custom.localeList.join(',')}";
+	localeList = localeList.split(",");	
+	
+	for (i=0; i<localeList.length; i++){
+		if (localeList[i] != "default"){
+			createLinkTag(requestLocale, localeList[i], requestPath);			
+		}
+	}
+	//Function to create Link Tags for different locales
+	function createLinkTag(requestLocale, localeToChange, hrefURL){
+	
+		hrefURL = hrefURL.replace(requestLocale, localeToChange);
+		localeToChange = localeToChange.replace("_", "-");
+		
+		link=document.createElement('link');
+		link.rel="alternate";
+		link.hreflang=localeToChange;
+		link.href=hrefURL;
+		
+		document.getElementsByTagName("head")[0].appendChild(link);			
+	}
+//-->
+</script>

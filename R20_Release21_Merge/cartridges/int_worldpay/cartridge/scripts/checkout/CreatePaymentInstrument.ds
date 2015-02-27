@@ -1,0 +1,106 @@
+/**
+ * Creates a payment instrument from the given  form
+ * for the given basket. If any error occurs the pipelet returns PIPELET_ERROR with
+ * no payment instrument being created. If the creation succeeded the script returns 
+ * the newly created payment instrument.
+ *
+
+ *
+ * @input Basket : dw.order.Basket The basket.
+ * @input PaymentType : String the type of the payment instrument.
+ * @input RemoveExisting : Boolean if true, removes any other payment instruments of the same type
+ * @input BankTransferForm : dw.web.FormGroup The payment form.
+ * @output PaymentInstrument : dw.order.PaymentInstrument The created payment instrument.
+ */
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.value );
+importPackage( dw.web );
+
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+    var basket : Basket = pdict.Basket;
+	var paymentType : String = pdict.PaymentType;
+	var removeExisting : Boolean = pdict.RemoveExisting;
+	var bankTransfer : FormGroup = pdict.BankTransferForm;
+	
+
+	// verify that we have a basket and payment Type
+	if( basket == null || paymentType == null || removeExisting == null)
+	{
+		return PIPELET_ERROR;
+	}
+
+	// remove existing Bank Transfer from the basket
+	if (removeExisting)
+	{
+		removeExistingPaymentInstruments( basket);
+	}
+	
+	// calculate the amount to be charged for the Bank Transfer
+	var amount = calculateNonGiftCertificateAmount( basket );
+
+	// create a payment instrument for this Bank Transfer
+	var paymentInstr : PaymentInstrument = basket.createPaymentInstrument( paymentType, amount );
+	
+	//Set bank transfer details to the paymentiinstrument
+	paymentInstr.custom.paymentType = bankTransfer.paymentType.value;
+	paymentInstr.custom.bankName = bankTransfer.bank.value;
+	//Set Bank Country in the Payment Instrument
+	paymentInstr.custom.bankCountry = bankTransfer.bankCountry.value;
+	pdict.PaymentInstrument = paymentInstr;
+    return PIPELET_NEXT;
+}
+
+/** 
+ * Determines if the basket already contains a Bank Transfer payment 
+ * instrument and removes it from the basket.
+ */
+function removeExistingPaymentInstruments( basket : Basket)
+{
+	var ccPaymentInstrs : Collection = basket.getPaymentInstruments();
+	var iter : Iterator = ccPaymentInstrs.iterator();
+	var existingPI : OrderPaymentInstrument = null;
+
+	// remove them
+	while( iter.hasNext() )
+	{
+		existingPI = iter.next();
+		basket.removePaymentInstrument( existingPI );
+	}
+}
+
+/**
+ * Calculates the amount to be payed by a non-gift certificate payment instrument based 
+ * on the given basket. The method subtracts the amount of all redeemed gift certificates 
+ * from the order total and returns this value.
+ */
+function calculateNonGiftCertificateAmount( basket : Basket ) 
+{
+	// the total redemption amount of all gift certificate payment instruments in the basket
+	var giftCertTotal : Money = new Money( 0.0, basket.currencyCode );
+
+	// get the list of all gift certificate payment instruments 
+	var gcPaymentInstrs : Collection = basket.getGiftCertificatePaymentInstruments();
+	var iter : Iterator = gcPaymentInstrs.iterator();
+	var orderPI : OrderPaymentInstrument = null;
+
+	// sum the total redemption amount
+	while( iter.hasNext() )
+	{
+		orderPI = iter.next();
+		giftCertTotal = giftCertTotal.add( orderPI.getPaymentTransaction().getAmount() );
+	}
+
+	// get the order total
+	var orderTotal : Money = basket.totalGrossPrice;
+
+	// calculate the amount to charge for the payment instrument
+	// this is the remaining open order total which has to be paid
+	var amountOpen : Money = orderTotal.subtract( giftCertTotal );
+
+	// return the open amount
+	return amountOpen;
+}

@@ -1,0 +1,31 @@
+/**
+
+*   @input remoteIP : String
+*-   @output ExampleOut : Number
+*
+*/
+importPackage( dw.system );
+
+function execute( args : PipelineDictionary ) : Number
+{
+//Splitting and calculating numeric value pf remote IP	
+var remoteIp: Array =  args.remoteIP.split(".");
+//var remoteIp: Array =  "155.136.16.129".split(".");
+var remoteIpasNum : Number = new Number(remoteIp.pop()) + new Number(remoteIp.pop()) *256 + new Number(remoteIp.pop()) *256*256 + new Number(remoteIp.pop())*256*256*256 ;
+
+var validIps : Array = Site.getCurrent().getCustomPreferenceValue("ValidIPForWorldPay");
+
+for each(var ip in validIps){
+var validIpRange: Array = ip.split("/");
+var mask : Number = validIpRange.pop();
+var subNetMask= 0xFFFFFFFF <<(32-mask);  // Calculating the Subnet mask of the given IP range in the BM
+var validIp: Array = validIpRange.pop().split(".");
+var validIpasNum: Number = new Number(validIp.pop()) + new Number(validIp.pop()) *256 + new Number(validIp.pop()) *256*256 + new Number(validIp.pop())*256*256*256 ;
+
+// Checking if the remote IP is in range of the subnet 
+  if((remoteIpasNum & subNetMask)==(subNetMask & validIpasNum )){
+	   return PIPELET_NEXT;
+     }
+   }
+   return PIPELET_ERROR;
+}

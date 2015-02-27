@@ -1,0 +1,36 @@
+/**
+ * Creates a shipping address for the given shipment and copies
+ * the address details stored in the given address form to the
+ * created shipment address.
+ * The method additionally sets the given gift options to the 
+ * shipment.
+ *
+ * @input requestLocale : String
+ * @output language : String
+ * @output country : String
+ * @output emailId : String
+ */
+importPackage( dw.util );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var localeObject : Locale = Locale.getLocale(pdict.requestLocale);
+	var countryName : String = localeObject.getCountry();
+	var language : string = localeObject.getLanguage();
+	
+	pdict.country = countryName;
+	pdict.language = language;
+	var contactUsEmailIDList: Array = dw.system.Site.getCurrent().getCustomPreferenceValue("ContactUsEmailIDs");
+		
+	for(var i=0 ; i<contactUsEmailIDList.length ;i++) {
+			var countryId = contactUsEmailIDList[i].getValue();
+			if(countryId==countryName){
+				if(!empty(contactUsEmailIDList[i].getDisplayValue()) && !(contactUsEmailIDList[i].getValue().equals(contactUsEmailIDList[i].getDisplayValue()))) {
+					pdict.emailId = contactUsEmailIDList[i].getDisplayValue();
+				}
+				break;
+			}	
+		}
+	
+    return PIPELET_NEXT;
+}

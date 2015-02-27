@@ -1,0 +1,410 @@
+<isdecorate template="account/pt_account_landing">
+<isinclude template="util/modules"/>
+ 
+<iscomment>Builds a registration page for the user. It provides all input fields for names and address</iscomment>
+<iscontentasset aid="account-personaldetails-banner"/>
+	<div class="registration">
+	<iscomment>Nadeem:putting condition to check whether its ragistration or edit profile page</iscomment>
+		<isset name="personalDetailsPage" value="${false}" scope="page"/>
+		<isif condition="${!empty(pdict.pageName) && pdict.pageName.equals('editprofile')}"> 
+		<isset name="personalDetailsPage" value="${true}" scope="page"/>
+		<iselse>
+			
+		</isif>
+		<div class="registrationform">
+		<form action="${URLUtils.httpsContinue()}" method="post" id="RegistrationForm">
+			<fieldset>
+				<div class="formfields">
+					<div class="formfield">			
+						<label for="${pdict.CurrentForms.profile.customer.title.htmlName}" class="label">				
+							<span class="labeltext">${Resource.msg('profile.title', 'forms', null)}</span>				
+							<span class="requiredindicator">*</span>
+						</label>			
+						<isscript>
+							importScript('checkout/Utils.ds');
+							var titleMap : dw.util.Map = getTitleMap();
+						</isscript>
+						<div class="value"><span class="genericinputbox">
+						<select id="${pdict.CurrentForms.profile.customer.title.htmlName}" name="${pdict.CurrentForms.profile.customer.title.htmlName}" class="selectbox required">
+							<option value="">${Resource.msg('forms.select','forms',null)}</option>											
+							<isloop items="${titleMap.keySet().iterator()}" var="key">
+								<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.profile.customer.title.value==key}">selected</isif>>${titleMap.get(key)}</option>
+							</isloop>
+						</select>
+						</span></div>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div><!-- END: Title -->
+					
+					<div class="formfield firstname">
+						<isinputfield formfield="${pdict.CurrentForms.profile.customer.firstname}" type="input"/>
+						<div class="formfieldtooltip"><istooltip content_id="help-firstname"/>
+						</div>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div><!-- END: firstname -->
+					<div class="formfield lastname">
+						<isinputfield formfield="${pdict.CurrentForms.profile.customer.lastname}" type="input"/>
+						<div class="formfieldtooltip"><istooltip content_id="help-surname"/>
+						</div>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div>
+					
+					<div class="formfield">
+							<label for="${pdict.CurrentForms.profile.birthday.day.htmlName}" class="label doblabel">
+									<span class="labeltext alignColon">${Resource.msg('registration.dateofbirth','account',null)}</span>
+							</label>
+							<label for="${pdict.CurrentForms.profile.birthday.month.htmlName}" class="hideLabel">
+									${Resource.msg('registration.dateofbirth','account',null)}
+							</label>
+							<label for="${pdict.CurrentForms.profile.birthday.year.htmlName}" class="hideLabel">
+									${Resource.msg('registration.dateofbirth','account',null)}
+							</label>
+					<div class="dob value">
+						<isset name="day" value="${1}" scope="page" />
+					   	<isset name="month" value="${1}" scope="page" />
+					   	<isset name="year" value="${dw.system.Site.getCurrent().preferences.custom.dobStartYear}" scope="page" />
+						<select class="day" id="${pdict.CurrentForms.profile.birthday.day.htmlName}" name="${pdict.CurrentForms.profile.birthday.day.htmlName}">			
+							<option value="">${Resource.msg('registration.dateofbirth.day','account',null)}</option>
+							<isloop begin="${day}" end="31">
+														
+								<option value="${day.toString()}" <isif condition="${pdict.CurrentForms.profile.birthday.day.htmlValue !=null && pdict.CurrentForms.profile.birthday.day.htmlValue == day.toString()}">selected</isif>><isprint value="${day}" formatter="00"></option>
+											
+								<isset name="day" value="${day=day+1}" scope="page" />
+					   		</isloop>
+					   </select>
+										   		
+						<select class="month" id="${pdict.CurrentForms.profile.birthday.month.htmlName}" name="${pdict.CurrentForms.profile.birthday.month.htmlName}">			
+							<option value="">${Resource.msg('registration.dateofbirth.month','account',null)}</option>
+								<isloop  begin="${month}" end="12" >
+									<option value="${month.toString()}" <isif condition="${pdict.CurrentForms.profile.birthday.month.htmlValue !=null && pdict.CurrentForms.profile.birthday.month.htmlValue == month.toString()}">selected</isif>><isprint value="${month}" formatter="00"></option>
+									<isset name="month" value="${month=month+1}" scope="page" />
+								</isloop>
+						</select>
+						<select class="year" id="${pdict.CurrentForms.profile.birthday.year.htmlName}" name="${pdict.CurrentForms.profile.birthday.year.htmlName}">			
+							<option value="">${Resource.msg('registration.dateofbirth.year','account',null)}</option>
+								<isloop begin="${year}" end="${new Date().getFullYear()}">
+									<option value="${year.toString()}" <isif condition="${pdict.CurrentForms.profile.birthday.year.htmlValue!=null  && pdict.CurrentForms.profile.birthday.year.htmlValue == year.toString()}">selected</isif>><isprint value="${year.toString()}"></option>
+									<isset name="year" value="${year=year+1}" scope="page" />
+								</isloop>
+													
+						</select>
+						<isif condition="${pdict.CurrentSession.custom.dateInvalid=='true'}">
+							<span class="errorIcon"></span>
+						</isif>	
+						<div class="formfieldtooltip"><istooltip content_id="help-dateofbirth"/></div>
+						<isif condition="${pdict.CurrentSession.custom.dateInvalid=='true'}">
+							<div class="errormessage">
+								${Resource.msg('global.invalidBirthDate','locale',null)}
+							</div>
+						</isif>	
+					</div>
+					<div class="clear"><!-- FOAT CLEAR --></div>
+											
+				</div>
+				
+				
+				<!-- END: formfields -->
+				<isif condition="${!personalDetailsPage}"> 
+			
+					<h4>${Resource.msg('registration.logininfo','account',null)}</h4>
+				</isif>
+				<div class="formfields">
+					<div class="formfield email">
+						<label for="${pdict.CurrentForms.profile.customer.email.htmlName}" class="label">
+							<span class="labeltext">${Resource.msg('profile.email','forms',null)}:</span>
+							<span class="requiredindicator">*</span>
+						</label>				
+						<div class="value">
+							<span class="genericinputboxdisabled_leftcurve"></span>
+							<span class="genericinputboxdisabled">
+								<input type="text" maxlength="90" value="${pdict.CurrentForms.profile.customer.email.value}" disabled="disabled" name="${pdict.CurrentForms.profile.customer.email}" id="${pdict.CurrentForms.profile.customer.email.htmlName}"  xhtmlclass="emailnum" class="disabled_input"/>
+							</span>
+						</div>
+						<iscomment><isinputfield formfield="${pdict.CurrentForms.profile.customer.email}" type="disabled"  xhtmlclass="emailnum" /></iscomment>
+						<div class="formfieldtooltip"><istooltip content_id="help-email"/>
+						</div>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+						<isif condition="${personalDetailsPage}"> 
+						<div class="roundedBtn button_curve">
+							<iscomment><!-- changing to anchor | Please add required attributes to the anchor like title and href etc. --></iscomment>
+							<iscomment><button  class="change_email expandable-btn grey" type="button" value="Change email"><span>${Resource.msg('account.changemail','account',null)}</span></button></iscomment>
+							<a  class="change_email expandable-btn grey" href="javascript:;"><span>${Resource.msg('account.changemail','account',null)}</span></a>
+						</div>
+						<iscomment><!-- removed this style and added the expandable button style | Rachna 28Apr --></iscomment>
+						<iscomment>
+							<div class="button_curve">
+								<span class="left_curve"></span>
+								<button type="button" value="Change email" class="right_curve change_email" ></button>
+								<div class="clear"></div>
+							</div>
+						</iscomment>
+						</isif>			
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div>
+				</div>
+				<iscomment><div class="formfields change_email_section hide">	
+					<div class="formfield email">
+						<isinputfield formfield="${pdict.CurrentForms.profile.customer.newemail}" type="input" xhtmlclass="emailnum" />
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div>				
+					<div class="formfield confirmEmail">
+						<isinputfield formfield="${pdict.CurrentForms.profile.customer.emailconfirm}" type="input" xhtmlclass="confirmemailnum CONFIRM_EMPTY"/>
+					</div>
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div></iscomment>
+			
+					
+					<div class="formfield password">
+						
+					<label for="${pdict.CurrentForms.profile.login.password.htmlName}" class="label">
+							<span class="labeltext">${Resource.msg('label.password','forms',null)}:</span>
+							<span class="requiredindicator">*</span>
+					</label>
+					<div class="value">
+						<span class="genericinputboxdisabled_leftcurve"></span>
+						<span class="genericinputboxdisabled">
+							<input type="text"  value="${Resource.msg('password.value','forms',null)}" disabled="disabled" name="${pdict.CurrentForms.profile.login.password}" id="${pdict.CurrentForms.profile.login.password.htmlName}" class="disabled_input" />
+						</span>
+					</div>
+			    	
+						<iscomment><isinputfield formfield="${pdict.CurrentForms.profile.login.password}" type="password" xhtmlclass="passwordvalidation"/></iscomment>
+						<div class="formfieldtooltip"><istooltip content_id="help-password"/></div>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+						<isif condition="${!empty(pdict.pageName) && pdict.pageName.equals('editprofile')}">
+						<div class="roundedBtn button_curve">
+							<iscomment><!-- changing to anchor | Please add required attributes to the anchor like title and href etc. --></iscomment>
+							<iscomment>
+								<button  class="change_pswd expandable-btn grey" type="button" value="Change email"><span>${Resource.msg('account.changepassword','account',null)}</span></button>
+							</iscomment>
+							<a  class="change_pswd expandable-btn grey" href="javascript:;"><span>${Resource.msg('account.changepassword','account',null)}</span></a>
+						</div>
+						<iscomment><!-- removed this button style and added the expandable button style | Rachna 28Apr --></iscomment>
+						<iscomment> 
+						<div class="button_curve">
+							<span class="left_curve"></span>
+							<button type="button" value="Change email" class="right_curve change_pswd">${Resource.msg('account.changepassword','account',null)}</button>
+							
+							<div class="clear"></div>
+						</div>
+						</iscomment>
+						</isif>	
+					</div>
+					<iscomment><div class="formfields email change_pswd_section hide">	 
+						<div class="formfield currentpassword">
+							<isinputfield formfield="${pdict.CurrentForms.profile.login.currentpassword}" type="password" xhtmlclass="passwordvalidation"/>
+							<div class="clear"><!-- FOAT CLEAR --></div>
+						</div>
+						<div class="formfield newpassword">
+							<isinputfield formfield="${pdict.CurrentForms.profile.login.newpassword}" type="password" xhtmlclass="passwordvalidation newpswd"/>
+							<div class="clear"><!-- FOAT CLEAR --></div>
+						</div>
+						<div class="formfield confirmpassword">
+							<isinputfield formfield="${pdict.CurrentForms.profile.login.passwordconfirm}" type="password" xhtmlclass="passwordvalidation confirmpswd CONFIRM_PWD_EMPTY"/>
+						</div>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div></iscomment>
+				
+					<iscomment>
+					<div class="formfield">
+						<isinputfield formfield="${pdict.CurrentForms.profile.login.question}" type="select"/>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div>
+				
+					<isif condition="${!personalDetailsPage}"> 
+					
+					<div class="formfield">
+					<div class="label">
+								<span class="requiredindicator">*</span>
+								<span class="labeltext">${Resource.msg('profile.accountquestion','forms',null)}</span> 
+					</div>
+					<div class="value">
+						<select id="${pdict.CurrentForms.profile.login.question.htmlName}" name="${pdict.CurrentForms.profile.login.question.htmlName}">
+							<isloop items="${dw.system.Site.getCurrent().preferences.custom.accountSecurityQuestions}" alias="securityQues">
+						   	 <isif condition="${pdict.CurrentForms.profile.login.question.htmlValue==securityQues}">
+								<OPTION value="${securityQues}" selected="selected"><isprint value="${securityQues}"></OPTION>
+							<iselse>
+								<OPTION value="${securityQues}"><isprint value="${securityQues}"></OPTION>
+							</isif>	
+											
+							</isloop>
+						</select>
+								
+					</div>
+					</div>
+					<div class="formfield"><div class="clear"></div>
+						<isinputfield formfield="${pdict.CurrentForms.profile.login.answer}" type="input"/>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div>
+					</isif>
+					</iscomment>
+					<iscomment>Commented as part of CR 123<div class="formfield privacywrapper">
+						<div class="emailsignupcheckbox">
+							<isinputfield formfield="${pdict.CurrentForms.profile.customer.addtoemaillist}" type="checkbox" label="false" class="checkinput"/>
+						</div>	
+						<div class="emailsignup">
+							<div>${Resource.msg('global.email.policy1','locale',null)}</div>
+							<div>${Resource.msg('global.email.policy2','locale',null)}</div>
+							<a href="javascript:;" title="${Resource.msg('global.privacypolicy','locale',null)}" id="privacyPolicy">${Resource.msg('global.privacypolicy','locale',null)}</a>
+						</div>
+						<div class="clear"><!-- FOAT CLEAR --></div>
+					</div></iscomment>
+				
+					<iscomment>
+					<div class="formactions">
+						<button type="button" onclick="submitForm();" value="${Resource.msg('global.register','locale',null)}" name="${pdict.CurrentForms.profile.confirm.htmlName}"><span><isif condition="${pdict.pageName!=null && pdict.pageName=='editprofile' }">${Resource.msg('global.save','locale',null)}<iselse>${Resource.msg('global.register','locale',null)}</isif></span></button>
+					</div>
+					</iscomment>
+					<div id="registrationformaction"></div>
+					<input type="hidden" name="${pdict.CurrentForms.profile.secureKeyHtmlName}" value="${pdict.CurrentForms.profile.secureKeyValue}"/>	
+				</div><!-- END: formfields -->
+			</fieldset>
+		</form>
+		</div><!-- END: registrationform -->
+		
+		
+		<div class="button_wrapper">
+			<div class="floatleft btn-grey-flat">
+						<div class="link_button">
+							<a href="${URLUtils.https('Account-Show')}" class="back-icon"><span>${Resource.msg('global.back','locale',null)}</span></a>
+						</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="floatright btn-grey-dark">
+						<button value="Savedetails" name="${pdict.CurrentForms.profile.confirm.htmlName}" type="submit" class="" onclick="submitForm();">
+							<span>${Resource.msg('global.save','locale',null)}</span><span class="forward-icon-white">&nbsp;</span>
+						</button>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div><!-- END: registration -->
+
+<div class="privacypolicy" id="privacypolicy" style="display:none;overflow:auto;">
+	<iscontentasset aid="privacy-policy"/>
+</div>
+<iscontentasset aid="account-footer"/>
+
+
+<script type="text/javascript"><!--
+	var loginChanged = false;
+	var nameChanged = false;
+	var dobChanged = false;
+	app.URLs.submitFormURL = "${URLUtils.url('Account-UpdateName')}";
+	
+	function submitForm() {
+		// if firstname/lastname change and no other field update the data via AJAX
+		// otherwise do normal submit				
+		if (nameChanged &&  !loginChanged) {
+		
+			if (jQuery("#RegistrationForm").validate().element( "[name=${pdict.CurrentForms.profile.customer.firstname.htmlName}]" ) && 
+					jQuery("#RegistrationForm").validate().element( "[name=${pdict.CurrentForms.profile.customer.lastname.htmlName}]" ) ) {
+				
+				var post = jQuery('#RegistrationForm').serialize();
+				
+		  		jQuery.ajax({
+				   type: "POST",
+				   url: app.URLs.submitFormURL,
+				   data: post,
+				   dataType: 'html',
+				   success: function(data){
+						var showurl = "${URLUtils.https('Account-Show')}";
+						window.location.href = showurl;
+				   },
+				   failure: function(data) {
+				   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+				   }
+				});
+			}
+		} else {
+			
+			jQuery('#registrationformaction').append("<input name='${pdict.CurrentForms.profile.confirm.htmlName}' type='hidden' />");
+			
+			jQuery("#RegistrationForm").submit();
+		}
+	}
+
+	jQuery(document).ready(function() {	
+		
+	 	jQuery('#privacypolicy').dialog({
+	 			bgiframe: true,
+				autoOpen: false,
+				modal: true,
+		    	height: 480,
+		    	width: 600,
+		    	title: '${Resource.msg('global.privacypolicy','locale',null)}',
+		    	resizable: false
+		});
+						
+		jQuery('#privacyPolicy').click( function() {
+			jQuery('#privacypolicy').show();
+			jQuery('#privacypolicy').dialog('open');
+		});
+     
+		// keep track of which fields are changed, firstname/lastname are nameChanged, all others are loginChanged
+		jQuery('input').change(function(formField) {			
+	        if (formField.currentTarget.id.indexOf("${pdict.CurrentForms.profile.login.htmlName}") >= 0) {  
+	        	loginChanged = true;
+	        } else if (formField.currentTarget.id.indexOf("${pdict.CurrentForms.profile.customer.newemail.htmlName}") >= 0) {
+	        	loginChanged = true;
+	        } else if ((formField.currentTarget.id.indexOf("${pdict.CurrentForms.profile.customer.firstname.htmlName}") >= 0) || 
+	    	        (formField.currentTarget.id.indexOf("${pdict.CurrentForms.profile.customer.lastname.htmlName}") >= 0)) {  
+	        	nameChanged = false;    
+	        } 
+		});
+
+		// if the select box has a change set the flag
+		jQuery('select').change(function(e) {
+			
+			
+			dobChanged = true;
+		});
+		
+		// clear out formfields that could be part of autocomplete
+	    jQuery("[name=${pdict.CurrentForms.profile.customer.emailconfirm.htmlName}]").val("");
+	    //jQuery("[name=${pdict.CurrentForms.profile.customer.newemail.htmlName}]").val("");
+	    jQuery("[name=${pdict.CurrentForms.profile.login.currentpassword.htmlName}]").val("");
+	    jQuery("[name=${pdict.CurrentForms.profile.login.newpassword.htmlName}]").val("");	 
+	    jQuery("[name=${pdict.CurrentForms.profile.login.passwordconfirm.htmlName}]").val("");
+
+	          
+	});
+		
+	var errmsgemail = $(".change_email_section .errormessage").text();
+	var errmsgepswd= $(".change_pswd_section .errormessage").text();
+	if(errmsgemail != ""){
+		
+		$('.change_email_section').show();
+		 $('.emailnum').addClass(" required");
+		 $('.confirmemailnum').addClass("required");
+		  $('.change_email_section label').append('<span class="requiredindicator">*</span>');
+		  $('.change_email').attr("disabled", "true");
+	}
+	if(errmsgepswd != ""){
+		
+		$('.change_pswd_section').show();
+		$('.passwordvalidation').addClass(" required");
+		  $('.change_pswd_section label').append('<span class="requiredindicator">*</span>');
+		  $('.change_pswd').attr("disabled", "true");
+	}
+	$('.change_email').click(function() {
+		var url = app.util.appendParamToURL("${URLUtils.url('Account-EditUserCredential')}", "fieldName", "email");
+		app.dialog.open(url,'${Resource.msg('logincahnge.modal.emailheader','account',null)}');
+		/* $('.change_email_section').show();
+		  $('.emailnum').addClass("required");
+		  $('.confirmemailnum').addClass("required");
+		  $('.change_email_section label').append('<span class="requiredindicator">*</span>');
+		  $('.change_email').attr("disabled", "true");
+		//  additionalClass += (pdict.formfield.mandatory == true) ? " required": "";*/
+	});
+	$('.change_pswd').click(function() {
+		var url = app.util.appendParamToURL("${URLUtils.url('Account-EditUserCredential')}", "fieldName", "password");
+		app.dialog.open(url,'${Resource.msg('logincahnge.modal.passwordheader','account',null)}');
+		  /*$('.change_pswd_section').show();
+		  $('.passwordvalidation').addClass(" required");
+		  $('.change_pswd_section label').append('<span class="requiredindicator">*</span>');
+		  $('.change_pswd').attr("disabled", "true");*/
+	});
+	
+	
+//--></script>
+	
+</isdecorate>

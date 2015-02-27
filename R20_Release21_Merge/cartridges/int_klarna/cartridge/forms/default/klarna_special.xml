@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+	<field formid="pclass" label="klarna.pclass" type="string" mandatory="true"
+		missing-error="klarna.error_nopclassselected">
+	</field>
+	
+	<!-- SSN. Requested in the nordic countries. for NL and DE we fallback on birthday -->
+	<field formid="ssn" label="klarna.ssn" description="klarna.ssn_notice" type="string"  min-length="10" max-length="12" />
+
+	<!-- used instead of SSN in NL and DE !-->
+	<group formid="birthday">
+		<field formid="year" label="klarna.birthday.year" type="string"/>
+		<field formid="month" label="klarna.birthday.month" type="string">
+			<options>
+	            <option label="month.january" 	value="01"/>
+				<option label="month.february" 	value="02"/>
+				<option label="month.march" 	value="03"/>
+				<option label="month.april" 	value="04"/>
+				<option label="month.may" 		value="05"/>
+				<option label="month.june" 		value="06"/>
+				<option label="month.july" 		value="07"/>
+				<option label="month.august" 	value="08"/>
+				<option label="month.september" value="09"/>
+				<option label="month.october"   value="10"/>
+				<option label="month.november"  value="11"/>
+				<option label="month.december"  value="12"/>
+			</options>
+		</field>
+		<field formid="day" label="klarna.birthday.day" type="string">
+			<options>
+				<option value="01" label="01"/>
+				<option value="02" label="02"/>
+				<option value="03" label="03"/>
+				<option value="04" label="04"/>
+				<option value="05" label="05"/>
+				<option value="06" label="06"/>
+				<option value="07" label="07"/>
+				<option value="08" label="08"/>
+				<option value="09" label="09"/>
+				<option value="10" label="10"/>
+				<option value="11" label="11"/>
+				<option value="12" label="12"/>
+				<option value="13" label="13"/>
+				<option value="14" label="14"/>
+				<option value="15" label="15"/>
+				<option value="16" label="16"/>
+				<option value="17" label="17"/>
+				<option value="18" label="18"/>
+				<option value="19" label="19"/>
+				<option value="20" label="20"/>
+				<option value="21" label="21"/>
+				<option value="22" label="22"/>
+				<option value="23" label="23"/>
+				<option value="24" label="24"/>
+				<option value="25" label="25"/>
+				<option value="26" label="26"/>
+				<option value="27" label="27"/>
+				<option value="28" label="28"/>
+				<option value="29" label="29"/>
+				<option value="30" label="30"/>
+				<option value="31" label="31"/>
+			</options>
+		</field>
+	</group>
+
+	<!-- In germany we need to display a concent checkbox !-->
+	<field formid="concent" label="klarna.concent" type="boolean"/>
+
+	<!-- Swedish address (for others we use builtin address fields) populated by GetAddresses -->
+	<field formid="addresses" label="klarna.addresses" type="string" mandatory="true" missing-error="klarna.error_missing_address" />
+
+	<!-- Gender. Used in Germany and the Netherlands. Rendered as radio buttons -->		
+	<field formid="gender" label="klarna.gender" type="string" mandatory="true" default-value="f">
+		<options>
+			<option label="klarna.gender.male" value="m"></option>
+			<option label="klarna.gender.female" value="f"></option>
+		</options>
+	</field>
+	
+	<!-- Company purchases. Not allowed for special campaigns but the fields are here for future use -->
+	<field formid="company_name" label="klarna.company_name" description="klarna.company_name_notice" type="string" mandatory="false" />
+	<field formid="reference" label="klarna.reference" description="klarna.reference_notice" type="string" mandatory="false" />
+	<field formid="is_company" label="klarna.is_company" type="string" mandatory="true" default-value="private">
+		<options>
+			<option optionid="private" label="klarna.private" value="private"></option>
+			<option optionid="female" label="klarna.company" value="company"></option>
+		</options>
+	</field>
+
+	<!-- Yearly salary. Yearly salary for Danish customers using part payment -->
+	<field formid="ysal" label="klarna.ysal" type="string" mandatory="false" default-value="0" />
+	
+	<action formid="save" valid-form="true"/>
+</form>

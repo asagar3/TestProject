@@ -1,0 +1,26 @@
+
+<isif condition="${! empty(pdict.Product.longDescription) && pdict.Product.longDescription.markup.length > 0}">	
+		<iscomment>INTP-22 Long description requires delimiter handling </iscomment>
+		<isscript>
+			importScript("app_mns:/product/ProductStringUtils.ds"); 
+			var descList:List=splitString(pdict.Product.longDescription.toString()); 
+		</isscript>
+		<isloop items="${descList}" var="longdesc" status="loopStatus">
+			<isprint value="${longdesc}" encoding="off"/>
+				<isif condition="${!loopStatus.last}">
+					<br><br>									
+				</isif>
+		</isloop>
+	</isif>
+	<isif condition="${pdict.Product.productSet}">
+		</p>
+	<iselse>
+		<isif condition="${!isQuickView}">
+			<a onclick="pdpTabSelection(0,'');" href="#pdpTab" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+		</isif>
+	</isif>			
+</div><!-- END: productDescription -->
+<iscomment>[QC: 424] | Dotted Border should be inside this if block, to avoid it from appearing on Product Set Page and displaying an extra dotted line</iscomment>
+<isif condition="${!pdict.Product.productSet && ! empty(pdict.Product.longDescription) && pdict.Product.longDescription.markup.length > 0}">
+	<div class="dotted_border"></div>
+</isif>

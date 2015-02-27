@@ -1,0 +1,161 @@
+.category_banner_header{
+	color:#4b4b4b;
+	font-size:38px ;
+	line-height:38px;
+	font-weight:800;
+	font-variant:normal ;
+	letter-spacing: -1px;
+}
+.category_banner_header_whiteHeading{
+	color:#fff;
+	font-size:38px ;
+	line-height:38px;
+	font-weight:800;
+	font-variant:normal ;
+	letter-spacing: -1px;
+}
+
+div.homepage .small_content_module h3 {
+font-weight: bold;
+color: #4b4b4b;
+line-height: 24px;
+}
+.ms_header_4, .ms_header_1{
+color: #4b4b4b !important;
+font-weight: bold !important;
+font-size: 28px;
+}
+.banner_head h2{
+	font-size: 30px;
+	height:30px;
+	letter-spacing: -1px;
+}
+.content_grey_header{
+color: #333 !important;
+}
+.content_grey_header2{
+color: #333 !important;
+}
+.content_checkout_header{
+color: #333 !important;
+font-size: 17px;
+white-space: nowrap;
+letter-spacing: -1px;
+}
+.contentArea h1 {
+font-size: 28px !important;
+letter-spacing: -1px;
+color: #4b4b4b !important;
+}
+.helpsection h3.faqHead{
+color: #333 !important;
+font-size: 24px !important;
+font-weight: normal;
+padding: 0;
+letter-spacing: -1px;
+}
+#homeSmallCarousel h3{
+font-size: 42px !important;
+line-height: 34px !important;
+text-align: left;
+padding: 7px 5px 0px;
+}
+.category_banner_2_headerSifr h2 {
+font-size: 34px;
+line-height: 38px;
+color: #4b4b4b !important;
+letter-spacing: -1px;
+}
+.category_banner_3_header h3{
+font-size: 28px;
+line-height: 28px;
+padding: 0;
+color: #4b4b4b !important;
+letter-spacing: -1px;
+}
+.headerHolder div.caption h2{
+color: #4b4b4b;
+}
+.headerHolder div.caption h2, .headerHolder div.captionwhite h2{
+font-size: 3.4em;
+height: 35px;	
+}
+
+.sitemap h1 {
+font-size: 28px;
+height: 28px;
+}
+.sitemap h2 {
+font-size: 21px;
+height: 21px;
+}
+.sitemap h2 a {
+color: #333 !important;
+}
+.ms_header_login{
+	color: #333 !important;
+	font-size: 26px;
+	letter-spacing: -1px;
+	}
+.account_wrapper .logingeneral .header h3 .ms_header_login {
+    color: #333 !important;
+    font-size: 20px;
+}
+
+.account_wrapper h3.overviewHead{
+	color: #333 !important;
+	font-size: 26px;
+	letter-spacing: -1px;
+	}
+.account_heading span{
+	color: #333 !important;
+    font-size: 28px;
+    letter-spacing: -1px;
+	}
+.logincreateHeader{
+	font-size: 28px;
+	}
+.logincustomersHeader{
+	font-size: 28px;
+	}
+.home_banner_copy h2, .home_banner_copy_whiteTextHeading h2{
+	font-size: 57px;
+	line-height:59px;
+	font-weight: normal;
+	letter-spacing: -1px;
+}
+.home_banner_copy h2{
+	color: #4b4b4b;
+}
+.home_banner_copy_whiteTextHeading h2{
+	color: #fff;
+}
+.account_wrapper .logincustomers h3{
+line-height: 20px;
+}
+.account_wrapper .logincreate h3 {
+line-height: 20px;
+}
+h1.productname{
+color:#4b4b4b;
+letter-spacing: -1px;
+}
+h5.grey_block_header span{
+letter-spacing: -1px;
+}
+.ms_header_account_login{
+	color: #4b4b4b !important;
+	letter-spacing: -1px;
+	clear: both;
+	display: block;
+	padding-right: 30px;
+	}
+.ms_header_1{
+color: #4b4b4b !important;
+font-size: 30px;
+}
+.firstcol h3 .ms_header_login, .secondcol h3 .ms_header_login{
+	color: #4b4b4b !important;
+    font-size: 24px !important;
+    letter-spacing: -1px;
+	}

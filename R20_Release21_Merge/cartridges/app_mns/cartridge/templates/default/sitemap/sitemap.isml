@@ -1,0 +1,109 @@
+<isdecorate template="content/pt_customerservice_no_lhn"> <iscomment><!-- MattS Have changed this from  pt_customerservice --></iscomment>
+<iscomment><isinclude template="util/modules"/></iscomment>
+<isscript>
+var root = null;
+var siteCatalog = dw.catalog.CatalogMgr.getSiteCatalog();
+if(siteCatalog!=null) {root = siteCatalog.getRoot();}
+var categoryType : String=null;
+var isUpdatedCategoryType : Boolean = false;
+var defaultDisplayed : Boolean = false;
+
+
+</isscript>
+
+<div class="sitemap clearfix">
+	<div class="header_section">
+		<iscomment><h1>${Resource.msg('global.storename','locale',null)}</h1></iscomment>
+		<h1>${Resource.msg('sitemap.name','components',null)}</h1>
+	</div>
+	<div class="categories">
+		<isscript>
+		//Praveen: Fix for QC916
+		var count : Number = 0;
+		var iterator : dw.util.Iterator =  dw.catalog.CatalogMgr.getSiteCatalog().getRoot().getOnlineSubCategories().iterator();
+		while(iterator.hasNext()){
+			if(iterator.next().custom.showInMenu){
+				count++;
+			}
+		
+		}
+		var numCols : Number = 2;
+		if(Math.floor((count/3)) > 2){
+			numCols = Math.floor((count/3));
+		}
+		var ctr = 1;
+		</isscript>
+		<div class="col">
+      		<isloop items="${dw.catalog.CatalogMgr.getSiteCatalog().getRoot().getOnlineSubCategories().iterator()}" var="topCategory" status="loopstatus">
+    			<iscomment>Praveen: Fix for QC916</iscomment>
+      			<isif condition="${('showInMenu' in topCategory.custom) && topCategory.custom.showInMenu.valueOf()}">
+	      			<isscript>
+					var result = ctr % numCols;
+					</isscript>
+					<isif condition="${result==1.0 && ctr > 1}">
+						</div><div class="col">
+					</isif>
+					<isset name="defaultDisplayed" value="${false}" scope="page"/>
+					<isscript>categoryType = null;</isscript>
+					<isscript>
+						var categoryList : dw.util.ArrayList = new dw.util.ArrayList();
+						var catGroupSet : dw.util.HashSet = new dw.util.HashSet();
+					</isscript>
+					<isloop items="${topCategory.getOnlineSubCategories()}" var="subCat">
+						<isif condition="${('showInMenu' in subCat.custom) && subCat.custom.showInMenu.valueOf()}">						
+							<isscript>
+								categoryList.add(subCat);
+								catGroupSet.add(subCat.custom.categoryType);								
+							</isscript>
+						</isif>
+					</isloop>	
+					<div class="cat_holder clearfix">
+						<div class="cat_header">
+							<h2>
+								<a href="${URLUtils.http('Search-Show','cgid', topCategory.getID())}" title="${topCategory.displayName}"><isprint value="${topCategory.displayName}"/></a>
+							</h2>
+						</div>
+						<isif condition="${topCategory.getOnlineSubCategories().iterator().hasNext()}">
+							<ul class="subcategory">
+								<isscript>
+									var  propCompare : dw.util.PropertyComparator = new dw.util.PropertyComparator("custom.categoryType");
+									categoryList.sort(propCompare);
+								</isscript>
+								<isloop items="${categoryList}" var="subCategory" status="loopstateSubCat">
+									<isscript>
+										if(null == categoryType || categoryType!=subCategory.custom.categoryType)
+										{															
+											categoryType = subCategory.custom.categoryType;
+											isUpdatedCategoryType = true;
+										}
+									</isscript>
+									<isif condition="${isUpdatedCategoryType==true}">
+										<iscomment>### Categories Group Name : PRINT #####</iscomment>	
+										<isif condition="${null == categoryType && !defaultDisplayed}">
+											<isif condition="${!loopstateSubCat.first}"></isif>
+												<li><h3>${dw.system.Site.current.preferences.custom.defaultCategoryType.toString()}</h3></li>
+												<isset name="defaultDisplayed" value="${true}" scope="page"/>	
+										<iselseif condition="${null != categoryType}"/>
+											<isif condition="${!loopstateSubCat.first}"></isif>
+											
+											<li><h3>
+												<iscomment>Praveen: Changes made for Category Ordering changes CR</iscomment>
+												<isprint value="${categoryType.slice(categoryType.indexOf(' ')+1,categoryType.length)}"/>
+											</h3></li>
+										</isif>
+										<isscript>
+											isUpdatedCategoryType = false;
+										</isscript>
+									</isif>
+									<li><a href="${URLUtils.http('Search-Show','cgid', subCategory.getID())}" title="${subCategory.displayName}"><isprint value="${subCategory.displayName}"/></a></li>
+								</isloop>	
+							</ul>
+						</isif>
+					 </div>
+					<isset name="ctr" value="${ctr=ctr+1}" scope="page" />
+				</isif>
+			</isloop>
+			</div>
+		  </div>
+</div><!-- END: sitemap -->
+</isdecorate>

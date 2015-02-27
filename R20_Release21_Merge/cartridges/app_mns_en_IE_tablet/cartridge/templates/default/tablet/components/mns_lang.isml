@@ -1,0 +1,2 @@
+<!--- TEMPLATENAME: mns_lang.isml --->
+<link href="${URLUtils.staticURL('/themes/demandwarestore/css/ireland_tablet.css')}" type="text/css" rel="stylesheet" title="Demandware Store" />

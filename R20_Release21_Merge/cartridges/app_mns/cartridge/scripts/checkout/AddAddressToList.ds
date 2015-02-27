@@ -1,0 +1,35 @@
+/**
+ * 
+ *
+ * 
+ * @output AddressList : dw.util.List
+ * @input Order : dw.order.Order
+ */
+importPackage( dw.customer );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.web ); 
+
+importScript( "app_mns:account/Utils.ds" );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var order : dw.order.Order = pdict.Order;
+	var OrderBillingAddress : dw.order.OrderAddress = order.billingAddress;
+	var OrderShippingAddress : dw.order.OrderAddress = order.shipments[0].shippingAddress;
+	
+	var addressList : dw.util.List = new dw.util.ArrayList();
+	
+	if(OrderBillingAddress != null)
+	{
+		addressList.add(OrderBillingAddress);
+	}
+	if(!(order.shipments[0].shippingMethodID == dw.web.Resource.msg('shipping.deliverymethod.storecollection','checkout',null)) && OrderShippingAddress != null)
+	{
+		addressList.add(OrderShippingAddress);
+	}
+	pdict.AddressList = addressList;
+	
+	return PIPELET_NEXT;
+}
+

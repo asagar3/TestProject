@@ -1,0 +1,9 @@
+<!--- TEMPLATENAME: rr_flush.isml --->
+<script chartset="utf-8" type="text/javascript">
+if(typeof(r3commonincluded) == 'undefined'){
+	var r3commonincluded = false;
+}
+if(r3commonincluded){
+rr_flush_onload();
+}
+</script>

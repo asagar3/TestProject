@@ -1,0 +1,62 @@
+/**
+ *  
+ *
+ * @input Profile : dw.customer.Profile
+ * @input usedAddress : dw.order.OrderAddress
+ * 
+ */
+importPackage( dw.customer );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.web ); 
+
+importScript( "app_mns:account/Utils.ds" );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var addressBook : AddressBook = pdict.Profile.addressBook;
+	var usedAddress : OrderAddress = pdict.usedAddress;
+		
+	if(usedAddress == null)
+	{
+		Logger.debug("Cannot add address to address book, without given order address.");
+		return PIPELET_ERROR;
+	}
+	var addressID : String = determineUniqueAddressID(usedAddress.city, addressBook);
+
+	// check on empty address ID
+	if(empty(addressID))
+	{
+		Logger.debug("Cannot add address to address book, with empty address ID.");
+		return PIPELET_ERROR;
+	}
+	
+	// get a possible equivalent address from the address book
+	var address : CustomerAddress = getEquivalentAddress(addressBook, usedAddress);
+
+	// create the new address, if no equavalent address was found 
+	// and copy the address attributes
+	if(address == null)
+	{
+		var address : CustomerAddress = addressBook.createAddress( addressID );
+		address.setFirstName( usedAddress.firstName );
+		address.setLastName( usedAddress.lastName );
+		address.setAddress1( usedAddress.address1 );
+		address.setAddress2( usedAddress.address2 );
+		address.setCity( usedAddress.city );
+		address.setPostalCode( usedAddress.postalCode );
+		address.setPostBox( usedAddress.postBox );
+		address.setStateCode( usedAddress.stateCode );
+		address.setCountryCode( usedAddress.countryCode.value );
+		address.setPhone( usedAddress.phone );
+		address.setTitle( usedAddress.title );		
+	
+		//populating the custom attributes
+		address.custom.streetName = usedAddress.custom.streetName;
+		address.custom.residence = usedAddress.custom.residence;
+		address.custom.alternateContactNumber = usedAddress.custom.alternateContactNumber;
+		
+	}
+    return PIPELET_NEXT;
+}
+

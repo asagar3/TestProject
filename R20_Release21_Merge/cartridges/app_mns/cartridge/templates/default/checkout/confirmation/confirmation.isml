@@ -1,0 +1,199 @@
+<isdecorate template="checkout/pt_orderconfirmation">
+<isinclude template="util/modules"/>
+<iscomment>Praveen: Separated the rendering section for ERROR and REJECT</iscomment>
+<isset name="ReasonCode" value="null" scope="session"/>
+<isset name="Decision" value="null" scope="session"/> 
+<isif condition="${pdict.CurrentSession.custom.csDeclineCounter > 2}">
+	<isset name="csDeclineCounter" value="${0}" scope="session"/>
+	<isset name="csErrorCounter" value="${0}" scope="session"/>
+	<div class="ordercancel"><iscontentasset aid="${dw.system.Site.getCurrent().getCustomPreferenceValue("OrderCancellation_REJECT_ContentID")}"/></div>
+	
+<iselseif condition="${pdict.CurrentSession.custom.csErrorCounter > 2}">
+	<isset name="csDeclineCounter" value="${0}" scope="session"/>
+	<isset name="csErrorCounter" value="${0}" scope="session"/>
+	<div class="ordercancel"><iscontentasset aid="${dw.system.Site.getCurrent().getCustomPreferenceValue("OrderCancellation_ERROR_ContentID")}"/></div>
+<iscomment>END</iscomment>
+<iselse>
+	<isinclude template="util/reporting/ReportOrder.isml"/>
+<iscomment>
+	This template visualizes the order confirmation page. Note, that it
+	uses a different decorator template.
+	It displays the order related information, such as the order number,
+	creation date, payment information, order totals and shipments of
+	the order.
+</iscomment>
+<isset name="Order" value="${pdict.Order}" scope="page"/>
+<isif condition="${null != pdict.CurrentSession.custom.deviceID}">
+	<isset name="deviceID" value="" scope="session" />
+</isif>
+<isif condition="${null != pdict.CurrentSession.custom.orderPoint}">
+	<isset name="orderPoint" value="" scope="session" />
+</isif>
+<isif condition="${null != pdict.CurrentSession.custom.orderChannel}">
+	<isset name="orderChannel" value="" scope="session" />
+</isif>
+
+<div class="orderconfirmation">
+	<div class="thankyoumessage floatleft">		
+		<h2>
+			<isif condition="${!pdict.CurrentCustomer.authenticated}">					
+				<div class="ms_header_1">
+					<iscomment>Praveen: Fixing the RS3-1817182, E-outique</iscomment>
+					<isif condition="${!empty(Order.shipments[0].shippingAddress.lastName)}">
+						<isif condition="${Order.paymentInstruments[0].paymentTransaction.paymentProcessor.ID=='CYBERSOURCE_PAYPAL' && !empty(Order.shipments[0].shippingAddress.firstName)}">						
+							${Resource.msg('confirmation.thankyou','checkout',null)} ${Order.shipments[0].shippingAddress.firstName} ${Order.shipments[0].shippingAddress.lastName}
+						<iselse>
+							${Resource.msg('confirmation.thankyou','checkout',null)} ${Order.shipments[0].shippingAddress.title} ${Order.shipments[0].shippingAddress.lastName}
+						</isif>
+					<iselse>
+						<isset name="billingAddress" value="${Order.getBillingAddress()}" scope="page"/>
+						${Resource.msg('confirmation.thankyou','checkout',null)} ${billingAddress.title} ${billingAddress.lastName}
+					</isif>
+				</div>
+			<iselse>					
+				<div class="ms_header_1">${Resource.msg('confirmation.thankyou','checkout',null)} ${Order.customer.profile.title} ${Order.customer.profile.lastName}</div>
+			</isif>
+		</h2>
+		<div class="print floatright"><a href="javascript:;" class="printpage">${Resource.msg('confirmation.print','checkout',null)}</a></div>
+		<p>${Resource.msg('confirmation.ordernumbermsg','checkout',null)} <span class="bold">${Order.orderNo}</span><isif condition="${Order.shipments[0].shippingMethodID == Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"><isprint value="${Resource.msg('sc.confirmation.page.start','checkout',null)}"/> <isprint value="${StringUtils.format(Resource.msg('confirmation.orderconfirmation.collectmessage','checkout',null),Order.shipments[0].shippingAddress.address1,pdict.storePickupTime,pdict.storeCollectionDate)}"/></isif>
+		<iscomment>
+		</p>
+		<p class="">
+		</iscomment>
+		<isif condition="${Order.paymentInstruments[0].paymentTransaction.paymentProcessor.ID=='WORLDPAY' && Order.custom.orderStatus=='REVIEW'}">
+			${Resource.msg('confirmation.worldpaymailmsg','checkout',null)} 
+		<iselse/>
+			${Resource.msg('confirmation.sentmailmsg','checkout',null)} 
+		</isif>
+			<span class="bold">
+			<isprint value="${Order.customerEmail}" />.
+			<iscomment>Praveen:-Commenting for bug:914492
+				<isif condition="${!pdict.CurrentCustomer.authenticated}">					
+					<isprint value="${pdict.CurrentForms.profile.customer.email.value}" />
+				<iselse>					
+					<isprint value="${pdict.CurrentForms.profile.customer.email.value}" />
+				</isif>
+			</iscomment>
+			</span>
+			<isif condition="${Order.shipments[0].shippingMethodID == Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"><isprint value="${Resource.msg('confirmation.orderconfirmation.recieptmessage','checkout',null)}"/></isif>
+		</p>
+		<iscomment><!-- Commented out to make it as per VD | Asha --></iscomment>
+		<iscomment>
+			<p>${Resource.msg('confirmation.message','checkout',null)}</p>
+			<p>${Resource.msg('confirmation.contact','checkout',null)}</p>
+			<p><a class="printpage">${Resource.msg('confirmation.print','checkout',null)}</a></p>
+		</iscomment>	
+	</div>
+	<iscomment>
+	<div class="print floatright"><a href="javascript:;" class="printpage">${Resource.msg('confirmation.print','checkout',null)}</a></div>
+	</iscomment>
+	<div class="clear"></div>
+	<!-- END: thankyoumessage -->
+	
+	<iscomment>=-=-=-=-= Create account section if user is non logged in user | Naveen Kumar =-=-=-=-=</iscomment>
+	<isif condition="${!pdict.CurrentCustomer.authenticated}">
+		<div class="createaccount">
+			<div style="width:100%;">			
+				<div class="floatleft leftsection"></div>
+				<div class="floatleft midsection">
+					<h3>${Resource.msg('confirmation.createaccount_headeing1','checkout',null)}</h3>
+				</div>
+				<div class="clear"></div>
+				<div class="accountform">				
+				<div class="floatleft detail_left">
+					<h4>${Resource.msg('confirmation.createaccount_headeing2','checkout',null)}</h4>
+					<ul>
+						<li>${Resource.msg('confirmation.createaccount_text1','checkout',null)}</li>
+						<li>${Resource.msg('confirmation.createaccount_text2','checkout',null)}</li>
+						<li>${Resource.msg('confirmation.createaccount_text3','checkout',null)}</li>
+					</ul>
+				</div>
+				<div class="floatleft detail_right">
+					<!-- TODO | Use the same section of login/pswd section in checkout sign in page. | Will skin it post integration | Asha -->				
+					<form action="${URLUtils.httpsContinue()}" method="post">
+						<fieldset>			
+							<iscomment>QC defect fixing 796</iscomment>			
+							<isif condition="${!pdict.CurrentForms.profile.customer.email.valid}">
+								<div class="mainerror-wrapper">
+									<div class="tLine">
+										<div class="bLine">
+											<div class="lLine">
+												<div class="rLine">
+													<div class="tlB">
+														<div class="trB">
+															<div class="blB">
+																<div class="brB">
+																	<div class="eMsg">
+																		<isprint value="${Resource.msg('profile.usernametaken','forms',null)}"/>
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="clear"></div>
+							</isif>
+							<div class="formfield username">
+							<iscomment>CR3103</iscomment>
+								<isinputfield formfield="${pdict.CurrentForms.profile.login.password}" type="password"  xhtmlclass="newpasswordvalidation newpswd"/>
+								<div class="clear"><!-- FOAT CLEAR --></div>
+							</div>
+							<div class="formfield password">
+							<iscomment>CR3103</iscomment>
+								<isinputfield formfield="${pdict.CurrentForms.profile.login.passwordconfirm}" type="password"  xhtmlclass="newpasswordvalidation confirmpswd"/>
+								<div class="clear"><!-- FOAT CLEAR --></div>
+							</div>
+							<div class="formactions">				
+							</div><!-- END: returningcustomers_button -->		
+							<iscomment>
+							<div class="actions" >
+								<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.profile.confirm.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span></button>
+							</div>
+							</iscomment>
+							<input type="hidden" name="${pdict.CurrentForms.profile.secureKeyHtmlName}" value="${pdict.CurrentForms.profile.secureKeyValue}"/>
+							<div class="floatleft btn-grey-dark">
+									<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.profile.confirm.htmlName}"><span>${Resource.msg('confirmation.savedetails','checkout',null)}</span><span class="forward-icon-white">&nbsp;</span></button>
+							</div>	
+						</fieldset>
+					</form>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</isif>
+	
+	<div class="orderconfirmationdetails">
+		<isorderdetails order="${pdict.Order}"/>
+	</div>
+	<div class="actions">
+		<iscomment><!-- TODO | styling done for button | Added static html snippet | Asha--></iscomment>
+		<div class="floatright btn-green-flat">
+				<iscomment><!-- Removed &gt; and it's appearing from css now. | Asha | 07-mar-11 --></iscomment>
+				<button class="addtocartbutton" type="button" value="Continue to checkout" onclick="javascript: continueCheckout('${URLUtils.http('Home-Show')}');"><span>${Resource.msg('global.continueshopping','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>
+		</div>
+		<div class="print floatright confirmationprint"><a href="javascript:;" class="printpage">${Resource.msg('confirmation.print','checkout',null)}</a></div>
+		<div class="clear"></div>
+		<iscomment><!-- styling is done for button | Asha --></iscomment>
+		<iscomment><a href="${URLUtils.http('Cart-ContinueShopping')}">${Resource.msg('confirmation.returnshop','checkout',null)}</a></iscomment>
+		<iscomment> removed from HTMLs | Naveen Kumar <a href="${dw.web.URLUtils.httpHome()}">${Resource.msg('confirmation.returnshop','checkout',null)}</a></iscomment>
+		
+	</div>
+</div><!-- END: orderconfirmation -->
+<script type="text/javascript"><!--
+jQuery(document).ready(function() {
+	jQuery("a.printpage").click(function() {
+		window.print();
+	});
+});
+//-->
+function continueCheckout(url){
+	window.location.href = url; 
+}
+</script>
+</isif>
+</isdecorate>

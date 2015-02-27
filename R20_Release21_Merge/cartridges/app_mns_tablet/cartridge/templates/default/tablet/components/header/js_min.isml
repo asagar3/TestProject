@@ -1,0 +1,26 @@
+<!--- BEGIN JS files to merge.(source_path=cartridge/static/default;targetfile=js/global_generated.js) --->
+<!--- Commented the call to jQuery1.3.2.fixed.js --->
+<iscomment><script src="${URLUtils.staticURL('/lib/jquery/js/jquery/jquery-1.3.2.fixed.js')}" type="text/javascript"></script></iscomment>
+<!--- loading the latest stable jQuery release, version 1.8.3 with alias jQ --->
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/jquery-1.3.2.min.fixed.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.core.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.dialog_tablet.js')}" type="text/javascript"></script>
+<iscomment><script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.resizable.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.draggable.js')}" type="text/javascript"></script></iscomment>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.tabs_tablet.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/effects.core.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/effects.slide.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jcarousel/jquery.jcarousel.fixed_tablet.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jcarousel/jcarousellite.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery-tooltip/jquery.tooltip.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery-validate/jquery.validate.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/bgiframe_2.1.1/jquery.bgiframe.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/app_tablet.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/product_tablet.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/searchsuggest_tablet.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/marksandspencer_tablet.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/jquery.event.move.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/jquery.event.swipe.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/jquery.foundation.orbit.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/custom-tooltip/jquery.bt.min.js')}" type="text/javascript" charset="utf-8"></script>
+<!--- END JS files to merge --->

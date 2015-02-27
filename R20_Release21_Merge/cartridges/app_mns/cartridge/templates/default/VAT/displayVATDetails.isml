@@ -1,0 +1,182 @@
+<!--- TEMPLATENAME: displayVATDetails.isml --->
+<isdecorate template="account/pt_vatinvoice">
+<isinclude template="util/modules"/>
+
+<isset name="netOrderTotalForProd" value="${0}" scope="page"/>
+<isset name="totalTaxForOrderProd" value="${0}" scope="page"/>
+
+<isif condition = "${!empty(pdict.order)}">
+	<isset name="Order" value="${pdict.order}" scope="page"/>
+	
+	<table cellpadding="0" cellspacing="0" border="0" class="vatdetails">
+	<thead>
+		<tr>
+			<th colspan="2">${Resource.msg('vatinvoice.orderdetails','order',null)}</th>
+		</tr>		
+	</thead>
+	<tbody>
+		<tr>
+			<td class="heading"><isprint value="${Resource.msg('order.orderDate','order',null)}"/></td>
+			<td><isprint value="${Order.creationDate}"/></td>
+		</tr>
+		<tr>
+			<td class="heading"><isprint value="${Resource.msg('order.invoiceDate','order',null)}"/></td>
+			<td><isprint value="${Order.creationDate}"/></td>
+		</tr>
+		<tr>
+			<td class="heading"><isprint value="${Resource.msg('order.invoiceNo','order',null)}"/></td>
+			<td class="paddingbottom"><isprint value="${Order.orderNo}"/></td>
+		</tr>
+		<iscomment><tr>
+			<td class="heading"><isprint value="${Resource.msg('vatinvoice.ordernumber','order',null)}"/></td>
+			<td class="paddingbottom"><isprint value="${Order.orderNo}"/></td>
+		</tr></iscomment>
+		<tr>
+			<td colspan="2"></td>
+		</tr>
+	</tbody>
+</table>
+<div class="deliveryaddress">
+	<h4><isprint value="${Resource.msg('order.paidBy','order',null)}"/></h4>		
+	<isminiaddress p_address="${Order.billingAddress}"/>
+
+</div>
+
+<div class="billingaddress">
+	<h4><isprint value="${Resource.msg('order.deliveredTo','order',null)}"/></h4>
+	<isset name="shipmentForAddress" value="${Order.shipments[0]}" scope="page" /> 
+	<isminiaddress p_address="${shipmentForAddress.shippingAddress}"/>
+
+
+</div>
+<div class="clear"></div>
+<div>
+	<iscomment><!-- moved all the below values to the table above as per the VD | Rachna 20Apr --></iscomment>
+	<iscomment>
+	<p><isprint value="${Resource.msg('order.orderDate','order',null)}"/><isprint value="${Order.creationDate}"/></p>
+	<p><isprint value="${Resource.msg('order.invoiceDate','order',null)}"/></p>
+	<p><isprint value="${Resource.msg('order.invoiceNo','order',null)}"/><isprint value="${Order.orderNo}"/></p>
+	<p><isprint value="${Resource.msg('order.orderNo','order',null)}"/><isprint value="${Order.orderNo}"/></p>
+	</iscomment>
+</div>
+<div>
+	<isif condition="${!empty(Order.shipments)}">
+		<isloop items="${Order.shipments}" var="shipment" status="shipmentloopstate">
+			<isif condition="${shipment.productLineItems.size() > 0}">	
+				<table class="ordershipmenttable" summary="Order Shipment">
+					<thead>
+						<tr>
+							<th>${Resource.msg('order.item','order',null)}</th>
+							<th>${Resource.msg('order.description','order',null)}</th>
+							<th class="aligncenter">${Resource.msg('order.quantity','order',null)}</th>
+							<th class="aligncenter">${Resource.msg('order.price','order',null)}</th>
+							<th class="aligncenter">${Resource.msg('order.vat','order',null)}</th>
+							<th class="aligncenter">${Resource.msg('order.total','order',null)}</th> 
+						</tr>
+					</thead>
+					<tbody>
+					<isloop items="${shipment.productLineItems}" var="productLineItem" status="pliloopstate">
+					<iscomment><!-- alternate rows should have a class="highlight" --></iscomment>
+					<isscript>
+							var prodActualQuantity = productLineItem.quantityValue;
+							var prodProcessedQuantity = productLineItem.custom.processedQuantity;
+							var prodBasePrice = (productLineItem.adjustedNetPrice)/prodActualQuantity;
+							var taxRate = productLineItem.taxRate;
+							var basePriceTotal  = Number((prodBasePrice*prodProcessedQuantity).toFixed(2));
+							var totalTax = Number((taxRate*basePriceTotal).toFixed(2));
+							
+							totalTaxForOrderProd = totalTaxForOrderProd + totalTax;
+							netOrderTotalForProd = netOrderTotalForProd + basePriceTotal;
+						</isscript>
+						<tr class="highlight">
+							<td>
+								<isprint value="${productLineItem.productID}"/>
+							</td>
+						    <td>
+						    	<isprint value="${productLineItem.productName}"/>
+					    	</td>
+					    	 <td class="aligncenter">
+						    	<isprint value="${prodProcessedQuantity}"/>
+					    	</td>
+					    	 <td class="aligncenter">
+						    	<isprint value="${new dw.value.Money(basePriceTotal, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+						    </td>
+					    	<td class="aligncenter">
+						    	<isprint value="${new dw.value.Money(totalTax, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+					    	</td>
+					    	 <td class="last aligncenter">
+					    	 	<isprint value="${new dw.value.Money(productLineItem.custom.orderLineValue, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+						    </td>					    	 
+						</tr>
+						
+					</isloop>
+						<tr class="deliverycharge">
+							<td colspan="3" class="charge">
+								<isprint value="${Resource.msg('order.deliveryCharge','order',null)}"/>
+							</td>
+							<td class="aligncenter">
+								<isprint value="${shipment.adjustedShippingTotalNetPrice}"/>
+							</td>
+							<td class="aligncenter">
+								<isprint value="${shipment.adjustedShippingTotalTax}"/>
+							</td>
+							<td class="aligncenter">
+								<isprint value="${new dw.value.Money(shipment.custom.shipmentShippingCharge, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+							</td>							
+						</tr>
+						<tr class="highlight deliverycharge">
+							<td colspan="3">
+								<isprint value="${Resource.msg('order.totalOrderValue','order',null)}"/>
+							</td>
+							<td class="aligncenter">
+								<isprint value="${new dw.value.Money(netOrderTotalForProd, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+							</td>
+							<td class="aligncenter">
+								<isprint value="${new dw.value.Money(totalTaxForOrderProd, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+							</td>
+							<td class="aligncenter">
+								<isprint value="${new dw.value.Money(Order.custom.orderFinalTotal, dw.system.Site.getCurrent().getCurrencyCode())}"/>
+							</td>							
+						</tr>
+					</tbody>	
+					</table>
+					<iscomment><!-- added the below information to the above table | Rachna 20Apr --></iscomment>
+			<iscomment>
+			<div>					
+				<isprint value="${Resource.msg('order.deliveryCharge','order',null)}"/>	
+					<isprint value="${shipment.shippingTotalNetPrice}"/>
+					<isprint value="${shipment.shippingTotalTax}"/>
+					<isprint value="${shipment.shippingTotalGrossPrice}"/>
+			</div>
+			</iscomment>
+			</isif>
+		</isloop>
+		<iscomment><!-- below code is added to the table above | Rachna 21Apr --></iscomment>
+		<iscomment>
+		<div>
+			<isprint value="${Resource.msg('order.totalOrderValue','order',null)}"/>	
+				<isprint value="${Order.totalNetPrice}"/>
+				<isprint value="${Order.totalTax}"/>
+				<isprint value="${Order.totalGrossPrice}"/>
+		</div>
+		</iscomment>
+		
+		<div class="actions">
+			<div class="print floatleft"><a href="javascript:;" class="printpage">${Resource.msg('vatinvoice.print','order',null)}</a></div>
+			<div class="floatright grey_button">
+				<div class="grey_border"><div class="link_button"><a href="javascript:void(0);" title="close window" onclick="window.close();"><iscomment><button name="dwfrm_cart_addCoupon" value="Close" type="submit" ></iscomment><span>${Resource.msg('vatinvoice.close','order',null)}</span><iscomment></button></iscomment></a></div></div>
+			</div>
+		
+		</div>
+	</isif>	
+</div>
+
+</isif>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	jQuery("a.printpage").click(function() {
+		window.print();
+	});
+});
+</script>
+</isdecorate>

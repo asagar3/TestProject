@@ -1,0 +1,40 @@
+
+/**
+ * @output RequestLocale : String
+ */
+ 
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript('app_mns:languageselection/CookieUtils.ds');
+
+var validLocalesMap : HashMap = new HashMap();
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+
+	var browserLocale : String = request.httpLocale;
+	validLocalesMap = getLocaleMap(validLocalesMap);
+	
+	if ( empty(browserLocale) ){
+		browserLocale = getDefaultLocale();	// @TODO: Return Default Locale   
+	} else if (!validLocalesMap.containsKey(browserLocale)){
+		var language : String = null; 
+		var country : String = null;
+		var localeObj : Locale = Locale.getLocale(browserLocale);
+		
+		if (localeObj != null){
+			language = localeObj.language;
+			country = localeObj.country;
+		} else {
+			language = browserLocale.substr(0, 2);
+			country = browserLocale.substr(3);
+		}
+		browserLocale = getLocaleToRedirect(language, country, validLocalesMap);
+	 }
+	 
+	  //displayOverlay = ifDisplayOverLay(browserLocale, validLocalesMap); 
+   pdict.RequestLocale = browserLocale;
+   
+   return PIPELET_NEXT;
+}

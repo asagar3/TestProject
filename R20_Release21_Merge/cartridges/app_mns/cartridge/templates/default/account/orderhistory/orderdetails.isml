@@ -1,0 +1,154 @@
+<isdecorate template="account/orderhistory/pt_orderhistory">
+<isinclude template="util/modules"/>
+<iscomment>Nadeem:Commenting out the code to switch off the print vat invoice button(CR-32)</iscomment>
+<iscomment>
+<script type="text/javascript">
+	function displayVat(){
+	var orderNumber = "${pdict.Order.orderNo}";
+		if(orderNumber != null){
+			//var url="${URLUtils.https('VatInvoice-DisplayVatSheet','order')}" +order;
+			app.URLs.submitDialogURL = "${URLUtils.https('VatInvoice-DisplayVatSheet')}";
+			//app.URLs.submitDialogURL = app.util.appendParamToURL("${URLUtils.https('VatInvoice-DisplayVatSheet')}", "order", order);
+	//		"${URLUtils.https('Wishlist-SetShippingAddress', 'AddressID', '')}" + addressId;
+			//var data = order;
+			 
+			jQuery.ajax({
+				   type: "POST",
+				   url: "${URLUtils.https('VatInvoice-DisplayVatSheet')}",
+				   data: orderNumber,
+				   dataType: 'html',
+				   success: function(data){
+				 
+				   /* Please change the url below to the url to be displayed */				   
+					window.open ('' + app.util.appendParamToURL("${URLUtils.https('VatInvoice-DisplayVatSheet')}", "orderNumber", orderNumber) +'', "VATDetails","status=1,resizable=1,scrollbars=1,width=900,height=700");
+				//window.location.href = url; /*Rachna | 2May*/
+				   },
+				   failure: function(data) {
+				   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+				   }
+				});
+		}
+			
+	}	
+
+</script>
+</iscomment>
+
+<isif condition="${pdict.klarnaError}">
+	<div class="errormessage bold">
+		<isprint value="${Resource.msg('account.klarnacancelamounterror','account',null)}"/>
+	</div>
+</isif>
+
+<isif condition="${pdict.cancelOrder}">
+	<div class="errormessage bold">${Resource.msg('order.cancelmsg','order',null)}</div>
+</isif>
+
+<div class="orderdetails">
+	<isif condition="${!empty(pdict.Order)}">
+	<isset name ="order" value="${pdict.Order}"/>
+		<isinclude template="account/orderhistory/myorderdetail"/>
+		<isif condition="${pdict.cancelOrder}">
+			<isif condition="${pdict.Order.totalGrossPrice.available}">
+			 	<iscomment>2916-UAT - Order - Omniture - Cancelled revenue not working
+			 		The value should be whatever was recorded as the ‘revenue’ for the product when the customer checked out
+			 		<!--isset name="orderTotalValue" value="${pdict.Order.totalGrossPrice}" scope="page"/--> 
+			 	</iscomment>
+			 	<isset name="orderTotalValue" value="${pdict.Order.adjustedMerchandizeTotalPrice}" scope="page"/>
+			<iselse/>
+				<iscomment>
+					2916-UAT - Order - Omniture - Cancelled revenue not working
+					<!-- isset name="orderTotalValue" value="${pdict.Order.getAdjustedMerchandizeTotalPrice(true).add(pdict.Order.giftCertificateTotalPrice)}" scope="page"/ --> 
+				</iscomment>
+				<isset name="orderTotalValue" value="${pdict.Order.getAdjustedMerchandizeTotalPrice(true).add(pdict.Order.giftCertificateTotalPrice).subtract(pdict.Order.adjustedShippingTotalPrice)}" scope="page"/>
+			</isif>
+			<script>
+				s.events = "${Resource.msg('omniture.events.cancelorder','omniture',null)}" ;
+				s.eVar23 = "${orderTotalValue.value}";
+			</script>
+		</isif>
+		<div class="buttonWrapper">
+			<div class="floatleft btns">
+				<isif condition="${pdict.displayCancelButton}">
+					<div class="roundedBtn floatleft"><a href="javascript:;" class="cancelLink expandable-btn grey" name="${Order.orderNo}" onclick="cancelorder()" title="${Resource.msg('order.cancel','order',null)}"><span>${Resource.msg('order.cancel','order',null)}</span></a></div>
+				</isif>
+			</div>
+		</div>
+		<iscomment>Nadeem:Commenting out the code to switch off the print vat invoice button(CR-32)</iscomment>
+		<iscomment>
+		<form action="${URLUtils.https('VatInvoice-DisplayVatSheet','order',pdict.Order.orderNo)}" method="post">
+			<div class="formactions">
+				<div class="buttonWrapper">
+					<div class="floatleft btns">
+						<isif condition="${pdict.orderShipped}">
+							<div class="roundedBtn floatleft"><a onclick="displayVat();"class="deletelink expandable-btn grey" title="${Resource.msg('order.printinvoice','order',null)}"><span>${Resource.msg('order.printinvoice','order',null)}</span></a></div>
+						</isif>
+						<isif condition="${pdict.displayCancelButton}">
+							<div class="roundedBtn floatleft"><a class="cancelLink expandable-btn grey" name="${Order.orderNo}" onclick="cancelorder()" title="${Resource.msg('order.cancel','order',null)}"><span>${Resource.msg('order.cancel','order',null)}</span></a></div>
+						</isif>
+					</div>
+				</div>
+				<div class="clear"></div>
+			</div><!-- END: formactions -->
+		</form>	
+		</iscomment>
+		<div class="button_wrapper">
+			<div class="floatleft btn-grey-flat">
+					<div class="link_button">
+					<isif condition="${pdict.CurrentCustomer.authenticated}">
+						<a href="${URLUtils.https('Order-History')}" class="back-icon">
+					<iselse>
+						<a href="${URLUtils.https('Account-Show')}" class="back-icon">
+					</isif>
+							<span>${Resource.msg('orders.back','account',null)}</span>
+						</a>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<isif condition="${pdict.CurrentCustomer.authenticated}">
+				<div class="floatright btn-grey-dark">
+								<iscomment>
+									<button  value="Savedetails" onclick="" type="button">
+										<span>Save my details</span>
+									</button>
+								</iscomment>
+							<div class="floatright btn-grey-dark padding0">
+								<button value="${Resource.msg('global.returnmyaccount','locale',null)}" name="BACK_ACTION_TODO" type="submit" class="" onclick="javascript: window.location.href='${URLUtils.https('Account-Show')}';">
+									<span class="back-icon">${Resource.msg('global.returnmyaccount','locale',null)}</span>
+								</button>
+								<div class="clear"></div>
+							</div>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+				</isif>
+				<div class="clear"></div>
+		</div>
+		<iscomment>
+			<isif condition="${pdict.CurrentCustomer.authenticated}">
+				<a href="${URLUtils.https('Order-History')}" title="">${Resource.msg('orderdetails.returnorder','account',null)}</a>
+				<!-- Print Vat should be an anchor and not button (as given below). Please use the styles from Matt to style the same -->
+				<a href="javascript:void(0);" onclick="displayVat();">Print VAT</a>
+				<button type="button" value="Print Vat Invoice" onclick="displayVat();"></button> 
+			</isif>
+			<a href="${URLUtils.httpHome()}" title="">${Resource.msg('orderdetails.returnshopping','account',null)}</a>	
+		</iscomment>
+	<iselse>  
+		<isif condition="${pdict.CurrentCustomer.authenticated}">
+			<iscomment><div class="back"><a href="${URLUtils.https('Order-History')}" title="">${Resource.msg('orderdetails.returnorder','account',null)}</a></div>
+			<!-- Print Vat should be an anchor and not button (as given below). Please use the styles from Matt to style the same -->
+				<a href="javascript:void(0);" onclick="displayVat();">Print VAT</a></iscomment>
+		</isif>
+		<div class="notfound">${Resource.msg('orders.notfound','account',null)}</div>
+	</isif>
+</div><!-- END: orderdetails -->
+<script type="text/javascript">
+	function cancelorder() {
+			//[485]: QC defect fixing		
+			var url = app.util.appendParamToURL("${URLUtils.url('Order-ConfirmCancellation')}", "orderNo", "${Order.orderNo}");
+			var url = app.util.appendParamToURL(url, "emailAddress", "${Order.customerEmail}");
+			app.dialog.open(url,'${Resource.msg('order.cancel','order',null)}');
+	}
+		
+</script>
+
+</isdecorate>

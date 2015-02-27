@@ -1,0 +1,28 @@
+/**
+* Checks if  Payment processor for the payment method is worldpay .
+*
+*   @input basket : dw.order.Basket This is a sample comment.
+*   @output foundWorldPay : Boolean
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order);
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+
+	var paymentInstruments = pdict.basket.getPaymentInstruments();
+	pdict.foundWorldPay = false;
+	
+    for each( var pi : PaymentInstrument in paymentInstruments )
+	{
+        // ignore gift certificate payment instruments
+        if( pi.paymentMethod.equals("BANK_TRANSFER") || pi.paymentMethod.equals("CREDIT_CARD_MISTERCASH") )
+        {
+        	pdict.foundWorldPay = true;
+        }
+	}
+   
+
+   return PIPELET_NEXT;
+}

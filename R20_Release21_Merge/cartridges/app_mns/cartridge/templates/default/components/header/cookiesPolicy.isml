@@ -1,0 +1,46 @@
+<iscomment>Christina - INT-264 : Add cookies policy information panel</iscomment>
+
+<isset name="cookiesPolicyMessage" value="${Resource.msg('cookiesPolicy.cookiesPolicyMessage','components','test')}" scope="page"/>
+<isset name="cookiesPolicyCloseButton" value="${Resource.msg('cookiesPolicy.closeButton','components','test')}" scope="page"/>
+
+<script>
+$(document).ready(function(){
+	var cookiesPolicyCookie = jQuery.cookie('cookiesPolicy');
+
+	if (cookiesPolicyCookie!=null && cookiesPolicyCookie!="") {
+		return;
+	} else {
+		$("#divCookies").slideDown("slow");
+		getCookiesPolicyMessage();
+	}
+});
+
+function closeCookiesDiv(){
+	jQuery.cookie("cookiesPolicy", true, {expires: 365, path: '/'}); 
+    $("#divCookies").slideUp("slow");
+}
+
+function getCookiesPolicyMessage(){
+	var message = '${cookiesPolicyMessage}';
+	var splitted=message.split("$$");
+	document.getElementById("cookiesMessage1").innerHTML=splitted[0];
+	document.getElementById("cookiesMessage2").innerHTML=splitted[1];
+	document.getElementById("cookiesMessage3").innerHTML=splitted[2];
+}
+</script>
+
+<div id="divCookies">
+	<div class="divCookiesLeft">
+		<span class="info-icon">&nbsp;</span>
+		<p>
+			<span id="cookiesMessage1"></span>
+			<a href="${URLUtils.http('Page-HelpPageShow','secId','faq-07-01','quesId','#faq-07-01-01')}"  id="cookiesMessage2">&nbsp;</a> 
+			<span id="cookiesMessage3"></span>
+		</p>
+	 </div>
+	
+	<div class="divCookiesRight">
+		<a href="#" onclick="closeCookiesDiv()">${cookiesPolicyCloseButton}</a>
+	</div>
+	<div class="cl"></div>
+</div>

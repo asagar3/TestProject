@@ -1,0 +1,43 @@
+/**
+* This script is used to store order details in a custom object, 
+* before redirecting to the banks page for world pay orders
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @input basket : dw.order.Basket 
+*   @input orderNo : String 
+*   @input locale : dw.util.Locale
+
+*
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+    // read pipeline dictionary input parameter
+   var orderNo : String = args.orderNo;
+   var basket : Basket = args.basket;
+   var orderCustomObject = CustomObjectMgr.createCustomObject('OrderCustomObject', orderNo);		
+
+  orderCustomObject.custom.OrderNumber = orderNo;
+  orderCustomObject.custom.customerEmail = basket.customerEmail;
+  orderCustomObject.custom.orderTotal = basket.totalGrossPrice;
+  orderCustomObject.custom.title = basket.billingAddress.title;
+  orderCustomObject.custom.firstName = basket.billingAddress.firstName;
+  orderCustomObject.custom.lastName = basket.billingAddress.lastName;
+  orderCustomObject.custom.orderLocale = args.locale;
+  orderCustomObject.custom.status = "NOT_PLACED";
+
+
+   return PIPELET_NEXT;
+}

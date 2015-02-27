@@ -1,0 +1,192 @@
+/**
+ * This script will be used to create/update cookie & to get the browser settings.
+ *
+ * 
+ * @input localeStr : String
+ * @input queryString : String
+ * @output redirectURL : String
+ * @output LocaleID : String Locale to set 
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript('app_mns:languageselection/CookieUtils.ds');
+
+//Map, which contains all the valid locales and corresponding flag to display/non-display the overlay  
+var validLocalesMap : HashMap = new HashMap();
+
+function execute( pdict : PipelineDictionary ) : Number
+{ 
+	var localeStr : String = pdict.localeStr;
+	var browserLocale : String = null;
+	//If Request has locale available
+	var localeToReplace : String = null ;
+	var localeReplaceBy : String = null;
+	
+	var previewRequest : boolean = false ;
+	var requestPath:String = null ;
+	var pipelineName:String = null ;
+	
+	var displayOverlay: boolean = false ;
+	if(session != null && session.clickStream.last !=null ){
+		requestPath = session.clickStream.last.path ;	
+		pipelineName = session.clickStream.last.pipelineName ;
+		if (requestPath.indexOf("default/Page-Show") > -1 || requestPath.indexOf("default/Search-Show")>-1 || requestPath.indexOf("default/Product-Show") > -1 )
+		{
+			previewRequest = true ;
+		} 
+	}
+				
+	if(!empty(localeStr)){
+		//Retrieving the cookie from Request
+		var localeCookie : Cookie = request.httpCookies['LocaleCookie_EU'];		
+		
+		//If cookie does not exist, fall back to get the browser settings
+		if( empty(localeCookie) ) {
+			//Create/Get the valid locale map with the overlay flag
+			validLocalesMap = getLocaleMap(validLocalesMap);
+			//Get Browser Locale			
+			browserLocale = request.httpLocale;			
+			// If locale is valid i.e. is available in the valiLocaleMap; check if overlay needs to be displayed
+			// browser locale is null or empty
+			if ( empty(browserLocale) ){
+				browserLocale = getDefaultLocale();	// @TODO: Return Default Locale   
+			} else if (!validLocalesMap.containsKey(browserLocale)){
+				var language : String = null; 
+				var country : String = null;
+				var localeObj : Locale = Locale.getLocale(browserLocale);
+				
+				if (localeObj != null){
+					language = localeObj.language;
+					country = localeObj.country;
+				} else {
+					language = browserLocale.substr(0, 2);
+					country = browserLocale.substr(3);
+				}
+				
+				//get the locale as per the BRD Rules		
+				browserLocale = getLocaleToRedirect(language, country, validLocalesMap);
+			} 
+			
+			
+
+			//session flag to display country selector overlay
+			if(!previewRequest){
+			displayOverlay = ifDisplayOverLay(browserLocale, validLocalesMap);
+			}
+			//needs to be done here, because in some cases there will be no overlay on home page and then there will be no chane to update the cookie
+			//createOrUpdateCookie(browserLocale);
+			//setSessionVar(browserLocale);
+			
+			pdict.LocaleID = browserLocale;
+			pdict.redirectURL = browserLocale;
+			//This is required to create customized Home URL when customer enters the url in following format
+			//"http://www.marksandspencer.eu/on/demandware.store/Sites-EUSite-Site/de_DE/" or "http://www.marksandspencer.eu/on/demandware.store/Sites-EUSite-Site/"
+			
+			if (request.httpHost.indexOf("store.mns.demandware") > -1){ //this will never happen in production because the domain name will not contain "demandware" word in it.
+								
+				if(previewRequest){
+					localeToReplace = "/" + browserLocale + "/";
+					localeReplaceBy = "/" + localeStr + "/";
+					pdict.redirectURL = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy)+"/"+pipelineName+"?"+pdict.queryString;	
+						
+				} else if (displayOverlay){ 
+					
+					if(!empty(pdict.queryString)){ 
+						pdict.redirectURL = updateURLWithENLocale(request.httpPath,"en",localeStr)+"/Default-Start?"+pdict.queryString ;
+					}else {
+						pdict.redirectURL = updateURLWithENLocale(request.httpPath,"en",localeStr);
+					}				
+					
+				} else {
+					localeToReplace = "/" + browserLocale + "/";
+					localeReplaceBy = "/" + localeStr + "/";
+					if(!empty(pdict.queryString)){ 
+						pdict.redirectURL = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy)+"/Default-Start?"+pdict.queryString;
+					}else{
+						pdict.redirectURL = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy);
+					}
+				}	
+									
+			} else if (request.httpPath.indexOf("demandware.store") > -1){
+				
+				localeToReplace = "/" + browserLocale + "/";
+				localeReplaceBy = "/" + localeStr + "/";
+				
+				if(!empty(pdict.queryString)&& !displayOverlay){
+					pdict.redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+"/Default-Start?"+pdict.queryString;
+				}else {
+					pdict.redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy);
+				}
+				
+				
+			}
+			
+			if (request.httpHost.indexOf("store.mns.demandware") < 0 && displayOverlay){
+				if(!empty(pdict.queryString)){ 
+					localeReplaceBy= "/en/";
+					localeToReplace  = "/" + browserLocale + "/";
+					pdict.redirectURL = updateURLWithENLocale(pdict.redirectURL,localeReplaceBy,localeToReplace)+"/Default-Start?"+pdict.queryString;
+				}else {				
+					pdict.redirectURL = "en";
+				}
+				
+			}
+			//pdict.redirectURL = updateURL(request.httpPath,browserLocale,localeStr);			
+		
+		//else read the cookie, set the session attribute & redirect to the specified page
+		} else {
+			var localeInCookie : String = localeCookie.value;
+			var redirectURL : String = "";
+			pdict.LocaleID = localeInCookie;
+			//set attribute in cookie 
+			//setSessionVar(localeInCookie);
+			//update URL
+			if (request.httpPath.indexOf(localeStr) < 0){//User has hit in a different locale.
+				if (request.httpHost.indexOf("demandware") > -1) {//full URL having no domain name
+					localeToReplace = "/" + localeInCookie + "/";
+					localeReplaceBy = "/" + localeStr + "/";					
+					redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy);
+					
+				} else {
+					redirectURL = localeInCookie;
+				}
+			} else {
+				if (request.httpHost.indexOf("demandware") > -1) {//full URL
+					localeToReplace = "/" + localeInCookie + "/";
+					localeReplaceBy = "/" + localeStr + "/";					
+					 
+					if(previewRequest ){						
+						redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+"/"+pipelineName+"?"+pdict.queryString;;
+					}else if(!empty(pdict.queryString)){
+						redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+ "/Default-Start?"+pdict.queryString;
+					}else{
+						redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy);
+					}		
+					
+					
+				} else {	//short url				
+					if(!empty(pdict.queryString)){ 
+						var localeToReplace : String = "/" + localeInCookie + "/";
+						var localeReplaceBy : String = "/" + localeStr + "/";
+						redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+ "/Default-Start?"+pdict.queryString;;
+					}else {				
+						redirectURL = localeInCookie;
+					}
+					
+				}				
+			}			
+			pdict.redirectURL = redirectURL;
+		}
+	}
+		
+	if (pdict.redirectURL.indexOf("Util-URLWithLocale") > -1){
+		pdict.redirectURL = pdict.redirectURL.replace("/Util-URLWithLocale", "");
+	}	
+	/*
+	if (request.httpQueryString != null) {
+		pdict.redirectURL = pdict.redirectURL + "?" + request.httpQueryString;
+	} */
+	//pdict.DisplayOverlay = displayOverLay;	
+    return PIPELET_NEXT;
+}

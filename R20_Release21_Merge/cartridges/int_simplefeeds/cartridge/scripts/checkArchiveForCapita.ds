@@ -1,0 +1,105 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*-   @input ExampleIn : String This is a sample comment.
+*    @input ArchiveFolder : String  optional, e.g. "archive", folder is underneath Impex share, src folder, no mail if not provided
+*	@output franceFullPath : String
+*	@output irelandFullPath : String
+*	@output euFullPath : String
+*	@output folderURL : String
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	try
+		{
+		var archiveFolderString : String = args.ArchiveFolder;
+		
+		// no archiving if ArchiveFolder is empty, just delete
+		if ( empty( archiveFolderString ) )
+		{
+			Logger.getLogger("simplefeeds").error( "Empty archiveFolderString" );
+			return PIPELET_ERROR;
+		}
+		
+		var todayFolderString : String = archiveFolderString + File.SEPARATOR + getCurrentDateString();
+		var localFolder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + todayFolderString );
+		
+		if ( localFolder.exists() )
+		{
+			// nothing to do
+			var remoteFiles : Collection = localFolder.listFiles();
+			var checkFranceFile : File = checkFileName(remoteFiles,"FranceSite");
+			var checkIrelandFile : File = checkFileName(remoteFiles,"IrelandSite");
+			var checkEuFile : File = checkFileName(remoteFiles,"EUSite");
+			if(!empty(checkFranceFile.name) && !empty(checkIrelandFile.name) && !empty(checkEuFile.name))
+			{
+				args.folderURL = "https://"+dw.system.System.getInstanceHostname().replace(".pod17", "") + "/on/demandware.servlet/webdav/Sites/" + localFolder.fullPath ;
+				args.franceFullPath =  checkFranceFile.name;
+				args.irelandFullPath = checkIrelandFile.name;
+				args.euFullPath = checkEuFile.name;
+				return PIPELET_NEXT;
+			}
+			else 
+			{
+				Logger.getLogger("simplefeeds").error( "Capita Archive - Files of all sites dont exist" );
+				return PIPELET_ERROR;
+			}	
+			
+		}
+		else
+		{
+			Logger.getLogger("simplefeeds").error( "Capita Archive present day folder does not exist" );
+			return PIPELET_ERROR;
+		}
+	}
+	catch(e)
+	{
+		Logger.error(String(e));
+		return PIPELET_ERROR;
+	}
+}
+
+
+function checkFileName(remoteFiles : Collection, remoteFilePattern : String ) : File{
+	
+	var regExp : RegExp = new RegExp( remoteFilePattern );
+
+	var FileName : File;
+	
+	for each ( var remoteFile : String in remoteFiles )
+	{
+		if ( regExp.test( remoteFile ) )
+		{
+			FileName = remoteFile;
+			break;
+		}
+	}
+	return FileName;
+}
+
+function getCurrentDateString() : String
+{
+	// current date/time
+	var calendar : Calendar = new Calendar();
+	// for data exchanges we always use GMT
+	calendar.timeZone = "GMT";
+	
+	var dateString : String = StringUtils.formatCalendar(calendar, "yyyy-MM-dd");
+	
+	return dateString;
+}

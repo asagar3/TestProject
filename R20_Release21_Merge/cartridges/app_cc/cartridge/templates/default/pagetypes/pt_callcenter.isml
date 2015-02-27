@@ -1,0 +1,98 @@
+<!-- Template Name    : pt_callcenter -->
+<!--- Force no caching for CallCenter pages --->
+<iscache type="relative" hour="0" />
+
+<iscontent type="text/html" charset="UTF-8" compact="true" />
+
+<isinclude template="callcenter/util/modules" />
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>${Resource.msg('callcenter.title','callcenter',null)}</title>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<link href="${URLUtils.staticURL('callcenter/css/default.css')}" type="text/css" rel="stylesheet" />	
+
+	<!--- FAVICON icon (website icon, a page icon or an urlicon) 16x16 pixel image icon for website --->
+	<link rel="shortcut icon" href="${URLUtils.staticURL('/images/favicon.ico')}" />
+	
+	<script language="javascript">	    
+		/*  
+		 *  The code below is used to keep the agents session alive for a set amount of time past 
+		 *  the default Demandware timeout.
+		 *  An AJAX request is made to a blank pipeline / template "CC_Login-KeepSessionAlive"
+		 *
+		*/
+		  
+		var xmlhttp
+		
+		function loadXMLDoc(url) 
+		{
+			xmlhttp = null
+			// code for Mozilla, etc.
+			if (window.XMLHttpRequest)
+			{
+				xmlhttp = new XMLHttpRequest()
+			}
+			// code for IE
+			else if (window.ActiveXObject)
+			{
+				xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+			}
+			
+			if (xmlhttp != null)
+			{
+				xmlhttp.onreadystatechange = state_Change
+				xmlhttp.open("GET", url, true)
+				xmlhttp.send(null)
+			}
+			else
+			{
+				alert('${Resource.msg('callcenter.error.001','callcenter',null)}')
+			}
+		}
+
+		function state_Change()
+		{
+			// if xmlhttp shows "loaded"
+			if (xmlhttp.readyState == 4)
+			{
+				// if "OK"
+				if (xmlhttp.status == 200)
+				{
+					//alert(xmlhttp.responseText)
+				}
+				else
+				{
+					alert('${Resource.msg('callcenter.error.002','callcenter',null)}')
+				}
+			}
+		}
+		
+		var dynURL = '${URLUtils.url('CC_Login-KeepSessionAlive')}';
+		
+		var timeoutMinutes = 29;
+		var timeoutMilliseconds = timeoutMinutes * 1000 * 60;
+		
+		setTimeout ("loadXMLDoc(dynURL)", timeoutMilliseconds );
+    </script>
+</head>
+
+<body>
+	<isinclude template="callcenter/components/header" />
+		
+	<div class=MainScreen>
+		<!--- set the below bc* pdict variables to add to the breadcrumb trail --->
+		<isbreadcrumbs bcurl1="${pdict.bcurl1}" bctext1="${pdict.bctext1}" bcurl2="${pdict.bcurl2}" bctext2="${pdict.bctext2}">
+		<br/>
+		
+		<isreplace/>
+	</div>
+	
+	<isinclude template="callcenter/components/footer" />
+</body>
+
+</html>

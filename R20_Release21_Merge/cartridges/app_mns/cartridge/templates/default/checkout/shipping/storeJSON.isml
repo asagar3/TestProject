@@ -1,0 +1,55 @@
+<iscontent type="application/json" charset="UTF-8" compact="true"/>
+
+<iscache type="relative" minute="3"/>
+<isscript>
+	var storesListIterator : dw.util.SeekableIterator = dw.object.SystemObjectMgr.querySystemObjects("Store", "", null);
+	var storeListAddresses : dw.util.SortedMap	= new dw.util.SortedMap();
+	var storeCollectionDateMap : dw.util.HashMap = new dw.util.HashMap();
+	var pickUpTimeMap : dw.util.HashMap = new dw.util.HashMap();
+	var store : dw.catalog.Store;
+	var requestCountry : String = pdict.requestCountry;
+	while(storesListIterator.hasNext()) {
+		store = storesListIterator.next();
+		//Praveen: Added a check to verify if store is active then add in 'storeListAddresses' otherwise not
+		if(store.custom.isStoreActive && requestCountry.equalsIgnoreCase(store.countryCode.value)){
+			var deliveryLeadTime : String = store.custom.deliveryLeadTime;
+			var noDeliveryDays : Array = store.custom.noDeliveryDays;
+			var pickupDate : Date = new Date(new Date().getTime() + (deliveryLeadTime * 24 * 60 * 60 * 1000));
+			for each(var noDelDay in noDeliveryDays){
+				if(noDelDay.value==pickupDate.getDay()){
+					pickupDate = new Date(pickupDate.getTime() + ( 24 * 60 * 60 * 1000));
+				}
+			}
+			var pickupDateFormat: String = dw.util.StringUtils.formatCalendar(new dw.util.Calendar(pickupDate), "yyyy-MMMM-dd");
+			var splitDate = pickupDateFormat.split("-");
+			var storeCollectionDate = splitDate[2]+ " "+splitDate[1] + ", "+splitDate[0];
+			pickUpTimeMap.put(store.name+store.ID,store.custom.pickupTime);
+			storeCollectionDateMap.put(store.name+store.ID,storeCollectionDate);
+			storeListAddresses.put(store.name+store.ID, store);
+		}
+	}
+</isscript>
+
+{
+"stores":[
+<isloop items="${storeListAddresses.keySet()}" var="storeId" status="loopstate">
+{
+	"storeId": "<isprint value="${storeListAddresses.get(storeId).ID}"/>",
+	"storeName": "<isprint value="${storeListAddresses.get(storeId).name}"/>",
+	"storeHour": "<isprint value="${storeListAddresses.get(storeId).storeHours}"/>",
+	"collectionDate": "<isprint value="${storeCollectionDateMap.get(storeId)}"/>",
+	"address1": "<isprint value="${storeListAddresses.get(storeId).address1}"/>",
+	"address2": "<isprint value="${storeListAddresses.get(storeId).address2}"/>",
+	"address3": "<isprint value="${storeListAddresses.get(storeId).custom.address3}"/>",
+	"city": "<isprint value="${storeListAddresses.get(storeId).city}"/>",
+	"stateCode": "<isprint value="${storeListAddresses.get(storeId).stateCode}"/>",
+	"countryCode": "<isprint value="${storeListAddresses.get(storeId).countryCode.value}"/>",
+	"postBox": "<isprint value="${storeListAddresses.get(storeId).custom.postBox}"/>",
+	"zip": "<isprint value="${storeListAddresses.get(storeId).postalCode}"/>",
+	"pickUpTime": "<isprint value="${pickUpTimeMap.get(storeId)}"/>",
+	"storeMessage":"<isprint value="${StringUtils.format(Resource.msg('delivery.storecollection.collectinfo','checkout',null),storeListAddresses.get(storeId).name,pickUpTimeMap.get(storeId),storeCollectionDateMap.get(storeId))}"/>",
+	"image": "<isif condition="${!empty(storeListAddresses.get(storeId).image)}"><isprint value="${storeListAddresses.get(storeId).image.absURL}"/></isif>"
+	
+}<isif condition="${!loopstate.last}">,</isif>
+</isloop>
+]}

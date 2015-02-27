@@ -1,0 +1,118 @@
+/**
+* Demandware Script File
+* Calls the Exact Target Service - creating a subscriber to email marketing 
+*
+*
+* @input ordersList1 : dw.util.List
+* @output StatusMessage : String 
+*
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.rpc );
+importScript('exacttarget/BillingAddressDetails.ds') 
+
+var etframework : WebReference = webreferences.etframework;
+
+
+/**
+ * Main function - Web API call.
+ * For each order creates the oject and adds it to the array to be sent. 
+ * The request to the API is being done the the array of objects created.
+ * After successful call the script flags the sent objects as sent. 
+ */
+function execute( pdict : PipelineDictionary ) : Number {
+		
+	 
+	 // this will be changed to 'Success' after a successfull ExactTarget call
+	 pdict.StatusMessage  ="Error";
+	 
+	  var orderList : dw.util.List = pdict.ordersList1;
+
+	  // get service stub
+	  var service : Stub = etframework.getDefaultService();
+	  
+	  //add security header
+	  createSoapHeader(service);
+	  
+	  //init object array for the soap message.
+	  var apiObjects: Array = new Array();
+	  var i :Number = 0;
+	  for each (var order : Order in orderList) {
+		if(order!=null){
+			if(order.custom.emailMarketing){
+				Logger.debug("MNS DEBUG : Order ID to export: " + order.orderNo +" has marketing " + order.custom.emailMarketing); 
+				//data extention
+	  			var dataExtensionObject = new etframework.DataExtensionObject();
+	            dataExtensionObject.setCustomerKey(dw.system.Site.getCurrent().getCustomPreferenceValue('Exact_Target_Data_Extension'));
+	            
+	            var subscriberProperties: Array = createSubscriberProperties(order);
+	            //only add this subscriber if they have the properties set up
+	            if(subscriberProperties.length>0){
+	            	
+					dataExtensionObject.setProperties(subscriberProperties);
+		        	//add to array  
+		        	apiObjects[i] = dataExtensionObject;
+		        	i++;
+	            }
+			}
+	     }
+	  }
+	
+	 try{
+	   	   var options=new Array(); 
+	       var createOptions : etframework.CreateOptions = new etframework.CreateOptions();
+	    
+			// create request parameter
+	       var request : etframework.CreateRequest  = new etframework.CreateRequest();	    
+	       request.options = createOptions;
+	       request.objects = apiObjects;
+	      
+	       if(apiObjects.length>0){
+	       	// call the remote service
+	       	var response = service.create(request);
+	      	 // rertieve result from response
+	       	//var responseCode : String = response.getResponsecode();
+	       	Logger.debug( "MNS DEBUG : successfully called the ET API");
+	       }
+	       else{
+	       	
+	       	Logger.debug( "MNS DEBUG : didn't call ET API as no valid subscribers");
+	       }
+	       
+	       
+	       //Change the flag for the orders.
+		   for each (var order : Order in orderList) {
+				order.custom.exportStatusForExactTarget = true;		
+			}
+			pdict.StatusMessage  ="Success";
+       		
+   		} catch (e) {
+						
+			//Logger.getRootLogger().fatal("[addSubscriber.ds] ERROR : while calling the Exact Target API:", e.message);
+			pdict.StatusMessage="ERROR : while calling the ET API: " + e;
+			Logger.error("MNS ERROR : while calling the ET API:" + pdict.StatusMessage);	
+           	return PIPELET_NEXT;
+		  
+		}	
+		
+    return PIPELET_NEXT;
+}
+
+
+
+/**
+ * Creates the soap message header for the ET API
+ */
+function createSoapHeader(service: Stub){
+	
+	var username = dw.system.Site.getCurrent().preferences.custom.Exact_Target_Username;
+	var password = dw.system.Site.getCurrent().preferences.custom.Exact_Target_Password
+	
+	// create Security Header
+	var usernameToken : XML =new XML('<wsse:UsernameToken xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><wsse:Username>' + username + '</wsse:Username><wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">' + password + '</wsse:Password></wsse:UsernameToken>');
+            
+    SOAPUtil.setHeader( service, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd","Security", usernameToken, true, null );
+}		

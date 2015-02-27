@@ -1,0 +1,47 @@
+/**
+*  @input Content : dw.content.Content
+*  @input requestContent : Object
+*  @output customObject : Object
+* 
+*/
+
+importPackage(dw.system);
+importPackage(dw.content);
+
+
+function execute( pdict : PipelineDictionary ) : Number
+{ 
+	try{
+		var content:Content = pdict.Content ;
+		var contentObject =  new Object() ;
+		var sizeGuideContent:Boolean = pdict.requestContent.sizeGuideContent ;
+		
+		contentObject.id = content.ID ;
+	    contentObject.name = content.name ; 		
+	    contentObject.description = content.description ;
+	    
+	    var contentBody:String = null ;
+	    var contentHeader:String =  null ;
+	    var contentFooter:String =  null ;
+	    
+	    if(sizeGuideContent){	   	
+	   	 	contentHeader = "kiosk_sizeguide_header";
+	   	 	contentFooter = "kiosk_sizeguide_footer" ;	    	
+	    }else {	    	
+	    	contentHeader = "kiosk_header";
+	   	 	contentFooter = "kiosk_footer" ;
+	    }
+	    
+	 contentBody = ContentMgr.getContent(contentHeader).custom.body.markup ;	    
+	 contentBody = contentBody.concat(content.custom.body.markup);
+	 contentBody = contentBody.concat(ContentMgr.getContent(contentFooter).custom.body.markup) ;  
+	 contentObject.body = contentBody;   
+	    	
+	 pdict.customObject = contentObject ;
+	}catch(e){
+		Logger.error("GetContent :: CreateContentJSON : Script Error:::"+e.message) ;
+		return PIPELET_ERROR;
+	}
+  	
+    return PIPELET_NEXT;
+}

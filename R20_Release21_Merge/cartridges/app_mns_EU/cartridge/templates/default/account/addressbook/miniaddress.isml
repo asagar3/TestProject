@@ -1,0 +1,91 @@
+<iscomment>
+	Creates a miniaddress display.
+
+	Parameter:
+	p_address	 	: the address object to display
+    p_productlist   : the product list the address represents. can be empty
+    p_showphone		: if 'true', display the phone number 
+    p_isdefault		: if 'true', make the address bold
+</iscomment>
+<isif condition="${pdict.p_isdefault == 'true'}">
+	<div class="miniaddress bold">
+<iselse/>
+	<div class="miniaddress">
+</isif>
+	<iscomment>
+		There are some addresses without an ID, catch this here and make this include
+	    more universal usable therefore.
+    </iscomment>
+    <iscomment> Removed as it is not required (according to VD)
+		<isif condition="${'ID' in pdict.p_address && !empty(pdict.p_address.ID)}">
+			<div class="addressname">
+				<isprint value="${pdict.p_address.ID}"/>
+				<isif condition="${!empty(pdict.p_productlist)}">
+					<div class="productlist">${Resource.msg('miniaddress.registrywishlist','account',null)}</div>
+	 		    </isif>
+			</div>
+		</isif>
+	</iscomment>
+	<div class="name">
+		<span class="firstname"><isprint value="${pdict.p_address.title}"/>&nbsp;</span><span class="firstname"><isprint value="${pdict.p_address.firstName}"/>&nbsp;</span><span class="lastname"><isprint value="${pdict.p_address.lastName}"/></span>
+	</div>
+	<div class="address">
+		<div class="street">
+			<div class="line1">
+				<isif condition="${pdict.p_address.address1 != null}">
+					<span class="pBoxSpace"><isprint value="${pdict.p_address.address1}"/></span>					
+				</isif>
+			</div>
+		</div>
+		<div class="street">
+			<div class="line1">
+				<isif condition="${pdict.p_address.address2 != null}">
+					<span class="pBoxSpace"><isprint value="${pdict.p_address.address2}"/></span>					
+				</isif>
+			</div>
+		</div>
+		<div class="street">
+			<div class="line1">
+				<isif condition="${pdict.p_address.custom.address3 != null}">
+					<span class="pBoxSpace"><isprint value="${pdict.p_address.custom.address3}"/></span>					
+				</isif>
+			</div>
+		</div>
+		<div class="street">
+			<div class="line1">
+				<isif condition="${pdict.p_address.city != null}">
+					<span class="pBoxSpace"><isprint value="${pdict.p_address.city}"/>,</span>					
+				</isif>
+				<isif condition="${pdict.p_address.postalCode != null}">
+					<isprint value="${pdict.p_address.postalCode}"/>
+				</isif>
+			</div>
+		</div>
+		<div class="street">
+			<div class="line1">
+				<isif condition="${pdict.p_address.stateCode != null}">
+					<span class="pBoxSpace"><isprint value="${pdict.p_address.stateCode}"/>,</span>
+				</isif>
+				<isif condition="${pdict.p_address.countryCode != null}">
+					<isprint value="${pdict.p_address.countryCode}"/>
+				</isif>
+			</div>
+		</div>
+		<div class="country">
+			<div class="line1">
+				<iscomment><isif condition="${pdict.p_showphone == 'true'}"></iscomment>
+				<isif condition="${pdict.p_showphone == 'true' && pdict.p_address.phone != null}">
+					${Resource.msg('miniaddress.phone','account',null)} <isprint value="${pdict.p_address.phone}"/>
+				</isif>
+			</div>	
+		</div>
+		<div class="country">
+			<div class="line1">
+				<isif condition="${pdict.p_address.custom.alternateContactNumber != null}">
+					${Resource.msg('miniaddress.alternatePhone','account',null)} <isprint value="${pdict.p_address.custom.alternateContactNumber}"/>
+				</isif>
+			</div>	
+		</div>	
+	</div>	
+	
+</div>

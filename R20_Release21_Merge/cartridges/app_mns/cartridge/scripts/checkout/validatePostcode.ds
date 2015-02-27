@@ -1,0 +1,58 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+* @output invalidPostCode : Boolean 
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var userCountryCode : String = pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value;
+	var countryCodeArray : Array = dw.system.Site.getCurrent().preferences.custom.CountryCodesForPostCode;
+	var isCountryExist : Boolean = false;
+	
+	for (var i=0; i < countryCodeArray.length; i++) {
+		var countryCode : String = countryCodeArray[i].getValue();
+		if (userCountryCode.equals(countryCode)){
+			isCountryExist = true;
+			break;
+		}
+	}	
+		
+	if (isCountryExist) {
+		var regexToMatch : String = "^[a-zA-Z]+[ 0-9]"; // Any alphanumeric string starting with alphabet
+		var regexToReplace : RegExp = new RegExp("[a-zA-Z]+"); // Replace the first alphabets from an alphanumeric string
+		var oldPostcode : String = pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlValue;  //pdict.abc ;//oldPostcodeField.htmlValue;
+		var newPostcode : String = null; 
+		var matched : Boolean = false;
+		
+		if (oldPostcode.match(regexToMatch)) {
+			newPostcode = StringUtils.trim(oldPostcode.replace(regexToReplace, ""));
+			if (newPostcode.length < 4) {
+				pdict.invalidPostCode =true;
+				//CurrentForms.singleshipping.shippingAddress.addressFields.zip.invalidateFormElement("value-error");
+				//pdict.CurrentForms.singleshipping.invalidateFormElement();
+				return PIPELET_ERROR;
+			} else {
+				pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.value = newPostcode;
+			}		
+		}
+	}	
+	/*
+	pdict.CurrentForms.singleshipping.zip.invalidateFormElement();
+	pdict.CurrentForms.singleshipping.shippingAddress.zip.invalidateFormElement();
+	pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.invalidateFormElement();	
+	*/
+	return PIPELET_NEXT;
+}

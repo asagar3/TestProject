@@ -1,0 +1,120 @@
+/**
+* Demandware Script File
+* utils file for Addsubscriber to work put customer billing details and add thm to the request
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.util );
+
+var etframework : WebReference = webreferences.etframework;
+
+/**
+ * Creates the actual properties for the objects to be sent.
+ */
+function createProperty(name:String, value:String):etframework.APIProperty{
+		  
+	var apiProperty : etframework.APIProperty = new etframework.APIProperty();
+	apiProperty.setName(name);
+	apiProperty.setValue(value);
+	return apiProperty;
+	
+}
+
+/**
+ * Creates the soap message properties for the ET API
+ */
+function createSubscriberProperties(order:Order):Array{
+	
+		var billingAddress : OrderAddress =  order.billingAddress;
+		    	  
+		var Email_Address = order.customerEmail; 
+		var SubscriberKey = order.customerEmail;
+		var Customer_Source = dw.system.Site.getCurrent().preferences.custom.Exact_Target_Customer_Source; ; 
+					
+		var localeObject : Locale = Locale.getLocale(order.customerLocaleID);
+		var billingcountry  = billingAddress.getCountryCode();
+		var localecountry  = localeObject.getCountry();
+		var language : string = localeObject.getLanguage().toUpperCase();
+				    
+		var Title : String= billingAddress.title; 
+		var First_Name = billingAddress.firstName; 
+		var Last_Name = billingAddress.lastName; 
+		var SignUp_Source = dw.system.Site.getCurrent().preferences.custom.Exact_Target_SignUp_Source; 
+		var Email_Opt_in = "Y";
+					
+		var Post_Code = billingAddress.postalCode!=null?billingAddress.postalCode:"";
+		
+		var temp_Address_Line_1 = billingAddress.address1!=null?billingAddress.address1:"";
+		var temp_Address_Line_2 = billingAddress.address2!=null?billingAddress.address2:"";
+		
+		var Address_Line_1 = "";
+		var Address_Line_2 = "";
+		
+		
+		//France has different address fields than everyone else
+		if(billingcountry=="FR"){
+			Address_Line_1 = temp_Address_Line_2;
+			Address_Line_2 = temp_Address_Line_1; 
+			var residence = billingAddress.custom.residence !=null?" " + billingAddress.custom.residence:"";
+			var streetName = billingAddress.custom.streetName!=null?billingAddress.custom.streetName:"";
+			if(residence!=""){
+				Address_Line_1 = Address_Line_1 + " " + residence;
+			}
+			if(streetName!=""){
+				Address_Line_2 = Address_Line_2 + " " + streetName;
+			}
+				
+
+		}//else if not FR
+		else{
+			Address_Line_1= temp_Address_Line_1;
+			Address_Line_2= temp_Address_Line_2;
+			
+		}
+		
+		var Address_Line_3 = billingAddress.custom.address3!=null?billingAddress.custom.address3:"";
+		
+		var postbox = billingAddress.postBox!=null?billingAddress.postBox:"";
+		if(postbox!=""){
+			Address_Line_3 =Address_Line_3 ==""?postbox:Address_Line_3+" " + postbox;	
+		}	
+				    
+				    
+		var Town  = billingAddress.city!=null?billingAddress.city:"";
+		var County = billingAddress.stateCode!=null?billingAddress.stateCode:"";
+		var apiProperties: Array =new Array();
+    	
+    	//check we have the mandatory fields before we set up subscriber properties
+    	if(Email_Address!=null&&Email_Address!=""
+    	&&billingcountry!=null&&billingcountry!=""
+    	&&language!=null&&language!=""
+    	&&Title!=null&&Title!=""
+    	&&First_Name!=null&&First_Name!=""
+    	&&Last_Name!=null&&Last_Name!=""
+    	){
+   			apiProperties[0] = createProperty("Email_Address", Email_Address);
+   			apiProperties[1] = createProperty("SubscriberKey", SubscriberKey);
+   			apiProperties[2] = createProperty("Email_Opt_in", Email_Opt_in);
+   			apiProperties[3] = createProperty("Country", localecountry);
+   			apiProperties[4] = createProperty("Language", language);
+   			apiProperties[5] = createProperty("SignUp_Source", SignUp_Source);
+   			apiProperties[6] = createProperty("Customer_Source", Customer_Source);
+   			apiProperties[7] = createProperty("Title", Title);
+   			apiProperties[8] = createProperty("First_Name", First_Name);
+   			apiProperties[9] = createProperty("Last_Name", Last_Name);
+   			apiProperties[10] = createProperty("Post_Code", Post_Code);
+   			apiProperties[11] = createProperty("Address_Line_1", Address_Line_1);
+   			apiProperties[12] = createProperty("Address_Line_2", Address_Line_2);
+   			apiProperties[13] = createProperty("Address_Line_3", Address_Line_3);
+   			apiProperties[14] = createProperty("Town", Town);
+   			apiProperties[15] = createProperty("County", County);
+    	}
+    	else{
+    		Logger.warn("MNS: Exact Target call not made as invalid customer data in " + order.orderNo);
+    	}
+   		return apiProperties;
+	
+}
+

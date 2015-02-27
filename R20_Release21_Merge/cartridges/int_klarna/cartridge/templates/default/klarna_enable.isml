@@ -1,0 +1,26 @@
+<isscript>
+
+	var klarnaLanguages = ['sv', 'no', 'en', 'dk', 'de', 'fi', 'nl']
+	var activeCountries = dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_ACTIVE_COUNTRIES');
+	var activeCountriesSpecial = dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_SPECIAL_ACTIVE_COUNTRIES');
+	var active : Boolean = false;
+	var activeSpecial : Boolean = false;
+
+	for each (var val : EnumValue in activeCountries) {
+		if(val.getValue() == KlarnaCountry) {
+			active = true;
+			break;	
+		}
+	}
+	
+	for each (var val : EnumValue in activeCountriesSpecial) {
+		if(val.getValue() == KlarnaCountry) {
+			activeSpecial = true;
+			break;	
+		}
+	}
+
+	var countryCurrencyMatches = (KlarnaCountry == "SE" && KlarnaCurrency == "SEK") || (KlarnaCountry == "DK" && KlarnaCurrency == "DKK") ||
+		(KlarnaCountry == "FI" && KlarnaCurrency == "EUR") || (KlarnaCountry == "NO" && KlarnaCurrency == "NOK") || 
+		(KlarnaCountry == "DE" && KlarnaCurrency == "EUR") || (KlarnaCountry == "NL" && KlarnaCurrency == "EUR")
+</isscript>

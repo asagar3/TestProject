@@ -1,0 +1,7 @@
+.radio input{background: none; }
+.pt_checkout #content {max-width:613px;}
+.genericinputbox input {padding:5px 3px 5px 0px !important;}
+.creditcardpayment .checkbox input{height:auto; padding:0px !important} /*Ireland Feedback comments incorporated | Juliet*/
+.requiredindicator{margin-left:-3px;}
+.formfieldtooltip .tooltip_icon{float:none;}/*Defect 1810832*/
+.addressoptions .actions{float:left;}/*Defect 1810832*/

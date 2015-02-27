@@ -1,0 +1,15 @@
+<iscomponent pipeline="RichRelevance-IncludeCommon">
+<script chartset="utf-8" type="text/javascript">
+
+	var pts = "${!empty(pdict.ProductSearchResult.category.custom.rrPlacementTypes) ? pdict.ProductSearchResult.category.custom.rrPlacementTypes : dw.system.Site.current.preferences.custom.rrPlacementCategory}".split(',');
+	for (var i = 0; i < pts.length; i++) {
+		R3_COMMON.addPlacementType(pts[i]);
+	}
+	R3_CATEGORY = new r3_category();
+	R3_CATEGORY.setId('${pdict.ProductSearchResult.categoryID}');
+	R3_CATEGORY.setName('${pdict.ProductSearchResult.category.displayName.replace('&', '').replace('\'', '')}');
+
+r3();
+</script>
+
+

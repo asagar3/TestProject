@@ -1,0 +1,53 @@
+<isscript>
+	importScript('search/ProductGridUtils.ds');
+</isscript>
+<iscomment><!--Display the remaining products as list--></iscomment>
+
+<ul id="search-result-items" class="productlisting tiles-container clearfix ${ProductGridUtils.getCompareClass(pdict.category)} ${!empty(pdict.CurrentHttpParameterMap.format.value) ? (pdict.CurrentHttpParameterMap.format.value) : ''}">
+	<isloop items="${pdict.pagingmodel.pageElements}" var="LoopProductHit" status="loopstate">
+
+		<li class="grid-tile"  data-colors-to-show="${ProductGridUtils.getRepresentedVariationValueIDs(LoopProductHit,'color').join(',')}">
+
+			<iscomment><!--display a tile per product--></iscomment>
+			<isobject object="${LoopProductHit}" view="searchhit">
+				<iscomment><!-- Self contained product information. Can be cached separately even if search finds this product in different categories or positions within the grid  --></iscomment>
+				<isinclude url="${ProductGridUtils.buildHitTileURL(LoopProductHit, pdict.CurrentHttpParameterMap.cgid.value)}"/>
+			</isobject>
+			<isif condition="${(loopstate.index!=0 && (loopstate.index +1) % 4 == 0)}">
+				<div class="clear" style="margin-bottom: 15px;"></div>
+			</isif>
+		</li>
+	</isloop>
+</ul>
+<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('enableInfiniteScroll')}">
+	<isif condition="${pdict.pagingmodel.currentPage != pdict.pagingmodel.maxPage }">
+		<div class="pageBreak last">${Resource.msg('search.pageBreak','search',null)} <isprint value="${(pdict.pagingmodel.currentPage + 2).toFixed()}"/> <span class="pageNumber" style="display: none;"><isprint value="${(pdict.pagingmodel.currentPage + 2).toFixed()}"/></span> </div>		
+		<div class="infinite-scroll-placeholder" data-loading-state="unloaded" data-grid-url="${decodeURI(pdict.pagingmodel.appendPaging ( pdict.ProductSearchResult.url('Search-Show'), (pdict.pagingmodel.currentPage + 1) * pdict.pagingmodel.pageSize).append('format','page-element'))}" ></div>
+	<iselse>
+		<div class="pageBreak last"><span class="pageNumber" style="display: none;"><isprint value="${(pdict.pagingmodel.maxPage+1).toFixed()}"/></span> </div>
+	</isif>
+</isif>
+<script type="text/javascript">
+
+$(document).ready(function() {
+	initializeEventsQuickView();
+});
+
+function initializeEventsQuickView(){
+
+	var quickViewOptions = {
+			buttonSelector: "#content div.quickviewbutton",
+			imageSelector: "#content div.product div.image",
+			buttonLinkSelector: "#content div.quickviewbutton a",
+			productNameLinkSelector: "#content div.product div.name a"
+		};
+
+	app.quickView.bindEvents(quickViewOptions);	
+	
+	$("#content div.swatches a.swatch").unbind();
+	$("#content div.swatches div.palette a.swatch").unbind();
+	app.search.bindClickToAllRefineLinks();	
+
+	
+}
+</script>

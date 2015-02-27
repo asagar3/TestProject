@@ -1,0 +1,37 @@
+<script type="text/javascript">
+jQ(function(){
+	jQ('#subHeaderDetailsLink').on('click', function(e){
+		var btn = jQ(this).find('span.plusminus') 
+		if(btn.hasClass('plus')){
+			jQ(this).removeClass('bottomBorder');
+			btn.removeClass('plus').addClass('minus');	
+			jQ("#subHeaderDetails").slideDown();
+		}else{
+			jQ(this).addClass('bottomBorder');
+			btn.removeClass('minus').addClass('plus');
+			jQ("#subHeaderDetails").slideUp();
+		}
+		
+	});
+	
+	/*
+	var addressSummary = (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.value}")) + " "
+	+ (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.value}")) + " "
+	+ (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3}")=="null"? '' : (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.value}"))) + " "
+	+ (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.value}")) + " "
+	+ (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.value}"));
+	*/
+	
+	var addressSummary = (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.value}")) + " "
+	+ (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.value}")) + " ";
+	
+	
+	
+	addressSummary += (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.value}")) + " "
+	+ (jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.value}")=="null"? '' : jQ.trim("${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.value}"));
+	
+	
+	addressSummary = addressSummary.substr(0, 30);
+	jQ("#addressPartial").html(addressSummary);
+});
+</script>

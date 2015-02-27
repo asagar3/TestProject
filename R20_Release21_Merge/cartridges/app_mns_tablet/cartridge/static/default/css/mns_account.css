@@ -1,0 +1,840 @@
+/*******************
+Modules: All Account Pages
+Owner: Asha Sachdeva
+Date Started: Mar-24-2011
+*********************/
+/******Generic Class*******/
+.defaultselection.bold, .miniaddress.bold{font-weight:700 !important; color:#000 !important; font-size:1em}
+/*****************Buttons*********************/
+.edit_address_form .darkgrey_button.forward button{/*	background:url("../images/background_arrowgreater_white.png") no-repeat scroll 120px center transparent; padding:4px 5px 6px 15px !important;*/}
+.edit_address_form form .label{width:170px !important; color:#666;}
+.registration .darkgrey_button.forward button{/*background-position:115px 10px; padding: 5px 5px 8px 20px !important*/}
+/******************** Button********************************/
+.checkorder .green_button{margin-top:-3px}
+.checkorder div.errorclient{width:150px}
+/************* Account Pages Wrapper **********************/
+.account_wrapper{border-top:1px solid #eee;padding:0px 0px}
+
+/**************** All Account Pages |  Left Navigation********************************/
+.pt_account_landing #leftcolumn{margin-right:23px; width:156px; border:1px solid #eee; border-top:none; border-bottom: none;}
+.pt_account_landing #leftcolumn .navgroup{border-bottom:3px double #ccc; margin-bottom:0px; /*font-size:1.2em*/} /*27-apr*/
+.pt_account_landing #leftcolumn .navgroup h3{font-size:1.2em; background-image:none;padding:12px 8px 2px 19px; border:none;}
+.pt_account_landing #leftcolumn .navgroup ul{padding:0px 5px 3px 0px;}
+.pt_account_landing #leftcolumn .navgroup ul li{padding:0px 0px 9px 0px;}
+.pt_account_landing #leftcolumn .navgroup ul li.selected{font-weight:700} /*Apply this class on selected item of LHN*/
+
+.pt_account_landing #leftcolumn .navgroup ul li a{color:#666;/* padding-left:20px*/}
+.pt_account_landing #leftcolumn .navgroup ul li a:hover{color:#000;/*background:url("../images/background_dropdown_nav_list_arrow.png") no-repeat scroll 4px 4px transparent; padding-left:20px*/}
+/*.pt_account_landing #leftcolumn .navgroup ul li a.selected{color:#000;background:url("../images/background_dropdown_nav_list_arrow.png") no-repeat scroll 4px 4px transparent; padding-left:20px; font-weight:700;}*/
+
+/*.pt_account_landing #leftcolumn .navgroup ul li a{color:#666; padding-left:20px}*/
+/*.pt_account_landing #leftcolumn .navgroup ul li a:hover{color:#000;background:url("../images/background_dropdown_nav_list_arrow.png") no-repeat scroll 4px 4px transparent; padding-left:20px}*/
+/*.pt_account_landing #leftcolumn .navgroup ul li a.selected{color:#000;background:url("../images/background_dropdown_nav_list_arrow.png") no-repeat scroll 4px 4px transparent; padding-left:20px; font-weight:700;}*/
+
+.pt_account_landing #leftcolumn .contentasset{margin-top:0px}
+.pt_account_landing .account_rightcolumn{max-width:80%!important /* 858 LBI */; width:779px; }
+.pBoxSpace{padding-right:5px}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/************* Account Login Page | Returning Customer, New Customers **********************/
+.account_wrapper .logincustomersHeader{padding:12px 0 20px 54px}
+.account_wrapper .logincreate{width:373px; margin-right:0px; float:left; min-height:0px; margin-bottom:0px}
+/*.account_wrapper .logincustomers{width:372px;margin-right:10px; float:left; min-height:0; margin-bottom:0px}QC Defect733*/
+.account_wrapper .logincustomers{width:376px /* 858 LBI */;margin-right:5px; float:left; min-height:0; margin-bottom:0px}/*QC Defect733*/
+.account_wrapper .logincustomers .lock_icon{background:transparent url("../images/background_lock_account_login.png") no-repeat left 4px; padding-left:50px; height:42px; display:block;}
+.account_wrapper .logincustomers h3{background:#ccdd77 url(../images/heading_gradient_green.gif) repeat-x left top; padding-left:10px}
+/*.account_wrapper .logincustomers h3{background:#ccdd77 url(../images/heading_gradient_green.gif) repeat-x left top; padding-left:10px}*/
+.account_wrapper .logincreate h3{background-color:#f3f3f3 !important;}
+.account_wrapper .returningcustomers{background:transparent url("../images/gradient_account.png") no-repeat scroll left top;margin-top:0px; border-top:none; padding-top:29px; min-height:133px;padding-bottom:18px}
+/*.account_wrapper .returningcustomers form .label{width:100px}QC Defect733*/
+.account_wrapper .returningcustomers form .label{width:102px; padding-left:2px}/*QC Defect733*/
+.account_wrapper .returningcustomers .formactions{margin:13px 0px 0px 105px}
+.account_wrapper .returningcustomers .forgotpassword{margin:0px 0px 0px 105px}
+.account_wrapper .logincreateHeader{background:url("../images/icon_newcustomer.png") no-repeat 10px center #BFD252; padding:10px 0 8px 60px !important}
+.account_wrapper .createaccount{border:1px solid #e0e0e0; margin:0px 2px 1px 2px; min-height:132px; padding:44px 0px 0px 52px;background:transparent url("../images/gradient_account.png") no-repeat scroll left top;border-top:none;}
+.account_wrapper .createaccount ul{margin-bottom:10px}
+.account_wrapper .createaccount ul li{background:transparent url("../images/green_bullet.png") no-repeat left center; list-style-type:none; padding-left:15px; margin-bottom:2px; font-size:1.2em}
+.account_wrapper .createaccount{padding:58px 0 28px 62px}
+
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+.account_wrapper .createaccount {padding-bottom:39px} /*safari and chrome*/
+}
+
+.account_wrapper .createaccount .green_button{margin-top:0px}
+
+
+/***************Check Order*******************/
+.account_wrapper .logingeneral{width:100%; border:none; min-height:0; background:transparent url("../images/background_trackorder.png") repeat-x left top; margin-botom:6px; margin-top:15px;}
+.account_wrapper .logingeneral .header{background: transparent url("../images/icon_trackorder.png") no-repeat scroll 11px 14px;float:none; padding:19px 10px 12px 58px}
+.account_wrapper .logingeneral .header p{font-size:1.2em;}
+.account_wrapper .logingeneral .header h3{background-color:transparent; font-size:1.5em; font-weight:normal;float:none; margin:0px; padding:0px; color:#333; float:left; width:200px}
+.account_wrapper .logingeneral .headerHighlight{margin:0px 6px}
+.account_wrapper .logingeneral .checkorder{margin:3px 0px 0px 0px; padding:15px 6px 14px 15px }
+.account_wrapper .checkorder {height:auto}
+.account_wrapper .checkorder form .label{width:94px !important; font-size:1.4em; color:#333; text-align:left;}
+.account_wrapper .checkorder form .email .label{width:71px !important}
+.account_wrapper .checkorder .formfield{float:left;margin:0px 5px 10px 0px}
+.account_wrapper .checkorder .email{margin-left:0;}
+.account_wrapper .checkorder input.emailnum{width:196px}
+.account_wrapper .checkorder input{width:114px}
+.account_wrapper .returningcustomers .username,.account_wrapper .returningcustomers .password {margin:0px 0px 4px 0px}
+/*************All Account Page Footer****************/
+.account_footer{border:1px solid #e0e0e0; padding:1px;margin:25px 0px 0px 0px; width:756px;}
+.account_footer .inner_content{background-color:#efefef; padding:20px 0px 20px 20px}
+.account_footer .inner_content h3{background-color:transparent; margin:0; padding:0}
+.account_footer .inner_content li{float:left; list-style-type:none;}
+.account_footer .inner_content li.firstcol{background:transparent url("../images/icon_safesecure.png") no-repeat scroll left 2px;width:230px; padding-left:38px; padding-right: 5px}
+.account_footer .inner_content li.secondcol{background:transparent url("../images/account_footer_divider.png") no-repeat scroll 17px -9px;  padding-left:65px; width: 386px} /*27-apr*/
+.account_footer p{color:#333; font-size:1.1em}
+.account_footer span{color:#333; font-size:1.1em} /* accessibility issue 12 oct 2011 */
+.account_footer a{color:#034181; text-decoration:underline !important; font-weight:700}
+
+/**************** All Account Page | Balloon **************** **/
+.account_wrapper .balloon{float:right; margin-right:5px;}
+.account_wrapper .balloon_left{background:transparent url("../images/balloon_account_left.png") no-repeat left top;width:16px; height:43px; float:left}
+.account_wrapper .balloon_mid{background:transparent url("../images/balloon_account_mid.png") repeat-x left top;float:left; padding:14px 0px}
+.account_wrapper .balloon_right{background:transparent url("../images/balloon_account_right.png") no-repeat right top;width:11px; height:43px;  float:left}
+
+
+/****************** My Personal Details ********************** **/
+.account_wrapper .registration{margin:20px 0 0 10px; width: 100% !important;}
+.account_wrapper .registration .registrationform label {font-size:1.2em !important; color:#4b4b4b;}
+.account_wrapper .registration .registrationform label.nonbold{font-size:1em !important; font-weight:normal; }
+.account_wrapper .registration .registrationform input[type="radio"]{margin-right: 0px;}
+
+.account_wrapper .registration .registrationform{/*border-bottom:1px solid #e1e1e1;*//*padding-bottom:55px*/}/*812773*/
+.account_wrapper .registration .registrationform .button_wrapper {border-top:1px solid #e3e1e1;padding-top:35px;}/*812773*/
+.account_wrapper .registration .title{margin-bottom:23px;margin-top:20px;}
+.account_wrapper .registration .label{padding-right:20px; font-weight:normal}
+.account_wrapper .registration .email, .account_wrapper .registration .password{margin-top:25px;}
+.account_wrapper .registration .signup{margin-top:30px; color:#666;}
+.account_wrapper .emailsignup{font-size:1.1em; color:#666;}
+.account_wrapper .emailsignup a{color:#666666; text-decoration:underline !important}
+.account_wrapper .emailsignup a:hover, .account_wrapper .emailsignup a:focus{color:#666666; text-decoration:none !important}
+.account_wrapper .registration .emailsignupcheckbox{margin:22px 4px 0 173px}
+.account_wrapper .registration .emailsignup {margin-top:20px;}
+.change_email_section {margin-bottom:15px;}
+.registrationform .day{width:50px}
+.registrationform .month{width:65px}
+.registrationform .year{width:62px}
+/*aliddl: media query to fix support ticket INC000007872012, iPad DOB fields issue */
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) {
+	.registrationform .day{width:55px}
+	.registrationform .month{width:65px}
+	.registrationform .year{width:67px}
+}
+
+.privacywrapper{margin:27px 0px 49px 0px}
+.registrationform .errorform{margin-left:0px; padding:14px 33px}
+/************* Button *************************/
+.account_wrapper .button_wrapper{margin: 30px 0px 0px 0px}
+.account_wrapper .registration .button_curve{margin:12px 0px 0px 15.6em}
+.account_wrapper .registration .button_curve .link{float:left; margin:5px 20px}
+.account_wrapper .registration .button_curve a{text-decoration:underline !important; color:#034181}
+.account_wrapper .registration .button_curve .left_curve{background:transparent url("../images/button_left_curve.png") no-repeat left top; width:17px; height:28px; float:left}
+.account_wrapper .registration .button_curve .right_curve{background:transparent url("../images/button_right_curve.png") repeat-x right top;height:28px; border:0; float:left; padding-left:5px; font-size:1.1em; padding:0px 15px 4px 0px; color:#333;}
+/****************** My Registration Details ************************/
+.account_wrapper .createanaccount{margin:15px 0 0 0px; width:730px; font-size:1em;}
+.account_wrapper .createanaccount h4{background-color:#efefef; color:#333; font-size:1.5em; margin:1px 0px 15px 0px; padding:3px 10px; border-top:1px solid #fff;}
+.account_wrapper .formfields{margin-bottom:35px}
+.account_wrapper .createanaccount .formfields{margin:0px; padding-bottom:21px;background:url(../images/registration_bottom_shadow.png) no-repeat left top;padding-top:2px;}
+.account_wrapper .emailsignupcheckbox label{font-weight:normal}
+.emailsignupcheckbox a{text-decoration:underline !important}
+/** Dashboard **/
+
+/** Dashboard Header - Used across all account pages **/
+/*.account_wrapper #leftcolumn{margin-right:10px}*/
+.account_wrapper .dashBorder{ border:1px solid #e6e6e6;padding:0; width: 759px}
+.account_wrapper .balloon{margin:20px;}
+.account_wrapper .headerHighlight .holder {width:100%; background:transparent; height:50px;}
+.account_wrapper .headerHighlightSmall .holder{width:100%; background:transparent;}
+.account_wrapper .headerHighlight .holder div.content div.inner p, .account_wrapper .headerHighlightSmall .holder div.content div.inner p{width:100%;font-weight:normal !important;font-size:1.1em !important;} 
+.account_wrapper .accountpaymentinstruments .headerHighlight .holder div.content div.inner p {color:#666666;font-size:1.1em !important;}
+.account_wrapper .headerHighlight p, .account_wrapper .headerHighlightSmall p{font-size:1.3em; line-height:1.1em} /*NEED to retest balloon font-size before deploying*/
+.account_wrapper .headerHighlight, .account_wrapper .headerHighlightSmall {
+	float:right;
+	margin:13px 5px 16px;
+	position: relative;
+	width: 383px;
+	height: 69px;
+	text-align: left;
+	line-height: 13px;
+	background-color: #fff;	
+	/*-webkit-box-shadow: 2px 2px 4px #888;*/
+	padding:2px 5px 5px 10px;
+	color:#666;
+}/*27-apr*/
+
+.account_wrapper .headerHighlight {
+background:url("../images/bubb_arrow_left.png") 0 0px no-repeat;
+}
+
+.account_wrapper .headerHighlight .highlightcontent {background-color: #fff;padding:5px 5px 5px 10px;height:64px;}
+.account_wrapper .headerHighlightSmall .highlightcontent {background-color: #fff;padding:5px 5px 5px 10px;height:26px;}
+.account_wrapper .headerHighlightSmall {
+	height:36px;
+	width:420px;
+	margin:0px 10px 16px;
+	padding: 0 0 0 10px;
+	-moz-box-shadow:5px 1px 10px 0 #e1e1e1;-webkit-box-shadow: 5px 1px 10px 0 #e1e1e1;box-shadow: 5px 1px 10px 0 #e1e1e1;
+}
+.account_wrapper .headerHighlightSmall {
+background:url("../images/bubb_arrow_left_small.PNG") 0 0px no-repeat;
+}
+/*.account_wrapper .headerHighlight:before
+{
+	content: '';
+	position: absolute;
+	width: 10px;
+	height: 100%;
+	left: -10px;
+	top: 0px;
+	padding:0;
+	margin:0;*/
+	/* border: 5px solid;
+	border-color: transparent #cccccc transparent transparent; */
+	/*background:url("../images/bubb_arrow_left.png") 0 0px no-repeat;
+}*/
+/*.account_wrapper .headerHighlightSmall:before
+{
+	content: '';
+	position: absolute;
+	width: 10px;
+	height: 100%;
+	left: -10px;
+	top: 0px;
+	padding:0;
+	margin:0;*/
+	/* border: 5px solid;
+	border-color: transparent #cccccc transparent transparent; */
+	/*background:url("../images/bubb_arrow_left_small.PNG") 0 0px no-repeat;
+}
+*/
+.account_footer_shadow {
+	padding:0;
+	margin:0 0 48px 0;
+	background:url("../images/bkgd_account_footer_shadow.png") 0 0px no-repeat;
+	width:756px;
+	height:10px;
+}
+.account_wrapper .headerHighlight:after
+{
+
+	content: '';
+	position: absolute;
+	width: 413px;
+	height: 9px;
+	left: 40px;
+	bottom: -9px;
+	padding:0;
+	margin:0;
+	background:url("../images/bubb_shadow_bottom_new.png") 0 0px no-repeat;
+}
+.account_wrapper .headerHighlight h4{
+	font-size:1.4em;
+	/*border-bottom: 1px dotted #c2c2c2;*/
+    display: inline-block;
+    margin: 0;
+    padding: 0 10px 6px 0;
+    background:none;
+    color:#000000;
+    font-weight:bold;
+    line-height:1.2em;
+}/*27-apr*/
+
+.account_wrapper .headerHighlight a{
+	text-decoration:underline !important;
+	color: #034181;	
+}
+
+.account_wrapper .surround{margin-left:0; width:764px;}
+.account_wrapper .dashboardHeader{background:url("../images/bkgd_dashboard_grad.png") repeat-x; margin:1px; height:105px; position:relative;}/* 1028 */
+.account_wrapper h3.overviewHead{
+	color:#666666;
+	font-family:'HelveticaNeue-UltraLight','Helvetica Neue UltraLight','Helvetica Neue',Arial,Helvetica,sans-serif ;
+	font-size:24px ;
+	font-weight:100;
+	font-variant:normal ;
+	background-color:transparent;
+	float:left;
+	margin:33px 0 0 35px; 
+}
+
+.account_wrapper .accountlanding{margin:15px 0px 0px 0px;}
+.account_wrapper .dashNav{background:url("../images/dashboard_gradient.png") repeat-x;  height:397px; position:relative; padding:17px 0px 0px 24px ; margin-left:4px; width:731px}
+.account_wrapper .dashNav .dashboard_bottom{position:absolute;z-index:1;bottom:5px;background:url(../images/dashboard_shadow_bottom.png) no-repeat left top;width:500px;height:30px;left:71px;} 
+.account_wrapper .dashNav .model{bottom: 31px; position: absolute; right: 2px;z-index:2;}
+.account_wrapper ul.dashTabs{width:629px; /* background:url("../images/background_dash_ul.png") repeat-y right; 858 LBI*/ float:left; }
+.account_wrapper ul.dashTabs li{display:inline; float:left; margin: 0 0 0 10px; border-left:1px solid #e3e3e2; background:url("../images/dots_dashboard_separator.gif") no-repeat scroll 52px bottom #FFFFFF; height:117px;}
+.account_wrapper ul.dashTabs li div{ background: url("../images/dashboard_tabicon_1.png") no-repeat scroll -3px 10px transparent; height: 100%; margin-left:-10px; padding-left: 69px;}
+.account_wrapper ul.dashTabs li h4{background-color:transparent; color:#000000; margin-top:19px;margin-bottom:27px; padding:0;font-weight:normal; }/*27-apr*/
+.account_wrapper ul.dashTabs li h4 a {color:#333333 !important;}
+
+.account_wrapper ul.dashTabs li.left{margin-right:0; width:49%;/* 858 LBI */ }
+.account_wrapper ul.dashTabs li.right{margin-left:-10px; border-right:1px solid #e3e3e2; width:49%;/* 858 LBI */}
+.account_wrapper ul.dashTabs li.top{border-top:1px solid #e3e3e2;}
+.account_wrapper ul.dashTabs li.bottom{border-bottom:1px solid #e3e3e2; background:none; background-color:#ffffff;}
+.account_wrapper ul.dashTabs li.tb01{}
+
+/***744 Fix***/
+.account_wrapper ul.dashTabs li.tb01 div{background-image: url("../images/dashboard_tabicon_1.png");} 
+.account_wrapper ul.dashTabs li.tb02 div{background-image: url("../images/dashboard_tabicon_0.png");}
+.account_wrapper ul.dashTabs li.tb03 div{background-image: url("../images/dashboard_tabicon_2.png");}
+.account_wrapper ul.dashTabs li.tb04 div{background-image: url("../images/dashboard_tabicon_5.png");} 
+.account_wrapper ul.dashTabs li.tb05 div{background-image: url("../images/dashboard_tabicon_11.png");}
+.account_wrapper ul.dashTabs li.tb06 div{background-image: url("../images/dashboard_tabicon_6.png");}
+
+.account_wrapper ul.dashTabs li p, .account_wrapper ul.dashTabs li h4{width:210px;}
+.account_wrapper ul.dashTabs li p a{
+	background:url("../images/link_arrow.png") no-repeat scroll right center transparent;
+	padding-right: 15px; color:#333 !important;
+}/*27-apr*/
+
+.account_wrapper .accountpaymentinstruments{margin-left:0; width:100%;}
+
+
+
+
+/* My Payment Details **/
+
+.account_wrapper .noH{font-size: 1.1em; /*font-weight: bold; */letter-spacing: 0; line-height: 1.5em;  }
+.account_heading{
+    background-color: transparent;
+    color: #333333;
+    float: left;
+    font-family: 'HelveticaNeue-UltraLight','Helvetica Neue UltraLight','Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 17px;
+    font-variant: normal;
+    font-weight: 100;
+    margin: 0 0 0 0;/* 1028 */
+    padding-left: 54px;
+    position:relative;/* Rachna 09-May */
+    
+}
+.account_heading_description {position:absolute;float:left;font-size: 1.1em;margin: 72px 81px;color:#666666;}
+/* orders background */
+.bkgd5{background:url("../images/dashboard_titleicon_5.png") 0 50% no-repeat;}
+/* address background */
+.bkgd6{background:url("../images/dashboard_titleicon_6.png") 0 50% no-repeat;}
+/* payment details background */
+.bkgd4{background:url("../images/dashboard_titleicon_4.png") 0 50% no-repeat;}
+/* personal details, address background */
+.bkgd3{background:url("../images/icon_newcustomer.png") 0 50% no-repeat;}/* 1028 */
+.account_wrapper .cardHolder{width:100px; float:left; border:1px solid orange; margin-right:40px;}
+.PasswordResetDialog{overflow:visible !important;}/*955*/
+.ui-dialog .PasswordResetDialog.ui-widget-content{padding-right:0px !important; height:auto !important}/*Patch for Reset Popup*/
+
+.accheadleft {/* 1028 */
+    float: left;
+    margin-left: 30px;
+    width: 310px;
+    visibility:hidden;
+}
+
+
+/* Expandable Buttons */
+.orderinfotable .expandable-btn{background: url("../images/ui-icons_button_states_new.png") no-repeat scroll left top transparent;	color: #525252;	display: inline-block;	margin: 0;	text-decoration: none;	padding: 0 0 0 11px; border:none}
+/*a.expandable-btn span, span.expandable-btn input, button.expandable-btn span {
+   background: url("../images/ui-icons_button_states.png") no-repeat scroll right top transparent;
+   border: medium none;  color: #000000;  cursor: pointer;  display: block;   line-height: 25px;  height:30px;  border:0 !important;  margin: 0 0 0 14px;  
+   padding: 0 24px 0 0 !important;  
+   white-space: nowrap;
+   font-size:12px;
+}*/
+.orderinfotable button.expandable-btn span {background: url("../images/ui-icons_button_states_new.png") no-repeat scroll right -31px transparent;color: #525252;margin-left:0;display: inline-block;border:none !important; padding:0px 20px 0px 10px!important;}
+.orderinfotable button.expandable-btn:hover{background-position:left -70px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+.orderinfotable button.expandable-btn:hover span{background-position:right -101px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+.expandable-btn{background: url("../images/ui-icons_button_states_new.png") no-repeat scroll left top transparent;	color: #525252;	display: inline-block;	margin: 0;	text-decoration: none;	padding: 0 0 0 7px; border:none} /* Button Cut off issue zoom in issue 6 Jan, 2012 */
+/* START: CR015 | Naveen Kumar */
+.quantitycolumn .updatequantity button.expandable-btn{padding: 0 0 0 5px;}
+/* END: CR015 | Naveen Kumar */
+.expandable-btn:focus {border:none;}
+.account_wrapper .registration .button_curve a.expandable-btn {text-decoration:none!important;}
+a.expandable-btn span, span.expandable-btn input, button.expandable-btn span {
+   background: url("../images/ui-icons_button_states_new.png") no-repeat scroll right -31px transparent;
+   border: medium none;  color: #333333;  cursor: pointer;  display: block;   line-height: 27px;  height:30px;  border:0 !important;  margin: 0 0 0 5px;  
+   padding: 0 24px 0 12px !important;
+   white-space: nowrap;
+   font-size:12px;
+   text-decoration: none !important;
+}
+
+button.expandable-btn span {background: url("../images/ui-icons_button_states_new.png") no-repeat scroll right -31px transparent;color: #525252;display: inline-block;border:none !important; padding:0px 20px 0px 10px!important;}
+
+
+/* set different variations here */
+
+span.grey :hover, a.grey:hover, button.grey:hover, span.grey :focus, a.grey:focus, button.grey:focus{background-position:left -70px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+span.grey input:hover, a.grey:hover span, button.grey:hover span, span.grey input:focus, a.grey:focus span, button.grey:focus span{background-position:right -101px; color:#ffffff;/*font-weight:bold;*/ text-decoration:none !important;   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);}
+
+
+/* Temp placeholder for CMS content*/ 
+.dwContent{ padding: 29px 55px; border-bottom:1px solid #e0e0e0; color:#666;}
+.dwContent .supportedimage{width:auto;vertical-align:middle;margin:0px 0px 0px 40px;}
+.dwContent .supportedimage img {margin-right:7px;}
+.paymentcardtext {float:left;margin-top:3px;display:block;font-size:0.75em !important;}
+.accountoverview .paymentcardtext {font-size:0.8em !important;}
+.paymentinstruments .expirationdate .label{text-transform:capitalize !important;}
+.creditcardform .cardnumber{/*padding-bottom:20px;*/}
+.creditcardform .validfromdate {margin-top:0 !important;}
+.dwContent .payment_cards .contentasset{float:right}
+/*Add New Card Section*/
+.btn{margin:20px 10px;}
+.accountoverview{width:100%;margin:18px 0px 0px 0px;}
+
+.accountoverview .paymentinstruments{ margin: 46px 0 38px 60px;}
+.accountoverview .creditcard{float: left;padding: 10px 11px 8px 9px;width: 200px;}
+#CreditCardDialog .defaulttext{margin-left:140px}
+#CreditCardDialog .defaulttext .year{margin-left:21px}/*889112*/
+/* overrides existing actions class */
+.accountoverview  .creditcard .actions{margin: 29px 0 5px 17px; text-align: center;}
+.paymentinstruments  .creditcard .actions{margin: 29px 0 5px 27px; text-align: left;}
+
+/* Used to space out the credit card list columns */
+.accountoverview .creditcard .minicreditcard .type {font-weight:bold;color:#000000;font-size:14px;margin-top:5px;margin-bottom:2px;}
+.accountoverview .creditcard .minicreditcard .number, .accountoverview .creditcard .minicreditcard .expirationdate {color:#666666;font-size:14px;}
+.accountoverview .creditcard .actions a.deletelink {margin:0;}
+.accountoverview .minicreditcard {margin: 0 0 0 17px;}
+.account_wrapper .addCard {text-align:center; border-top:1px solid #e1e1e1;  border-bottom:1px solid #e1e1e1; padding:20px 0; margin-top: 27px}
+.account_wrapper .accountoverview .addCard {border-top:none !important;margin-top:0 !important;}
+.bordertop {border-top:1px solid #e0e0e0;}
+
+
+/* used on grey back button and black finished button */
+.border-button{  border: medium none;  color: #000000; padding: 8px 10px 6px;}
+.greyborderButton{ 	border: 1px solid #b6b3b3; padding: 2px;  background-color:#dcddd8;}
+.defaultButton { border: medium none;  font-size: 1em; padding:8px 18px 6px 18px; display: block; }
+.withArrow{	background: url("../images/background_arrowlesser_thin.png") no-repeat scroll 10px 50% transparent;  display: block;  padding: 8px 21px 6px 27px; border: 1px solid #FFFFFF; }
+.btn-black{ background:url("../images/bkgd_buttion_grad_black.jpg") 0 0 repeat;	color:#fffefe;	border:1px solid #fcfcfc; }
+.btn-grey{ background:url("../images/bkgd_buttion_grad_grey.jpg") 0 0 repeat-x; }
+.btn-grey button{border:1px solid #ffffff; background:url("../images/bkgd_buttion_grad_grey.jpg") 0 0 repeat-x;}
+
+.btn-grey .withArrow{	background: url("../images/background_arrowlesser_thin.png") no-repeat scroll 10px 50% transparent;  display: block;  padding: 8px 21px 6px 27px; border: 1px solid #FFFFFF; }
+.btn-black .withForwardArrow{ background:url("../images/background_arrowgreater_white_thin.png") no-repeat scroll 87% 62% transparent;  display: block;  padding:8px 21px 6px 16px; color:#fefefe;}
+
+.actionButtons{padding:27px 7px 30px 7px;}
+
+
+/* Added Styles for modal lightbox */
+
+.ui-dialog{
+	/*border-width:3px;*/
+	/*-moz-box-shadow: 0 0 7px #a19797;*/  /* bug #907712 */
+	/*-webkit-box-shadow: 7px 0px 0px #a19797;*//*907872*/
+	/*box-shadow: 0 0 7px #a19797;*/ /*889112*/
+	/*z-index:99999 !important;*/
+	margin: 0 30px;
+	width: 270px;
+	/*padding: 14px;*/
+	/*-o-border-image: url("../images/lb_border_4.png") 3;
+	-icab-border-image: url("../images/lb_border_4.png") 3;
+	-khtml-border-image:url("../images/lb_border_4.png") 3;
+	-moz-border-image: url("../images/lb_border_4.png") 3;
+	-webkit-border-image: url("../images/lb_border_4.png") 3;
+	border-image: url("../images/lb_border_4.png") 3;*/
+/*	border: double orange 1em;*/
+/*	background:#ffffff url("../images/lb_bkgd_title.png") repeat-x scroll 0 0 ;*/
+	/*padding: 1em;temporary*/
+	padding:1px;
+	border:1px solid #bababa;
+}
+#dialogcontainer, #confirmationcontainer {border-left:1px solid #e0e0e0;border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;}
+/*.ui-dialog{padding:1em;}*/
+.ui-dialog .ui-dialog-titlebar{height:62px;  background: none repeat scroll 0 0 #DBDBDB; }
+.ui-dialog .ui-dialog-titlebar-close{ top: 10px;right:10px;}
+
+
+/* used in the pop up - SIfr Title */
+.ui-dialog .ui-dialog-title{
+	color:#666;
+	font-family:Arial ;
+	font-size:24px ;
+	font-weight:100;
+	font-variant:normal ;
+	/*padding: 0;  13px 0 13px; */
+	padding:15px 0 0 13px; /* 869962 */
+}
+	
+	
+.ui-dialog  form .label{width:163px; margin-right: 10px;color:#666666 !important;}
+.ui-dialog .formfields{margin-top:43px;margin-bottom:46px;} /* bug #907712  */
+.ui-dialog .month input, .ui-dialog .issue input{width:30px !important; margin-right:5px;}
+.ui-dialog .year input {width:40px !important; margin-right:5px;}/* Rachna |869992 */
+
+.expirationdate .issuenumber{display:inline;}
+.ui-dialog .actions {margin:23px 0 0 0; border-top:1px solid #e9e9e9; /*padding-top:15px;*/}
+
+/* Styling Formfields */
+
+.ui-dialog .formfield{margin:0 0 0px; height:38px } /*570*/
+.ui-dialog .formfieldTxtArea{margin:0 0 0px; height:auto } /*570*/
+.ui-dialog .cardtype {/*margin-bottom:14px;*/}/*889112*/
+.ui-dialog .issuenumber {margin-top:12px;}/*889112*/
+.ui-dialog .validfromdate{margin-top:26px;}
+.ui-dialog div.errorclient {width:220px; margin:0px 0px 0px 0px;}/*783 and 570*/
+
+
+
+/* MattS : TODOD - USED IN DIALOG BOX -- THIS ADDS A BORDER TOP. THIS COULD BE AMENDED AND MERGED WITH PAYMENTINSTRUMENTLIST buttons */
+.ui-dialog .button_wrapper{padding: 19px 13px 20px 0; float:right;} /* #907712 */
+.passwordresent .button_wrapper {padding:21px 13px 17px 0; float:right}
+/*.passwordsent h2{color:#333; font-size:1.2em; font-weight:normal; padding:55px 0px}*/
+.confirmationcontainer .passwordsent{width:90%;color:#333;font-size:1em;}
+.confirmationcontainer .passwordsent h2{padding:0px 0px;}
+#dialogcontainer .linetxt{ 
+    margin: 51px 0;
+    text-align: center;
+    font-size:1.2em;
+    color:#666;
+}
+
+#dialogcontainer .button_wrapper > div, .passwordreset .button_wrapper > div{float:left; margin-left:18px; margin-right:5px;}
+#dialogcontainer .button_wrapper > div:first-child, .passwordreset .button_wrapper > div:first-child{margin:0;}
+
+
+.pleaseWaitDialog {width:513px !important; }
+.pleaseWaitDialog #dialogcontainer{height:186px !important;}
+.pleaseWaitTicker{ margin: 36px auto; display:block; }
+p.sifr-pw{display:inline-block; text-align:center;}
+
+
+div.separator {border-top: 1px solid #e9e9e9; height: 1px;} /* Bug #907712 */ 
+.passwordreset div.separator {border-top: 1px solid #e9e9e9; height: 1px;margin-top:35px;} 
+
+/**************** Order History Page ******************/
+
+.orders  {margin:25px 0 0 1px;width:100%;}
+
+.orders .orderinfotable thead tr {border-bottom:none;}
+.orders th {height:55px;padding-top:10px;background:url("../images/background_orderhistory_table.png") repeat-x left top;vertical-align:top;padding-left:12px;color:#ffffff; font-size:1em !important} /*Rachna | 26Apr*/
+.orders .orderinfotable ul {list-style-type:none;}
+.orders .orderinfotable th.ordernmber {width:115px;}
+.orders .orderinfotable th.orderdte {width:68px;}
+.orders .orderinfotable th.items {width:208px;text-align:center;}
+.orders .orderinfotable th.orderstus {width:84px;padding-top:0;}
+.orders .orderinfotable th.orderstus .statuslabel {display:block;float:left;padding-right:10px;padding-top:10px;}
+.orders .orderinfotable th.orderstus a.tooltip{background:url(../images/info_icon_border.png) no-repeat left top;display:block;float:left;height:18px;margin-top:9px;width:20px;}
+.orders .orderinfotable th.orderstus .infoicon {background: transparent url(../images/info_icon.png) no-repeat right center; padding-right:25px;} /*Rachna | 26Apr */
+.orders .orderinfotable th.deliveredto {width:108px;}
+.orders .orderinfotable th.totalvalue {width:65px;}
+.orders .orderinfotable td.status {text-transform:capitalize;}
+.orders .orderinfotable td {padding:12px;border-right:1px solid #efeeee; font-size:12px;vertical-align:top;}
+.orders .orderinfotable td.last {border-right:none;}
+.orders .orderinfotable .progress {color:#144e89;font-weight:bold;}
+.orders .orderinfotable li {margin-bottom:5px;}
+.orders .orderinfotable tr {border-bottom:1px solid #efeeee;}
+.orders .orderinfotable tr.highlight {background:#f3f3f3;}
+.orders .orderinfotable tr.last {border-bottom:none;}
+.orders .orderinfotable .roundedBtn {margin:15px 0;}
+
+.orderhistorypagination {background:url(../images/background_historypaging.png) no-repeat right -34px;padding:0;width:auto;float:right;margin-top:30px;}
+.orderhistorypagination ul {background:url(../images/background_historypaging.png) no-repeat left top;padding:7px 0 7px 25px;margin-right:27px;}
+.orderhistorypagination li {padding-right:10px;display:inline;}
+.orderhistorypagination li a {color:#a3a3a3;font-size:12px;}
+.orderhistorypagination .background_arrowgreater a, .pagination .background_arrowgreater a:hover, .orderhistorypagination .background_arrowgreater a:visited {
+    background: url("../images/background_arrowgreater.png") no-repeat scroll right 3px transparent;
+    color: #000000;
+    padding-right: 11px;
+}
+.orderhistorypagination .background_arrowlesser a, .pagination .background_arrowlesser a:hover, .orderhistorypagination .background_arrowlesser a:visited {
+    background: url("../images/background_arrowlesser.png") no-repeat scroll left center transparent;
+    color: #000000;
+    padding-left: 11px;
+}
+.orderhistorypagination ul li.currentpage a{color:#000000;}
+
+
+/***** Order Details Page (orderdetails.isml) *****/
+
+/* does this break anything else? Needs to be set to 760px, to allow the footer to expand */
+/*div#content {width:760px;}*/ /*Commenting it out as it's breaking all the pages. | Asha*/
+
+.orderdetails{margin-left:1px;width:100%;}
+.orderdetails table td{padding:20px 15px; vertical-align:top;}
+
+.orderdetails .ordertrack{margin-top:20px;}
+.orderdetails .ordertrack th {height:38px;padding-top:11px;background:url("../images/background_orderhistory_table.png") repeat-x left top;vertical-align:top;padding-left:12px;color:#ffffff; font-size:1.2em !important; letter-spacing: -0.03em; }
+.orderdetails .ordertrack th.col1{width:101px;}
+.orderdetails .ordertrack th.col2{width:84px;}
+.orderdetails .ordertrack th.col3{width:81px;}
+.orderdetails .ordertrack th.col4{width:213px;}
+.orderdetails .ordertrack th.col5{width:175px;}
+.orderdetails .ordertrack td{padding:20px 15px; vertical-align:top; border-right:1px solid #efeeee;}
+.orderdetails .ordertrack .trackDelivery{margin:10px 0;}
+.orderdetails .ordertrack .last ul {list-style-type:none;}
+.orderdetails .ordertrack .last ul li{padding-bottom:20px;}
+
+.orderdetails .orderprct thead, .orderdetails .orderpayinfo thead{background-color:#efefef;}
+.orderdetails .orderprct th, .orderdetails .orderpayinfo thead  th, .orderdetails .retrnrefunds th{color:#666666; font-size:1.2em; height:40px; padding-left:15px;}
+.orderdetails .orderprct td, .orderdetails .orderpayinfo td {padding-left:15px; padding-right:15px;}
+
+.orderdetails .shipDiscount{color:#E62617; width:184px;}
+
+.orderdetails .orderpayinfo{}
+.orderdetails .orderpayinfo th {}
+.orderdetails .orderpayinfo tbody th{font-size:1.1em; color:#333333; background-color:#f7f7f7; padding-top:20px; padding-left:15px; padding-right:15px;white-space:normal;vertical-align:top;}/*QC defect fixing[761]. | Rachna*/
+.orderdetails .orderpayinfo tbody td{background-color:#f7f7f7; padding-top:10px; padding-bottom:40px;}
+.orderdetails .orderpayinfo tbody td .miniaddress,.orderdetails .orderpayinfo tbody td .minicreditcard {margin-left:0;}
+.orderdetails .orderpayinfo tbody th.col1{width:134px;}
+.orderdetails .orderpayinfo tbody th.col2{width:123px;}
+.orderdetails .orderpayinfo tbody th.col3{width:126px;}
+.orderdetails .orderpayinfo tbody th.col4{width:103px;}
+
+.orderdetails .orderprct{margin-top:15px;}
+.orderdetails .orderprct th.col1{width:351px;}
+.orderdetails .orderprct th.col2{width:126px;}
+.orderdetails .orderprct th.col3{width:119px;}
+.orderdetails .orderprct th.col4{width:59px;}
+
+.orderdetails .orderprct tbody tr, .orderdetails .retrnrefunds tbody tr {border-bottom:1px solid #efeeee;}
+.orderdetails .retrnrefunds tbody tr.last {border-bottom:0;}
+.orderdetails .orderprct td, .orderdetails .retrnrefunds td {border-right:1px solid #efeeee;}
+.orderdetails .orderprct td.last, .orderdetails .retrnrefunds td.last {border-right:none;}
+
+.orderdetails .retrnrefunds{margin-top:20px;}
+.orderdetails .retrnrefunds th{background-color:#858585; color:#ffffff;}
+.orderdetails .retrnrefunds th.col1{width:351px;} 
+.orderdetails .retrnrefunds th.col2{width:190px;}
+.orderdetails .retrnrefunds th.col3{width:147px;}
+.orderdetails .orderprct tbody tr.highlight, .orderdetails .retrnrefunds tbody tr.highlight {background:#f3f3f3;}
+
+.orderdetails .emph{font-weight:bold; color:#000000}
+.orderdetails .btns {width:300px; margin-top: 25px;}
+.orderdetails .btns .roundedBtn{margin-right:10px;}
+.pt_order .button_wrapper{font-size:0.9em; }/*specifically for order detail and order history button font-size*/
+.productattributes {margin-top:5px;}
+.productattributes .attribute {font-size:inherit !important;}
+.productattributes .attribute .label {color:#666666;font-weight:normal;}
+.productattributes .attribute .value {color:#000000;font-weight:normal;}
+
+.account_wrapper .button_wrapper {clear:both;}
+.account_wrapper .buttonWrapper{
+	border-bottom: 1px solid #D0CFCF;
+    border-top: 1px solid #D0CFCF;
+    clear: both;
+    display: inline-block;
+    width: 100%;
+    padding-top:25px;
+    padding-bottom:25px;
+}
+.account_wrapper .buttonWrapper .roundedBtn {margin-right:10px;}
+/*
+.productattributes .label {font-weight:normal;font-size:12px;}
+.productattributes .value {font-weight:bold;font-size:12px;}*/
+
+/*** Page Numbers used across multiple pages**/
+
+/*.orderhistorypagination{background: url("../images/ui-background-page.png") no-repeat left top transparent;	color: #525252;	display: inline-block;	margin: 30px 0;	text-decoration: none;	padding: 0 0 0 3px; border:none}
+.orderhistorypagination div{background: url("../images/ui-background-page.png") no-repeat right top transparent; padding: 9px 24px 9px 20px;}*/
+.orderhistorypagination a.selected {
+	color:#000000;
+}
+.nextprev{padding-left:8px;}
+/*button.expandable-btn span {margin-top:-1px; margin-top:0px\0/;border:none !important; padding:0px 20px 0px 0px;}*/
+
+
+
+
+
+/***** Account Add Address (editaddress.isml) *****/
+.accounteditaddress {font-size:1.4em;margin: 35px 0px 0px 28px;width:735px;}
+.accountaddress {float:left;height:auto;margin: 7px 10px 35px 0px;overflow:hidden;width:230px;}
+.accountaddress .miniaddress div {white-space:normal !important; }
+.accountaddress .miniaddress{margin-left:0px;height:110px;/*font-weight:normal; */color:#666666}
+.accountaddress .actions {margin:0;text-align:left;}
+.accountaddress .actions button {margin:0 0 0 0px;}
+.accountaddress .actions a.deletelink {display:block;margin:0 0 0 0px;text-decoration:none !important;}
+.accountaddress .actions a.deletelink:hover {text-decoration:underline;}
+.accounteditaddress a.createaddress {text-decoration:underline;}
+.accounteditaddress .defaultselection{margin:21px 0px 19px 0px; font-weight:normal}
+.defaultselection input{border:none !important; background: none;}
+.account_addresses .roundedBtn{margin-right:6px}
+/***** Account Add Addresses (miniaddress.isml) *****/
+.account_wrapper .accountaddress .miniaddress{height:auto!important;}
+.miniaddress {margin: 0px 0px 0px 17px;}
+.miniaddress .addressname {font-weight:normal;}
+.miniaddress .address .location .city {display: inline;}
+.miniaddress .address .location .statedivider {display: inline;margin-right: 5px;}
+.miniaddress .address .location .state {display: inline;margin-right: 5px;}
+.miniaddress .address .location .zip {display: inline;}
+/***** Vat Invoice *****/
+.pt_vatinvoice h1.logo {float:none!important;}
+.pt_vatinvoice h2 {width:auto!important;float:left;margin-left:14px;}
+.pt_vatinvoice .pagetitle {margin-bottom:15px;}
+.printheadbar1 {height:30px;width:100%;background:#000000;margin:32px 0 1px;}
+.printheadbar {height:30px;width:100%;background:url(../images/background_categorymenu2.gif) repeat-x left top;margin-bottom:15px;}
+#vatcontent {background:url(../images/bkgd_vat_content.jpg) no-repeat left top;padding-top:30px;margin:0;}
+#vatcontent .header {padding-left:18px;}
+#vatcontent .header h3 {background:none;font-size:22px;padding:0;}
+#vatcontent .header p {font-size:14px;padding:5px 0 25px 0;}
+#vatcontent .header .vatnumber {font-size:16px;font-weight:bold;padding-top:0;}
+.pt_vatinvoice table.vatdetails {width:100%!important;margin-top:5px;padding-bottom:15px;}
+.pt_vatinvoice table.vatdetails tbody{background:#f7f7f7;}
+.pt_vatinvoice table.vatdetails th {padding:12px 14px;color:#666666;}
+.pt_vatinvoice table.vatdetails td {padding:10px 0 0 14px!important;font-size:12px;}
+.pt_vatinvoice table.vatdetails td.heading {padding-right:30px;font-size:12px;font-weight:bold;width:20%;}
+.pt_vatinvoice .deliveryaddress {width:364px;text-align:center;float:left;padding-top:35px;margin-bottom:25px;}
+.pt_vatinvoice .billingaddress {width:364px;float:right;padding-top:35px;text-align:center;margin-bottom:25px;}
+.pt_vatinvoice .deliveryaddress h4,.pt_vatinvoice .billingaddress h4 {padding:0;font-size:14px;font-weight:bold;background:none;color:#333333;}
+.pt_vatinvoice .miniaddress {margin:0;font-size:12px;}
+.pt_vatinvoice table.ordershipmenttable {width:100%;font-size:12px;font-weight:bold;margin-bottom:35px;}
+.pt_vatinvoice table.ordershipmenttable tr.highlight {background:#f7f7f7;}
+.pt_vatinvoice table.ordershipmenttable .aligncenter {text-align:center;}
+.pt_vatinvoice table.ordershipmenttable th {border: 0px;padding:12px 14px;font-size:12px;color:#666666;}
+.pt_vatinvoice table.ordershipmenttable td {border: 0px;border-bottom: 1px solid #eaeaea;padding:30px 14px;vertical-align: top;border-right:1px solid #eaeaea;}
+.pt_vatinvoice table.ordershipmenttable td.last {border-right:none;}
+.pt_vatinvoice table.ordershipmenttable td.ordershipmentdetails {border-left: 1px solid #CCCCCC;width:200px;}
+.pt_vatinvoice table.ordershipmenttable .product .name a {color: black;font-size:1.2em;font-weight: bold;}
+.pt_vatinvoice table.ordershipmenttable .promo {font-size:1.1em;}
+.pt_vatinvoice table.ordershipmenttable .productattributes {font-size:1.2em;}
+.pt_vatinvoice table.ordershipmenttable .productoption {font-size:1.2em;font-weight:bold;}
+.pt_vatinvoice table.ordershipmenttable td.ordergiftcertattributes {font-size:1.2em;}
+.pt_vatinvoice table.ordershipmenttable td.ordershipmentgiftmessageheader {padding:0px;}
+.pt_vatinvoice table.ordershipmenttable td.ordershipmentgiftmessage {border:0px;font-size:1.2em;}
+.pt_vatinvoice table.ordershipmenttable tr.deliverycharge td.charge {color:#666666;background:url(../images/standard_cart_icon.png) no-repeat 14px center;padding:10px 14px 10px 55px;}
+.pt_vatinvoice table.ordershipmenttable tr.deliverycharge td {padding:10px 14px;}
+.pt_vatinvoice .actions {float:right;width:20%;margin:0 0 40px 0;}
+.pt_vatinvoice .print {margin-top:5px;margin-right:10px;}
+
+.pt_vatinvoice #footer {height:40px;background:#000000;width:960px;}
+
+
+
+/************* Text Boxes Width*******************/
+.account_wrapper .lastname input, .account_wrapper .firstname input{width:206px} /*QC 369*/
+/*.account_wrapper .firstname input{width:154px}*//*QC 369*/
+.account_wrapper .email input, .account_wrapper .password input, .account_wrapper .email input, .account_wrapper .confirmpassword input, .account_wrapper .confirmemail input,.account_wrapper .createanaccount .password input{width:222px}/*QC Defect733*/
+.account_wrapper .username input, .account_wrapper .password input{width:210px}/*QC Defect733*/
+/*************Combo Styling*******/
+.account_wrapper select{font-size:1em; color:#111;padding:0px 0px 0px 3px; height:20px; margin-top:5px}
+.account_wrapper .formfields .label{/*padding-top:3px*/}
+.doblabel{padding-top:6px}
+
+/****/
+.sendtofriend .stfmessage textarea{width:222px; height:119px; margin-left:3px}
+.sendtofriend .emailform{padding:44px 0px 0px 0px}
+.ui-dialog .sendtofriend  form .label{color:#666; padding-top:6px;width:200px; margin-right:10px}
+.ui-dialog .sendtofriend .errorclient{width:222px !important}
+.ui-dialog .sendtofriend .formfields{margin-top:0px;}
+.sendtofriend input.textinput{width:222px}
+.sendtofriend .darkgrey_button{margin-right:17px}
+.stfmessage{margin-bottom:49px}
+.ui-dialog .sendtofriend .actions{padding:0px 17px;margin-top:0;}
+.confirmationcontainer h2{color:#333; font-size:1.2em; font-weight:normal; padding:55px 0px}
+.confirmationcontainer .btn-grey-dark{margin-right:14px}
+
+/* registration */
+
+.registrationform h4 {margin-bottom:0!important;}
+.bottomborder {border-bottom:1px solid #e3e1e1;margin-bottom:2px;}
+
+/* contact number width */
+.edit_address_form .contactNum input, .edit_address_form .alternatecontactnumber input{width:98px !important;}
+
+.edit_address_form .editaddress {margin-top:12px;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/************** Error Page Not Found ************/
+.errorNotFound{width:607px; margin:68px auto; text-align:center;}
+.errorNotFound p{font-size:1.3em;  text-align: center;}
+
+
+
+
+/**************    Sitemap    *******************/
+
+.sitemap{clear:both;margin:0; width:960px;}
+.sitemap .header_section{background:url("../images/shadow_sitemap.jpg") bottom no-repeat; padding-bottom:32px;}
+.sitemap .header_section h1{margin-left:17px;}
+.sitemap .categories{clear:both;}
+
+.sitemap h2{margin-left:0px;}
+.sitemap h3{font-size:1.3em; background:none; margin: 5px 0 9px 0; padding:0;}
+.sitemap .col{float:left;  margin: 10px 0 0 15px; width:299px;}
+.sitemap .col_1{margin-left:16px;}
+.sitemap .col_2{margin-left:16px;}
+.sitemap .col_3{margin-left:16px;}
+.sitemap .categories .cat_holder{border:1px solid #eaeaea; margin-bottom:15px; padding-bottom: 10px;}
+.sitemap .categories div.cat_header{ padding: 15px 0 15px 16px; background: url("../images/site_map_arrow.png") no-repeat scroll 252px 50% #F3F3F3;}
+.sitemap .categories div.shadow{background:url("../images/sitemap_cat_title_shadow.png") bottom no-repeat; height:11px}
+.sitemap .categories .subcategory{ }
+.sitemap .categories ul{margin:0 0 0 17px; /*list-style-type:none;*/}
+.sitemap .categories ul li{margin: 0 0 7px; font-size:1.2em;}
+
+ 
+.nonmandatory .labeltext{
+	margin-right: 9px !important;
+}
+
+ 
+ 
+.roundedBtn a.deletelink {
+     text-decoration: none !important;
+}
+ 
+ 
+
+ 
+ 

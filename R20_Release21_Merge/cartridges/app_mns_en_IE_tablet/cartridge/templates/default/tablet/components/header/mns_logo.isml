@@ -1,0 +1,2 @@
+<!--- TEMPLATENAME: mns_logo.isml --->
+<a href="${URLUtils.httpHome()}" title="${Resource.msg('global.storename','locale',null)}" class="logo"><img src="${URLUtils.staticURL('/themes/demandwarestore/images/marks-and-spencer-ireland.jpg')}" alt="" /></a>

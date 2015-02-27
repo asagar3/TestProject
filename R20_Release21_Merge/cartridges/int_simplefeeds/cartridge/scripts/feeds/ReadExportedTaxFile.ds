@@ -1,0 +1,63 @@
+/**
+* Demandware Script File
+* To read the tax file exported by ExportTaxTable and preapre set of taxcodes available. This will delete the csv file created temporary.
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* @input taxFileName : String
+* @output OutTaxCodeHashSet : dw.util.HashSet 
+* @output errorMsg : String 
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.io );
+
+function execute( pdict : PipelineDictionary ) : Number
+{ 	
+	pdict.OutTaxCodeHashSet=null;
+	pdict.errorMsg = "";
+	//Creating (XML)File Reader
+	var TaxCode_ClassID : String = "class-id";
+	var Taxcode_Class:String="tax-class";
+	var fileIn : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + pdict.taxFileName);
+	var fileReader : FileReader = new FileReader(fileIn);		
+	var xmlReader : XMLStreamReader = new XMLStreamReader(fileReader);
+	
+	var parseEvent : Number = 0;	
+	var TaxCodeHashSet : HashSet = new HashSet();
+	try {
+		//Start Reading the file the file
+		while (xmlReader.hasNext()) {
+			parseEvent = xmlReader.next();
+			if (parseEvent==XMLStreamConstants.START_ELEMENT) {
+				if (xmlReader.getLocalName().equalsIgnoreCase(Taxcode_Class)) {
+					var index : Number;
+					for (index=0; index<xmlReader.getAttributeCount(); index++)
+					{		
+							if (TaxCode_ClassID.equalsIgnoreCase(xmlReader.getAttributeLocalName(index)))
+							    {
+								TaxCodeHashSet.add1(xmlReader.getAttributeValue(index));
+								}				
+					}					
+				}
+			}			
+		}	
+		pdict.OutTaxCodeHashSet=TaxCodeHashSet;
+		Logger.getLogger("TaxCodeHashSet").debug( "TaxCodeHashSet: TaxCodeHashSet is successfully created"); 
+		xmlReader.close();
+		fileReader.close();
+		fileIn.remove();
+	} catch (ex){
+		Logger.getLogger("TaxCodeHashSet").error( "TaxCodeHashSet: Error in Creating TaxCodeHashSet. " + ex );	
+		pdict.errorMsg = ex.message;
+	    return PIPELET_ERROR;
+	           }
+ return PIPELET_NEXT;
+}

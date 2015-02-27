@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<iscomment><!-- TODO | Fixed Web Acc. | Please make sure "fr" should appear from properties file |Asha | 10-mar-2011--></iscomment>
+<isinclude template="util/modules"/>
+<head>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+</head>
+<body>
+
+<iscomment><!-- Web acc fix |  asha | 10-mar-2011 --></iscomment>
+<iscomment><!-- Added new header isml file for checkout pages | asha | 07-mar-11 --></iscomment>
+	<isinclude template="components/header/header"/>
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+	<script type="text/javascript">
+		s.pageName = "${pdict.omniPageName}" ; 
+		s.server = "${dw.system.System.getInstanceHostname()}" ;
+		s.channel = "${Resource.msg('omniture.channel.myaccount','omniture',null)}" ;
+		s.prop1 = "${Resource.msg('omniture.channel.myaccount','omniture',null)}" ;
+		s.prop18 = "${Resource.msg('omniture.channel.myaccount','omniture',null)}" ;
+		s.prop24 = "${Resource.msg('omniture.prop24.myaccount','omniture',null)}";
+		s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"
+	</script>
+	
+	<div id="container" class="pt_account_landing">	
+		<div id="main">
+			<iscomment><!-- Moved breadcrumb to top as per vd | Asha --></iscomment>
+			<isif condition="${pdict.CurrentPageMetaData.title!=Resource.msg('account.pagetitle.dashboard','account',null)}"> 
+				<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="${Resource.msg('account.header','account',null)}" bctext2="${pdict.CurrentPageMetaData.title}"/>
+			<iselse/>
+				<isbreadcrumbs bctext1="${Resource.msg('account.header','account',null)}"/>
+			</isif>
+			<div class="account_wrapper">
+				<div id="leftcolumn">
+						<isinclude url="${URLUtils.url('Account-IncludeNavigation')}"/>
+						<iscomment><!--  Not required as per VD in LHN | Asha --></iscomment>
+						<iscomment><div class="accountnavtext"><iscontentasset aid="account-nav-text"/></div></iscomment>
+						<div class="clear"><!-- FLOAT CLEAR --></div><!-- END: accountnavtext -->
+				</div><!-- END: leftcolumn -->
+				<div id="content" class="account_rightcolumn">
+						<iscomment><!-- Breadcrumb not required here as per VD --></iscomment>
+						<iscomment><isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="${Resource.msg('account.header','account',null)}"/></iscomment>
+					<isreplace/>
+				</div><!-- END: content -->
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+			<iscomment><!-- moved footer inside the main div | Naveen --></iscomment>
+			<isinclude template="components/footer/footer"/>			
+		</div><!-- END: main -->
+	</div><!-- END: container -->
+</body>
+</html>

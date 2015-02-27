@@ -1,0 +1,122 @@
+<!--- TEMPLATENAME: carddetails.isml --->
+
+				<iscomment>render credit card input form</iscomment>
+				<fieldset><div class="formfields add-new-card">
+<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}">
+								<div class="formfield cardtype">
+									<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.type}" type="select" value="false"/>
+									<div class="value">
+										<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.type}" type="select" label="false"/>
+									</div>
+							    	<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: card_type -->
+								<iscomment>Praveen: Qc defect 760, Title removed from card details section</iscomment>
+								
+							    <div class="formfield cardname">
+							    	<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.owner}" type="input" value="false" xhtmlclass="alpha_fr"/>
+							    	<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.owner}" type="input" label="false" xhtmlclass="alpha_fr"/>
+							    	<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: card_name -->
+								<div class="formfield cardnumber">
+							    	<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.number}" type="input" value="false" xhtmlclass="creditcard_updated"/>
+							    	<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.number}" type="input" label="false" xhtmlclass="creditcard_updated"/>
+							    	<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: card_number -->
+								<iscomment><!--  TODO:21/03/2011 turn this into a real field and wire up the xml etcetera  --></iscomment>
+					
+								<isscript>
+										var cardList = dw.order.PaymentMgr.getPaymentMethod(dw.order.PaymentInstrument.METHOD_CREDIT_CARD).activePaymentCards;	
+								</isscript>	
+								<script type="text/javascript">
+									var paymentCardList = new Array();
+									var validFromFlagList = new Array();
+								</script>
+								<isloop items="${cardList}" var="cards" status="index">
+									<script type="text/javascript">
+										paymentCardList[${index.count-1}] = "${cards.cardType}";
+										validFromFlagList[${index.count-1}] = "${cards.custom.validFromFlag}";
+									</script>
+								</isloop>
+								
+								<div class="formfield validfromdate">
+								    <label class="label" for="dwfrm_billing_paymentMethods_creditCard_ccValidFromMonth">	
+										<span>${Resource.msg('billing.validfrom','checkout',null)}:</span>
+									</label>
+										<div class="month">
+												<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth}" type="input" label="false" xhtmlclass="validfrom_month example_content"/>
+										</div>
+										 <label class="hideLabel" for="dwfrm_billing_paymentMethods_creditCard_ccValidFromYear">	
+											<span>${Resource.msg('billing.validfrom','checkout',null)}:</span>
+										</label>
+										<div class="year"><span class="datedivider">/</span>
+												<isinputfield  formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear}" type="input" label="false" xhtmlclass="validfrom_year example_content"/>
+										</div>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+									<iscomment>
+										<div class="defaulttext">
+											<div class="month floatleft">${Resource.msg('billing.month','checkout',null)}</div>
+											<div class="year floatleft leftspacer">${Resource.msg('billing.year','checkout',null)}</div>
+										</div>
+									</iscomment>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div>
+								
+								
+								<div class="formfield expirationdate">
+						    		<span class="label expirylabel" for="dwfrm_billing_paymentMethods_creditCard_month">	
+										<span class="labeltext" <isif condition="${!pdict.CurrentForms.billing.paymentMethods.creditCard.month.valid || !pdict.CurrentForms.billing.paymentMethods.creditCard.year}">class="warning"</isif>>${Resource.msg('billing.creditcardexpires','checkout',null)}:</span>
+										<span class="requiredindicator">*</span>
+										
+									</span>
+								
+									<div class="month">
+											<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.month}" type="input" xhtmlclass="expire_month example_content"/>
+									</div>
+									<div class="year">
+										<span class="datedivider">/</span>
+											<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.year}" type="input" xhtmlclass="expire_year example_content"/>
+									</div>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+									<iscomment>
+									<div class="defaulttext">
+										<div class="month floatleft">${Resource.msg('billing.month','checkout',null)}</div>
+										<div class="year floatleft leftspacer">${Resource.msg('billing.year','checkout',null)}</div>
+									</div>
+									</iscomment>
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: expirationdate -->
+										
+								<div class="formfield cardcvn">
+						    		<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn}" type="input" value="false"  xhtmlclass="cvn"/>
+								    <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn}" type="input" label="false"  xhtmlclass="cvn"/>
+								    <div class="formfieldtooltip">
+										<div class="tooltip">
+											<img class="tooltip_icon" alt="${Resource.msg('billing.linkcvn','checkout',null)}" src="${URLUtils.staticURL('images/tablet/info_icon.png')}" />
+											<div class="tooltip-body" style="display:none">
+												<div class="tooltipcontainer">
+													<div class="tooltipcontent"><iscontentasset aid="checkout-security-code"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+						    		
+									<div class="clear"><!-- FLOAT CLEAR --></div>
+								</div><!-- END: card_cvn -->
+								<isif condition="${pdict.CurrentCustomer.authenticated}">
+									<div class="formfield saveCard">
+									<div class="label">&nbsp;</div>
+										<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard}" type="checkbox"/>
+										<iscomment>
+											<div class="value">
+												<p class="labelUpperText"><b>${Resource.msg('creditcard.savecard','forms',null)}?</b></p>
+												<span><input type="radio" name="${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.htmlName}" value ="true"   <isif condition="${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.value}">checked="checked"</isif>/> <label for="yes">${Resource.msg('forms.yes','forms',null)}</label></span>
+												<span><input type="radio" name="${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.htmlName}" value ="false"   <isif condition="${!pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.value}">checked="checked"</isif>/> <label for="no">${Resource.msg('forms.no','forms',null)}</label></span>
+												<div class="clear"></div>
+											</div>
+										</iscomment>
+										<div class="clear"><!-- FLOAT CLEAR --></div>
+									</div><!-- END: save_card -->
+								</isif>
+							</form>
+							
+							</div></fieldset>

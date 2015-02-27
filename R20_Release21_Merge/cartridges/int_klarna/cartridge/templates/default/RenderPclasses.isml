@@ -1,0 +1,24 @@
+<iscache type="relative" hour="24" />
+<isif condition="${pdict.PClasses.length > 0 && !empty(pdict.PClasses[0]['type'])}">
+	<isif condition="${pdict.PClasses[0]['type'] == 2}">
+		[{
+			"pclassID" : "${pdict.PClasses[0]['pclassID']}",
+			"description" : "<isprint value="${pdict.PClasses[0]['description']}" encoding="off"/>",
+			"logo" : "${pdict.PClasses[0]['logo']}",
+			"url" : "${pdict.PClasses[0]['url']}",
+			"type" : "${pdict.PClasses[0]['type']}"
+		}]
+		<iselse>
+		[
+		<isloop iterator="${pdict.PClasses}" alias="pclass">
+		{
+			"pclassID" : "${pclass['pclassID']}",
+			"description" : "<isprint value="${pclass['description']}" encoding="off"/>",
+			"monthlyCost" : "${pclass['monthlyCost']}",
+			"months" : "${pclass['months']}",
+			"type" : "${pclass['type']}"
+		},
+		</isloop>
+		]
+	</isif>
+</isif>

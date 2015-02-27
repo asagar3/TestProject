@@ -1,0 +1,2 @@
+s7jsonResponse(
+{"image.bgc":"0xffffffff","image.height":"303","image.iccEmbed":"0","image.iccProfile":"sRGB IEC61966-2.1","image.length":"0","image.mask":"0","image.pathEmbed":"0","image.pixTyp":"RGB","image.printRes":"72","image.quality":"80,0","image.type":"image/jpeg","image.version":"f1Ort3","image.width":"278","image.xmpEmbed":"0","metadata.version":"0g1010"},"");

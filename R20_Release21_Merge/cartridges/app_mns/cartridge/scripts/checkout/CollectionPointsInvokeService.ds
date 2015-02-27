@@ -1,0 +1,167 @@
+/**
+*  @output customObject : Object 
+*  @output errorCode : java.lang.String 
+*  @output errorMessage : java.lang.String 
+*  @output counter : Number
+*/
+importPackage( dw.system );
+importPackage( dw.crypto );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.rpc );
+importPackage( dw.io );
+importPackage( dw.util );
+importScript('checkout/Utils.ds');
+
+function execute( pdict : PipelineDictionary ) : Number {
+	
+
+	var collectionPointReponse :Object = null;
+//	var postcode : java.lang.Double = pdict.postcode; 
+	var postcode : String = pdict.CurrentForms.collectionpoints.zip_cp.value;
+	Logger.error("Post code"+postcode);
+	var collectionPointsSecurityKey : String = dw.system.Site.getCurrent().preferences.custom.collectionPointsSecurityKey;
+	var enseigne : String = dw.system.Site.getCurrent().preferences.custom.collectionPointsEnseigne;
+	var securityKey = generateSecurityKey(enseigne,"FR",postcode,collectionPointsSecurityKey);
+  
+	//createSoapHeader(service);
+	var webRef : WebReference = webreferences.collectionpointws;
+	var service : Stub = webRef.getDefaultService();
+	service.setTimeout(10000);
+ 	var request : webRef.WSI3_PointRelais_Recherche = new webRef.WSI3_PointRelais_Recherche();	
+ 	request.enseigne = enseigne ;   
+ 	request.pays = "FR"; 
+ 	request.CP=postcode; 
+ 	request.security = securityKey;
+ 	
+ 	try {
+		var response :webRef.WSI3_PointRelais_RechercheResponse = service.WSI3_PointRelais_Recherche(request);		
+//		var e:Error=new Error();
+//		e.message = "You are getting an error";
+//		throw e;	
+	 }
+ 	catch(e){
+ 		if (e.causeFullName == 'java.net.UnknownHostException'){			
+			pdict.errorMessage = e.faultString;
+		}
+		
+		if (e.causeFullName == 'java.net.SocketTimeoutException'){
+			pdict.errorMessage =  e.faultString;
+		}
+		
+		if (e.causeFullName == '(500)Internal Server Error'){
+			pdict.errorMessage = e.faultString;
+		}
+ 		if (e instanceof Fault) {
+ 			Logger.error("CollectionPointsInvokeService.ds: Actor " + e.faultActor + " caused fault '" + e.faultCode + "' (" + e.faultString + " - " + e.faultDetail + ") in " + this.serviceName);
+				pdict.errorMessage = e.faultString;		
+ 		}
+ 		else {
+ 			Logger.error("CollectionPointsInvokeService.ds Error while getting response from the modial webservice "+e.message);	
+ 			pdict.errorMessage = e.message;
+ 		}
+ 		pdict.errorCode = "SERVICE_UNAVAILABLE";
+ 		return PIPELET_ERROR;
+ 	}
+	
+	var status:String = response.WSI3_PointRelais_RechercheResult.STAT;
+	if (status == 0){
+		Logger.error("CollectionPointsInvokeService.ds status "+status);
+		collectionPointReponse = createCollectionPointJsonResponse(response);
+		pdict.errorCode=status;		
+		pdict.customObject = collectionPointReponse;	
+		pdict.counter = collectionPointReponse.collectionPoints.length;	
+	} 
+	else {
+		pdict.errorCode=status;
+	}
+	
+    return PIPELET_NEXT;
+}
+
+
+
+function generateSecurityKey(enseigne:String,pays:String,postCode:String,privateKey:String):String {
+	var securityKey:String = null;
+	 var digest: MessageDigest = new MessageDigest(MessageDigest.DIGEST_MD5);
+     securityKey = digest.digest(enseigne+pays+postCode+privateKey);
+     securityKey = securityKey.toUpperCase();
+     return securityKey;
+}
+
+function createCollectionPointJsonResponse(response:Object):Object{
+	var collectionsPoint = new Object();
+	collectionsPoint.collectionPoints = new Array();
+	var collPointResponse :Object = null ;
+	try {
+		for each (var collectionPoint :Object in response.WSI3_PointRelais_RechercheResult.pointsRelais){
+			collPointResponse = new Object();
+			collPointResponse.num = collectionPoint.num;
+			collPointResponse.latitude = formatLatitude(collectionPoint.latitude);
+			collPointResponse.longitude = formatLongitude(collectionPoint.longitude);
+			collPointResponse.lgAdr1 = formatStoreAddress(collectionPoint.lgAdr1);
+			collPointResponse.lgAdr2 = formatStoreAddress(collectionPoint.lgAdr2);
+			collPointResponse.lgAdr3 = formatStoreAddress(collectionPoint.lgAdr3);
+			collPointResponse.lgAdr4 = formatStoreAddress(collectionPoint.lgAdr4);
+			collPointResponse.CP = collectionPoint.CP;
+			collPointResponse.ville = dw.util.StringUtils.trim(collectionPoint.ville);
+			collPointResponse.pays = collectionPoint.pays;
+			collPointResponse.localisation1 = collectionPoint.localisation1;
+			collPointResponse.localisation2 = collectionPoint.localisation2;
+			collPointResponse.typeActivite = collectionPoint.typeActivite;
+			collPointResponse.horaires_Lundi0 = formatStoreTime(collectionPoint.horaires_Lundi[0]);
+			collPointResponse.horaires_Lundi1 =  formatStoreTime(collectionPoint.horaires_Lundi[1]);
+			collPointResponse.horaires_Lundi2 = formatStoreTime(collectionPoint.horaires_Lundi[2]);
+			collPointResponse.horaires_Lundi3 = formatStoreTime(collectionPoint.horaires_Lundi[3]);
+									
+			collPointResponse.horaires_Mardi0 = formatStoreTime(collectionPoint.horaires_Mardi[0]);
+			collPointResponse.horaires_Mardi1 = formatStoreTime(collectionPoint.horaires_Mardi[1]);
+			collPointResponse.horaires_Mardi2 = formatStoreTime(collectionPoint.horaires_Mardi[2]);
+			collPointResponse.horaires_Mardi3 = formatStoreTime(collectionPoint.horaires_Mardi[3]);
+			
+			collPointResponse.horaires_Mercredi0 = formatStoreTime(collectionPoint.horaires_Mercredi[0]);
+			collPointResponse.horaires_Mercredi1 = formatStoreTime(collectionPoint.horaires_Mercredi[1]);
+			collPointResponse.horaires_Mercredi2 = formatStoreTime(collectionPoint.horaires_Mercredi[2]);
+			collPointResponse.horaires_Mercredi3 = formatStoreTime(collectionPoint.horaires_Mercredi[3]);
+			
+			
+			collPointResponse.horaires_Jeudi0 = formatStoreTime(collectionPoint.horaires_Jeudi[0]);
+			collPointResponse.horaires_Jeudi1 = formatStoreTime(collectionPoint.horaires_Jeudi[1]);
+			collPointResponse.horaires_Jeudi2 = formatStoreTime(collectionPoint.horaires_Jeudi[2]);
+			collPointResponse.horaires_Jeudi3 = formatStoreTime(collectionPoint.horaires_Jeudi[3]);
+			
+			collPointResponse.horaires_Vendredi0 = formatStoreTime(collectionPoint.horaires_Vendredi[0]);
+			collPointResponse.horaires_Vendredi1 = formatStoreTime(collectionPoint.horaires_Vendredi[1]);
+			collPointResponse.horaires_Vendredi2 = formatStoreTime(collectionPoint.horaires_Vendredi[2]);
+			collPointResponse.hhoraires_Vendredi3 = formatStoreTime(collectionPoint.horaires_Vendredi[3]);
+			
+			collPointResponse.horaires_Samedi0 = formatStoreTime(collectionPoint.horaires_Samedi[0]);
+			collPointResponse.horaires_Samedi1 = formatStoreTime(collectionPoint.horaires_Samedi[1]);
+			collPointResponse.horaires_Samedi2 = formatStoreTime(collectionPoint.horaires_Samedi[2]);
+			collPointResponse.horaires_Samedi3 = formatStoreTime(collectionPoint.horaires_Samedi[3]);
+			
+			collPointResponse.horaires_Dimanche0 = formatStoreTime(collectionPoint.horaires_Dimanche[0]);
+			collPointResponse.horaires_Dimanche1 = formatStoreTime(collectionPoint.horaires_Dimanche[1]);
+			collPointResponse.horaires_Dimanche2 =formatStoreTime( collectionPoint.horaires_Dimanche[2]);
+			collPointResponse.horaires_Dimanche3 = formatStoreTime(collectionPoint.horaires_Dimanche[3]);
+			
+			collPointResponse.URL_Photo = collectionPoint.URL_Photo;
+			collPointResponse.URL_Plan = collectionPoint.URL_Plan;
+			collPointResponse.distance = collectionPoint.distance;
+	
+			collectionsPoint.collectionPoints.push(collPointResponse);
+			
+		}
+	}
+	catch (e){
+		Logger.error("CollectionPointsInvokeService.ds Error while formatting the response from the mondial webservice response"+e.message);	
+		return PIPELET_ERROR;
+	}
+	return collectionsPoint;
+	
+}
+
+
+   
+
+

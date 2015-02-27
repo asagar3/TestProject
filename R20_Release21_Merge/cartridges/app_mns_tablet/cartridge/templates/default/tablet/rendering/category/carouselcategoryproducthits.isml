@@ -1,0 +1,64 @@
+<isset name="CategorgyRenderTemplate" value="list" scope="page"/>
+<isset name="DecoratorTemplate" value="tablet/search/pt_productsearchresult_carousal" scope="page"/>
+<isif condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+  <isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+  <iscomment>Specific call for ajax | Sep 29, 2011</iscomment>
+  <script src="${URLUtils.staticURL('/themes/demandwarestore/js/ajaxCallSpec.js')}" type="text/javascript"></script> 
+</isif>
+<isdecorate template="${DecoratorTemplate}">
+  <iscomment> Use the decorator template based on the requested output. If
+    a partial page was requested an empty decorator is used.
+    The default decorator for the product hits page is
+    search/pt_productsearchresult. </iscomment>
+  <iscache type="relative" minute="30" varyby="price_promotion"/>
+  <isinclude template="tablet/util/modules"/>
+  <script type="text/javascript">
+$(document).ready(function(){
+	if($.browser.safari ) {
+		var getIdHeight = $("#search").height();
+		if(getIdHeight > 1000 && getIdHeight < 1400){
+			$("#noofitemsperpage option:selected").removeAttr("selected");
+			$("#noofitemsperpage").find("option:first").attr("selected", "selected");
+		}
+	}
+});
+</script>
+  <iscomment> Configured as default template for the product search results.
+    Displays a global slot with static html and the product search
+    result grid. </iscomment>
+  <iscomment>create reporting event</iscomment>
+  <isinclude template="util/reporting/ReportSearch.isml"/>
+  <isif condition="${!empty(pdict.ProductSearchResult.getSuggestedSearchPhrase())}">
+    <div class="didyoumean"> ${Resource.msg('search.nohits.didyoumeanex','search',null)} <a title="${pdict.ProductSearchResult.suggestedSearchPhrase}" href="<isprint value="${URLUtils.http('Search-Show','q',pdict.ProductSearchResult.suggestedSearchPhrase)}"/>">
+      <isprint value="${pdict.ProductSearchResult.suggestedSearchPhrase}"/>
+      </a> </div>
+  </isif>
+  <div class="producthits">
+    <isif condition="${!empty(pdict.ProductSearchResult.category)}">
+      <div id="catBannerBreadcrumb" class="top_banner_grey clearfix">
+        <div class="banner_head">
+          <h2>${pdict.ProductSearchResult.category.displayName}</h2>
+        </div>
+      </div>
+      <isif condition="${pdict.createSlotForKiosk != null }">
+        <isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+        <isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+      </isif>
+      <iselse/>
+    </isif>
+    <div id="search" class="search">
+      <isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+        <div class="searchinformation"> ${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt; <a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a> </div>
+        <!-- END: searchinformation --> 
+      </isif>
+      <isscript> var selectedString = 'selected="selected"'; </isscript>
+      
+    </div>
+    <!-- END: search -->
+    <isslot id="search-promo" description="Promotional Content at the bottom of Search Results" context="global"/>
+  </div>
+  <!-- END: producthits -->
+  
+  <iscomment>Include inline JS to update the refinements</iscomment>
+  <isinclude template="search/components/jsrefinementsupdate"/>
+</isdecorate>

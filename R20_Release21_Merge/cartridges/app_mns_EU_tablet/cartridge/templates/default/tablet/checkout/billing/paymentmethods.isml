@@ -1,0 +1,1183 @@
+<!--- TEMPLATENAME: paymentmethods.isml --->
+<isinclude template="tablet/util/modules"/>
+<iscomment>START:new html for the payment page for tablet</iscomment>
+<div id="newPaymentMethodSelectorContainer">
+        <h5 class="newGrayHeader">
+                <span>
+                        <strong class="newGrayHeaderText">${Resource.msg('billing.paymentheadermobile','checkout',null)}</strong>
+                </span>
+                <div class="clear">
+        </h5>
+        <isset name="error"  value="false" scope="page"/>
+        <div class="newFormContentOuter">
+                <div class="newFormContentInner">
+                        <div class="newNonCollapseContainer">
+                                <isif condition="${!empty(pdict.worldpayError)}">
+                                        <div class="newErrorContainer">
+                                        <span class="errorIcon"></span>
+                                                <span>
+                                                ${Resource.msg('billing.worldpayfailure','checkout',null)}
+                                                </span>
+                                        </div>
+                                        <div class="clear"></div>
+                                        
+                                </isif>
+                                <isif condition="${(!empty(pdict.Decision) && ((pdict.Decision.equals('REJECT')) || (pdict.Decision.equals('ERROR')))) || (!pdict.CurrentForms.billing.paymentMethods.creditCard.month.valid || !pdict.CurrentForms.billing.paymentMethods.creditCard.year.valid)}">
+                                        <div class="newErrorContainer">
+                                        <span class="errorIcon"></span>
+                                                <span>
+                                                ${Resource.msg('billing.invalidcreditcarddetails','checkout',null)}
+                                                </span>
+                                        </div>
+                                        <div class="clear"></div>
+                                        <isset name="error"  value="true" scope="page"/>
+                                </isif>
+                                <isscript>
+                                        var klarnaErrorCode = "klarnaerror."+ pdict.KlarnaOrderError;
+                                        var klarnaErrorMsg = dw.web.Resource.msg(klarnaErrorCode,'klarnaErrors',null);
+                                        if("klarnaerror.null".equalsIgnoreCase(klarnaErrorMsg)){
+                                                klarnaErrorMsg = "klarnaerror.default";
+                                        }
+                                        klarnaErrorMsg = dw.web.Resource.msg(klarnaErrorMsg,'klarnaErrors',null);
+                                </isscript>
+                                <isif condition="${(!empty(pdict.klarnaOrderStatus)) && (pdict.klarnaOrderStatus.equals('REJECT') || pdict.klarnaOrderStatus.equals('ERROR'))}">
+                                        <div class="newErrorContainer">
+                                        <span class="errorIcon"></span>
+                                                <span>
+                                                <isif condition=${!empty(klarnaErrorMsg)}>
+                                                        <isprint value="${klarnaErrorMsg}"/>
+                                                <iselse>
+                                                        ${Resource.msg('billing.klarnadetails','checkout',null)}
+                                                </isif>
+                                                </span>
+                                        </div>
+                                        <div class="clear"></div>
+                                </isif>
+                                <isif condition="${pdict.PlaceOrderError != null}">
+                                        <div class="newErrorContainer"><span class="errorIcon"></span><span>${Resource.msg(pdict.PlaceOrderError.code,'checkout',null)}</span></div>
+                                        <div class="clear"></div>
+                                        <isset name="error"  value="true" scope="page"/>
+                                </isif>
+                                <isscript>
+                                        var idealBanks : Array = dw.system.Site.getCurrent().preferences.custom.idealSupportedBanks;
+                                        var sofortCountry :Array = dw.system.Site.getCurrent().preferences.custom.bankCountry;
+                                        var sofortCountryCode : Array = new Array() ;
+                                        for each(var country:String in sofortCountry){
+                                                sofortCountryCode.push(country.getValue());
+                                        }
+                                        var mCashCountry : Array = dw.system.Site.getCurrent().preferences.custom.mCashCountry;
+                                        var iDealCountry : Array = dw.system.Site.getCurrent().preferences.custom.iDealCountry;
+                                        var iDealApplicable : Boolean = true;
+                                        var sofortApplicable : Boolean = true;  
+                                </isscript>
+                                <isset name="localeCountry" value="${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"  scope="page"/>
+                                <isset name="localeCountryText" value="${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).displayCountry}"  scope="page"/> 
+                                <iscomment> paymentmethods div id inserted: INT-529 Free return coupon</iscomment>
+ 	 	 	 					<div id="paymentmethods">
+                                <formfield class="payment_cards newForm">
+                                        <div class="formfield">
+                                                <label class="label">                           
+                                                        <span class="labeltext">${Resource.msg('billing.countrytext','checkout',null)}:</span>
+                                                </label>
+                                                <div class="value ">
+                                                        <span class="label bold">${localeCountryText}</span>
+                                                </div>                  
+                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                        </div>
+                                        <div class="formfield">
+                                                <label class="label zeroTopPad">                                
+                                                        <iscomment>aliddl : defect id 4573</iscomment>
+                                                        <span class="labeltext">${Resource.msg('billing.accptedpaymentcards','checkout',null)}</span>
+                                                </label>
+                                                <div class="value">
+                                                        <ul id="paymentMethodSelector">
+                                                                <isloop items="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.options}" var="paymentMethodType">
+                                                                        <!-- Ignore GIFT_CERTIFICATE method, GCs are handled separately before other payment methods. -->
+                                                                        <isif condition="${paymentMethodType.value.equals(dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE)}"><iscontinue/></isif>
+                                                                        <isset name="radioID" value="${paymentMethodType.value}" scope="page"/>
+                                                                        <isif condition="${paymentMethodType.value.equals(dw.order.PaymentInstrument.METHOD_BANK_TRANSFER)}">
+                                                                                <isscript>
+                                                                                        var paymentmethod :dw.order.PaymentMethod = dw.order.PaymentMgr.getPaymentMethod(dw.order.PaymentInstrument.METHOD_BANK_TRANSFER);
+                                                                                        var paymentTypes : Array =paymentmethod.custom.suppPaymentTypes;
+                                                                                </isscript>
+                                                                                <isloop items="${paymentTypes}" var="paymentType">
+                                                                                        <isif condition="${(paymentType.getValue()=='SOFORT-SSL') && (sofortCountryCode.indexOf(localeCountry)==-1)}">
+                                                                                                <isset name="sofortApplicable" value="${false}"  scope="page"/>
+                                                                                                <iscontinue/>
+                                                                                        </isif>
+                                                                                        <isif condition="${(paymentType.getValue()=='IDEAL-SSL') && (iDealCountry.indexOf(localeCountry)==-1)}">
+ 
+                                                                                                <isset name="iDealApplicable" value="${false}"  scope="page"/>
+                                                                                                <iscontinue/>
+                                                                                        </isif>
+                                                                                        <isset name="radioID" value="${paymentType.getValue()}" scope="page"/>
+                                                                                        <isset name="localeID" value="${request.locale}" scope="page"/>
+                                                                                        <isif condition="${(paymentType.getValue()=='SOFORT-SSL') && (sofortCountryCode.indexOf(localeCountry) != -1)}">                                                
+                                                                                                <li class="is-${radioID}_${localeID}">                                  
+                                                                                        <iselse>
+                                                                                                <li class="is-${radioID} radio">
+                                                                                        </isif>
+                                                                                                <div class="radioButton" >
+                                                                                                        <div class="sprite radioSwitch "></div>
+                                                                                                </div>                                                                                  
+                                                                                                <isif condition="${pdict.CurrentForms.billing.paymentMethods.banktransfer.paymentType.htmlValue==paymentType.getValue()}">
+                                                                                                        <input type="radio" checked="checked" name="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}" value="${paymentType.getValue()}" id="is-${radioID}" />
+                                                                                                <iselse>
+                                                                                                        <input type="radio" class="hidden" name="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}" value="${paymentType.getValue()}" id="is-${radioID}" />
+                                                                                                </isif>
+                                                                                                <label for="is-${radioID}"><isprint value="${paymentType.getDisplayValue()}"/></label>
+                                                                                        </li>
+                                                                                </isloop>
+                                                                                <iscontinue/>
+                                                                        </isif>
+                                                                        <li class="is-${radioID} radio">
+                                                                                <div class="radioButton" >
+                                                                                        <div class="sprite radioSwitch "></div>
+                                                                                </div>  
+                                                                                <isif condition="${paymentMethodType.checked}">
+                                                                                        <input type="radio" checked="checked" name="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}" value="${paymentMethodType.htmlValue}" id="is-${radioID}" />
+                                                                                        <isset name="isKlarnaDisabled" value="false" scope="page"/>
+                                                                                <iselse>
+                                                                                        <isif condition="${radioID == 'BML' && (pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value == 'BE' || pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value == 'NL' || pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.value == 'ES')}">
+                                                                                                <isset name="isKlarnaDisabled" value="true" scope="page"/>
+                                                                                        <iselse>
+                                                                                                <isset name="isKlarnaDisabled" value="false" scope="page"/>
+                                                                                        </isif>
+                                                                                        <input <isif condition="${isKlarnaDisabled == 'true'}">disabled="disabled"</isif> type="radio" name="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}" value="${paymentMethodType.htmlValue}" id="is-${radioID}" />
+                                                                                </isif>
+                                                                                <label for="is-${radioID}" <isif condition="${isKlarnaDisabled == 'true'}"> class="disabledText"</isif>><isprint value="${Resource.msg(paymentMethodType.label,'forms',null)}"/></label>
+                                                                                <isif condition="${isKlarnaDisabled == 'true'}">
+                                                                                        <div class="formfieldtooltip">
+                                                                                        <istooltip content_id="klarna-radio-tooltip"/>
+                                                                                </div>
+                                                                                </isif>
+                                                                        </li>
+                                                                </isloop>
+                                                        </ul>
+                                                </div>                  
+                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                        </div>
+                                </formfield>
+                                <div class="clear"></div>       
+                       <!-- </div> --> 
+                        <div id="newCreditCardDetails" class="hide newForm">
+                                
+                                <div class="formfield hide" id="euChangeButtonContainer">
+                                        <div class="label">&nbsp;</div>
+                                        <div class="value">
+                                                <div class="floatright btn-grey-flat">
+                                                        <div class="link_button">
+                                                                <a id="changeCCDetails" href="#">${Resource.msg('minishipments.ChangeText','checkout',null)}</a>
+                                                        </div>
+                                                        <div class="clear"><!-- FLOAT CLEAR --></div>
+                                
+                                                </div>
+                                        </div>
+                                        <div class="clear"></div>
+                                </div>
+                                <div class="formfield">
+                                        <div class="label">&nbsp;</div>
+                                        <div class="value">
+                                                <span id="selectedCardLogo" class="sprite blankCard"></span>
+                                        </div>
+                                        <div class="clear"></div>
+                                </div>
+                                <div class="formfield">
+                                        <div class="label">&nbsp;</div>
+                                        <div class="value">
+                                                <span id="selectedCardNo"></span>
+                                        </div>
+                                        <div class="clear"></div>
+                                </div>
+                                <div class="formfield">
+                                        <div class="label">&nbsp;</div>
+                                        <div class="value">
+                                                <span class="labeltext">${Resource.msg('billing.creditcardexpires','checkout',null)}</span>
+                                                <span id="selectedCardExpiry"></span>
+                                        </div>
+                                        <div class="clear"></div>
+                                </div>
+                                <isif condition="${pdict.CurrentCustomer.authenticated}">
+                                <div class="formfield">
+                                        <label class="label">
+                                                <span class="labeltext">${Resource.msg('creditcard.cvnlabel','forms',null)}</span>
+                                        </label>
+                                        <div class="value genericinputbox">
+                                                <input type="text" id="formCVVCode" maxlength="4"/>
+                                        </div>
+                                        <div class="clear"></div>
+                                </div>
+                                <div class="formfield">
+                                        <label class="label">           
+                                                <span class="labeltext bold">&nbsp;</span>
+                                        </label>
+                                        <div class="value">
+                                                <div class="floatright btn-green-flat">
+                                                        <button type="button" id="creditCardNext" name="next" value="Next">
+                                                                <span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+                                                                <span class="forward-icon">&nbsp;</span>
+                                                        </button>
+                                                </div>
+                                        </div>                  
+                                        <div class="clear"><!-- FOAT CLEAR --></div>
+                                </div>
+                                </isif>
+                        </div>
+                
+                        <div id="newPaymentForm" class="newForm">
+                                <div id="PaymentMethod_CREDIT_CARD" class="paymentform creditcardpayment">
+                                        <iscomment>display select box with stored credit cards if customer is authenticated</iscomment>
+                                        <isif condition="${pdict.CurrentCustomer.authenticated}">
+                                                <isif condition="${!empty(pdict.ApplicableCreditCards)}">
+                                                        <iscomment>user authenticated and has saved cards</iscomment>
+                                                        <div class="formfield">
+                                                                <label class="label">                           
+                                                                                <span class="labeltext bold">${Resource.msg('billing.paybaycard','checkout',null)}</span>
+                                                                </label>
+                                                                <div class="value">
+                                                                        <label for="${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}" class="hideLabel">
+                                                                                ${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}
+                                                                </label>
+                                                                <span class="tablet-selectbox">
+                                                                <select id="${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}" name="${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}">
+                                                                                <option value="" selected="selected">${Resource.msg('billing.creditcardlistselect','checkout',null)}</option>
+                                                                                <isloop items="${pdict.ApplicableCreditCards}" var="creditCardInstr">
+                                                                                        <option value="${creditCardInstr.UUID}" data-cardtype="${creditCardInstr.creditCardType}" data-cardno="${creditCardInstr.maskedCreditCardNumber}" data-expirymonth="${creditCardInstr.creditCardExpirationMonth}" data-expiryyear="${creditCardInstr.creditCardExpirationYear}">(<isprint value="${creditCardInstr.creditCardType}"/>) <isprint value="${creditCardInstr.maskedCreditCardNumber}"/> - ${Resource.msg('billing.creditcardlistexp','checkout',null)} <isprint value="${creditCardInstr.creditCardExpirationMonth}" formatter="00" />.<isprint value="${creditCardInstr.creditCardExpirationYear}" formatter="0000" /></option>
+                                                                                </isloop>
+                                                                        </select>
+                                                                        </span>
+                                                                        <input type="hidden" value="${pdict.ApplicableCreditCards}"/>
+                                                                </div>
+                                                                
+                                                        <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                        </div><!-- END: card_type -->
+                                                        <div class="formfield">
+                                                                <label class="label">                           
+                                                                        <span class="labeltext">&nbsp;</span>
+                                                                </label>
+                                                                <div class="label bold value">
+                                                                        ${Resource.msg('billing.orText','checkout',null)}
+                                                                </div>                  
+                                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                                        </div>
+                                                        <div class="formfield">
+                                                                <label class="label">                           
+                                                                        <span class="labeltext">&nbsp;</span>
+                                                                </label>
+                                                                <div class="value">
+                                                                        <div class="floatright btn-grey-flat">
+                                                                                <div class="link_button">
+                                                                                        <a id="enterNewCard" href="#">${Resource.msg('billing.enteranewcard','checkout',null)}</a>
+ 
+                                                                                </div>
+                                                                                <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                                        </div>
+                                                                </div>                  
+                                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                                        </div>
+                                                        <div class="formfield">
+                                                                <label class="label">                           
+                                                                        <span class="labeltext">&nbsp;</span>
+                                                                </label>
+                                                                <div class="value">
+                                                                        &nbsp;
+                                                                </div>                  
+                                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                                        </div>
+                                                        <div class="formfield">
+                                                                <label class="label">                           
+                                                                        <span class="labeltext">&nbsp;</span>
+                                                                </label>
+                                                                <div class="value">
+                                                                        <div class="floatright btn-green-flat">
+                                                                                <button value="Next" name="next" id="paymentMethodNext" type="button">
+                                                                                        <span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+                                                                                        <span class="forward-icon">&nbsp;</span>
+                                                                                </button>
+                                                                        </div>
+                                                                </div>                  
+                                                                <div class="clear"><!-- FOAT CLEAR --></div>
+ 
+                                                        </div>
+                                                        <div  id="hiddenCard" style="display: none;">
+                                                                <div id="dialogcontainerCard" class="checkout">
+                                                                        <isinclude template="tablet/checkout/billing/carddetails"/>
+                                                                        <div class="formfield">
+                                                                                <label class="label">                           
+                                                                                        &nbsp;
+                                                                                </label>
+                                                                                <div class="value">
+                                                                                        <div class="continuebutton btn-green-flat">
+                                                                                        <button id="popupContinue" class="" type="button" name="${Resource.msg('global.continueText','locale',null)}" value="${Resource.msg('global.continueText','locale',null)}">
+                                                                                                <span class="btn-ic-lock">${Resource.msg('global.continueText','locale',null)}</span>
+                                                                                                <span class="forward-icon">&nbsp;</span>
+                                                                                        </button>
+                                                                                        <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                                                </div>
+                                                                                </div>                  
+                                                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                                                        </div>
+                                                                </div>
+                                                        </div>
+                                                <iselse>
+                                                        <iscomment>user authenticated and has no saved cards</iscomment>
+                                                        <div class="formfield">
+                                                                <label class="label notopmargin">                               
+ 
+ 
+                                                                        <span class="labeltext bold">${Resource.msg('billing.enterdetailsbelow','checkout',null)}</span>
+                                                                </label>
+                                                                <div class="value textValInput">
+                                                                        ${Resource.msg('global.requiredfield','locale',null)} <span class="requiredindicator">*</span>
+                                                                </div>                  
+ 
+                                                                <div class="clear"><!-- FOAT CLEAR --></div>
+                                                        </div>
+                                                        <isinclude template="tablet/checkout/billing/carddetails"/>
+ 
+ 
+                                                        <div class="formfield">
+                                                                <div class="label">&nbsp;</div>
+                                                                <div class="value">
+                                                                        <div class="floatright btn-green-flat">
+                                                                                <button value="Next" name="next" id="paymentMethodNext" type="button">
+ 
+                                                                                        <span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+                                                                                        <span class="forward-icon">&nbsp;</span>
+                                                                                </button>
+                                                                        </div>
+                                                                </div>
+                                                                <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                        </div>
+                                                </isif>
+                                        <iselse>
+                                                <iscomment>guest user</iscomment>
+                                                <div class="formfield">
+                                                        <label class="label">                           
+                                                                <span class="labeltext bold">${Resource.msg('billing.enterdetailsbelow','checkout',null)}</span>
+                                                        </label>
+                                                        <div class="value textValInput">
+                                                                ${Resource.msg('global.requiredfield','locale',null)} <span class="requiredindicator">*</span>
+                                                        </div>                  
+                                                        <div class="clear"><!-- FOAT CLEAR --></div>
+                                                </div>
+                                                <isinclude template="tablet/checkout/billing/carddetails"/>
+                                                <div class="formfield">
+                                                        <div class="label">&nbsp;</div>
+                                                        <div class="value">
+                                                                <div class="floatright btn-green-flat">
+                                                                        <button value="Next" name="next" id="paymentMethodNext" type="button">
+                                                                                <span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+                                                                                <span class="forward-icon">&nbsp;</span>
+                                                                        </button>
+                                                                </div>
+                                                        </div>
+ 
+                                                        <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                </div>
+                                        </isif>
+                                </div>
+                                <div id="PaymentMethod_BML_COMMENTED" class="paymentform billmelater hide">
+                                        <div class="helptext">${Resource.msg('billing.bmlhelp','checkout',null)}</div>
+                                        <form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.paymentMethods.bml.htmlName}">
+                                                <div class="bmlform">
+                                                        <div class="formfield bmlbirthday">
+                                                        <div class="label"><isif condition="${pdict.CurrentForms.billing.paymentMethods.bml.year.mandatory}"><span class="required">*</span></isif>Date of Birth:</div>
+                                                                <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.year}" type="select" xhtmlclass="year"/>
+                                                                <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.month}" type="select" xhtmlclass="month"/>
+                                                                <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.day}" type="select" xhtmlclass="day"/>
+                                                                <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                        </div><!-- END: bmlbirthday -->
+                                                        <div class="formfield bmlssn">
+                                                        <div class="label">
+                                                                <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.ssn}" type="input" value="false"/>
+                                                        </div>
+                                                                <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.ssn}" type="input" label="false" xhtmlclass="ssn"/>
+                                                                <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                        </div><!-- END: bmlssn -->
+                                                        <div class="bmltermsandconditions">
+                                                                <iscommnet>This content asset is not getting used by our site hence commenting it to remove the accessiblity issue present is this content asset<iscontentasset aid="bml-tc"/></iscommnet>
+                                                                <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                        </div><!-- END: bmltermsandconditions -->
+                                                        <div class="bmliagree">
+                                                                <isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.termsandconditions}" type="checkbox" label="true"/>
+                                                                <div class="clear"><!-- FLOAT CLEAR --></div>
+                                                        </div><!-- END: bmliagree -->
+                                                </div><!-- END: bmlform -->
+                           </form>
+                                </div>
+ 
+                                <div id="PaymentMethod_BANK_TRANSFER" class="paymentform banktransfer hide">
+ 
+                                        <!-- Your custom payment method implementation goes here. -->
+                                        <form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.paymentMethods.banktransfer.htmlName}">
+                                                <input type="hidden" name="${pdict.CurrentForms.billing.paymentMethods.banktransfer.paymentType.htmlName}" value="IDEAL-SSL"/>  
+                                                <div class="cAsset">
+                                                        <div class="formfield selectbank">
+                                                                <iscomment>
+                                                                        <div class="formfield">
+                                                                                <label class="label">   
+                                                                                        <span class="labeltext bold">${Resource.msg('billing.paybyideal','checkout',null)}<br>
+                                                                                                ${Resource.msg('billing.netherlands','checkout',null)}
+                                                                                        </span>
+                                                                                </label>
+                                                                                <div class="value">
+                                                                                        &nbsp;
+                                                                                        <span class="sprite payment ideal"></span>
+                                                                                </div>
+                                                                        <div class="clear"></div>
+                                                                        </div>
+                                                                </iscomment>
+                                                                <div class="formfield">
+                                                                        <isif condition="${iDealApplicable}">
+                                                                                <iscontentasset aid="ideal-payment-description" />
+                                                                        <iselse/>
+                                                                                <iscontentasset aid="sofort-payment-description" />
+                                                                        </isif>
+                                                                
+                                                                <div class="clear"></div>
+                                                                </div>
+                                                                <div class="formfield">
+                                                                        <label class="label">   
+                                                                                <isif condition="${!pdict.CurrentForms.billing.paymentMethods.banktransfer.bank.valid}">
+                                                                                        <span class="selectcreditcardmessage labeltext errorlabel">
+                                                                                <iselse>
+                                                                                        <span class="selectcreditcardmessage labeltext">
+                                                                                </isif>
+        
+                                                                                ${Resource.msg('worldpay.selectbank','checkout',null)}</span>
+                                                                                <span class="requiredindicator">*</span>
+                                                                        </label>
+        
+                                                                        <div class="value">
+                                                                        <span class="tablet-selectbox">
+                                                                                <select class="iDealClass selectbox required" id="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bank.htmlName}" name="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bank.htmlName}">
+                                                                                        <option value="" selected="selected">${Resource.msg('worldpay.selectbanks','checkout',null)}</option>
+                                                                                        <isloop items="${idealBanks}" var="idealBank">
+                                                                                                <option value="${idealBank.getValue()}" <isif condition=${pdict.CurrentForms.billing.paymentMethods.banktransfer.bank.htmlValue==idealBank.getValue()}>selected="selected"</isif>><isprint value="${idealBank.getDisplayValue()}"/></option>
+                                                                                        </isloop>
+                                                                                </select>
+                                                                                </span>
+                                                                                <isif condition="${!pdict.CurrentForms.billing.paymentMethods.banktransfer.bank.valid}">
+                                                                                        <span class="errorIcon"></span>
+                                                                                        <div class="errorclient" generated="true" htmlfor="${pdict.CurrentForms.profile.address.country.htmlName}">
+                                                                                                <isset name="errorVar" value="${Resource.msg('global.missingval','locale',null)}" scope="page">
+                                                                                                <isset name="bankVar" value="${Resource.msg('worldpay.banks','checkout',null)}" scope="page">
+                                                                                                <isscript>
+                                                                                                        var finalErrorMsg : String = errorVar.replace("{0}",bankVar);
+                                                                                                </isscript>
+                                                                                                <isprint value="${finalErrorMsg}"/>
+                                                                                         </div>
+                                                                                </isif>
+        
+                                                                        </div>
+                                                                <div class="clear"></div>
+                                                                </div>
+                                                                
+                                                        </div>
+                                                        
+                                                <div class="formfield selectcountry required">
+                                                        <iscomment>
+                                                                <div class="formfield">
+                                                                        <label class="label">   
+                                                                                <span class="labeltext bold">${Resource.msg('billing.paybysofort','checkout',null)}<br>
+                                                                                        ${Resource.msg('billing.germanyandaustria','checkout',null)}
+                                                                                </span>
+                                                                        </label>
+                                                                        <div class="value">
+                                                                                &nbsp;
+                                                                                <span class="sprite payment sofort"></span>
+                                                                        </div>
+                                                                <div class="clear"></div>
+                                                                </div>
+                                                        </iscomment>
+                                                        <div class="formfield">
+                                                                        <isif condition="${iDealApplicable}">
+                                                                                <iscontentasset aid="ideal-payment-description" />
+                                                                        <iselse/>
+                                                                                <iscontentasset aid="sofort-payment-description" />
+                                                                        </isif>
+                                                                
+                                                        <div class="clear"></div>
+                                                        </div>
+                                                        <div class="formfield">
+                                                                <label for="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}" class="label  selectcreditcard">
+                                                                        <isif condition="${!pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.valid}">
+                                                                                <span class="selectcreditcardmessage labeltext errorlabel">
+                                                                        <iselse>
+                                                                                <span class="selectcreditcardmessage labeltext">
+                                                                        </isif>
+                                                                        ${Resource.msg('worldpay.selectcountry','checkout',null)}</span>
+                                                                        <span class="requiredindicator">*</span>
+                                                                </label><!-- END: selectaddress -->
+                                                                <div class="value">
+                                                                <span class="tablet-selectbox">
+                                                                        <select class="iDealClass selectbox required" id="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}" name="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}">
+                                                                                <option value="" selected="selected">${Resource.msg('worldpay.paymenttypeselect','checkout',null)}</option>
+                                                                                <isloop items="${sofortCountry}" var="bankCountry">
+                                                                                        <option value="${bankCountry.getValue()}" <isif condition=${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlValue==bankCountry.getValue()}>selected="selected"</isif>><isprint value="${bankCountry.getDisplayValue()}"/></option>
+                                                                                </isloop>
+                                                                        </select>
+                                                                </span>
+                                                                        <isif condition="${!pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.valid}">
+                                                                                <span class="errorIcon"></span>
+                                                                                <div class="errorclient" generated="true" htmlfor="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}" name="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}">
+                                                                                        <isset name="errorVar" value="${Resource.msg('global.missingval','locale',null)}" scope="page">
+                                                                                        <isset name="bankVar" value="${Resource.msg('worldpay.country','checkout',null)}" scope="page">
+                                                                                        <isscript>
+                                                                                                var finalErrorMsg : String = errorVar.replace("{0}",bankVar);
+                                                                                        </isscript>
+                                                                                        <isprint value="${finalErrorMsg}"/>
+                                                                                        
+                                                                                 </div>
+                                                                        </isif>
+                                                                 </div>
+                                                                <div class="clear"></div>
+                                                        </div>
+                                                        
+                                                        </div>
+                                                        
+                                                        <iscomment>!--Nadeem : load the content asset based on the country instead of using javascript to show hide</iscomment>
+                                                        <iscomment>     
+                                                                <isif condition="${iDealApplicable}">
+                                                                        <div class="formfieldtooltip">
+                                                                        <istooltip content_id="help-ideal-payment"/>
+                                                                </div>
+                                                                <iselse/>
+                                                                        <div class="formfieldtooltip">
+                                                                        <istooltip content_id="help-sofort-payment"/>
+                                                                </div>
+                                                                </isif>
+                                                        </iscomment>
+                                </div>
+                                        </form>
+                                </div>
+ 
+                                <div id="PaymentMethod_CREDIT_CARD_MISTERCASH" class="paymentform mistercash">
+ 
+                                        <isif condition="${mCashCountry.indexOf(localeCountry)!=-1}">
+                                        <div class="cAsset">
+                                                <div class="formfield">
+                                                        <iscontentasset aid="mistercash-payment-description" />
+                                                        <div class="formfieldtooltip">
+                                                        <istooltip content_id="help-mistercash-payment"/>
+                                                </div>
+                                                </div>
+                                        </div>
+ 
+ 
+ 
+                                        <form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.paymentMethods.banktransfer.htmlName}">
+                                                <iscomment>
+                                                        <div class="country">
+                                                                <div class="selectcreditcard">
+                                                                        <div class="label">
+                                                                                <span class="selectcreditcardsstar">*</span>
+                                                                                <span class="selectcreditcardmessage">${Resource.msg('worldpay.country','checkout',null)}</span>
+                                                                        </div>
+                                                                        <div class="value">
+                                                                        <span class="tablet-selectbox">
+                                                                                <select id="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}" name="${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}">
+                                                                                        <isloop items="${mCashCountry}" var="bankCountry">
+                                                                                                <option value="${bankCountry}" <isif condition=${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlValue==bankCountry.getValue()}>selected="selected"</isif>><isprint value="${Resource.msg(bankCountry,'checkout',null)}"/></option>
+                                                                                        </isloop>
+                                                                                </select>
+                                                                        </span>
+                                                                        </div>
+                                                                </div>
+                                                                <div class="clear"></div>
+                                                        </div>
+                                                </iscomment>
+                                                <input type="hidden" name="${pdict.CurrentForms.billing.paymentMethods.banktransfer.paymentType.htmlName}" value="MISTERCASH-SSL"/>
+                                        </form>
+                                </isif>
+                        </div>
+                        </div>
+                        </div>
+                        <div class="giftcertused" style="display:none;"></div>
+                        </div>
+                </div>
+        </div>
+</div>
+<iscomment>END:new html for the payment page for tablet</iscomment>
+ 
+<iscomment>
+<div id="paymentmethodform" class="collapse accordionOpen">
+   <div class="done-check">&nbsp;</div>
+        <h5 class="grey_block_header">
+                <span>
+                        <strong class="content_grey_header">${Resource.msg('billing.paymentheadermobile','checkout',null)}</strong>
+                </span>
+                <div class="floatright btn-grey-flat">
+                        <div class="link_button">
+                                <a id="changePaymentMethod" href="#">${Resource.msg('minishipments.ChangeText','checkout',null)}</a>
+                        </div>
+                        <div class="clear"><!-- FLOAT CLEAR --></div>
+ 
+                </div>
+                <div class="clear"><!-- FLOAT CLEAR --></div>
+        </h5>
+</div>
+</iscomment>
+ 
+ 
+<iscomment><!-- TODO: 22/03/2011 the array here maps to the order of credit cards in the dropdown.
+true/false  applies to "Requires Valid From Date? true/false--></iscomment>
+<script type="text/javascript">
+//<![CDATA[
+/***** Remove comma from year field | 08-apr*****************/
+jQ(function(){
+         var dlgCardNew = jQuery('#dialogcontainerCard').dialog({
+                        bgiframe: true,
+                        autoOpen: false,
+                        modal: true,
+                        overlay: {
+                        opacity: 0.5,
+                        background: "black"
+                        },
+                height: "auto",
+                width: 550,
+                resizable: false
+                });
+         dlgCardNew.parent().appendTo(jQ("#PaymentMethod_CREDIT_CARD"));
+         jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]').val('');
+         
+         jQ('#changeCCDetails').on('click', function(e){
+                 e.preventDefault();
+                 jQ('#newPaymentForm').removeClass('hide').slideDown();
+                 jQ('#newCreditCardDetails').addClass('hide').slideUp();
+                 jQ('#creditCardNext').parents('.formfield').removeClass('hide');
+                 jQ('#creditCardNext').parents('.formfield').prev('.formfield').removeClass('hide');
+                 jQ("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]").val('');
+                 
+                 
+                 /*clear cc details
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}]').val('');
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]').val('');
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]').val('');
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]').val('');
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]').val('');
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]').val('');
+                 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]').val('');*/
+                 
+                // jQ('#billingAddressFields').slideUp();
+                // jQ('#newEnterCardDetails').slideDown();
+                 //     jQ('#newShowCardDetails').slideUp();
+                 jQ('#newContactDetails').removeClass('accordionOpen');
+                 jQ('#newBillingAddressContainer').removeClass('done').slideUp();
+                 jQ('#newAddressContainer').addClass('hide').slideUp();
+                 jQ('#newContactDetails').addClass('hide').slideUp();
+                 
+                 
+         });
+         jQ('#creditCardNext').on('click', function(){
+                  if(${pdict.CurrentCustomer.authenticated}){
+                                 if(jQ('#formCVVCode').is(':visible')){
+                                 var tempVal = jQ.trim(jQ('#formCVVCode').val());
+                                 if(tempVal !=''){
+                                         jQ('#formCVVCode').removeClass('errorclient').parents(".formfield").find(".labeltext").removeClass("errorlabel");
+                                         jQ('#formCVVCode').next('.errorIcon').addClass('successIcon');
+                                          
+                                         jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]').val(tempVal);
+                                         jQ('#formCVVCode').val('');
+                                         jQ('#cardholderform').addClass('accordionOpen');
+                                         jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+                                         jQ(this).parents('.formfield').addClass('hide');
+                                         jQ(this).parents('.formfield').prev('.formfield').addClass('hide');
+                                         jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                         if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+                                                 jQ('#newAddressContainer').addClass('hide').slideUp();
+                                                 jQ('#selectAddressContainer').removeClass('hide').slideDown();
+                                         }else{
+                                                 jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                         }
+                                         jQ('#changeCCDetails').parents('.formfield').removeClass('hide');
+                                 }else{
+                                         jQ('#formCVVCode').addClass('errorclient').parents(".formfield").find(".labeltext").addClass("errorlabel");
+                                         if(!jQ('#formCVVCode').next().is('span.errorIcon')){
+                                                 jQ('#formCVVCode').after('<span class="errorIcon"></span>');    
+                                         }
+                                         jQ('#changeCCDetails').parents('.formfield').addClass('hide');
+                                 }
+                        }else{
+                                jQ('#cardholderform').addClass('accordionOpen');
+                                 jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+                                 jQ(this).parents('.formfield').addClass('hide');
+                                 jQ(this).parents('.formfield').prev('.formfield').addClass('hide');
+                                 jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                 if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+                                         //jQ('#changeBillingAddress').click();
+                                         jQ('#newAddressContainer').addClass('hide').slideUp();
+                                         jQ('#selectAddressContainer').removeClass('hide').slideDown();
+                                 }else{
+                                         jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                 }
+                        }
+                         }else{
+                                 if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+                                         //jQ('#changeBillingAddress').click();
+                                         jQ('#newAddressContainer').addClass('hide').slideUp();
+                                         jQ('#selectAddressContainer').removeClass('hide').slideDown();
+                                 }else{
+                                         jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                }
+                         }
+                
+                 
+                 
+         });
+         jQ('#paymentMethodSelector li').find('input[type=radio]').each(function(){
+                 if(jQ(this).is(':checked')){
+                         jQ(this).parents('li').find('div.radioButton .sprite').addClass('checked');
+                 }
+                 
+         });
+         
+         jQ('#paymentMethodSelector li').on('click', '.radioSwitch', function(){
+                 var thisOnesRadio = jQ(this).parents('li').find('input[type=radio]');
+                 if(typeof(jQ(thisOnesRadio).attr('disabled')) == "undefined"){
+                         jQ(this).addClass('checked');
+                         jQ(this).parents('ul').find('div.radioButton .sprite').removeClass('checked');
+                         jQ(this).addClass('checked').parents('li').find('input[type=radio]').click();
+                         jQ('#paymentForm').removeClass('hide').show();
+                         jQ('#newCreditCardDetails').hide();
+                 }
+         });
+         jQ('#paymentMethodSelector li').on('click', 'input[type=radio]', function(){
+                 jQ(this).parents('ul').find('div.radioButton .sprite').removeClass('checked');
+                 jQ(this).prev('div').find('div.radioSwitch').addClass('checked');
+                 jQ('#paymentForm').removeClass('hide').show();
+                 jQ('#newCreditCardDetails').hide();
+         });
+         
+         jQ('#enterNewCard').on('click', function(e){
+                 e.preventDefault();
+                
+                        var dialogTitle = "${Resource.msg('billing.enteranewcard','checkout',null)}";
+                        jQuery('#dialogcontainerCard').dialog('option', 'title', dialogTitle);
+                        jQuery('#dialogcontainerCard').find('input, select').not("input[type=checkbox]").val('');
+                        
+                        var validator = $("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").validate();
+               validator.resetForm();//remove validation
+               $("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").find('input, select').nextAll('.errorIcon, .errorclient').remove();
+               $("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").find('input, select').parents('.formfield').find('.errorlabel').removeClass('errorlabel');
+               
+                        jQuery('#dialogcontainerCard').dialog('open');
+                          /* for all dialogue boxes - set to center in both orientations - Shahzad */
+                         var popupW = jQuery('#dialogcontainerCard').width();   
+                        jQuery('#dialogcontainerCard').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%"});
+                         
+                         /* end */
+         });
+         jQ('#popupContinue').on('click', function(e){
+                 e.preventDefault();
+                 var payMethodForm = jQuery("${'#' + pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}");
+                        removeValidFrom();
+                        if(payMethodForm.valid()){
+                                 jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+                                 jQ('#selectedCardNo').html('XXXX-XXXX-XXXX-X' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val().substring(12));
+                                 jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+                                 jQ('#newPaymentForm').slideUp();
+                                 jQ('#newCreditCardDetails').removeClass('hide').slideDown();
+                                 jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                 
+                                 jQuery('#dialogcontainerCard').dialog('close');
+                                jQ('#creditCardNext').parents('.formfield').addClass('hide');
+                                 jQ('#creditCardNext').parents('.formfield').prev('.formfield').addClass('hide');
+                                if(${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}){
+                                        //jQ('#changeBillingAddress').click();
+                                        jQ('#newAddressContainer').addClass('hide').slideUp();
+                                        jQ('#selectAddressContainer').removeClass('hide').slideDown();
+                                        
+                                 }
+                                 
+                        }
+                 
+         });
+         jQ('#paymentMethodNext').on('click', function(e){
+                 e.preventDefault();
+                 if(!${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}){
+                         if(jQ("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").is(':visible')){
+                                 removeValidFrom();
+                                 var tempValid = true;
+                                 
+                                 $("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").each(function(){
+                                         if($(this).valid()==0){
+                                                 tempValid = false;
+                                         }
+                                 });
+                                 
+                                 if(jQ("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").is(":visible")){
+                                         $("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").each(function(){
+                                                 if($(this).valid()==0){
+                                                         tempValid = false;
+                                                 }
+                                         });
+                                 }
+                                 if(tempValid){
+                                         jQ('#cardholderform').addClass('accordionOpen');
+                                         jQ('#paymentmethodform').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+                                         jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+                                         
+                                         jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+                                         var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+                                         newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+                                         jQ("#selectedCardNo").html(newMaskedNumber);
+                                         jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+                                         jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                         jQ('#addressformView').removeClass('hide').show();
+                                         jQ('#creditCardNext').parents('.formfield').removeClass('hide');
+                                         jQ('#creditCardNext').parents('.formfield').prev('.formfield').removeClass('hide');
+                                         jQ('#formCVVCode').val('');
+                                         jQ('#changeCCDetails').parents('.formfield').removeClass('hide');
+                                         if(${pdict.CurrentCustomer.authenticated} || !${!empty(pdict.ApplicableCreditCards)}){
+                                                 jQ('#creditCardNext').parents('.formfield').addClass('hide');
+                                                 jQ('#creditCardNext').parents('.formfield').prev('.formfield').addClass('hide');
+                                         }
+                                         
+                                         jQ('#newPaymentForm').slideUp();
+                                         jQ('#newCreditCardDetails').removeClass('hide').slideDown();
+                                 }
+                         }
+                 }else{
+                         removeValidFrom();
+                        var tempValid = true;
+                         
+                         $("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").each(function(){
+                                 if($(this).valid()==0){
+                                         tempValid = false;
+                                 }
+                         });
+                         
+                         if(jQ("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").is(":visible")){
+                                 $("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").each(function(){
+                                         if($(this).valid()==0){
+                                                 tempValid = false;
+                                         }
+                                 });
+                         }
+                         if(tempValid){
+                                 if((jQ('select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]').val()!='')||(jQ('#newCardDetailInfo').is(':visible'))){
+                                         jQ('#cardholderform').addClass('accordionOpen');
+                                         jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+                                         jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+                                         
+                                         jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+                                         var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+                                         newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+                                         jQ("#selectedCardNo").html(newMaskedNumber);
+                                         jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+                                         
+                                         jQ('#newPaymentForm').slideUp();
+                                         jQ('#newCreditCardDetails').removeClass('hide').slideDown();
+                                         jQ('#changeCCDetails').parents('.formfield').removeClass('hide');
+                                         
+                                         
+                                         if(${(pdict.CurrentCustomer.authenticated && (pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0))}){
+                                                 //authenticated with saved cards
+                                                 
+                                         }else{
+                                                 
+                                                 if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+                                                 jQ('#enterAddressContainer').removeClass('hide');
+                                                 jQ('#billingAddressFields').removeClass('hide').show();
+                                                 }else{
+                                                         jQ('#newAddressContainer').removeClass('hide').show();
+                                                        // jQ('#newBillingAddressContainer').removeClass('hide').slideDown();
+                                                         //jQ('#enterAddressContainer').addClass('hide').slideUp();
+                                                 }
+                                                
+                                                 //jQ('#newAddressContainer').addClass('hide').slideUp();
+                                                 //jQ('#enterAddressContainer').addClass('hide').slideUp();
+                                                 
+                                         }
+                                         /* removing the popup code
+                                         if(${pdict.CurrentCustomer.authenticated}){
+                                                 jQuery('#dialogcontainerSameAddress').dialog('option', 'title', "${Resource.msg('billing.changedetails','checkout',null)}");
+                                         }else{
+                                                 jQuery('#dialogcontainerSameAddress').dialog('option', 'title', "${Resource.msg('billing.enterdetails','checkout',null)}");
+                                         }
+                                         jQuery('#dialogcontainerSameAddress').dialog('open');
+                                         jQuery('#dialogcontainerSameAddress').parent().children().children(".ui-dialog-titlebar-close").hide();
+                                          
+                                         var popupW = jQuery('#dialogcontainerSameAddress').width();    
+                                        jQuery('#dialogcontainerSameAddress').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%"});
+                                        */
+                                         
+                                 }
+                         }
+                 }
+                 
+                 
+                 
+         });
+         jQ("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]").on('change', function(){
+                        showValidFrom(this.value);
+                        if(jQ(this).val()!=''){
+                                var temp = jQ(this).find("option:selected")[0];
+                                jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ(temp).attr('data-cardtype').toLowerCase().replace(/\s/g, ''));
+                                var newMaskedNumber = jQ(temp).attr('data-cardno');
+                                newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+                                jQ('#selectedCardNo').html(newMaskedNumber);
+                                jQ('#selectedCardExpiry').html(jQ(temp).attr('data-expirymonth') + '<span class="datedivider">/</span>' + jQ(temp).attr('data-expiryyear'));
+                                //jQ('#billingAddressFields').removeClass('hide').slideDown();
+                                var cardUUID = jQuery(this).val();
+                                if(!cardUUID) return false;
+                                populateCreditCardInfo(cardUUID);
+                                jQ('#newPaymentForm').slideUp();
+                                jQ('#newCreditCardDetails').removeClass('hide').slideDown();
+                        }
+                 });
+         
+         selectboxvalue=jQ('.selectbox').val();
+         showValidFrom(selectboxvalue);
+         jQ('#paymentmethods').on('change', '.cardtype select', function(){
+                 showValidFrom(this.value);
+         });
+         
+});
+ 
+function populateCreditCardInfo(cardID){
+                // load card details
+                var url = app.util.appendParamToURL("${URLUtils.https('COBilling-SelectCreditCard')}", "creditCardUUID", cardID);
+                var result = app.ajax.getJson({
+                        url: url,
+                        callback: function(data) {
+                                if(!data || !data.creditCard) {
+                                        return false;
+                                }
+                                jQ('select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]').val(data.creditCard.type);
+                                jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}]').val(data.creditCard.holder);
+                                jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]').val(data.creditCard.number);
+                                jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]').val(data.creditCard.startMonth);
+                                jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]').val(data.creditCard.startYear);
+                                jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]').val(data.creditCard.expirationMonth);
+                                jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]').val(data.creditCard.expirationYear);
+                                
+                                jQ("#selectedCardLogo").removeClass('visa master amex blankCard').addClass((data.creditCard.type).toLowerCase().replace(/\s/g, ''));
+                                var newMaskedNumber = data.creditCard.number;
+                                newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+                                jQ("#selectedCardNo").html(newMaskedNumber);
+                                var finalYearValue = "";
+                                if(data.creditCard.expirationYear.indexOf(",") > -1){
+                                        finalYearValue = data.creditCard.expirationYear.replace(/,/g,'');
+                                }
+                                if(data.creditCard.expirationYear.indexOf(".") > -1){
+                                        finalYearValue = data.creditCard.expirationYear.replace(/\./g,'');
+                                }
+                                jQ("#selectedCardExpiry").html(data.creditCard.expirationMonth + '<span class="datedivider">/</span>' + finalYearValue);
+                                
+                        }
+                });
+        }
+$(document).ready(function() {
+ 
+        
+        
+        //hide bank and country selector
+                 $('.expirationdate .month .value input , .expirationdate .year .value input').css("color","#999");
+        // QC 672
+        //$('.expirationdate .month .value').append("<div class=\"month caption\">${Resource.msg('billing.month','checkout',null)}<\/div>");
+        $('.expirationdate .month .value input').attr("value","${Resource.msg('billing.month','checkout',null)}");
+        //$('.expirationdate .year .value').append("<div class=\"year caption leftspacer\">${Resource.msg('billing.year','checkout',null)}<\/div>");
+        $('.expirationdate .year .value input').attr("value","${Resource.msg('billing.year','checkout',null)}");
+        $('.validfromdate .month .value').append("<div class=\"month caption\">${Resource.msg('billing.month','checkout',null)}<\/div>");
+        $('.validfromdate .year .value').append("<div class=\"year caption leftspacer\">${Resource.msg('billing.year','checkout',null)}<\/div>");       
+ 
+        $("input.expire_year, input.expire_month").each(function(){
+                var storedVal = $(this).val();  
+                
+                $(this).focus(function(){
+                        $(this).css("color","#333");
+                        var changedVal = $(this).val();
+                        if(changedVal == storedVal){
+                                 $(this).val("");
+                                $(this).css("color","#333");
+                        }
+                });
+                $(this).blur(function(){
+                        var changedVal = $(this).val();
+                        if(changedVal == ""){
+                                $(this).val(storedVal);
+                                $(this).css("color","#999");
+                        }
+                });
+        });
+ 
+        //Praveen: [QC Defect-2670]Method created for handling the bank validations
+        jQuery('#billingShoppingButton').click( function() {
+                if (jQuery("#is-IDEAL-SSL") != null && jQuery("#is-IDEAL-SSL").attr("checked")){
+                        var value = jQuery('.iDealClass').val();
+                        if(value == null || value==""){
+                                var temp='${pdict.CurrentForms.billing.paymentMethods.banktransfer.bank.htmlName}';
+                                if(jQuery.browser.msie){
+                                        setTimeout(function() { document.getElementById(temp).focus(); document.getElementById(temp).blur();}, 10);
+                                }else{
+                                        jQuery('#'+temp).focus().blur();
+                                }
+                                //evt.preventDefault();
+                        }
+                }
+                if (jQuery("#is-SOFORT-SSL") != null && jQuery("#is-SOFORT-SSL").attr("checked")){
+                        var value = jQuery('.iDealClass').val();
+                        if(value == null || value==""){
+                                var temp='${pdict.CurrentForms.billing.paymentMethods.banktransfer.bankCountry.htmlName}';
+                                if(jQuery.browser.msie){
+                                        setTimeout(function() { document.getElementById(temp).focus(); document.getElementById(temp).blur();}, 10);
+                                }else{
+                                        jQuery('#'+temp).focus().blur();
+                                }
+                                //evt.preventDefault();
+                        }
+                }
+                if (jQuery("#is-BML") != null && jQuery("#is-BML").attr("checked")){
+                        var value = jQuery('input:radio[name="klarnagender"]:checked').val();
+                        if(value == null || value == ""){
+                                jQuery('input:radio[name="klarnagender"]').parents(".formfield").find(".labeltext").addClass("errorlabel");
+                                /*jQuery('input:radio[name="klarnagender"][value="F"]').next('.errorIcon').remove();
+                                jQuery('input:radio[name="klarnagender"][value="F"]').next('.errormessage').remove();*/
+                        }
+                }
+                var selectedPaymentMethodID = jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]:checked").val();
+                if(selectedPaymentMethodID=="${dw.order.PaymentInstrument.METHOD_BML}"){
+                        var gender = $('input:radio[name=klarnagender]:checked').val();
+                        if(gender == null || gender == ""){
+                                var errorMsg = jQuery('.formfield.gender').find('span.labeltext').text().replace(':',''),
+                                        errorMsgTemplate = "${Resource.msg('global.missingval','locale',null)}";
+                                errorMsg = String.format(errorMsgTemplate, errorMsg);
+                                jQuery("input[name=klarnagender]").parent().find('.errorIcon').remove();
+                                jQuery("input[name=klarnagender]").parent().find('.errormessage').remove();
+                                jQuery("input[name=klarnagender]").parent().append("<span class=\"errorIcon\"><\/span>")
+                                jQuery("input[name=klarnagender]").parent().append("<span class=\"errormessage\">" + errorMsg + "<\/span>");
+                        }else{
+                                jQuery("input[name=klarnagender]").parent().find('span.errorIcon').addClass('successIcon').removeClass('errorIcon').end().find('span.errormessage').remove();
+                                jQuery("input[name=klarnagender]").parent().parents(".formfield").find(".labeltext").removeClass("errorlabel");
+                                jQuery("input[name=klarnagender]").parent().parents(".formfield").find(".errormessage").remove();
+                        }
+                }
+        });
+ 
+        //Praveen:- fixed for QC defect - 163
+        if(${pdict.CurrentForms.billing.paymentMethods.creditCard.year.value} != null)
+        {
+                $('.expirationdate .year input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.year.value});
+                $('.expirationdate .month input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.month.value});
+        }
+        if(${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.value} != null)
+        {
+                $('.validfromdate .year input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.value});
+        }
+        /*
+        if($('.expirationdate .year input:textbox').val().indexOf(",") > -1)
+        {
+                $('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/,/g,''));
+                $('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/,/g,''));
+        }
+        if($('.expirationdate .year input:textbox').val().indexOf(".") > -1)
+        {
+                $('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/\./g,'')); 
+                $('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/\./g,''));
+        }
+        */
+        
+        //$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/,/g,''));        
+        //$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/,/g,''));  
+        
+        /*Praveen:-changed for '3954482', Credit Card Values | On Load*/
+        selectboxvalue=jQuery('.selectbox').val();
+        showValidFrom(selectboxvalue);
+        
+        selectBank =jQuery('.selectpaymentType select').val();
+        showBank(selectBank);
+         
+        
+ 
+});
+ 
+//Nadeem: Added this function to convert save card checkbox to radio
+function saveCard(userSelection){
+        var test =userSelection
+        if(userSelection == "Yes"){
+                
+                jQuery(".checkbox input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.htmlName}]").attr("checked", true);
+                jQuery(".checkbox input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.htmlName}]").val("true");
+        }
+        else {
+                
+                jQuery(".checkbox input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.htmlName}]").attr('checked','');
+                jQuery(".checkbox input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.saveCard.htmlName}]").val("false");
+                
+        }
+}
+ 
+ 
+/*Praveen:-changed for '3954482' */
+function showValidFrom(card){
+        for(i=0; i<paymentCardList.length; i++){
+                if(paymentCardList[i] == card){
+                        if(validFromFlagList[i] == "true"){
+                                jQuery('.validfromdate').show();
+                        }
+                        else{
+                                jQuery('.validfromdate').hide();
+                        }
+                        break;
+                }
+        }
+}
+function removeValidFrom(){
+        var ccType = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}').value;
+        if (ccType != "${Resource.msg('creditcard.amex','forms',null)}") {
+                var ccvalidFromMonth = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}');
+                if(ccvalidFromMonth != null && (ccvalidFromMonth.value == null|| ccvalidFromMonth.value == "")){
+                        jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").remove();
+                }
+                var ccvalidFromYear = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}');
+                if(ccvalidFromYear != null && (ccvalidFromYear.value == null || ccvalidFromYear.value == "")){
+                        jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").remove();
+                }
+        }
+}
+function showBank(paymentType){
+                        if(paymentType == "IDEAL-SSL"){
+                                
+                                jQuery('.selectbank').show();
+                                jQuery('.selectcountry').hide();
+                                
+                        }
+                        else if(paymentType== 'SOFORT-SSL'){
+                                jQuery('.selectcountry').show();
+                                jQuery('.selectbank').hide();
+                                
+                        }
+                        else{
+                                jQuery('.selectcountry').hide();
+                                jQuery('.selectbank').hide();
+                        }
+                        
+ 
+}
+/*
+app.resources["creditcard_validfrom_map"] = {
+ 
+        "0" : false,
+        "1" : true ,
+        "2" : false
+}
+ 
+ 
+ 
+$(document).ready(function() {
+        jQuery(".expirationdate .month input:textbox").val("MM");
+        jQuery(".expirationdate .year input:textbox").val("YYYY");
+ 
+        jQuery(".expirationdate .month input:textbox").click(function() {
+                jQuery(".expirationdate .month input:textbox").val("");
+        });
+        jQuery(".expirationdate .year input:textbox").click(function() {
+                jQuery(".expirationdate .year input:textbox").val("");
+        });
+});
+*/
+//]]>
+</script>

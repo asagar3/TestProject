@@ -1,0 +1,159 @@
+<isdecorate template="tablet/account/pt_account_landing">
+<isinclude template="tablet/util/modules"/>
+
+
+<isif condition="${pdict.CallFrom == 'Order-History'}">
+	<div class="logingeneral">
+
+<iscontentasset aid="account-signin-banner"/>
+
+		<div class="checkorder">
+			
+			<isif condition="${pdict.OrderNotFound != null}">
+				<div class="errorform">${Resource.msg('accountlogin.ordererror','account',null)}</div><!-- END: errorform -->
+			</isif>
+			<p class="trackyourordertitle">${Resource.msg('accountlogin.orderheadertext','account',null)}</p>
+			<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.ordertrack.htmlName}" autocomplete="off">
+				
+					<div class="formfield">
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.orderNumber}" type="input"/>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="formfield email">
+						<iscomment><!-- TODO | change "Billing Post Code" to "Email Address" | To match with VD |Asha  
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.postalCode}" type="input" class="email"/>--></iscomment>
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.emailAddress}" type="input" xhtmlclass="emailnum"/>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="floatright btn-green-flat">
+							<button type="submit" value="${Resource.msg('accountlogin.orderbutton','account',null)}" name="${pdict.CurrentForms.ordertrack.findorder.htmlName}"><span>${Resource.msg('accountlogin.orderbutton','account',null)}</span><span class="arrow-btn">&nbsp;</span></button>
+					</div><!-- END: checkorder_button -->
+					<div class="clear"></div>
+				
+			</form>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: checkorder -->
+		<div class="clear"></div>
+	</div><!-- END: logingeneral -->
+	
+
+<div class="accountlogin">
+	<iscomment><!--  Header is not required as per VD | Asha | 04-march-2011 --></iscomment>
+	<iscomment><h1>${Resource.msg('account.header','account',null)}</h1></iscomment>
+	<script type="text/javascript">
+		//Variables added for Omniture Tagging | Naveen Kumar	
+		//this event var is used on chkout signin and account signin pages
+		s.events = "${Resource.msg('omniture.events.signin','omniture',null)}" ;
+	</script>
+	<isinclude template="tablet/account/login/logininclude"/>
+	<div class="logincreate">
+		<iscomment><!--  added class in h3 | Asha | 04-march-2011 --></iscomment>
+		<iscomment><!-- Added sIFR implementaion | Asha | 08-mar-2011 --></iscomment>
+		<h3 class="logincustomersHeader"><span class="ms_header_account_login"><isprint value="${Resource.msg('globalaccount.createaccount','locale',null)}"/></span>
+		<iscomment><!-- <span class="ms_header_account_login"><isprint value="${Resource.msg('globalaccount.createnewaccount2','locale',null)}"/></span> --></iscomment></h3>
+		<iscomment><!-- This section is not required as per VD. Commented out | Asha | 04-mar-2011 --></iscomment>
+		
+		<div class="createaccount"> 
+			<iscomment><p>${Resource.msg('globalaccount.createmessage','locale',null)}</p></iscomment>
+			<iscontentasset aid="create-account-benefits"/>
+			
+			<form class="newCustomer-Button" action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.login.htmlName}_register">
+					<iscomment><!-- added styles to button | Asha --></iscomment>
+					<div class="float-right btn-green-flat">
+							<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.login.register.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>
+					</div>
+					<!-- END: createaccountbutton -->
+					<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+			</form>
+			<iscomment><!-- commented out this section to match with VD | Asha --></iscomment>
+			<iscomment><div class="createbenefits">
+				<iscontentasset aid="create-account-benefits"/>
+			</div><!-- END: createbenefits -->
+			</iscomment>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: createaccount -->
+	</div><!-- END: logincreate -->
+	<iscomment><!-- Moved to top | As per vd --><isinclude template="tablet/account/login/logininclude"/></iscomment>
+	<iscomment><!-- moved to top as per VD | Asha --></iscomment>
+	
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: accountlogin -->
+<iselse>
+<div class="accountlogin">
+	<iscomment><!--  Header is not required as per VD | Asha | 04-march-2011 --></iscomment>
+	<iscomment><h1>${Resource.msg('account.header','account',null)}</h1></iscomment>
+	<script type="text/javascript">
+		//Variables added for Omniture Tagging | Naveen Kumar	
+		//this event var is used on chkout signin and account signin pages
+		s.events = "${Resource.msg('omniture.events.signin','omniture',null)}" ;
+	</script>
+	<isinclude template="tablet/account/login/logininclude"/>
+	<div class="logincreate">
+		<iscomment><!--  added class in h3 | Asha | 04-march-2011 --></iscomment>
+		<iscomment><!-- Added sIFR implementaion | Asha | 08-mar-2011 --></iscomment>
+		<h3 class="logincustomersHeader"><span class="ms_header_account_login"><isprint value="${Resource.msg('globalaccount.createaccount','locale',null)}"/></span>
+		<iscomment><!-- <span class="ms_header_account_login"><isprint value="${Resource.msg('globalaccount.createnewaccount2','locale',null)}"/></span> --></iscomment></h3>
+		<iscomment><!-- This section is not required as per VD. Commented out | Asha | 04-mar-2011 --></iscomment>
+		
+		<div class="createaccount"> 
+			<iscomment><p>${Resource.msg('globalaccount.createmessage','locale',null)}</p></iscomment>
+			<iscontentasset aid="create-account-benefits"/>
+			
+			<form class="newCustomer-Button" action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.login.htmlName}_register">
+					<iscomment><!-- added styles to button | Asha --></iscomment>
+					<div class="float-right btn-green-flat">
+							<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.login.register.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>
+					</div>
+					<!-- END: createaccountbutton -->
+					<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+			</form>
+			<iscomment><!-- commented out this section to match with VD | Asha --></iscomment>
+			<iscomment><div class="createbenefits">
+				<iscontentasset aid="create-account-benefits"/>
+			</div><!-- END: createbenefits -->
+			</iscomment>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: createaccount -->
+	</div><!-- END: logincreate -->
+	<iscomment><!-- Moved to top | As per vd --><isinclude template="tablet/account/login/logininclude"/></iscomment>
+	<iscomment><!-- moved to top as per VD | Asha --></iscomment>
+	
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: accountlogin -->
+
+	<div class="logingeneral">
+
+<iscontentasset aid="account-signin-banner"/>
+
+		<div class="checkorder">
+			
+			<isif condition="${pdict.OrderNotFound != null}">
+				<div class="errorform">${Resource.msg('accountlogin.ordererror','account',null)}</div><!-- END: errorform -->
+			</isif>
+			<p class="trackyourordertitle">${Resource.msg('accountlogin.orderheadertext','account',null)}</p>
+			<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.ordertrack.htmlName}" autocomplete="off">
+				
+					<div class="formfield">
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.orderNumber}" type="input"/>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="formfield email">
+						<iscomment><!-- TODO | change "Billing Post Code" to "Email Address" | To match with VD |Asha  
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.postalCode}" type="input" class="email"/>--></iscomment>
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.emailAddress}" type="input" xhtmlclass="emailnum"/>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="floatright btn-green-flat">
+							<button type="submit" value="${Resource.msg('accountlogin.orderbutton','account',null)}" name="${pdict.CurrentForms.ordertrack.findorder.htmlName}"><span>${Resource.msg('accountlogin.orderbutton','account',null)}</span><span class="arrow-btn">&nbsp;</span></button>
+					</div><!-- END: checkorder_button -->
+					<div class="clear"></div>
+				
+			</form>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: checkorder -->
+		<div class="clear"></div>
+	</div><!-- END: logingeneral -->
+</isif>
+
+<iscontentasset aid="account-footer"/>
+</isdecorate>

@@ -1,0 +1,128 @@
+/**
+ * This script will be used to copy the SOD file from archive to folder for golden feeds
+ * @output filesCreated : dw.util.ArrayList , contains the name of the SOD file
+ */
+
+importPackage( dw.io );
+importPackage( dw.net );
+importPackage( dw.system );
+importPackage( dw.util );
+importScript( "feeds/FileUtil.ds" );
+ 
+function execute( args : PipelineDictionary ) : Number
+{
+	var filesCreated : ArrayList = new ArrayList();
+	var date : String = createDate();
+	var fileOut : File = null;
+	//Find SOD file in archive folder, if not found return error
+	var SODFileName : File = findSODFile(date);
+	var result : boolean;
+	
+	
+	//If SOD file found in archive
+	if(!empty(SODFileName)){
+		//Setting the SOD file name in list for uploading and archive
+		var localFileLocation : String = dw.system.Site.getCurrent().getCustomPreferenceValue("goldenFeedLocalDirectory");	
+		
+		//filesCreated.add("GoldenFeeds/"+SODFileName.name);
+		filesCreated.add(localFileLocation+SODFileName.name+".zip");
+		args.filesCreated = filesCreated;
+	
+		//fileOut = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "GoldenFeeds" + File.SEPARATOR  + SODFileName.name);
+		
+		fileOut = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + localFileLocation  + SODFileName.name);
+		
+		//check whether the current date file has been copied or not
+		var sitePrefDate : String = Site.getCurrent().getCustomPreferenceValue("GoldenFeedSODTime");
+		
+		if(empty(sitePrefDate) || date > sitePrefDate){
+			try{
+				copyFile(SODFileName,fileOut);
+				Site.getCurrent().setCustomPreferenceValue("GoldenFeedSODTime",date);
+				result = zipFile(localFileLocation+SODFileName.name);
+				if ( !result )
+				{
+					return PIPELET_ERROR;
+				}
+				removeFile(localFileLocation+SODFileName.name);
+			}catch(ex){
+				Logger.error("SOD EXPORT"+ex);
+				return PIPELET_ERROR;
+			}
+			
+		}
+	}
+	else{//else return error
+		Logger.error("CopySODFile.ds: SOD file not present in archive folder");
+		return PIPELET_ERROR;
+	}
+	return PIPELET_NEXT;
+	
+}
+
+function createDate(): String{
+	var cal : Calendar = new Calendar();
+	//return StringUtils.format("yyyy-MM-dd", cal);
+	return dw.util.StringUtils.formatCalendar(cal, "yyyy-MM-dd")
+	
+} 
+
+function checkSOD(remoteFiles : Collection, remoteFilePattern : String ) : File{
+	
+	var regExp : RegExp = new RegExp( remoteFilePattern );
+
+	var SODFileName : String;
+	
+	for each ( var remoteFile : String in remoteFiles )
+	{
+		if ( regExp.test( remoteFile ) )
+		{
+			SODFileName = remoteFile;
+			break;
+		}
+	}
+	return SODFileName;
+}
+
+function copyFile(SODFileName : File, outputFile: File){
+			var localFile : dw.io.File = SODFileName;
+			var fileReader : FileReader = new FileReader(localFile);		
+			
+			//var xmlReader : XMLStreamReader = new XMLStreamReader(fileReader);
+			var fileOut : File = outputFile;
+			var test : Boolean;
+			if (!fileOut.exists()){
+				fileOut.createNewFile();
+			}
+			var fileWriter : FileWriter = new FileWriter(fileOut);	
+			//var writer : XMLStreamWriter = new XMLStreamWriter(fileWriter);
+			
+			var nextLine : String = fileReader.readLine();
+						
+			while (nextLine != null) {			
+					fileWriter.write(nextLine);
+					nextLine = fileReader.readLine();
+				}
+			
+			//fileOut.renameTo(new File(file));
+			
+			fileWriter.flush();
+			fileWriter.close();
+			
+}
+
+function findSODFile(date : String) : File{
+	
+	var successArchiveDir : dw.io.File = new File (File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "archive-pim" + File.SEPARATOR + "Success" + File.SEPARATOR + date);
+	var warningArchiveDir : dw.io.File = new File (File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "archive-pim" + File.SEPARATOR + "Warning" + File.SEPARATOR + date);
+	var remoteFiles : Collection = successArchiveDir.listFiles();
+	var SODFileName : File = checkSOD( remoteFiles, "MS-Inventory-Merge" );	
+	if(!empty(SODFileName) && SODFileName.exists()){
+		return 	SODFileName;
+	}
+	else{
+		remoteFiles = warningArchiveDir.listFiles();
+		var SODFileName : File = checkSOD( remoteFiles, "MS-Inventory-Merge" );	
+		return SODFileName;
+	}
+}

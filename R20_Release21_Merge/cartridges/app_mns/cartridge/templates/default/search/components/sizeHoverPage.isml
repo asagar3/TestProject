@@ -1,0 +1,28 @@
+
+	<div id="size_popin" class="size_popin">
+		<div class="refineattributes">
+			<div class="swatches ${RefinementDefinition.getDisplayName()}">
+				<ul>
+					<iscomment>render the actual swatches</iscomment>
+					<isloop items="${Refinements.getAllRefinementValues(RefinementDefinition)}" var="RefinementValue">
+						<isset name="swatchID" value="${'swatch-' + RefinementValue.getDisplayValue()}" scope="page"/>
+						<isif condition="${pdict.ProductSearchResult.isRefinedByAttributeValue(RefinementDefinition.attributeID,RefinementValue.value)}">
+							<li class="selected">
+								<a class="swatchRefineLink" id="${swatchID}" href="${pdict.ProductSearchResult.urlRelaxAttributeValue('Search-Show',RefinementValue.getID(),RefinementValue.getValue())}" title="${RefinementValue.getDisplayValue()}"><isprint value="${RefinementValue.getDisplayValue()}"></a>
+							</li>
+						<iselseif condition="${RefinementValue.hitCount == 0}"/>
+							<li class="unselectable">
+								<a class="swatchRefineLink" id="${swatchID}" title="${RefinementValue.getDisplayValue()}" href="javascript:;"><isprint value="${RefinementValue.getDisplayValue()}"/></a>
+							</li>
+						<iselse/>
+							<li>
+								<a class="swatchRefineLink" id="${swatchID}" href="${pdict.ProductSearchResult.urlRefineAttributeValue('Search-Show',RefinementValue.getID(),RefinementValue.getValue())}" title="${RefinementValue.getDisplayValue()}"><isprint value="${RefinementValue.getDisplayValue()}"/></a>
+							</li>
+						</isif>
+					</isloop>
+				</ul>
+			</div>	<!-- END: swatches -->	
+		</div>	<!-- END: refineattributes -->
+	</div>	<!-- END: size_popin -->		
+
+				

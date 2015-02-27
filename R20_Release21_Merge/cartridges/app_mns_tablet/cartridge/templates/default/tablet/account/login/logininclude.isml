@@ -1,0 +1,132 @@
+<div class="logincustomers">
+	<iscomment><!--  added class in h3 | Asha | 04-march-2011 --></iscomment>
+	
+	<h3 class="logincustomersHeader"><isif condition="${pdict.pageName != null && pdict.pageName == 'checkout'}"><span class="ms_header_login">${Resource.msg('checkoutlogininclude.customersheader','account',null)}<iselse><span class="ms_header_account_login">${Resource.msg('logininclude.customersheader','account',null)}</isif></span></h3>
+	<div class="returningcustomers">
+	<div class="shadowbar">&nbsp;</div>
+		<p>${Resource.msg('logininclude.registered','account',null)}</p>
+		<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.login.htmlName}">
+			<iscomment>Login Unsuccessful Error Message</iscomment>
+			<isif condition="${!pdict.CurrentForms.login.loginsucceeded.valid}">
+				<div class="errorform">${Resource.msg('logininclude.loginerror','account',null)}</div>
+			</isif>
+			<div class="fieldsetClass">
+				<div class="formfield username">
+					<label for="${pdict.CurrentForms.login.username.htmlName}" class="label">
+								<span class="labeltext"> ${Resource.msg('label.username','forms',null)}</span>
+								<span class="requiredindicator">*</span>
+					</label>		
+					<isinputfield formfield="${pdict.CurrentForms.login.username}" type="input"  label="false" xhtmlclass="emailnum checkoutLoginField"/>
+					<div class="clear"></div>
+				</div>
+				<div class="formfield password passwordMsg">
+					<label for="${pdict.CurrentForms.login.password.htmlName}" class="label">
+								<span class="labeltext"> ${Resource.msg('label.password','forms',null)}</span>
+								<span class="requiredindicator">*</span>
+					</label>
+					<isinputfield formfield="${pdict.CurrentForms.login.password}" type="password"  label="false" xhtmlclass="passwordvalidation checkoutLoginField"/>
+					<div class="clear"></div>
+				</div>
+				<iscomment><!--  Not required as per vd | asha | 07-mar-11 --></iscomment>
+				<iscomment>
+				<div class="formfield rememberme">
+					<isinputfield formfield="${pdict.CurrentForms.login.rememberme}" type="checkbox"/>
+				</div>
+				</iscomment>
+				<iscomment><!-- Moved this section above login button as per VD | Asha | 07-mar-11 --></iscomment>
+				<iscomment> not available in HTMLs | Naveen |
+				<div class="formactions">
+					<button type="submit" value="${Resource.msg('global.login','locale',null)}" name="${pdict.CurrentForms.login.login.htmlName}"><span>${Resource.msg('global.login','locale',null)}</span></button>
+				</div><!-- END: returningcustomers_button -->
+				</iscomment>
+				<div class="clear"></div>
+				
+				
+				
+				<div class="formactions">
+					<div class="value">
+				
+				<iscomment><!-- addded forward class to fix button issue --></iscomment>
+				<isif condition="${pdict.pageName != null && pdict.pageName == 'checkout'}">
+					<div class="float-right btn-green-flat">
+							<button id="checkoutLoginBtn" type="button" onclick="continueShipping();" title="${Resource.msg('account.pagetitle.login','account',null)}" value="${Resource.msg('global.login','locale',null)}" name="${pdict.CurrentForms.login.login.htmlName}"><span>${Resource.msg('account.pagetitle.login','account',null)}</span><span class="arrow-btn">&nbsp;</span></button>
+					</div>
+				<iselse>
+				 	<div class="float-right btn-green-flat">
+							<button type="submit" title="${Resource.msg('account.pagetitle.login','account',null)}" value="${Resource.msg('global.login','locale',null)}" name="${pdict.CurrentForms.login.login.htmlName}"><span>${Resource.msg('account.pagetitle.login','account',null)}</span><span class="forward-icon">&nbsp;</span></button>
+					</div>
+				</isif>	
+				
+				<div class="forgotpassword marginRight">
+						<a id="PasswordReset" title="${Resource.msg('logininclude.forgotpassword','account',null)}" href="javascript:;">${Resource.msg('logininclude.forgotpassword','account',null)}</a>
+					</div>
+				</div>
+				
+				
+				
+				<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				</div>
+			</div>
+				<div class="clear"></div>
+		</form>
+		<div class="clear"></div>
+	</div>
+	<div class="clear"></div>
+</div>
+<script type="text/javascript"><!--
+
+	jQuery(document).ready(function() {
+		if (jQuery(".PasswordResetDialog").length <=0) {
+	   		jQuery("<div/>").attr("class", "PasswordResetDialog").appendTo(document.body);
+	   	}
+	  	jQuery('.forgotpassword a').click(function() {
+	    	app.ajax.load({selector: ".PasswordResetDialog", url: '${URLUtils.url('Account-PasswordResetDialog')}'});
+			return false;
+	  	});
+	  	jQuery('.checkoutLoginField').keypress( function(e) {
+			if(e.which == 13 && null != jQuery('#checkoutLoginBtn').html()) {
+				jQuery('#checkoutLoginBtn').click();
+				return false;
+			}
+			return true;
+		});
+	  	
+	  //CR 3103
+	  	if(${pdict.tokenexpired}){
+			$('#PasswordReset').bind('click', function() {
+				app.ajax.load({selector: ".PasswordResetDialog", url: '${URLUtils.url('Account-PasswordResetDialog')}'});
+				return false;
+		    });
+			$('#PasswordReset').trigger('click');
+		}
+
+	});
+
+function continueShipping() {
+	    var post = jQuery("${'#' + pdict.CurrentForms.login.htmlName}").serialize();
+		var submitDialogURL = "${URLUtils.url('COCustomer-ContinueShipping')}";
+		if(jQuery("${'#' + pdict.CurrentForms.login.htmlName}").valid()) {
+  			jQuery.ajax({
+		   		type: "POST",
+		   		url: submitDialogURL,
+		   		data: post,
+		  		dataType: 'html',
+		   		success: function(data){
+		   			if(data.indexOf("errorform") == -1) {
+						var showurl = "${URLUtils.https('Cart-StartCheckout')}";
+						window.location.href = showurl;
+		   			}else {
+			   			if(null == jQuery(".errorform").html()) {
+			   				var errorDiv = "<div class='errorform'>"+"${Resource.msg('logininclude.loginerror','account',null)}"+"</div>";
+			   				$('.fieldsetClass').parent().prepend(errorDiv);
+			   			}
+		   			}
+		  	 	},
+		   		failure: function(data) {
+		   			alert("${Resource.msg('global.serverconnection','locale',null)}");		
+		   		}
+			});
+	   }
+}
+
+//--></script>

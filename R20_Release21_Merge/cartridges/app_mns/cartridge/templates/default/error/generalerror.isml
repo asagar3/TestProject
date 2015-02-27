@@ -1,0 +1,40 @@
+
+<isset name="DecoratorTemplate" value="error/pt_error" scope="page"/>
+<isif condition="${!empty(pdict.nodecorator) && pdict.nodecorator == 'true'}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+<iselse>
+	<isset name="DecoratorTemplate" value="error/pt_error" scope="page"/>
+</isif>
+
+<isdecorate template="${DecoratorTemplate}">
+<isinclude template="util/modules"/>
+<isif condition="${pdict.isPageNotFound == 'true'}">	
+    <isif condition="${!empty(pdict.nodecorator) && !pdict.nodecorator == 'true'}">
+		<isbreadcrumbs bctext1="${Resource.msg('pagenotfound.pagetitle','error',null)}" />
+	</isif>
+<iselse>
+	<isbreadcrumbs bctext1="${Resource.msg('generalerror.pagetitle','error',null)}" />
+</isif>
+<div class="errorWrapper">
+<div class="errorNotFound">
+<isif condition="${pdict.isPageNotFound == 'true'}">
+	<h1 class="errorHeader">${Resource.msg('pagenotfound.header','error',null)}</h1>
+	<iscontentasset aid="pagenotfound-page-content"/>
+	<iscontentasset aid="pagenotfound-message"/>
+<iselse>
+	<h1 class="errorHeader">${Resource.msg('generalerror.header','error',null)}</h1>
+	<iscontentasset aid="generalerror-page-content"/>
+	<iscontentasset aid="generalerror-message"/>
+</isif>	
+<isif condition="${!empty(pdict.nodecorator) && !pdict.nodecorator == 'true'}">
+	<div class="btn-green-flat floatleft padding0">
+		<div class="link_button">
+			<a class="back-icon" href="${URLUtils.http('Home-Show')}" value="${Resource.msg('error.goback','error',null)}">
+			${Resource.msg('error.goback','error',null)}
+			</a>	
+		</div>
+	</div>
+</isif>
+</div>
+</div>
+</isdecorate>

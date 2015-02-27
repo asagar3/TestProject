@@ -1,0 +1,538 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*   
+* 
+*	 @input ProductPagingModel : dw.web.PagingModel
+* 	 @input ProductSearchResult : dw.catalog.ProductSearchModel  
+*    @output customObject : Object
+*
+*/
+importPackage( dw.system );
+importPackage( dw.catalog );
+importPackage(dw.util);
+importPackage( dw.object );
+importPackage( dw.value );
+importScript("app_mns:/product/ProductSetPriceCalculation.ds");
+
+function execute( args : PipelineDictionary ) : Number
+{
+	
+	var categoryProductsObject  = new Object();	/* The master categoryProductObject */
+	var productSearchModel : ProductSearchModel = args.ProductSearchResult ;
+	var isSearchCatalog :Boolean =true;
+	
+	if(empty(productSearchModel.getSearchPhrase())){//check if its GetProductsForCategory service call
+		isSearchCatalog =false;
+	}
+    var productPagingModel : dw.web.PagingModel = args.ProductPagingModel ;
+    var productHits : Iterator = null ;
+    var productCount : Number=0;
+     var suggestedSearchPhrase :String ;
+    
+     
+    if(productPagingModel == null ){//in case of zero results paging model will be null 
+    	productHits = productSearchModel.getProducts();
+        productCount = productSearchModel.getCount();
+         if(isSearchCatalog && !productSearchModel.refinedSearch){//suggested search phrase will be included only for search catalog service
+         	 suggestedSearchPhrase =productSearchModel.suggestedSearchPhrase;
+             categoryProductsObject.suggestedSearchPhrase=suggestedSearchPhrase;
+    	}
+    	categoryProductsObject.productCount = productCount ; 
+     args.customObject = categoryProductsObject ; /*Assigning categoryProductObject back to customObject as to display it in ISML*/
+  	 return PIPELET_NEXT;
+    }
+    else{
+    	productHits = productPagingModel.pageElements;
+        productCount = productPagingModel.count;
+    }
+    categoryProductsObject.productCount = productCount ;
+    
+	//categoryProductsObject.productCount = "";
+	categoryProductsObject.products  = new Array();
+	refinements = new Object();
+	refinements.categoryRefinements = new Array();
+	refinements.attributeRefinements = new Array();
+	categoryProductsObject.sortingOptions= new Array();
+ 
+    try{
+  	for each (var productHit:Product in  productHits){   /* start loop to treverse each product in search result  */
+   	    var product : Product = productHit.product ; /*  get the product from product hit */
+   	    var categoryProduct  = new Object();	 /* object to store product attribute values  */
+   	    //cooment - JSON variables should be directly used instead of instaioation them with "" and then assigning
+   	 /*
+   	  	if(product.getImage('catlanding',0) != null ){
+   	  		categoryProduct.defaultImage  = product.getImage('catlanding',0).absURL.toString();
+   	  	}else {
+   	  		categoryProduct.defaultImage = dw.web.URLUtils.httpStatic('/images/noimagemedium.png').toString();
+   	  	}
+		*/
+   	  	 
+   	    categoryProduct.image = new Object();     /*  object to store product image attributes   */
+   	    categoryProduct.swatches = new Array();   /* Array to store swatches of the products  */
+   	  			/* Object representing swatch  */
+   	    categoryProduct.pricing = new Object(); 
+   	  
+   	    categoryProduct.promotions =new Object();
+   	  
+   	    /* attributes to be added in the image */ 
+   	    
+   	    //Initialize it with null 
+   	    var scene7AssetID : String = null ;//represents thumbnail image url
+   	    var imageType : String = null;
+   	    var imageDimension :String = null;
+   	    var imageHeight : String = null;
+   	    var thumbnailAlt : String =null ;
+		var thumbnailTitle : String =null ;
+		/* attributes to be added in the swatch */ 
+		var swatchAssetID : String = null ;//represents swatch image url
+		var swatchAlt : String = null ;
+		var swatchTitle : String = null ;
+		var sthumbnailAssetID : String = null ;
+		var sthumbnailAlt : String =null ;
+		var sthumbnailTitle : String =null ;
+		var swatchproductUrl : String =null;
+		var productAvailability = 0 ;
+		var productVariationModel;
+		
+		categoryProduct.productName = product.name ;
+		categoryProduct.productId = product.ID ;
+		categoryProduct.isNew = "false" ;
+		 /* code to check if product is new   */  
+		
+			var storeLiveDate = dw.system.Site.getCurrent().getCustomPreferenceValue("storeLiveDate");
+	
+		if(storeLiveDate != null && ((new Date()-storeLiveDate.valueOf())/(24*60*60*1000))>28){
+			if(product.onlineFrom != null){
+				if(((new Date()-product.onlineFrom.valueOf())/(24*60*60*1000))<28){
+					categoryProduct.isNew = "true" ;
+				}
+			}
+		}
+			
+	/*
+		Get the colors selectable from the current product master or variant range if we
+		need to determine them based on a search result.
+	*/
+	
+		var selectableColors : dw.util.Collection = new dw.util.ArrayList();
+		var varAttrColor : dw.catalog.ProductVariationAttribute = null;
+		
+		if( product.master )
+		{
+			var varModel : dw.catalog.ProductVariationModel = product.variationModel;
+			varAttrColor = varModel.getProductVariationAttribute("color");
+	
+			if( varAttrColor != null )
+			{
+				selectableColors = productHit.getRepresentedVariationValues( varAttrColor );
+			}
+		}
+		
+		/* code to get thumbnail image  */
+		var image :dw.content.MediaFile = null ;
+		/*if(!empty(selectableColors) && selectableColors.size() > 0){
+			var firstColorVariation = selectableColors.get(0);
+			image = firstColorVariation.getImage('catlanding');
+		}else{ */
+			image = product.getImage('catlanding',0);
+		//}
+		
+		/*get asset Id ,alt and title from the image .If image couldn't be determined, display a "no image" medium */
+		var thumbnailUrl : dw.web.URL= null ;
+		
+		if(!empty(image)){
+			thumbnailUrl = image.absURL;
+			scene7AssetID = thumbnailUrl.toString();
+			thumbnailAlt = image.alt;
+			thumbnailTitle = image.title ;
+		}else{
+			thumbnailUrl= dw.web.URLUtils.httpStatic('/images/noimagemedium.png');
+			scene7AssetID = thumbnailUrl.toString();
+			thumbnailAlt=product.name;
+			thumbnailTitle=product.name;
+		}
+		 imageType = product.custom.ImageType ; /*get the image type from product */
+		 if(imageType == null){
+		 	imageType = "default" ;
+		 }
+		//comment: commented code should be removed
+		categoryProduct.image.imageURL = scene7AssetID ;
+		 categoryProduct.image.imageAlt = thumbnailAlt;
+		 categoryProduct.image.imageTitle = thumbnailTitle ;
+		 categoryProduct.image.imageType = imageType ;
+		
+		 /* get the swatches of the product if present  */
+		 for each(var swatchItem : Product in selectableColors ){
+		 	  var swatch = new Object();		
+		 	var swatchImage = swatchItem.getImage('swatch');
+		 	var swatchThumbnailImage = swatchItem.getImage('catlanding');
+		 	if(!empty(swatchImage)){
+		 		var swatchImageUrl : dw.web.URL = swatchImage.absURL;
+		 		 swatchAssetID = swatchImageUrl.toString();
+		 		 swatchAlt = swatchImage.alt;
+		 	     swatchTitle = swatchImage.title;
+		 	}
+		 	if(!empty(swatchThumbnailImage)){
+		 		var swatchThumbnailImageUrl : dw.web.URL = swatchThumbnailImage.absURL;
+		 		sthumbnailAssetID = swatchThumbnailImageUrl.toString();
+		 	    sthumbnailAlt = swatchThumbnailImage.alt;
+		 	    sthumbnailTitle = swatchThumbnailImage.title;
+		 	} 
+		 	//sending Swatch product id as flex will not use dw product page url
+		 	var swatchproductID : String  = swatchItem.getID();
+		 	
+		 	//add values to swatch object
+		 	swatch.swatchURL = swatchAssetID;
+		 	swatch.swatchAlt = swatchAlt;
+		 	swatch.swatchTitle = swatchTitle ;
+		 	swatch.sthumbnailURL = sthumbnailAssetID ;
+		 	swatch.sthumbnailAlt = sthumbnailAlt ;
+		 	swatch.sthumbnailTitle = sthumbnailTitle ;
+		 	swatch.swatchColor = swatchproductID;// pass the color of the swach 
+		 	//push swatch to the swatches Array
+		 	categoryProduct.swatches.push(swatch);
+		  }
+		  
+		  /* get product pricing information */
+		  categoryProduct.pricing = getPriceAttributes(productHit);
+		 
+		 /* get promotion call out msg */
+		
+		 categoryProduct.promotions.calloutMsg = new Array();
+		var promos = dw.campaign.PromotionMgr.activeCustomerPromotions.getProductPromotions(product);
+			if(!empty(promos)){
+				for each(var promo in promos){
+					var promoMsg : String
+					if(promo.calloutMsg!=null){
+					 promoMsg = promo.calloutMsg.markup ;
+					}
+					categoryProduct.promotions.calloutMsg.push(promoMsg);
+				}
+			}
+		
+		 /* push object to the products array   */	
+		categoryProductsObject.products.push(categoryProduct);	
+		
+	
+	/* end loop */
+    }   
+    
+    } catch ( e)
+	{
+		Logger.error("GetProductsForCategory::Error"+ e.message);
+		//Logger.error("GetProductsForCategory::Request"+ args.RequestObject);
+		return PIPELET_ERROR;
+	}
+	 /* get Attribute and price refinements for the category and products */
+	   refinements =getRefinements(productSearchModel,isSearchCatalog);
+    
+    
+    categoryProductsObject.refinements =refinements;
+	categoryProductsObject.sortingOptions = getSortingRules(productSearchModel);
+    args.customObject = categoryProductsObject ; /*Assigning categoryProductObject back to customObject as to display it in ISML*/
+   return PIPELET_NEXT;
+}
+
+/* function to get asset id from image url */
+function getSortingRules(productSearchModel : ProductSearchModel):Object{
+	var sortingOptions =new Array();
+	
+	var sortingRule : SortingRule = null;
+	
+		var category : Category = productSearchModel.getCategory();
+		if (category == null) {
+			category = dw.catalog.CatalogMgr.getSiteCatalog().getRoot();
+		}
+		if (category.getDefaultSortingRule() != null) {
+			sortingRule = category.getDefaultSortingRule();
+		}
+	
+	var isSelected:Boolean;
+	for each(var sortingOption:SortingOption  in CatalogMgr.getSortingOptions()){//get sorting options defined on catalogs
+		if(!sortingOption.getID().equals('TopRated') && !sortingOption.getID().equals('MostReviewedCount'))
+		{
+			isSelected=false;
+			var sortingOptionObj:Object = new Object();
+			sortingOptionObj.sortingOptionName =sortingOption.getDisplayName();
+			sortingOptionObj.sortingRuleID =sortingOption.getSortingRule().getID();
+			 if(sortingRule!=null && sortingOption.getSortingRule().getID() == sortingRule.getID()) {
+					isSelected = true;
+				}
+				sortingOptionObj.isDefaultSortingOption=isSelected;
+		    sortingOptions.push(sortingOptionObj);
+		}
+	
+	}
+	
+  return sortingOptions;
+}
+/* function get product pricing information */
+function getPriceAttributes(productHit : Product):Object{
+	var product :Product = productHit.product ;
+	var pricing = new Object();
+	
+	pricing.priceMin = null ;
+	pricing.priceMax = null ;
+	pricing.standardPrice = null ;
+	pricing.salesPrice = null ;
+		
+	var salesprice:Money ;
+	var minprice:Money  ;
+	var maxprice:Money ;
+	var varProduct :Product ;
+	var pricemodel :ProductPriceModel  ;
+	var standardprice:Money ;
+	var isSymbol:Boolean = false ;
+	if(product.productSet){
+		isSymbol =  false ;    
+		if(product.custom.productSetPriceIndicator != null){
+			
+			/** INT-450 - PIM - New product set indicators - comment out the previous logic
+			if(product.custom.productSetPriceIndicator == '0'){
+			salesprice = product.getPriceModel().getMinPrice();
+			}else if(product.custom.productSetPriceIndicator == '1'){
+			salesprice =product.getProductSetProducts()[0].getPriceModel().getMinPrice();	//comment - NEEDS TO BE TESTED
+			**/
+			
+			/** INT-450 - PIM - New product set indicators - new logic for indicator 3 **/
+			if(product.custom.productSetPriceIndicator == '3'){
+				salesprice = product.getPriceModel().getMinPrice();
+			}else if(product.custom.productSetPriceIndicator == '2'){
+				var setTotalPrices : HashMap = getProductSetPrice(product);
+									
+				var minPriceTotal:Money =  setTotalPrices.get("setMinPriceTotal");
+				var minProductPrice:Money = setTotalPrices.get("minProductPrice");
+				if(minPriceTotal.available)
+					psPrice = minPriceTotal;
+				else
+					psPrice = minProductPrice;
+			}else{
+				salesprice = new Money(0.0, Site.getCurrent().getCurrencyCode());
+			}			
+			if(salesprice!=null){
+				pricing.standardPrice = StringUtils.formatMoney(salesprice);
+			}
+		}
+	}else if(product.master && productHit.priceRange){
+			minprice = productHit.minPrice;
+			maxprice = productHit.maxPrice;
+			if(minprice.available && maxprice.available){
+			pricing.priceMin = StringUtils.formatMoney(minprice);/*storing price max and price min  if price range is available*/
+			pricing.priceMax = StringUtils.formatMoney(maxprice);/*storing price max and price min  if price range is available*/
+			}
+		}else{
+			if(product.master && !productHit.priceRange){
+				product = productHit.firstRepresentedProduct ;
+			}
+		
+		if(product.optionProduct){
+			pricemodel =varProduct.getPriceModel(varProduct.getOptionModel());
+		}else{
+			pricemodel =product.getPriceModel();
+		}
+		if(! pricemodel.getPrice().available){
+			standardprice = Money.NOT_AVAILABLE; 
+		}else if(!empty(dw.system.Site.current.preferences.custom.listPriceDefault)){
+			standardprice=pricemodel.getPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault);
+		}else{
+			standardprice = pricemodel.getPriceBookPrice('list-prices');
+		}
+		salesprice = pricemodel.getPrice();
+	   if(standardprice.available && salesprice.available && standardprice.compareTo(salesprice) == 1){
+	   	pricing.standardPrice =StringUtils.formatMoney(standardprice);/*standard price will be displayed only if it is not empty and is not equal to sales price */	
+	   	pricing.salesPrice =StringUtils.formatMoney(salesprice)  ;/*storing sales price in both price max and price min */
+	   }else{
+	   	pricing.standardPrice = StringUtils.formatMoney(salesprice)  ;/*storing sales price in both price max and price min */
+	   	
+	   }
+	   //Praveen: Code for was-now CR
+	   if(!product.isProductSet()){
+		   if(product.isVariant()){
+		   	   var master : dw.catalog.Product = product.variationModel.master;
+		   }else{
+		   	   var master : dw.catalog.Product = product;
+		   }
+		   priceModel = master.getPriceModel();
+		   var maxStndPrice : dw.value.Money = priceModel.getMaxPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault);
+		   var minStndPrice : dw.value.Money = priceModel.getMinPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault);
+		   var maxSalesPrice : dw.value.Money  = priceModel.getMaxPrice();
+		   var minSalesPrice : dw.value.Money  = priceModel.getMinPrice();
+			if(minStndPrice != null){
+				if(!minStndPrice.equals(maxStndPrice)){
+			   		pricing.standardPrice = StringUtils.formatMoney(minStndPrice)+"-"+StringUtils.formatMoney(maxStndPrice);
+			   }else{
+					pricing.standardPrice = StringUtils.formatMoney(maxStndPrice);   	
+			   	}
+			}   
+			//Setting the sales price
+			if(minSalesPrice!=null){
+			   
+			   	if(!maxSalesPrice.equals(minSalesPrice)){
+			   		pricing.salesPrice = StringUtils.formatMoney(minSalesPrice)+"-"+StringUtils.formatMoney(maxSalesPrice);
+			   	}else{
+			   		pricing.salesPrice = StringUtils.formatMoney(maxSalesPrice);
+			   	}
+			}
+	  //Praveen: END
+		}	
+	   }
+	
+	
+return pricing;	
+	 
+}	
+function getRefinements(productSearchModel : ProductSearchModel,isSearchCatalog:Boolean):Object {
+    var refinements =new Object();
+    
+    refinements.attributeRefinements = new Array();
+  //  if(isSearchCatalog){
+    refinements.categoryRefinements =  new Array();
+  //  }
+    refinementsObject =new Array();
+    var Refinements = 	productSearchModel.refinements ;
+	for each(var RefinementDefinition : dw.catalog.ProductSearchRefinementDefinition  in Refinements.refinementDefinitions){
+				var refinementValueObj = new Object();
+				refinementValueObj.refinementAttributeId = "";
+				refinementValueObj.refinementDisplayName = "";
+				
+				 refinementValueObj.refinementVals = new Array(); 
+				
+			if( RefinementDefinition.isCategoryRefinement() ){//category refinements will be sent only for search catalog service 
+					refinements.categoryRefinements =getCategoryRefinements(productSearchModel);
+					if(refinements.categoryRefinements.length>0){
+						 return refinements;
+					}
+			}
+			if(RefinementDefinition.isAttributeRefinement() && !RefinementDefinition.attributeID.equals('TopRated')){
+				refinementValueObj.refinementDisplayName = RefinementDefinition.getDisplayName();
+				refinementValueObj.refinementAttributeId = RefinementDefinition.attributeID;
+				
+				for each(var RefinementValue :dw.catalog.ProductSearchRefinementValue  in Refinements.getAllRefinementValues(RefinementDefinition)){
+					var  refinementVal = new Object();
+					var refValue:String = RefinementValue.getValue();
+					refValue= refValue.replace("&","%26");//replacing '&' with its html representation in refinement value 
+					refinementVal.refinementValue = refValue;
+					refinementVal.refinementDisplayValue = RefinementValue.getDisplayValue();
+					refinementVal.hitCount =RefinementValue.hitCount;
+					if(RefinementValue.ID.equals('color')){ //logic to add RGB color value for color refinements
+						refinementVal.refinementRGBValue =RefinementValue.getDescription();
+					}
+					refinementValueObj.refinementVals.push(refinementVal);
+				}
+					
+				refinementsObject.push(refinementValueObj);
+			}
+			
+			if(RefinementDefinition.isPriceRefinement()){
+				refinementValueObj.refinementDisplayName = RefinementDefinition.getDisplayName();
+				refinementValueObj.refinementAttributeId = RefinementDefinition.attributeID;
+				for each(var RefinementValue :dw.catalog.ProductSearchRefinementValue  in Refinements.getAllRefinementValues(RefinementDefinition)){
+					var  refinementVal = new Object();
+					refinementVal.pmin = RefinementValue.getValueFrom();
+					refinementVal.pmax = RefinementValue.getValueTo();
+					refinementVal.refinementDisplayValue = RefinementValue.getDisplayValue();
+					refinementVal.hitCount =RefinementValue.hitCount;
+					refinementValueObj.refinementVals.push(refinementVal);
+				}
+				refinementsObject.push(refinementValueObj);
+			}
+		}
+		refinements.attributeRefinements=refinementsObject
+		//if(isSearchCatalog){
+  		 return refinements;
+		//}else{
+		//	return refinementsObject;
+		//}
+ }
+function getCategoryRefinements(productSearchModel : ProductSearchModel):Array {///function to get category refinement attributes
+   // var refinementsObject = new Array();
+    var categoryRefinements = new Array();
+    var Refinements = 	productSearchModel.refinements ;
+     var category :dw.catalog.Category =null;
+     var categoryType : String=null;
+	if(Refinements != null && Refinements.refinementDefinitions.size() > 0){
+		var cat = productSearchModel.category;
+		var path = new dw.util.ArrayList();
+		while( cat != null && cat.parent != null )
+		{
+			if( !cat.online )
+			{
+				cat = cat.parent;
+				continue;
+			}
+			path.addAt( 0, cat );
+			cat = cat.parent;
+		}
+		if(path.size()>0){
+		category =path.get(path.size()-1);
+		}
+		
+			var IDPath = new dw.util.ArrayList();
+
+		if(path != null)
+		{
+			// remove the first level successively
+			if(path.size() > 0)
+			{
+			path.removeAt(0);
+			}
+
+			// build array list of category IDs
+			var pathIterator = path.iterator();
+			while( pathIterator.hasNext() )
+			{
+				IDPath.add( pathIterator.next().ID );
+			}
+		}
+		
+	   
+	    if(category ==null || productSearchModel.categoryID == category.ID){
+	    	var RefinementValues :dw.util.Collection =Refinements.getNextLevelCategoryRefinementValues(category);
+	    	//var categoryList : dw.util.ArrayList = new dw.util.ArrayList();
+	    	if(RefinementValues.size() > 0){
+	    		
+				
+	    		for each(var RefinementValue:dw.catalog.ProductSearchRefinementValue  in RefinementValues){
+	    			
+	    			var categoryObj =dw.catalog.CatalogMgr.getCategory( RefinementValue.getValue() );
+	    			if(null == categoryType || categoryType!=categoryObj.custom.categoryType)
+						{							
+							categoryType = categoryObj.custom.categoryType;		
+							//isUpdatedCategoryType = true;
+						}
+					if(null == categoryType){
+						categoryType=dw.system.Site.current.preferences.custom.defaultCategoryType;
+					}
+	    			    var catRefinementValueObj = new Object();
+	    				catRefinementValueObj.refinementAttributeId = categoryObj.getID();
+	    				catRefinementValueObj.refinementDisplayName = categoryObj.getDisplayName();
+	    				catRefinementValueObj.categoryGroupName = categoryType; //value stored in the category type need to to be manipulated according to the display logic on the flex
+	    				catRefinementValueObj.hitCount= RefinementValue.hitCount;
+	    				categoryRefinements.push(catRefinementValueObj);
+	    			
+	    		}
+	    	}
+	    }else{
+	    	if(category.onlineSubCategories.size() > 0){
+	    		for each(var subCategory:dw.catalog.Category in category.onlineSubCategories){
+	    			var catRefinementValueObj = new Object();
+	    			catRefinementValueObj.refinementAttributeId = subCategory.getID();
+	    			catRefinementValueObj.refinementDisplayName = subCategory.getDisplayName();
+	    			catRefinementValueObj.categoryGroupName = subCategory.custom.categoryType;
+	    			categoryRefinements.push(catRefinementValueObj);
+	    		}
+	    		
+	    	}
+	    }
+	}
+	  return categoryRefinements;
+	}

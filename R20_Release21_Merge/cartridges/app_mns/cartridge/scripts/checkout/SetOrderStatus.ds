@@ -1,0 +1,43 @@
+
+/**
+* Set the order export status to EXPORT_STATUS_READY
+*
+* @input Order : dw.order.Order The order.
+* @input klarnaOrderStatus : String
+* @input cardValidationStatus : String
+*/
+importPackage( dw.order );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+    // read pipeline dictionary input parameter
+    var order : Order = pdict.Order;
+    var cardValidationStatus : String = pdict.cardValidationStatus;
+    var klarnaOrderStatus : String = pdict.klarnaOrderStatus;
+	//Praveen: If 'cardValidationStatus' is null, it's a Klarna order    
+	if(!empty(cardValidationStatus)){
+		if(cardValidationStatus.equalsIgnoreCase("REVIEW"))
+		{
+			order.setExportStatus(Order.EXPORT_STATUS_NOTEXPORTED);
+			order.custom.orderStatus = "REVIEW";
+		}
+		else
+		{
+			order.setExportStatus(Order.EXPORT_STATUS_READY);
+			order.custom.orderStatus = "APPROVED";
+		}
+	}
+	if(!empty(klarnaOrderStatus)){
+		if(klarnaOrderStatus.equalsIgnoreCase("PENDING"))
+		{
+			order.setExportStatus(Order.EXPORT_STATUS_NOTEXPORTED);
+			order.custom.orderStatus = "REVIEW";
+		}
+		else
+		{
+			order.setExportStatus(Order.EXPORT_STATUS_READY);
+			order.custom.orderStatus = "APPROVED";
+		}
+	}
+	return PIPELET_NEXT;
+}

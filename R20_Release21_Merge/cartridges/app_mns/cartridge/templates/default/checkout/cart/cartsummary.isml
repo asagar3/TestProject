@@ -1,0 +1,8 @@
+<isinclude template="util/modules"/>
+<iscomment>
+	This template renders the summary of the current basket at the right hand side
+	of all checkout pages. It includes an order summary including order totals,
+	a list of all included shipments as well as the payment methods used to pay
+	the basket.
+</iscomment>
+<isordertotals p_lineitemctnr="${pdict.Basket}" p_totallabel="${Resource.msg('cart.ordertotal','checkout',null)}"/>

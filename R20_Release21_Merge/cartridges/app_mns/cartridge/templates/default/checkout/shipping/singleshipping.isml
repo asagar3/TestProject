@@ -1,0 +1,1052 @@
+<isdecorate template="checkout/pt_checkout">
+<isinclude template="util/modules"/>
+<iscomment>
+	This template visualizes the first step of the single shipping checkout
+	scenario. It renders a form for the shipping address and shipping method
+	selection. Both are stored at a single shipment only.
+</iscomment>
+<iscomment>Report this checkout step (we need to report two steps)</iscomment>
+<isset name="checkoutstep" value="${2}" scope="page"/>
+<isset name="checkoutname" value="${'ShippingAddress'}" scope="page"/>
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+
+<isset name="checkoutstep" value="${3}" scope="page"/>
+<isset name="checkoutname" value="${'ShippingMethod'}" scope="page"/>
+<isinclude template="util/reporting/ReportCheckout.isml"/>
+<script>
+jQuery( document ).ready(function( $ ) 
+		{
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_address1").val("");
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_address2").val("");
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_city").val("");
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_postBox").val("");
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_zip").val("");
+		});
+</script>
+<isscript>
+	var productListAddresses : dw.util.HashMap 	= new dw.util.HashMap(),
+		owners : dw.util.HashMap 				= new dw.util.HashMap(),
+		productListTypes : dw.util.HashMap 		= new dw.util.HashMap(),
+		addressesJsonStr 						= "";
+		
+	if (pdict.Basket != null && pdict.Basket.productLineItems.size() > 0) {
+		addressesJsonStr = "{";
+		var lineItemsIt = pdict.Basket.productLineItems.iterator(),		
+			lineitem 	= null, 
+			productList = null, 
+			address 	= null;
+		
+		while (lineItemsIt.hasNext()) {
+			lineitem = lineItemsIt.next();
+			
+			if (lineitem.productListItem != null 		&& 
+				lineitem.productListItem.list != null 	&& 
+				( lineitem.productListItem.list.type == dw.customer.ProductList.TYPE_WISH_LIST || lineitem.productListItem.list.type == dw.customer.ProductList.TYPE_GIFT_REGISTRY) ) {
+				
+				productList = lineitem.productListItem.list;
+				
+				if (productList != null && pdict.CurrentCustomer != productList.owner) {
+					address = productList.shippingAddress;
+					
+					if (address != null) {	
+						productListAddresses.put(productList.owner.profile.credentials.login+'??'+address.ID, address);
+						owners.put(productList.owner.profile.credentials.login+'??'+address.ID, productList.owner);
+						productListTypes.put(productList.owner.profile.credentials.login+'??'+address.ID, lineitem.productListItem.list.type);
+						addressesJsonStr += "'"+productList.owner.profile.credentials.login+'??'+address.ID+"':"+"{address:{ID:'"+address.ID+"',firstName:'"+address.firstName+"',lastName:'"+address.lastName+"',address1:'"+address.address1+"',address2:'"+address.address2+"',postalCode:'"+address.postalCode+"',city:'"+address.city+"',stateCode:'"+address.stateCode+"',countryCode:'"+address.countryCode.value+"',phone:'"+address.phone+"'}}";
+						if (lineItemsIt.hasNext()) {
+							addressesJsonStr += ",";
+						}
+					}
+				}
+			}
+		}
+		addressesJsonStr +="}";
+		// get rid of null vals 
+		addressesJsonStr = addressesJsonStr.replace(new RegExp('null', 'g'), '');
+	}
+	
+</isscript>
+<isset name="isStoreDelActive" value="${pdict.CurrentSession.custom.isStoreCollActive}" scope="page"/>
+<isset name="currentShippingMethod" value="${pdict.Basket.defaultShipment.shippingMethodID}" scope="page"/>
+<isset name="isCollectionPointActive" value="${pdict.CurrentSession.custom.isCollectionPointActive}" scope="page"/>
+
+<div class="checkout">
+
+    <iscomment>checkout progress indicator</iscomment>
+    <div class="checkoutshipping">
+	<form action="${URLUtils.continueURL()}" name="ShippingForm" method="post" id="${pdict.CurrentForms.singleshipping.shippingAddress.htmlName}" class="checkoutshippingform" autocomplete="off">
+	<iscomment>shipping address area</iscomment>
+		<div id="addressform" class="addressform">
+		
+			
+			<iscomment>Entry point for Multi-Shipping (disabled on purpose)</iscomment>
+			<isif condition="${pdict.Basket.productLineItems.size() > 1 && false}">
+				<div class="shiptomultiple">
+					${Resource.msg('singleshipping.multiple','checkout',null)} <button class="shiptomultiplebutton textbutton" type="submit" name="${pdict.CurrentForms.singleshipping.shipToMultiple.htmlName}" value="${Resource.msg('global.yes','locale',null)}"><span>${Resource.msg('global.yes','locale',null)}</span></button>
+				</div><!-- END: shiptomultiple -->
+			</isif>
+			<iscomment>Praveen: If store-collection is active then display 'collapsibleArea' otherwise include 'HomeDelivery'</iscomment>
+			<div class="collapsibleArea">
+			
+			<iscomment>INT 1196: Range Extension</iscomment>
+				<isif condition="${(pdict.Basket.custom.rangeExtensionCheck == true)}">
+				<isinclude template="checkout/shipping/storeCollection"/>
+				<isinclude template="checkout/shipping/HomeDelivery"/>
+			<iselse>
+				<isif condition="${isStoreDelActive || isCollectionPointActive}">
+					<isif condition="${('STANDARD'.equalsIgnoreCase(currentShippingMethod))}">
+						<iscomment>Praveen : Refactored the store collection code</iscomment>
+						<iscomment> INT 552: re-order collapsible content for delivery page</iscomment>
+						<div class="collapse home">
+							<div class="iRadio homeDel">
+								<input type="radio" id="homeDelivery" name="nDelivery" value="STANDARD" />
+							</div> 
+							<h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('singleshipping.homedelivery.name','checkout',null)}</strong></span></h5>
+						</div>
+						<isinclude template="checkout/shipping/HomeDelivery"/>
+						<isif condition="${isStoreDelActive}">
+						<isinclude template="checkout/shipping/storeCollection"/>
+						</isif>
+						<isif condition="${isCollectionPointActive}">
+						<isinclude template="checkout/shipping/collectionPoint"/>
+						</isif>
+					<iselseif condition="${('COLLECTION_POINT'.equalsIgnoreCase(currentShippingMethod))}">						
+								<isinclude template="checkout/shipping/collectionPoint"/>		
+						<div class="collapse home">
+							<div class="iRadio homeDel">
+								<input type="radio" id="homeDelivery" name="nDelivery" value="STANDARD"/>
+							</div> 
+							<h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('singleshipping.homedelivery.name','checkout',null)}</strong></span></h5>
+						</div>
+						<isinclude template="checkout/shipping/HomeDelivery"/>
+						<isif condition="${isStoreDelActive}">
+						<isinclude template="checkout/shipping/storeCollection"/>
+						</isif>	
+					<iselse>
+					<isinclude template="checkout/shipping/storeCollection"/>
+						<div class="collapse home">
+							<div class="iRadio homeDel">
+								<input type="radio" id="homeDelivery" name="nDelivery" value="STANDARD" />
+							</div> 
+							<h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('singleshipping.homedelivery.name','checkout',null)}</strong></span></h5>
+						</div>
+						<isinclude template="checkout/shipping/HomeDelivery"/>
+						<isif condition="${isCollectionPointActive}">
+						<isinclude template="checkout/shipping/collectionPoint"/>
+						</isif>
+						<iscomment>Praveen : Refactored the store collection code</iscomment>
+					</isif>
+				<iselse>
+					<div class="noStore">
+						<h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('singleshipping.deliveryaddress','checkout',null)}</strong></span></h5>
+						<!--  <img class="under_shadow_dark" alt="" src="${URLUtils.staticURL('themes/demandwarestore/images/under_shadow_dark.png')}" />
+						<br />-->
+						<isinclude template="checkout/shipping/HomeDelivery"/>
+					</div>
+				</isif>
+			<!-- TODO: 9/03/2011 attach tooltip text -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+			
+			</iselse>
+			</isif>
+		</div><!-- END: shippingaddress -->
+		<div class="formactions">
+			
+			
+			<iscomment>Entry point for Multi-Shipping (disabled on purpose)</iscomment>
+			<isif condition="${pdict.Basket.productLineItems.size() > 1 && false}">
+				<div class="shiptomultiple">
+					${Resource.msg('singleshipping.multiple','checkout',null)} <a href="${URLUtils.https('COShippingMultiple-Start')}">${Resource.msg('global.yes','locale',null)}</a>
+				</div><!-- END: shiptomultiple -->
+			</isif>
+			<div class="floatleft btn-grey-flat">
+				<div class="link_button">
+					<a href="${URLUtils.url('Cart-Show')}" class="back-icon"><span>${Resource.msg('singleshipping.back','checkout',null)}</span></a>
+				</div>
+			</div><!-- END: checkoutshipping -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+			<input type="hidden" name="${pdict.CurrentForms.singleshipping.secureKeyHtmlName}" value="${pdict.CurrentForms.singleshipping.secureKeyValue}"/>
+		</div><!-- END: continuecheckout -->
+		
+	</form>
+	<!-- TODO: 9/03/2011 add "Back" actio to the form flow. -->
+		
+</div>
+<div class="clear"><!-- FLOAT CLEAR --></div>
+</div>
+</div><!-- END: checkout -->
+<div id="dialogcontainer"></div>
+<script type="text/javascript">
+var isStoreActive = ${isStoreDelActive};
+var isCollectionPointActive = ${isCollectionPointActive};
+var currShippingMethod = "${currentShippingMethod}";
+var isCPZipPopulated = false;
+
+function submitShippingForm() {		
+		var submitDialogURL = "${URLUtils.url('COShipping-StartBillingProcess')}";
+		action = "${pdict.CurrentForms.singleshipping.shippingAddress.save.htmlName}";
+		jQuery ('#continuecheckoutbutton').append("<input name='" + action + "' type='hidden' />");
+		var optionCounter = $("#storeList").find("option").length;
+		var giftValue = jQuery("#store_gift_message").val();
+
+		
+		if (giftValue != null && jQuery.trim(giftValue) != ""){
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}]").val(true);
+		} else {
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}]").val(false);
+		}
+		var proceedCheckout = false;
+		if (isStoreActive || isCollectionPointActive){//if the storedelivery is active for this site
+			var selectedIndex = ($("#storeList option").index($("#storeList option:selected")));
+			//Praveen : If there is only one store active, then selectedIndex will be 0 and optionCounter 1, hence 
+			//this condition sould run. For multiple stores, optionCounter will not be 1 and if selectedIndex is 0, following condition will block the processing.
+			if((jQuery("#storeCollection").attr('checked') && !(selectedIndex ==0 && optionCounter != 1))){				
+				proceedCheckout = true;
+				createStoreAddress();	
+			}
+			if(jQuery("#homeDelivery").attr('checked')) {
+				// INT 758 - populated the collection point zip code with some value so as to ensure that the home delivery form get submitted
+				if (isCPZipPopulated){
+					jQuery("input[name=${pdict.CurrentForms.collectionpoints.zip_cp.htmlName}]").val('12345');
+				}
+				if (jQuery(".checkoutshippingform").valid()){		
+					proceedCheckout = true;
+					jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val('');
+				}	
+			}		
+			if((jQuery("#collectionPoint").attr('checked'))){					
+				proceedCheckout = true;
+				createCollectionPointAddress();			
+			}			
+		}
+		else{//store delivery is not active
+			if(jQuery(".checkoutshippingform").valid()){
+			proceedCheckout = true;
+			jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val('');
+			}
+		}
+		if(proceedCheckout){
+			var post = jQuery("${'#' + pdict.CurrentForms.singleshipping.shippingAddress.htmlName}").serialize();
+			<iscomment>
+			Overlay added to lock screen for 
+			INC000009983623 Insufficient Shipping information 
+           </iscomment>
+			var options = {
+					minWidth:513,
+					minHeight:220,
+					title: pleaseWaitText,
+					zIndex:90210,
+					resizable:false,
+					modal:true,
+					dialogClass:'pleaseWaitDialog',
+					closeText:'close',
+					close: function(ev, ui) { $(this).remove(); },
+					stack:true,
+					closeOnEscape: false,
+				   	open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); } // Hides close button 
+			}
+			$('#dialogcontainer').dialog(options);
+			jQuery.ajax({
+				dataType: "html",
+				url		: "${URLUtils.url('COStoreShipping-GetWaitDeliveryImage')}",
+				cache	: true,		
+				success: function(response, textStatus) {
+						jQuery('#dialogcontainer').html(response);									
+				}
+			});
+  		jQuery.ajax({
+		   type: "POST",
+		   url: submitDialogURL,
+		   data: post,
+		   dataType: 'html',
+		   success: function(data){
+			   if (data.indexOf("failure") < 0) { 
+					var showurl = "${URLUtils.https('COBilling-Start')}";				
+					window.location.href = showurl;
+		   		} else {
+		   			var showurl = "${URLUtils.https('COShipping-Start')}";				
+					window.location.href = showurl;
+		   		}
+		   },
+		   failure: function(data) {
+		   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+		   }
+		});
+
+		}else {
+			jQuery(".required.errorclient:first").focus();
+		}	
+		}
+// init gift message box
+function initGiftMessageBox() {
+	
+	/*********** detect QC:- 3918 start********/
+
+	jQuery(".homeDelivery .giftmessagetext:last textarea").attr('id',"store_gift_message")
+	jQuery(".homeDelivery .giftmessagetext:last label").attr('for',"store_gift_message");	
+	jQuery(".collpointgiftmessagediv textarea").attr("id","store_gift_message");
+	jQuery(".storegiftmessagediv textarea").attr("id","store_gift_message");
+	
+	/*********** detect QC:- 3918 finish********/
+	if(jQuery("input.isgiftno:checked").length === 1) {
+		jQuery(".homeDelivery .giftmessagetext:last").hide();
+	} else {
+		jQuery(".homeDelivery .giftmessagetext:last").show();
+	}
+
+	if(jQuery("input.isstoregiftno:checked").length === 1) {
+		jQuery(".storeListDiv .giftmessagetext:first").hide();
+	} else{
+		jQuery(".storeListDiv .giftmessagetext:first").show();
+	}
+}
+function useSameaddressButton(userSelection){
+	if(userSelection == "Yes"){
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").attr('checked','checked');
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val("true");
+	}
+	else {
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").attr('checked','');
+		jQuery(".checkbox input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val("false");
+	}
+}
+// updates the address form with the attributes of a given address
+function updateAddressForm(addressID, address)
+{
+	if ( address && typeof address == 'object' )
+	{
+		// we have address data as json
+		updateAddressFormFields( address, addressID );
+	}
+	else { 
+		// load address details
+		var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.address) {
+					return false;
+				}
+				// fill the form
+				updateAddressFormFields( data, addressID );
+				// remove error messaging
+				jQuery("#addressform span.errormessage").remove();
+				jQuery("#addressform input.errormessage").removeClass("errormessage");
+				jQuery("#addressform .errorlabel").removeClass("errorlabel");
+
+				// Check if the list of shipping methods needs to change
+				updateShippingMethodList();
+			}
+		});
+	}
+	// update the order summary to reflect the correct tax rate for this state
+}
+// changes the selection of the given form select to the given value
+function changeFormSelection(selectElem, selectedValue)
+{
+	if(!selectElem) return;
+	var options = selectElem.options;
+	if(options.length > 0) {
+		// find index of value to select
+		var idx = 0;
+		for(var i=0; i<options.length; i++) {
+			if(options[i].value != selectedValue) continue;
+			idx = i; break;
+		}
+		selectElem.selectedIndex = idx;
+	}
+}
+// updates the current address list entry with the updated address details
+function updateAddressListEntry() {
+	// get the current address ID and load address details
+	var addressID = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}]").val();
+	var url = app.util.appendParamToURL("${URLUtils.https('Address-GetAddressDetails')}", "addressID", addressID);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data || !data.address) {
+				return false;
+			}
+			// update the address select entry
+			var addressLine = "(" + data.address.ID + ") " + data.address.address1 + ", " + data.address.city +
+				", " + data.address.stateCode + ", " + data.address.postalCode;
+
+			// update address list entry
+			var optionElem = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}] > option[value=" + data.address.ID + "]");
+			optionElem.html(addressLine);
+		}
+	});
+}
+// removes the current address list entry
+function removeAddressListEntry() {
+	// get the current address ID
+	var addressID = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}]").val();
+	// remove the option element
+	var optionElem = jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}] > option[value=" + addressID + "]");
+	optionElem.remove();
+	// reset selection to first entry
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.addressList.htmlName}]")[0].selectedIndex = 0;
+}
+// selects a shipping method for the default shipment
+// and updates the summary section on the right hand side
+function selectShippingMethod(shippingMethodID) {
+	// nothing entered
+	if(!shippingMethodID) {
+		return;
+	}
+	// attempt to set shipping method
+	var url = getShippingMethodURL("${URLUtils.https('COShipping-SelectShippingMethod')}");
+	url = app.util.appendParamToURL(url, "shippingMethodID", shippingMethodID);
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			updateSummary();
+			if(shippingMethodID != "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+				jQuery("#homeDelivery").val(shippingMethodID);
+			}
+			if(!data || !data.shippingMethodID) {
+				return false;
+			}
+			// display promotion in UI and update the summary section,
+			// if some promotions were applied
+			jQuery(".shippingpromotions").empty();
+			if(data.shippingPriceAdjustments && data.shippingPriceAdjustments.length > 0) {
+				for(var i=0; i<data.shippingPriceAdjustments.length; i++) {
+					var spa = data.shippingPriceAdjustments[i];
+					jQuery(".shippingpromotions").append("<div>${Resource.msg('shipment.qualifiesfor','checkout',null)} " + spa.calloutMessage + "<\/div>");
+				}
+			}
+		}
+	});
+	$("#shippingTypeSelected").val(shippingMethodID); //INT 443 : for Omniture tagging
+}
+//<iscomment>Variables added for Omniture Tagging for Delivery page| INT 443</iscomment>
+function setOmnitureVariablesForDeliveryPage(obj){
+	obj=document.getElementById('shippingTypeSelected');
+	var selectedShippingType=obj.getAttribute("value");
+	s.eVar65=selectedShippingType;
+	s.products="";
+	/** INT 443 - changed to add tnumber instead of product number in omniture script**/
+	var tNumber = productListForOmniture.split(";");
+	var products = "";
+	for (var k = 1; k < (tNumber.length) ; k++) {
+		// remove trailing comma from products
+		if(tNumber[k].charAt(tNumber[k].length - 1) == ','){	
+			tNumber[k] = tNumber[k].substring(0, tNumber[k].length - 2); 	
+		}
+		// remove trailing comma from total string
+		if(k != tNumber.length - 1){
+			products = products + ";" + tNumber[k]  + ";;;;" + "eVar65=" + selectedShippingType +",";
+		}else{
+			products = products + ";" + tNumber[k]  + ";;;;" + "eVar65=" + selectedShippingType;
+		}	
+    }
+	s.products = products;	
+	s.events="${Resource.msg('omniture.deliveryPage.event','omniture',null)}";
+	s.linkTrackVars="eVar65,events,products";
+	s.linkTrackEvents="event17";
+	s.tl(true,'o',selectedShippingType);
+	
+}
+
+// updates the order summary based on a possibly recalculated 
+// basket after a shipping promotion has been applied
+function updateSummary() {
+	var url = "${URLUtils.url('COBilling-UpdateSummary')}";
+	// load the updated summary area
+	jQuery("#rightcolumn").load(url, function() { 
+		// hide edit shipping method link 
+		jQuery("#rightcolumn").fadeIn("fast"); 
+		jQuery('.checkoutminisummary .minishipment .header a').hide(); 
+		jQuery('.ordertotalstable .ordershipping .label a').hide();
+		$("div.ui-widget-overlay, div.pleaseWaitDialog").remove(); 
+	});
+}
+/**
+ * Cached JavaScript array of currently applicable shipping methods.
+ */
+var shippingMethods;
+/**
+ * Helper method which constructs a URL for an AJAX request using the 
+ * entered address information as URL request parameters.
+ */
+function getShippingMethodURL(url) 
+{
+	var countryCode = jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").val();
+	var stateCode = jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").val();
+	var postalCode = jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").val();
+	var city = jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").val();
+
+	url = app.util.appendParamToURL(url, "countryCode", countryCode);
+	url = app.util.appendParamToURL(url, "stateCode", stateCode);
+	url = app.util.appendParamToURL(url, "postalCode", postalCode);
+	url = app.util.appendParamToURL(url, "city", city);
+
+	return url;
+}
+/**
+ * Make an AJAX request to the server to retrieve the list of applicable shipping methods
+ * based on the merchandise in the cart and the currently entered shipping address 
+ * (the address may be only partially entered).  If the list of applicable shipping methods 
+ * has changed because new address information has been entered, then issue another AJAX 
+ * request which updates the currently selected shipping method (if needed) and also updates
+ * the UI.  In particular, the list of available shipping methods and the right hand summary
+ * must change.
+ */
+function updateShippingMethodList() {
+	var url = getShippingMethodURL("${URLUtils.https('COShipping-GetApplicableShippingMethodsJSON')}");
+	var result = app.ajax.getJson({
+		url: url,
+		callback: function(data) {
+			if(!data) {	
+				return false;
+			}
+			if (shippingMethods != null && shippingMethods.toString() == data.toString())
+			{
+				// No need to update the UI.  The list has not changed.
+				return true;
+			}
+			// We need to update the UI.  The list has changed.
+			// Cache the array of returned shipping methods.
+			shippingMethods = data;
+			url = getShippingMethodURL("${URLUtils.https('COShipping-UpdateShippingMethodList')}");
+			// indicate progress
+			jQuery("#shippingmethodform").html(app.showProgress());
+			// load the shipping method form
+			jQuery("#shippingmethodform").load( url, function() {
+				jQuery("#shippingmethodform").fadeIn("fast");
+				// rebind the radio buttons onclick function to a handler.
+				jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}]").click(function() {
+					var selectedMethodID = jQuery(this).val();
+					selectShippingMethod(selectedMethodID);
+				});
+				// activate the tooltips in the newly loaded AJAX section
+				app.tooltipDefault();
+			});
+		}
+	});
+}
+// updates the state label depending on the given contry code
+// if the flag updateSelection is set to true the state selection
+// changes to the first possible select option based on the country
+function updateStateLabel(countryCode, updateSelection) {
+	var label = "${Resource.msg('forms.state','forms',null)}:";
+	if(countryCode == "CA") {
+		label = "${Resource.msg('forms.province','forms',null)}:";
+	}
+	jQuery("div.state > .label > .labeltext").html(label);
+
+	if(updateSelection) {
+		var initialOption = "##";
+		if(countryCode == "US") {
+			initialOption = "";
+		} else if(countryCode == "CA") {
+			initialOption = "AB";
+		}
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]")[0], initialOption);
+	}
+}
+function updateStoreDetails(obj) {	
+	var store_id = obj.options[obj.selectedIndex].value;
+	if(obj.selectedIndex == 0){
+		$(".slectedStoreDetails").hide();
+		$(".storeListDiv .giftMessageDiv").hide();
+		$(".storeListDiv .continuecheckoutbutton").hide();
+	}else {
+		for(var i=0; i<storesJson.stores.length; i++){
+			if(store_id == storesJson.stores[i].storeId) {
+				selectedStore = storesJson.stores[i];
+				$(".sCollectionDate").html(storesJson.stores[i].collectionDate);
+				$(".spickUpTime").html(selectedStore.pickUpTime);
+				$(".sName").html(storesJson.stores[i].storeName);
+				$(".sAddr1").html(storesJson.stores[i].address2);
+				$(".sAddr2").html(storesJson.stores[i].address3);
+				$(".sTiming").html(storesJson.stores[i].storeHour);
+				$(".sStoreMessage").html(storesJson.stores[i].storeMessage);
+				//Praveen: Fix for QC Fix-3937 the defect where post code is not appearing 
+				if(selectedStore.zip == null || selectedStore.zip == ''){
+					$(".sCity").html(selectedStore.city);
+				}else if(selectedStore.zip != null && selectedStore.zip != '' && (selectedStore.city == null || selectedStore.city == '')){
+					$(".sCity").html(selectedStore.zip);
+				}else{
+					$(".sCity").html(selectedStore.city + " , " + selectedStore.zip);
+				}
+				//End
+				$(".sCountyCountry").html(storesJson.stores[i].stateCode+", "+storesJson.stores[i].countryCode);
+				$(".storeMap img").attr('src',storesJson.stores[i].image);
+				$(".storeMap img").attr('alt',storesJson.stores[i].storeName);
+				break;
+			}
+		}
+		$(".slectedStoreDetails").show();
+		$(".storeListDiv .giftMessageDiv").show();
+		$(".storeListDiv .continuecheckoutbutton").show();
+	}
+}
+jQuery(document).ready(function() {
+	// Show GoogleMaps dialog box for Collection Point	
+	jQuery('div.storeListDiv button.searchLocation').click(function(){
+		jQuery('div.ui-dialog').css('display','block');  // .show(); 
+	});
+	jQuery('#addressform .collapsibleArea .collapse').each(function(i){
+		jQuery(this + 'div.iRadio input').click(function(){		
+		});		
+	});
+	jQuery("#homeDelivery").click(function() {	
+		//INT 758 - flag to ensure that the collection point dummy value only gets changed when this flag is set to true
+		isCPZipPopulated = true;
+		jQuery("#shipping-method-STANDARD").attr('checked', true);
+		jQuery("#homeDelivery").val("STANDARD");
+		updateShippingMethodList();
+		//Praveen :- QC Fix 3911 � Contactnumber should be populated in payment page for ideal payment when home delivery is selected after accessing store collection
+		useSameaddressButton("Yes");	
+	});
+	storesJson = "{[]}";
+	selectedStore = "";
+	nobuttonClicked = false;
+	usergiftselection = false;
+	userstoregiftselection = false;
+	var pageLoad = true;
+	var defaultShippingMethod= "${pdict.Basket.defaultShipment.shippingMethodID}";
+	if("${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.value}" == "true") {
+		$('.smallBtn:first').addClass('activeBtn');
+		nobuttonClicked = false;
+	}else {
+		if(defaultShippingMethod != "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+			nobuttonClicked = true;
+			$('.smallBtn:last').addClass('activeBtn');
+		}else {
+			nobuttonClicked = false;
+		}
+	}
+	$('.smallBtn').click(function() {
+	     $(this).addClass('activeBtn');
+	     $(this).siblings().removeClass('activeBtn');
+	     if($(this).hasClass('marginright')){
+	    	 nobuttonClicked = false;
+	     }else {
+	    	 nobuttonClicked = true;
+	     }
+	 });
+	//var limitNum = 59; //Bug:1805762, variable has been moved in individial HomeDelivery.isml 
+	jQuery(".delivery_instructions textarea").bind("keyup",function(){		
+	    if (jQuery(this).val().length > limitNum) {
+	        jQuery(this).val(jQuery(this).val().substring(0, limitNum));	        
+	    } 
+	});
+	// select address from list
+	jQuery(".addresslist select").change(function() {
+		var addressID = jQuery(this).val(),
+			address = null;
+		if (addressID.indexOf("??") > 0) {
+			// we have address in the select data attr			
+			address = jQuery(this).data("data")[addressID];
+		}
+		if(!addressID) return false;
+		
+		updateAddressForm(addressID, address);
+		return false;
+	}).change();
+
+	$('input[name=radioName]:checked', '#myForm').val()
+	
+	$(".collapsibleArea input[name=nDelivery]:checked").parents(".collapse").next(".collapseContent").find("div:first").show();
+
+	$(".collapsibleArea input[name=nDelivery]").click(function(){
+	
+			$(this).parents(".collapse").siblings(".collapseContent").find("div:first").slideUp();
+			$(this).parents(".collapse").next(".collapseContent").find("div:first").slideDown();
+		var selectedMethodID = $(this).val();
+		//Praveen :- Added the code for setting the shipping method in form before the call to selectShippingMethod()
+		$(this).parents(".collapsibleArea").find(".shippingmethods input#shipping-method-"+selectedMethodID).attr("checked","checked");
+		if(!pageLoad){
+			var options = {
+					minWidth:513,
+					minHeight:220,
+					title: pleaseWaitText,
+					zIndex:90210,
+					resizable:false,
+					modal:true,
+					dialogClass:'pleaseWaitDialog',
+					closeText:'close',
+					close: function(ev, ui) { $(this).remove(); },
+					stack:true,
+					closeOnEscape: false,
+				   	open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); } // Hides close button 
+			}
+			$('#dialogcontainer').dialog(options);
+			jQuery.ajax({
+				dataType: "html",
+				url		: "${URLUtils.url('COStoreShipping-GetWaitDeliveryImage')}",
+				cache	: true,		
+				success: function(response, textStatus) {
+						jQuery('#dialogcontainer').html(response);									
+				}
+			});
+			selectShippingMethod(selectedMethodID);
+		}else {
+			pageLoad = false;
+		}
+		var storeCollectionMethod = "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}";
+		if($(this).attr("id") == "homeDelivery"){
+			//INT 758 - flag to ensure that the collection point dummy value only gets changed when this flag is set to true
+			isCPZipPopulated = true;
+			/** INT 707 - code to fix th issue in which during toggling from collection point to home delivery, all the error messages for validations were fired. below code is used to 
+			reset the form validations and to set the css back to normal **/
+			validation = jQuery('form').validate();
+			validation.resetForm();
+			jQuery(".label span.labeltext.errorlabel").removeClass("errorlabel");
+			jQuery(".value .genericinputbox .errorIcon").removeClass("errorIcon");
+			jQuery(".value .errorIcon").removeClass("errorIcon");
+			jQuery(".value .genericinputbox .errorinputbox_leftcurve").removeClass("errorinputbox_leftcurve").addClass("genericinputbox_leftcurve"); 
+			/** INT 707 ends **/
+			$(this).parents(".collapsibleArea").find("#shipping-method-"+storeCollectionMethod).parent().parent(".shippingmethod").hide();
+			if(usergiftselection){
+				$(".isgiftyes").attr("checked","checked");
+				$(".isgiftyes").click();
+			}else {
+				$(".isgiftno").attr("checked","checked");
+				$(".isgiftno").click();
+			}
+			if(nobuttonClicked){
+				$(".smallBtn:last").click();
+			}else {
+				$(".smallBtn:first").click();
+			}
+		}
+		else if($(this).attr("id") == "collectionPoint"){ 
+			//INT 758 - made the collection point zip code field as blank when toggling between delivery options i.e to remove the dummy value
+			if (isCPZipPopulated) {
+				jQuery("input[name=${pdict.CurrentForms.collectionpoints.zip_cp.htmlName}]").val('');
+			}if (document.getElementById("cpAddressLines")!= null) {
+				var cpAdr1 = document.getElementById("cpAddressLines").innerHTML;
+				if (cpAdr1.length > 0) {
+					$(".slectedStoreDetails").show();
+					$(".storeListDiv .continuecheckoutbutton").show();
+					$(".storeListDiv .giftMessageDiv").show();	
+				}else {
+					$(".storeListDiv .continuecheckoutbutton").hide();
+					$(".storeListDiv .giftMessageDiv").hide();
+				} 
+			}
+		}else {		
+			//INT 758
+			isCPZipPopulated = true;
+			$(this).parents(".collapsibleArea").find("#shipping-method-"+storeCollectionMethod).parent().parent(".shippingmethod").show();
+			if($("#storeList").val() == '' && storesJson.stores.length != 1){
+				$(".slectedStoreDetails").hide();
+				$(".storeListDiv .giftMessageDiv").hide();
+				$(".storeListDiv .continuecheckoutbutton").hide();
+			}else {
+				$(".slectedStoreDetails").show();
+			}
+			if(userstoregiftselection){
+				$(".isstoregiftyes").attr("checked","checked");
+				$(".isstoregiftyes").click();
+			}else {
+				$(".isstoregiftno").attr("checked","checked");
+				$(".isstoregiftno").click();
+			}
+		}
+	});//changes for INT 552: reorder collapsible content on delivery page
+	window.onload= function(){
+		//INT 758 
+		if (currShippingMethod == "STANDARD" ){
+			isCPZipPopulated = true;
+		}
+		//INT 552: This part controls the collapsible content on delivery page. Checks if shipping method selected is Home delivery or Collection point. Slides down selected content. Control goes to function to slide down collapsible content line. If selected content is Store delivery control passes to codition to check for it. 
+		if(currShippingMethod == "STANDARD" || (currShippingMethod == "COLLECTION_POINT")){		
+			jQ(jQ(".collapsibleArea input[name=nDelivery]")[0]).trigger("click");
+		} 
+	}
+		var storeIdSelectedBefore = jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val();
+		app.ajax.getJson({
+			url		: "${URLUtils.url('COStoreShipping-getStores')}",
+			callback: function (data){
+				storesJson = data;
+				if(data.stores.length>1 && isStoreActive){//Shashi::isStoreActive added for RS3 defect 1805442 //If there are more than 1 stores 
+					$("#multipleStores").show();
+					for(var i=0; i<data.stores.length; i++) {
+						var addedElement = false;
+						var optionElement = document.createElement("option");
+						optionElement.text = data.stores[i].storeName;
+						optionElement.value = data.stores[i].storeId;
+						if(defaultShippingMethod == "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+							if(storeIdSelectedBefore == data.stores[i].storeId){
+								optionElement.selected = "selected";
+								document.getElementById("storeList").options.add(optionElement);
+								$("#storeList").trigger("onchange");
+							addedElement = true;
+							}
+						}
+						if(!addedElement){
+							document.getElementById("storeList").options.add(optionElement);
+						}
+					}
+				}else if(data.stores.length==1){//If there is only 1 store
+					$("#singleStores").show();
+					$("#singleStores").html(data.stores[0].storeName);
+					updateSingleStoreDetail(data.stores[0]);
+				}
+				//INT 552: Checks if shipping method chosen is Store collection,slides down top content.Control goes to function to slide down collapsible content.
+				if(currShippingMethod == "STORE_COLLECTION") {
+					jQ(jQ(".collapsibleArea input[name=nDelivery]")[0]).trigger("click");
+				}
+			}
+		});	
+	if(defaultShippingMethod == "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}"){
+		if("${pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}" == "true") {
+			$(".isstoregiftyes").attr("checked","checked");
+			userstoregiftselection = true;
+		}else {
+			$(".isstoregiftno").attr("checked","checked");
+			userstoregiftselection = false;
+		}
+		usergiftselection = false;
+	}else {
+		jQuery("#homeDelivery").val(defaultShippingMethod);
+		if("${pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}" == "true") {
+			$(".isgiftyes").attr("checked","checked");
+			usergiftselection = true;
+		}else {
+			$(".isgiftno").attr("checked","checked");
+			usergiftselection = false;
+		}
+		if(nobuttonClicked){
+			$(".smallBtn:last").click();
+		}else {
+			$(".smallBtn:first").click();
+		}
+		userstoregiftselection = false;
+	}
+	if(storeIdSelectedBefore != null && storeIdSelectedBefore != ''){
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.useAsBillingAddress.htmlName}]").val(true);
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addToAddressBook.htmlName}]").val(true);
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox.htmlName}]").val('');
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]")[0], '');
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]")[0], '');
+		changeFormSelection(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}]")[0], '');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storeCollectionDate.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storePickupTime.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone.htmlName}]").val('');
+		jQuery("textarea[name=${pdict.CurrentForms.singleshipping.shippingmethod.deliveryInstructions.htmlName}]").val('');
+		//Praveen: Setting the additional variables to default value
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address3.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.streetName.htmlName}]").val('');
+		jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence.htmlName}]").val('');
+	}
+	// gift message box toggling
+	jQuery(".isgiftyes").click(function() {
+		jQuery(".homeDelivery .giftmessagetext:last").show();
+		matchAllGiftMessages();
+		if(jQuery('#store_gift_message').val() == ""){
+			$('#store_gift_message').val("${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlValue}");
+		}
+		usergiftselection = true;
+	});
+	//Praveen: QC defect fixing: 1078
+	jQuery(".isgiftno").click(function() {
+		jQuery(".homeDelivery .giftmessagetext:last").hide();
+		jQuery(".homeDelivery .giftmessagetext:last textarea").attr("value", "");
+		usergiftselection = false;
+	});
+	// gift message box toggling
+	jQuery(".isstoregiftyes").click(function() {
+		jQuery(".storeListDiv .giftmessagetext:first").show();
+		userstoregiftselection = true;
+		matchAllGiftMessages();
+	});
+	//Praveen: QC defect fixing: 1078
+	jQuery(".isstoregiftno").click(function() { 
+		jQuery(".storeListDiv .giftmessagetext:first").hide();
+		jQuery(".storeListDiv .giftmessagetext:first textarea").attr("value", "");
+		userstoregiftselection = false;
+	});
+
+	// update shipping method list on load
+	updateShippingMethodList();
+	// bind shipping method selection
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}]").click(function() {
+		var selectedMethodID = jQuery(this).val();
+		selectShippingMethod(selectedMethodID);
+	});
+	// update state label upon entering page
+	updateStateLabel(jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").val(), false);
+	// update state label upon country selection
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").change(function() {
+		updateStateLabel(jQuery(this).val(), true);
+	});
+	// Update shipping method list if country, state, city, or zip changes.
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	jQuery("select[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	jQuery("input[name=${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlName}]").change(function() {
+		updateShippingMethodList();
+	});
+	
+	//Initialise the gift message fields
+	initGiftMessageBox();
+	
+	//Add another class value to each gift message box to identify
+	addClassToGiftMessageFields()
+	
+	//Match the gift message fields to each other
+	matchAllGiftMessages();
+	
+	//Bind the keyup and blur functions to the gift message fields
+	$('.home_gift_message').bind('keyup blur', function(){
+ 		checkGiftMessageLength('.home_gift_message');
+		$('.store_collection_gift_message').val($(this).val());
+		$('.collection_point_gift_message').val($(this).val()); 
+	});
+	$('.store_collection_gift_message').bind('keyup blur', function(){
+		checkGiftMessageLength('.store_collection_gift_message');
+		$('.home_gift_message').val($(this).val());
+		$('.collection_point_gift_message').val($(this).val()); 
+	});
+	$('.collection_point_gift_message').bind('keyup blur', function(){
+		checkGiftMessageLength('.collection_point_gift_message');
+		$('.store_collection_gift_message').val($(this).val());
+		$('.home_gift_message').val($(this).val());
+	});
+});
+
+//Function to check the length of the gift message does not exceed 240 characters
+function checkGiftMessageLength(giftMessageId){
+	var max = 240;
+	var value = jQuery(giftMessageId).val();
+	var left = max - value.length;
+	if(left < 0) {
+		jQuery(giftMessageId).val( value.slice(0, left) );
+		left = 0;
+	}
+}
+
+//On page load, this function will check for a gift message in any of the gift message fields, and then match the others
+function matchAllGiftMessages(){
+	var hd = $('.home_gift_message').val();
+	var sg = $('.store_gift_message').val();
+	var cp = $('.collection_point_gift_message').val();
+	var gmv = "";
+	
+	var gm = new Array(hd,sg,cp);
+	
+	for(var i = 0; i < 3; i++){
+		if(gm[i] != null && gm[i] != ""){
+			gmv = gm[i];
+	 		$('.home_gift_message').val(gmv);
+			$('.store_collection_gift_message').val(gmv);
+			$('.collection_point_gift_message').val(gmv);
+			break;
+		}
+	}	
+}
+
+//Add new classes to the Gift Message fields so that they can be easily identified
+function addClassToGiftMessageFields(){
+	$('.homeDelivery').find('#store_gift_message').addClass('home_gift_message');	
+	$('.storegiftmessagediv').find('#store_gift_message').addClass('store_collection_gift_message');	
+	$('.collpointgiftmessagediv').find('#store_gift_message').addClass('collection_point_gift_message');
+}
+
+function updateSingleStoreDetail(){
+	selectedStore = storesJson.stores[0];
+	$(".sCollectionDate").html(selectedStore.collectionDate);
+ 	$(".spickUpTime").html(selectedStore.pickUpTime);
+	$(".sName").html(selectedStore.storeName);
+	$(".sAddr1").html(selectedStore.address2);
+	$(".sAddr2").html(selectedStore.address3);
+	$(".sTiming").html(selectedStore.storeHour);
+	//$(".sCity").html(selectedStore.city);
+	$(".sStoreMessage").html(selectedStore.storeMessage);
+	//Praveen: Fix for QC Fix-3937 the defect where post code is not appearing 
+	if(selectedStore.zip == null || selectedStore.zip == ''){
+		$(".sCity").html(selectedStore.city);
+	}else if(selectedStore.zip != null && selectedStore.zip != '' && (selectedStore.city == null || selectedStore.city == '')){
+		$(".sCity").html(selectedStore.zip);
+	}else{
+		$(".sCity").html(selectedStore.city + " , " + selectedStore.zip);
+	}
+	//End
+	$(".sCountyCountry").html(selectedStore.stateCode+", "+selectedStore.countryCode);
+	$(".storeMap img").attr('src',selectedStore.image);
+	$(".storeMap img").attr('alt',selectedStore.storeName);
+	$(".slectedStoreDetails").show();
+	$(".storeListDiv .giftMessageDiv").show();
+	$(".storeListDiv .continuecheckoutbutton").show();
+}
+/* incident- INC000010670291, fix for junk characters. Gift message must be removed from text area if user enter any junk character.
+ * parseGiftMessage() is called in HomeDelivery.isml for all sites and StoreCollection.isml.
+ */
+function parseGiftMessage() {
+	var giftValue = null;	
+	var divClass = null;
+	//Following condition will be true for home-delivery and false for store collection.
+	
+	if(jQuery("#homeDelivery").attr('checked')){
+		divClass = "#delivery_gift_message";
+		giftValue	= jQuery("#delivery_gift_message").val();	
+	}else{
+		divClass = "#store_gift_message";
+		giftValue = jQuery("#store_gift_message").val();
+	}
+	var xmlString = "<gift-message name='gift'>" + giftValue + "</gift-message>";
+	try {
+		validateXML(xmlString, divClass);
+	} catch (err) {
+		console.log(err);
+	}
+}
+
+ function validateXML(txt, divClass) {
+
+	 if (window.ActiveXObject) {
+		//code for IE
+		try{
+		 var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.async = false;		
+		xmlDoc.loadXML(txt);
+		
+		if (xmlDoc.parseError.errorCode != 0) {
+	//		Console.log("On internet explorer");		
+			jQuery(divClass).val('');
+		} 
+	}
+	catch(err) {
+		console.log(err);
+	}
+	}	
+	
+	// code for Mozilla, Firefox, Opera, etc.
+	else if (document.implementation.createDocument) {
+		try {
+		//	console.log("parsing starts");
+			var text = txt;
+			var parser = new DOMParser();
+			var xmlDoc = parser.parseFromString(text, "application/xml");
+		} catch (err) {
+			console.error("Error:" + err.message);
+		}
+		if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+			jQuery(divClass).val('');
+		} 
+	}	 
+}
+ 
+//--></script>
+</isdecorate>
+<input type="hidden" id="shippingTypeSelected" value="${pdict.Basket.defaultShipment.shippingMethodID}"/><iscomment>Variables added for Omniture Tagging for Basket page| INT 443</iscomment>

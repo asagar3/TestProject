@@ -1,0 +1,70 @@
+/** 
+* The order XML object contains a XML order request
+* Include with:
+* 
+* importScript("int_worldpay:lib/WorldPay.ds"); 
+*
+**/
+importPackage( dw.net );
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript("int_worldpay:lib/worldPayPreferences.ds");
+
+function OrderXML() {
+	var preferences : WorldPayPreferences = new WorldPayPreferences();
+	var testPendingOrders : Boolean =preferences.testPendingOrders;
+	this.content = new XML();
+	if(testPendingOrders){
+	this.content = <paymentService version="1.4" merchantCode="XXXXX">
+					<submit>
+						<order orderCode="YYYYYYY">
+							<description>
+							</description>
+							<amount value="0000" currencyCode="???" exponent="2"/>
+							<orderContent>
+							</orderContent>
+							<paymentMethodMask>
+							</paymentMethodMask>
+							<shopper>
+								<shopperEmailAddress>
+								</shopperEmailAddress>
+							</shopper>				
+						
+						</order>
+					</submit>
+				</paymentService>;
+	}else{
+		this.content = <paymentService version="1.4" merchantCode="XXXXX">
+					<submit>
+						<order orderCode="YYYYYYY">
+							<description>
+							</description>
+							<amount value="0000" currencyCode="???" exponent="2"/>
+							<orderContent>
+							</orderContent>
+							<paymentDetails>
+							</paymentDetails>
+							<shopper>
+								<shopperEmailAddress>
+								</shopperEmailAddress>
+							</shopper>				
+						
+						</order>
+					</submit>
+				</paymentService>;
+	}
+}
+
+// Returns the XML contained
+OrderXML.prototype.getXML = function() : XML {
+	return this.content;
+}
+
+// Returns a string representation of the XML object by adding the XML declaration and DOCTYPE
+OrderXML.prototype.getCompleteXML = function() : String {
+	var output : String = '<?xml version="1.0"?>' +
+						'<!DOCTYPE paymentService PUBLIC "-//RBS WorldPay/DTD RBS WorldPay PaymentService v1//EN" "http://dtd.wp3.rbsworldpay.com/paymentService_v1.dtd">' 
+						+ this.content.toXMLString();
+	return output;
+}

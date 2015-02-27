@@ -1,0 +1,220 @@
+<isset name="CategorgyRenderTemplate" value="list" scope="page"/>
+<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('enableInfiniteScroll')}"> 
+<isset name="DecoratorTemplate" value="search/pt_productsearchresult_content" scope="page"/>
+<iselse>
+<isset name="DecoratorTemplate" value="search/pt_productsearchresult" scope="page"/>
+</isif>
+
+<isif condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+	<iscomment>Specific call for ajax | Sep 29, 2011</iscomment>
+	<script src="${URLUtils.staticURL('/themes/demandwarestore/js/ajaxCallSpec.js')}" type="text/javascript"></script>
+</isif>
+<isdecorate template="${DecoratorTemplate}">
+<iscomment>
+	Use the decorator template based on the requested output. If
+	a partial page was requested an empty decorator is used.
+	The default decorator for the product hits page is
+	search/pt_productsearchresult.
+</iscomment>
+
+<iscache type="relative" minute="30" varyby="price_promotion"/>
+<isinclude template="util/modules"/>
+
+<script type="text/javascript">
+/*INC000006599976 - Page quantity dropdown reset on category list page upon back button
+ - GetIdHeight variable gets the height of <div id="search"> 12 products contain height between 1000px to 1400px whenever height lies between 1000px to 1400px the selected value sets to 12
+::change will work only in Safari and Chrome::
+ */
+$(document).ready(function(){
+	if($.browser.safari ) {
+		var getIdHeight = $("#search").height();
+		if(getIdHeight > 1000 && getIdHeight < 1400){
+			$("#noofitemsperpage option:selected").removeAttr("selected");
+			$("#noofitemsperpage").find("option:first").attr("selected", "selected");
+		}
+		
+	}
+	var wls = window.location.search;
+	if(wls.length > 0){
+		$('#noofitemsperpage option').each(function() {
+			var substr = this.value.substring(this.value.indexOf('?'), this.value.indexOf('sz='));
+	    	this.value = this.value.replace(substr, window.location.search+'&');
+		});
+	
+		$('.pagination a').each(function () {
+			var substr = this.href.substring(this.href.indexOf('?'), this.href.indexOf('start='));
+	    	this.href = this.href.replace(substr, window.location.search+'&');
+		});
+		
+		$('#sortingorder option').each(function() {
+			var start_index = this.value.indexOf('start=');
+			var srule_index = this.value.indexOf('srule=');
+			var f_index = 0;
+			if(parseInt(srule_index) < parseInt(start_index))
+				f_index = srule_index;
+			else
+				f_index = start_index;
+
+			if(f_index > 0){
+				var substr = this.value.substring(this.value.indexOf('?'), f_index);				
+	    		this.value = this.value.replace(substr, window.location.search+'&');
+			}
+		});
+		
+	}
+});
+</script>
+<iscomment>
+	Configured as default template for the product search results.
+	Displays a global slot with static html and the product search
+	result grid.
+</iscomment>
+
+<iscomment>create reporting event</iscomment>
+<isinclude template="util/reporting/ReportSearch.isml"/>
+<iscomment>TO DO | Moving it to the top. Removing from here....</iscomment>
+<iscomment><isinclude template="search/components/productsearchbreadcrumbs"/></iscomment>
+
+<iscomment>suggest similar search phrase below the breadcrumb</iscomment>
+<isif condition="${!empty(pdict.ProductSearchResult.getSuggestedSearchPhrase())}">
+	<div class="didyoumean">
+		${Resource.msg('search.nohits.didyoumeanex','search',null)}
+		<a title="${pdict.ProductSearchResult.suggestedSearchPhrase}" href="<isprint value="${URLUtils.http('Search-Show','q',pdict.ProductSearchResult.suggestedSearchPhrase)}"/>"><isprint value="${pdict.ProductSearchResult.suggestedSearchPhrase}"/></a>
+	</div>
+</isif>
+<div class="producthits">
+<iscomment><!--Begin | ASHA | Added static HTML Snippet for Category List Page--></iscomment>
+<iscomment><!--End | ASHA | Added static HTML Snippet for Category List Page --></iscomment>
+<iscomment><!--Begin | ASHA | Added static HTML Snippet for Search Page --></iscomment>
+<iscomment>
+<div class="breadcrumb2_searchresultspage">
+<isinclude template="search/components/productsearchbreadcrumbs"/>
+</div>
+</iscomment>
+<iscomment><!-- End | ASHA | Added static HTML Snippet for Search Page --></iscomment>
+	<iscomment>
+		Render promotional content at the top of search results as global slot.
+		This content is only displayed if the search result is refined by a category.
+		If the search result is not refined by a category a global default is displayed.
+	</iscomment>
+	<isif condition="${!empty(pdict.ProductSearchResult.category)}">
+	
+		<iscomment> Removing the Asset for CR 3043 and placing container with the category page name below</iscomment>
+		<div id="catBannerSlotContainer">
+			<isslot id="cat-banner" context="category" description="Category Banner" context-object="${pdict.ProductSearchResult.category}"/>
+		</div>
+		<div id="catBannerBreadcrumb" class="top_banner_grey" style="visibility:hidden">
+		  <div class="banner_head">
+		  	<h2>${pdict.ProductSearchResult.category.displayName}</h2>
+		  </div>
+		  <div class="banner_head_shadow"></div>
+		</div>
+		
+		<isif condition="${pdict.createSlotForKiosk != null }">
+			<iscomment>This slot is created only for content slots for Kiosk</iscomment>
+			<isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+			<isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+		</isif>
+	<iselse/>
+		<div class="breadcrumb2_searchresultspage">
+			<isinclude template="search/components/productsearchbreadcrumbs"/>
+		</div>
+	<iscomment>	<isslot id="search-result-banner" description="Promotional Search Result Banner" context="global"/></iscomment>
+	</isif>
+
+	<div id="search" class="search">
+
+		<isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+			<div class="searchinformation">
+				${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt;
+				<a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a>
+			</div><!-- END: searchinformation -->
+		</isif>
+
+		<isscript>
+			var selectedString = 'selected="selected"';
+		</isscript>
+
+		<isif condition="${!pdict.ProductPagingModel.empty}">
+
+			<div class="searchresultsheader">
+				<div class="sorthitscontainer">
+	                <iscomment>sort by</iscomment>
+	                <table cellpadding="0" cellspacing="0" class="width100">
+	                	<tr>
+	                		<isproductsortingoptions productsearchmodel="${pdict.ProductSearchResult}" pagingmodel="${pdict.ProductPagingModel}"/>
+	              			<ispaginginformation pagingmodel="${pdict.ProductPagingModel}" pageurl="${pdict.ProductSearchResult.url('Search-Show')}"/>
+						</tr>
+					</table>
+	                <div class="clear"><!-- FLOAT CLEAR --></div>
+	            </div><!-- END: sorthitscontainer -->
+
+		        <iscomment>render compare controls if we present in a category context</iscomment>
+		        <isif condition="${!empty(pdict.ProductSearchResult) && !empty(pdict.ProductSearchResult.category)}">
+		        	<iscomparecontrols category="${pdict.ProductSearchResult.category}"/>
+		        </isif>
+
+	            <iscomment>pagination</iscomment>
+	            <isif condition="${!dw.system.Site.getCurrent().getCustomPreferenceValue('enableInfiniteScroll')}"> 
+					<ispagingbar pageurl="${pdict.ProductSearchResult.url('Search-Show')}" pagingmodel="${pdict.ProductPagingModel}"/>
+				</isif>	
+				
+	            <div class="clear"><!-- FLOAT CLEAR --></div>
+			</div><!-- END: searchresultsheader -->
+
+			<div class="productresultarea">
+			<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('enableInfiniteScroll')}">
+		    	<isproductgridiscroll producthits="${pdict.ProductPagingModel.pageElements}" productrows="${1000}" productstoskip="${0}" productsperrow="${4}" pagingmodel="${pdict.ProductPagingModel}" scope="search"/>
+		    	<iselse>
+		    	<isproductgrid producthits="${pdict.ProductPagingModel.pageElements}" productrows="${1000}" productstoskip="${0}" productsperrow="${4}" pagingmodel="${pdict.ProductPagingModel}" scope="search"/>
+		    </isif>	
+			</div><!-- END: productresultarea -->
+
+			<div class="searchresultsfooter">
+				<iscomment>pagination</iscomment>
+				<isif condition="${!dw.system.Site.getCurrent().getCustomPreferenceValue('enableInfiniteScroll')}">
+				<ispagingbar pageurl="${pdict.ProductSearchResult.url('Search-Show')}" pagingmodel="${pdict.ProductPagingModel}"/>
+				</isif>
+				
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				<iscomment>TO DO Hidden bottom section of sort
+				<div class="sorthitscontainer" style="display:none">
+	                          
+	                <table cellpadding="0" cellspacing="0" class="width100">
+	                	<tr>
+		    	            <isproductsortingoptions productsearchmodel="${pdict.ProductSearchResult}" pagingmodel="${pdict.ProductPagingModel}"/>
+			                <ispaginginformation pagingmodel="${pdict.ProductPagingModel}" pageurl="${pdict.ProductSearchResult.url('Search-Show')}"/>
+						</tr>
+					</table>	                
+	                <div class="clear"><!-- FLOAT CLEAR --></div>
+	            </div><!-- END: sorthitscontainer --></iscomment>
+	            <div class="clear"><!-- FLOAT CLEAR --></div>
+			</div><!-- END: searchresultsheader -->
+
+			<iscomment>show top content hits</iscomment>
+			<isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+				<div class="searchinformation">
+					${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt;
+					<a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a>
+				</div><!-- END: searchinformation -->
+				<isinclude template="search/topcontenthits"/>
+			</isif>
+
+		<iselse/>
+
+			<iscomment>display no results</iscomment>
+			<div class="noresults">
+				${Resource.msg('productresultarea.noresults','search',null)}
+			</div><!-- END: noresults -->
+
+		</isif>
+	</div><!-- END: search -->
+
+	<iscomment>Render promotional content at the bottom of search results as global slot</iscomment>
+	<isslot id="search-promo" description="Promotional Content at the bottom of Search Results" context="global"/>
+</div><!-- END: producthits -->
+
+<iscomment>Include inline JS to update the refinements</iscomment>
+<isinclude template="search/components/jsrefinementsupdate"/>
+</isdecorate>

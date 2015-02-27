@@ -1,0 +1,32 @@
+/**
+*
+*
+*	@input Month : String
+*	@input Year : String
+*	@input Day : String
+*	@output DateValid : Boolean
+*	
+*	
+*/
+importPackage( dw.system );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var isLeapYear : Boolean = false;
+	args.DateValid = false;
+	if((args.Year%400 ==0 || (args.Year%100 != 0 && args.Year%4 == 0)))
+		isLeapYear = true;
+	
+	if((args.Month ==1 ||args.Month ==3 || args.Month ==5 || args.Month ==7 || args.Month ==8 || args.Month ==10 || args.Month ==12) && (args.Day<=31))
+		args.DateValid = true;
+	else if((args.Month ==4 ||args.Month ==6 || args.Month ==9 || args.Month ==11) && (args.Day<=30))
+ 		args.DateValid = true;
+ 	else if((args.Month ==2) && isLeapYear && (args.Day<=29))
+ 		args.DateValid = true;
+ 	else if((args.Month ==2) && !isLeapYear && (args.Day<=28))
+ 		args.DateValid = true;
+	
+	
+	
+	return PIPELET_NEXT;
+}

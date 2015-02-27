@@ -1,0 +1,300 @@
+<iscontent type="text/plain" charset="UTF-8" compact="true"/>
+<iscomment>
+	Desc:
+		Creates the variation section if product is a variation or a master		
+
+	Parameter:
+		Product - the product to use
+	
+	Options:
+		none
+</iscomment>
+
+<iscomment><!-- TODO: Scene7 mattDales 9/5/2011  add the id  --></iscomment>
+	<isscript>
+			var subProductID = pdict.Product.ID;
+			var masterID = null;
+			if (pdict.Product.isMaster()) {
+				masterID = pdict.Product.ID;
+			} else {
+			 if (pdict.Product.isVariant()) {
+					masterID = pdict.Product.variationModel.getMaster().ID;
+				} else {
+					masterID = pdict.Product.ID;
+				}
+			}
+			subProductID = subProductID.replace(/[^0-9a-z_]+/ig , '_');
+			masterID = masterID.replace(/[^0-9a-z_]+/ig , '_');
+	</isscript>
+<isscript>
+	if(null != pdict.Product.getImage('hero')) {
+		var heroImageURL : String = pdict.Product.getImage('hero').getURL().toString();
+	}
+</isscript><isscript>
+	var heroAssetId : String = "";
+	if (null != heroImageURL) {
+		var heroImageURLSplit : Array = heroImageURL.split("/");
+		heroAssetId = heroImageURLSplit[(heroImageURLSplit.length)-1];
+	}
+</isscript>
+	
+	<script type="text/javascript">
+	var s7InitialValues = s7InitialValues ? s7InitialValues :{};
+	s7InitialValues["${masterID}"]  =  '${heroAssetId}';
+	
+	</script>
+<isif condition="${pdict.Product.isVariant() || pdict.Product.isMaster()}">
+	<isif condition="${pdict.CurrentVariationModel != null}">
+		<isset name="PVM" value="${pdict.CurrentVariationModel}" scope="page"/>
+	<iselse>
+		<isset name="PVM" value="${pdict.Product.variationModel}" scope="page"/>
+	</isif>
+	<isset name="isSizeChartAvailable" value="" scope="page"/>
+		<iscomment><!-- TODO: Scene7 mattDales 9/5/2011  add the id  --></iscomment>
+		
+	<div class="variationattributes_altics" id="variations--${masterID}--${subProductID}">
+		<isscript>
+			var sizeChartID = null;
+		</isscript>
+		<iscomment>
+			Filter out variation attribute values with no orderable variants.
+			The "clean" ProductVariationModel of the master without any selected attribute values is used to filter the variants.
+			Otherwise hasOrderableVariants() would use currently selected values resulting in a too narrow selection of variants.
+		</iscomment>
+		<isset name="cleanPVM" value="${(pdict.Product.variant ? pdict.Product.masterProduct.variationModel : pdict.Product.variationModel)}" scope="page"/>
+		
+		<isloop items="${PVM.productVariationAttributes}" var="VA" status="loopstatus0">
+			<isif condition="${!empty(PVM.getAllValues(VA)) && (null != PVM.getAllValues(VA))}">
+				<isset name="VAVALS" value="${PVM.getAllValues(VA)}" scope="page"/>
+			</isif>
+			<iscomment>Praveen: Removing NullPointerException</iscomment>
+			<isif condition="${(null != VAVALS) && (null != VAVALS.length) }">
+				<isset name="Valength" value="${VAVALS.length}" scope="page"/>
+			</isif>
+			<iscomment>Praveen: END</iscomment>
+			<isset name="vaId" value="${VA.getAttributeID()}" scope="page"/>
+			<isif condition="${null != loopstatus0}">
+				<isset name="productLoopStatus" value="${loopstatus0}" scope="page"/>	
+				<isset name="qtyDisplayOrder" value="${loopstatus0.count}" scope="page"/>	
+			<iselse>
+				<isset name="qtyDisplayOrder" value="0" scope="page"/>	
+			</isif>	
+			<iscomment>
+			
+			<!-- TODO: this is the original set. 
+			Those items removed EG: vaId == 'size' will render as dropdown lists
+			Please check that this is the correct way to do this.
+			
+				
+			<isif condition="${vaId == 'color' || vaId == 'size' || vaId == 'width' || vaId == 'waist' || vaId == 'length'}">
+			 -->
+			</iscomment>
+			<isif condition="${(vaId == 'size' || vaId == 'width' || vaId == 'waist' || vaId == 'length') && sizeChartID == null}">
+					<isscript>
+						if (sizeChartID == null) {
+							var category : dw.catalog.Category = null;
+							
+							// get category from products primary category
+							category = pdict.Product.primaryCategory;
+				
+							// get category from product master if not set at variant
+							if( category == null && pdict.Product.variant )	{
+								category = pdict.Product.masterProduct.primaryCategory;
+							}
+							
+							while (category != null && sizeChartID == null) {
+								if (('sizeChartID' in category.custom) && !empty(category.custom.sizeChartID)) {
+									sizeChartID = category.custom.sizeChartID;
+								}
+								else {
+									category = category.parent;
+								}
+							}							
+						}
+					</isscript>
+			</isif>		
+			<isif condition="${vaId == 'color'  || vaId == 'width' || vaId == 'waist' || vaId == 'length'}">
+			
+				<iscomment>custom ui i.e. divs controlled via css</iscomment>
+				<div class="swatches ${VA.getID()}">
+				<iscomment>Size Chart link and is shown only once on the product detail page</iscomment>
+				<isif condition="${(vaId == 'width' || vaId == 'waist' || vaId == 'length') && empty(isSizeChartAvailable)}">
+					<iscomment><isscript><!--  
+						if (sizeChartID == null) {
+							var category : dw.catalog.Category = null;
+							
+							// get category from products primary category
+							category = pdict.Product.primaryCategory;
+				
+							// get category from product master if not set at variant
+							if( category == null && pdict.Product.variant )	{
+								category = pdict.Product.masterProduct.primaryCategory;
+							}
+							
+							while (category != null && sizeChartID == null) {
+								if (('sizeChartID' in category.custom) && !empty(category.custom.sizeChartID)) {
+									sizeChartID = category.custom.sizeChartID;
+								}
+								else {
+									category = category.parent;
+								}
+							}							
+						}
+					--></isscript></iscomment>
+					<isif condition="${!empty(sizeChartID)}">
+						<a class="attributecontentlink_altics" href="${URLUtils.url('Page-Include','cid', sizeChartID)}" title="${Resource.msg('variations.sizechart','product',null)}">${Resource.msg('variations.sizechart','product',null)}</a>
+						<isset name="isSizeChartAvailable" value="true" scope="page"/>
+					</isif>
+				</isif>
+				
+				<iscomment>Select a default variant color if none selected.</iscomment>
+					<isscript>
+						var colorSelected = false;
+						var variantColor = null; 
+						
+						// first determine if there is a selected color
+						for each( var varValue in VAVALS ) { 
+							if (cleanPVM.hasOrderableVariants(VA, varValue) && PVM.isSelectedAttributeValue(VA, varValue)) { 
+								colorSelected = true;
+								break;
+							}
+						}
+ 
+						// if no color is selected, then select color
+						if (!colorSelected) {
+							if (PVM.getSelectedVariant() == null) {
+								var variant = null;
+								 if(pdict.Product.master) {
+								 	if(!empty(PVM.defaultVariant)) {
+								 		variant = PVM.defaultVariant;
+								  	} else if(PVM.variants.length > 0) {
+								  		variant = PVM.variants[0];
+								  	}
+								 }
+								 
+								 if (variant != null) {
+								 	var productVariationAttribute : ProductVariationAttribute = PVM.getProductVariationAttribute("color");
+								 	if (productVariationAttribute != null && PVM.getVariationValue(variant, productVariationAttribute) != null) {
+								 		variantColor = PVM.getVariationValue(variant, productVariationAttribute).value;
+								 	}
+								 }
+							}
+						}
+					</isscript>
+				<!--  TODO: 
+
+change the variable VA.displayName to "Choose a color" for Color
+and keep "Size" for Size if this method is incorrect
+				<isprint value="${VA.displayName}"/>: </span>
+				
+				-->
+				<isif condition="${vaId == 'color'}"> 
+					<span class="gris txt14"><isif condition="${qtyDisplayOrder != 0}">${Number(qtyDisplayOrder).toFixed()}. </isif><isprint value="${Resource.msg('altics.colour','product',null)}"/> </span><iscomment>INT 684-Colour french translate error. Added colour in product.properties</iscomment>
+				<iselse>
+					<span class="gris txt14"><isif condition="${qtyDisplayOrder != 0}">${Number(qtyDisplayOrder).toFixed()}. </isif><isprint value="${VA.displayName}"/> </span>
+				</isif>
+					
+				
+				<script type="text/javascript">
+				jQuery(document).ready(function() {
+ 				jQuery('#carousel-couleurs').jcarousel({
+  				scroll: 1
+				});
+				});
+				</script>
+				
+				
+			
+				<p class=special><span class="value selectedvarval" id="${pdict.Product.ID.replace(' ','_')}_colorvalue"></span></p>
+				<ul id="carousel-couleurs" class="jcarousel-skin-couleurs jcarousel-list-horizontal swatchesdisplay">
+				
+					<isloop items="${VAVALS}" var="VV" status="swatchLoop" >
+					<isscript>
+						if (null != VV.getImage('hero',0)){
+							var heroImageURL : String = VV.getImage('hero',0).getURL().toString();
+						}
+					</isscript>
+					<isscript>
+					if (null != heroImageURL) {
+						var heroImageURLSplit : Array = heroImageURL.split("/");
+						heroAssetId = heroImageURLSplit[(heroImageURLSplit.length)-1];
+					}
+					</isscript>
+						<iscomment>filter out unorderable variation attribute values</iscomment>						
+						<isif condition="${cleanPVM.hasOrderableVariants(VA, VV)}">
+							<isif condition="${PVM.isSelectedAttributeValue(VA, VV) || Valength == 1 || (!empty(variantColor) && VV.value.equals(variantColor))}">
+								<li id="${pdict.Product.ID}_${VV.value}" lang="${VV.value}" class="selected firstSwatch swatchli" onclick="variantPriceAndAvailability('${pdict.Product.ID}','${VV.value}','false');">
+							<iselse>
+								<li id="${pdict.Product.ID};${VV.value}" lang="${VV.value}" class="emptyswatch swatchli" onclick="variantPriceAndAvailability('${pdict.Product.ID}','${VV.value}','false');"></isif>
+							<isif condition="${VV.displayValue != null}"><isif condition="${vaId == 'color'}"><a href="javascript:;" id="${heroAssetId}" title="${VV.displayValue}" lang="${VV.value}" class="swatchanchor onlyforcolorswatch" ><iselse><a href="javascript:;" title="${VV.displayValue}" lang="${VV.value}" class="swatchanchor"></isif><isprint value="${VV.displayValue}"/></a><iselse><isif condition="${vaId == 'color'}"><a href="javascript:;" lang="${VV.value}" title="${VV.value}"><iselse><a href="javascript:;" lang="${VV.value}" title="${VV.value}"></isif><isprint value="${VV.value}"/></a></isif>
+							</li>
+						</isif>
+					</isloop>
+				</ul>
+					<iscomment>CR018 | Naveen Kumar</iscomment>
+					<span class="" id="${pdict.Product.ID}colorswatchErrorIcon"></span>
+					<div  style="display:none" class="errorclient clear" id="${pdict.Product.ID}colorswatchError">${Resource.msg('product.selectcolor.error','product',null)}</div>
+			<iselse>
+				<iscomment>default ui i.e. dropdown</iscomment>
+				<div class="variantdropdown_altics">
+					<div class= "left titre-taille">
+				<!--  TODO: change the variable VA.displayName to "Choose a color" for Color
+				and keep "Size" for Size if this method is incorrect
+				<isprint value="${VA.displayName}"/>: </span>
+				-->
+				<isif condition="${vaId == 'color'}">
+					<span class="gris txt14"><isif condition="${qtyDisplayOrder != 0}">${Number(qtyDisplayOrder).toFixed()}. </isif><isprint value="${Resource.msg('product.choose_a_colour','product',null)}"/></span>
+				<iselse>
+					 <span class="gris txt14"><isif condition="${qtyDisplayOrder != 0}">${Number(qtyDisplayOrder).toFixed()}. </isif><isprint value="${VA.displayName}"/></span>
+				</isif>
+				<iscomment>Praveen : Adding the additional text</iscomment>
+				
+				</div>
+				
+				
+				<div class="left bloc-tailles">
+				<div class="select-taille">
+				<isif condition="${vaId == 'size'}">
+					<label for="${pdict.Product.ID}_sizedropdown" class="hideLabel"><isprint value="${VA.displayName}"/></label>
+					<select id="${pdict.Product.ID}_sizedropdown" name="sizedropdown" class="${pdict.Product.ID}sizedropdown sizeDropSelect" onchange="javascript:changeErrorStatusIcon('${pdict.Product.ID}');">
+					
+				<iselse>
+					<select>
+				</isif>	 
+						<isif condition="${Valength > 0}"><option value="">${Resource.msg('global.select','locale',null)} <isprint value="${VA.displayName}"/></option></isif>
+						<isloop items="${VAVALS}" var="VV">
+							<iscomment>filter out unorderable variation attribute values</iscomment>						
+							<isif condition="${cleanPVM.hasOrderableVariants(VA, VV)}">
+								<isif condition="${PVM.isSelectedAttributeValue(VA,VV)}"><isset name="selected" value="${'selected=\'selected\''}" scope="page"/><iselse><isset name="selected" value="${''}" scope="page"/></isif>
+								<isif condition="${VV.displayValue != null}"><option id="${VV.value}" value="${VV.displayValue}" ${selected}><isprint value="${VV.displayValue}"/></option><iselse><option value="${VV.value}" ${selected}><isprint value="${VV.value}"/></option></isif>
+							</isif>
+						</isloop>
+					</select>
+					
+						
+					
+					<span class="hidden">${vaId}</span>
+					<iscomment>CR018 | Naveen Kumar</iscomment>
+									
+				</div>
+				<iscomment>INT-648: changes made to fix overlapping error icon </iscomment>
+				<span class="" id="${pdict.Product.ID}sizedropdownErrorIcon"></span>
+				<div  style="display:none" class="errorclient clear" id="${pdict.Product.ID}sizedropdownError">${Resource.msg('product.selectsize.error','product',null)}</div>	
+			</isif>
+							
+							<isif condition="${vaId == 'size' && empty(isSizeChartAvailable)}">
+					<isif condition="${!empty(sizeChartID)}"><br>
+						<a class="attributecontentlink_altics" href="${URLUtils.url('Page-Include','cid', sizeChartID)}" title="${Resource.msg('variations.sizechart','product',null)}">
+						<div class="sgimage" border="0"></div>
+						${Resource.msg('variations.sizechart','product',null)}
+						</a>
+						<isset name="isSizeChartAvailable" value="true" scope="page"/>
+					</isif>
+				</div>
+				</isif>
+			</div>
+			<span class="hidden">${vaId}</span>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</isloop>
+	</div><!-- END: variationattributes -->
+</isif>

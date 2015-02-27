@@ -1,0 +1,72 @@
+/**
+*/
+importPackage( dw.io );
+importPackage( dw.system );
+importPackage( dw.util );
+
+var className : String = "FileUtil";
+
+function zipFile(inputFileName : String) : boolean
+{
+ 	var sourceFile : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + inputFileName);
+ 	var targetFile : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + inputFileName+".zip");
+
+	 if (!sourceFile.exists()) {
+	  Logger.getLogger("gZipFile").error("Source file '" + sourceFile.name + "' cannot be found!");
+	  return false;
+	 }
+	 try {
+	  
+	   sourceFile.zip(targetFile);
+	 }
+	 catch (e) {
+	   Logger.getLogger("gZipFile").error("Error occurred calling zip: " + e);
+	   return false;
+	 } 
+	 return true;
+}
+
+function removeFile(inputFileName : String) : boolean
+{
+ 	var sourceFile : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + inputFileName);
+	 if (!sourceFile.exists()) {
+	  return true;
+	 }
+	 try {
+	   sourceFile.remove();
+	 }
+	 catch (e) {
+	   Logger.getLogger("gZipFile").error("Error occurred while removing file: " + e);
+	 } 
+	 return true;
+}
+
+function moveFile(sourceFile : File, destFile : File) : boolean
+{
+	var result : boolean = false;
+	Logger.getLogger(className).error( className+": Moving " + sourceFile.fullPath + " to " + destFile.fullPath );
+	
+	try {
+	 	result = sourceFile.renameTo( destFile );
+	}catch(e){
+		Logger.getLogger(className).error( className+": Error occurred while removing file: " + e);
+	}
+	
+	return result;
+
+}
+
+
+function removeFileObject(inputFile : File) : boolean
+{ 	
+	 if (!inputFile.exists()) {
+	  return true;
+	 }
+	 try {
+	   inputFile.remove();
+	 }
+	 catch (e) {
+	   Logger.getLogger(className).error(className+": Error occurred while removing file: " + e);
+	 } 
+	 return true;
+}

@@ -1,0 +1,50 @@
+<!--- TEMPLATENAME: mns_lang.isml --->
+
+<isscript>
+       var requestLocale = pdict.CurrentRequest.locale;
+       importPackage( dw.system );
+       <!--- if redirection for the url ---> 
+      if(pdict.omniPageName == Resource.msg('omniture.title.homepage','omniture',null)){
+          if(pdict.CurrentRequest.getHttpPath().indexOf("Default-Start") == -1){
+			if (pdict.CurrentRequest.getHttpQueryString() !=null) {
+				var requestPath = pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + pdict.CurrentRequest.getHttpQueryString() ;
+			} else {
+				var requestPath = pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost()  + "/" + requestLocale;   
+			}
+	       }else{
+	       var requestPath = pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + pdict.CurrentRequest.getHttpPath() + "?" + pdict.CurrentRequest.getHttpQueryString() ;
+	        }
+       }
+       else{  <!-- No Redirection -->
+       if(pdict.CurrentRequest.getHttpQueryString() != null) { <!--  If query String is present in the url-->
+        if(pdict.CurrentRequest.getHttpPath().indexOf("Search-Show") != -1){       <!--  SEO friendly url-->
+      	        var requestPath =pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + URLUtils.url('Search-Show','cgid', pdict.CurrentHttpParameterMap.cgid);
+      	}else if(pdict.CurrentRequest.getHttpPath().indexOf("Product-Show") != -1){
+      	        var requestPath =pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + URLUtils.url('Product-Show','pid', pdict.Product.ID) ;
+      	}else if(pdict.CurrentRequest.getHttpPath().indexOf("Page-Show") != -1){
+      	        var requestPath =pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + URLUtils.url('Page-Show','cid', pdict.Content.ID);
+      	}else{
+      	       var requestPath = pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + pdict.CurrentRequest.getHttpPath() + "?" + pdict.CurrentRequest.getHttpQueryString() ;
+      	 }
+      	 } else{
+      	 if(pdict.CurrentRequest.getHttpPath().indexOf("Search-Show") != -1){       <!--  SEO friendly url-->
+      	        var requestPath =pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + URLUtils.url('Search-Show','cgid', pdict.CurrentHttpParameterMap.cgid);
+      	  }else if(pdict.CurrentRequest.getHttpPath().indexOf("Product-Show") != -1){
+      	        var requestPath =pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + URLUtils.url('Product-Show','pid', pdict.Product.ID);
+      	  }else if(pdict.CurrentRequest.getHttpPath().indexOf("Page-Show") != -1){
+      	        var requestPath =pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + URLUtils.url('Page-Show','cid', pdict.Content.ID);
+      	  }else{
+      	         var requestPath = pdict.CurrentRequest.getHttpProtocol() + "://" + pdict.CurrentRequest.getHttpHost() + pdict.CurrentRequest.getHttpPath();
+      	 }
+       	}
+       }
+	   var localeList =  dw.system.Site.getCurrent().preferences.custom.localeList;
+</isscript>
+
+<isloop items="${localeList}" var="locale">  
+      <isscript>
+	  var hrefURL = requestPath.replace(requestLocale,locale);
+	  var localeToChange = locale.replace("_", "-");
+	  </isscript>
+ <link rel="alternate"  hreflang="${localeToChange}" href="${hrefURL}">
+</isloop>

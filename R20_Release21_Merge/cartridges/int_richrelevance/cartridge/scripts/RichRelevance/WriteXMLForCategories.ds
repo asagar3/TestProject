@@ -1,0 +1,63 @@
+ /**
+* @input XmlStreamWriter:dw.io.XMLStreamWriter
+* @output Message : String
+* @output FileName : String
+*/
+ importPackage( dw.system );
+ importPackage( dw.util );
+ importPackage( dw.web );
+ importPackage( dw.net );
+ importPackage( dw.catalog );
+ importPackage( dw.io );
+
+importScript( "int_richrelevance:RichRelevance/MNSExtractCatalog.ds");
+
+	var CATEGORYMAP = "CATEGORYMAP";
+	var GENRE = "GENRE";
+	var CATEGORIES = "CATEGORIES";
+ 
+
+ 
+function execute( pdict : PipelineDictionary ) : Number {
+	
+  pdict.Message = "";
+ 
+  var xsw : XMLStreamWriter = pdict.XmlStreamWriter;
+  xsw.writeEndElement(); //end products tag
+  var siteCatalog : Catalog = CatalogMgr.getSiteCatalog();
+ 
+  try {
+  	
+  		xsw.writeStartElement(CATEGORYMAP);
+		xsw.writeStartElement(GENRE);
+		xsw.writeStartElement(CATEGORIES);
+	
+	for each(var c in siteCatalog.root.onlineSubCategories){
+		
+		exportCategory(c, xsw); //writes category nodes
+		
+	} 
+	
+	xsw.writeEndElement();
+	xsw.writeEndElement();
+
+	
+
+	       	
+	 } catch(ex) {
+	        Logger.error("RichRelevance WriteXMLFor Categories.ds: Error while writing categories to product feed"  + ex.message);
+	        pdict.Message = "RichRelevance WriteXMLFor Categories.ds: Error while writing categories to product feed "+ ex.message;       
+			xsw.flush();
+			xsw.close();	            
+	        return PIPELET_ERROR;    
+	 }   
+	  return PIPELET_NEXT;    
+}
+
+
+
+
+
+
+
+	

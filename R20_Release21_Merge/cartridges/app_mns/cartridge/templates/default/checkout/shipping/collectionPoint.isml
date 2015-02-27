@@ -1,0 +1,243 @@
+<!--[if lt IE 9 ]>
+  <style>
+  	.searchLocation{
+  		left:1px;
+  		position:relative;
+  		top:1px;
+  	}
+  	.postcodeContainer .formfieldtooltip{
+  		position:relative !important;
+  		left:0px !important;
+  	}
+  	
+  	.postcodeContainer .value{
+  		width:255px;
+  	}
+  	
+  	.postcodeContainer{
+  		position: relative;
+  	}
+  	
+  	
+  </style>
+<![endif]-->
+
+<div class="collapse cPoint">
+	<div class="iRadio cPoint">
+		<input type="radio" id="collectionPoint" value="${Resource.msg('shipping.deliverymethod.collectionpoint','checkout',null)}" name="nDelivery"/>
+	</div>
+	<h5 class="grey_block_header">
+		<span><strong class="content_grey_header">${Resource.msg('singleshipping.collectionPoint.name','checkout',null)}</strong></span>    
+	</h5>
+</div>
+<div class="collapseContent">
+	<div class="storeListDiv">
+	<script type="text/javascript">
+
+		var cpNum = "";
+		var cpAddress1 = "";
+		var cpAddress2 = "";
+		var cpZip = "";
+		var cpCity = "";
+		var cpCountry = "";
+	
+		function storeCollectionPointID(cp) {					
+			cpNum = cp.num;
+			if(cp.lgAdr2 != "") {
+				cpAddress1 = cp.lgAdr1 + ", " + cp.lgAdr2;
+			}
+			else {
+				cpAddress1 = cp.lgAdr1;
+			}
+			if(cp.lgAdr4 != "") {
+				cpAddress2 = cp.lgAdr3 + ", " + cp.lgAdr4;	
+			}
+			else {
+				cpAddress2 = cp.lgAdr3;
+			}		 		
+			cpZip = cp.CP;
+			cpCity = cp.ville; 
+			cpCountry =cp.pays;	
+			$( "#cpAddressLines").empty();
+			$("#cpAddressLines").append('<BR/>' + cpAddress1+'<BR/>' +cpAddress2 +'<BR/>' + cpCity + " " + cpZip +'<BR/>'+ cpCountry);
+			$(".successIcon").show();
+			$(".slectedStoreDetails").show();
+		}
+		//INT443
+		
+		function setOmnitureforCollectionPoints(){
+
+				if(document.getElementById('collectionPointJson') == null){
+					s.events = "${Resource.msg('omniture.collectionpoints.failure','omniture',null)}";
+				}else{
+				var json = document.getElementById('collectionPointJson').value;
+				var locations = JSON.parse(json); //jQuery.parseJSON(json);
+				s.events = "${Resource.msg('omniture.collectionpoints.success','omniture',null)}";
+				}
+				postCodeEntered = document.getElementById('dwfrm_collectionpoints_zip__cp').value;
+				s.eVar2 = postCodeEntered;
+				s.linkTrackVars="eVar2,events";
+				s.linkTrackEvents="event18,event19";
+				s.tl(true,'o',postCodeEntered);
+				
+			}
+			
+		
+		$(document).ready(function(){			
+			
+			if("${CurrentForms.singleshipping.shippingaddress.shippingMethodID.htmlValue==COLLECTION_POINT}"){
+				var address1 = "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1.htmlValue}";
+				var address2 = "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2.htmlValue}";
+				var city = "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city.htmlValue}";
+				var postcode = "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlValue}";
+				var country = "${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlValue}";
+				
+				var pattern = /^([0-9]{6})/;
+				if (pattern.test(address1) == true){
+					cpNum = address1.substring(0,6);					
+					cpAddress1 = address1.substring(9,(address1.length));
+					cpAddress2 = address2;
+					cpZip = postcode;
+					cpCity = city;
+					cpCountry = country;												
+					$("#cpAddressLines").empty();
+					$("#cpAddressLines").append('<BR/>' + cpAddress1+'<BR/>' +cpAddress2 +'<BR/>' + cpCity + " " + cpZip +'<BR/>'+ cpCountry);
+		 			$(".successIcon").show();
+		 			$(".storeListDiv .continuecheckoutbutton").show();
+				 	$(".storeListDiv .giftMessageDiv").show();
+				}
+			}
+		});
+		
+		
+		function getCollectionPoints(){
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_firstName").val("");
+			$("#dwfrm_singleshipping_shippingAddress_addressFields_lastName").val("");
+			var post = jQuery("${'#' + pdict.CurrentForms.singleshipping.shippingAddress.htmlName}").serialize();	
+			var url = "${URLUtils.https('CollectionPoints-StartCollectionPoints')}";
+			$.ajax({
+				url		: url,
+				type    : "POST",
+				data    : post,
+				cache	: false,
+				dataType: "html",
+				success	: function(response){
+						
+					jQuery("#errorPostcode").empty();
+						
+					var noValue = response.search("collPointsError");
+					if (noValue == -1) {
+						jQuery('#dialog').html(response);
+						var errorCode = document.getElementById('errorCode').value;
+						if(errorCode==0) {
+						
+								jQuery("#dialog").dialog({ 
+								resizable:false,
+								dialogClass:'leftDialogCollectionPoint'
+								}); 
+								jQuery("#dialog").dialog('option', 'width', 875);
+
+						}									
+						else {						
+							jQuery("#dialog").dialog('close');
+							jQuery("#cpAddressLines").empty();
+							$(".storeListDiv .continuecheckoutbutton").hide();
+							$(".storeListDiv .giftMessageDiv").hide();
+							jQuery(".collectionPointAddress .successIcon").hide(); 
+
+							$('.storeListDiv .value .errorclient').text("${Resource.msg('global.formerrors.postcode.noresults','forms',null)}");
+
+							$('.storeListDiv .value .successIcon').removeClass('successIcon').addClass('errorIcon');
+}
+						
+					}
+					else {
+						jQuery("#dialog").dialog('close');
+						jQuery("#cpAddressLines").empty();
+						$(".storeListDiv .continuecheckoutbutton").hide();
+						$(".storeListDiv .giftMessageDiv").hide();
+						jQuery(".collectionPointAddress .successIcon").hide(); 
+
+
+						$('.storeListDiv .value .errorclient').text("${Resource.msg('global.formerrors.postcode.noresults','forms',null)}");
+
+						$('.storeListDiv .value .successIcon').removeClass('successIcon').addClass('errorIcon');
+						//jQuery('#errorPostcode').html(response);
+						setOmnitureforCollectionPoints();
+						
+					}	
+				},
+				error	: function(response){} 
+			});
+			setOmnitureforCollectionPoints();
+		}
+
+	 </script>
+		
+		
+	<div class="formfield postcode_fr">
+	<div class = "searchMsg">${Resource.msg('singleshipping.collectionPoint.search','checkout',null)}</div><iscomment>INT 715: message added as part of resource bundle</iscomment>
+	<p class="cufonIt"></p>
+	<div class="postcodeContainer">
+	    	<isinputfield formfield="${pdict.CurrentForms.collectionpoints.zip_cp}" type="input" label="false"/>
+	           <button class="searchLocation" onclick="getCollectionPoints()"></button>
+	           
+	    	<div class="formfieldtooltip" style="position: absolute; left: 318px;">
+	    		<istooltip content_id="help-shippingPostCode"/>
+	    	</div>
+	    	
+	</div>    	
+	    	
+	            <script>
+	            $( document ).ready(function() {
+	           	 $("#dwfrm_collectionpoints_zip__cp").attr("placeholder","${Resource.msg('singleshipping.collectionPoint.placeholder','checkout',null)}");
+	            });
+	            </script>		    	
+	</div>
+	<div id="errorPostcode"></div>
+	<div id="searchMapResults"><div id="dialog"></div></div> 
+	<div id="errorResponse"></div>
+		
+	<div class="storeContent">
+		<div class="slectedStoreDetails">
+		<div class="sAddress">									
+			<div class="collectionPointAddress">
+				<span id="cpAddressLines"></span>
+				<iscomment>INT 731: Success icon added when address is displayed</iscomment>
+				<span hidden class=successIcon></span>
+			</div> 
+		</div>								
+		<div class="clear"></div>
+		</div>
+	</div>
+	<div class="collpointgiftmessagediv">
+	<div class="giftMessageDiv" style="display:none;">
+	<iscomment>INT 552: changes to include collection message in resource bundle for delivery page.</iscomment>
+		<span class="collectionmessage">${Resource.msg('checkout.delivery.collectionpoint','checkout',null)}</span><br><br>
+		
+				
+		<div class="formfield giftmessage">
+	    	<div class="label"><isprint value="${Resource.msg(pdict.CurrentForms.singleshipping.shippingAddress.isGift.label,'forms',null)}">:<span>${Resource.msg('forms.240character','forms',null)}</span></div>
+			<div class="giftmessagetext">
+				<label for="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlName}" class="hideLabel">
+					${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlName}
+	        	</label>		    	
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage}" type="textarea" label="false" attribute1="rows" value1="4" attribute2="cols" value2="10"/>
+	    		<div class="clear"><!-- FLOAT CLEAR --></div>
+	    		</div><!-- END: giftmessagetext -->
+    			<div class="formfieldtooltip">
+	    			<istooltip content_id="help-giftmessage"/>
+			 	</div>		
+	    	<div class="clear"><!-- FLOAT CLEAR --></div>
+	    </div><!-- END: giftmessage -->
+	   </div>
+	</div>
+	<div class="continuecheckoutbutton floatright btn-green-flat" style="display:none;">
+		<button class="" type="button" onclick="setOmnitureVariablesForDeliveryPage(this); submitShippingForm();" name="${pdict.CurrentForms.singleshipping.shippingAddress.save.htmlName}" value="${Resource.msg('global.continue','locale',null)}">
+		<span class="btn-ic-lock">${Resource.msg('global.continue','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>	
+	</div>
+	<div class="clear"></div>		
+	</div>
+</div> 
+
+<script src="//maps.googleapis.com/maps/api/js?key=AIzaSyDY0kkJiTPVd2U7aTOAwhc9ySH6oHxOIYM&sensor=false"></script>

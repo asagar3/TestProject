@@ -1,0 +1,268 @@
+<isinclude template="tablet/util/modules"/>
+
+<div id="CreditCardDialog" class="creditcardform">
+	<form id="CreditCardForm" name="CreditCardForm" action="${URLUtils.httpsContinue()}" method="post" autocomplete="off">
+		<fieldset>
+			<div class="formfields add-new-card">
+				<iscomment><div class="requiredcaption">
+					<span class="requiredindicator">*</span><strong>${Resource.msg('global.requiredfield','locale',null)}</strong></strong>
+				</div></iscomment>
+	   			<isscript>
+					var cardList = dw.order.PaymentMgr.getPaymentMethod(dw.order.PaymentInstrument.METHOD_CREDIT_CARD).activePaymentCards;	
+				</isscript>	
+				<script>
+					var paymentCardList = new Array();
+					var validFromFlagList = new Array();
+					var lengthRestrictionList = new Array();
+				</script>
+				<isloop items="${cardList}" var="cards" status="index">
+					<script>
+						paymentCardList[${index.count-1}]="${cards.cardType}";
+						lengthRestrictionList[${index.count-1}]="${cards.custom.isGreaterThanSixteen}";
+						validFromFlagList[${index.count-1}] = "${cards.custom.validFromFlag}";
+					</script>
+				</isloop>
+
+				<div class="formfield cardtype">
+					<isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.type}" type="select"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.owner}" type="input" maxlength="40" size="40" xhtmlclass="alpha_fr"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<div class="formfield cardnumber">
+					<isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.number}" p_dynamic="true" type="input" xhtmlclass="creditcard_updated"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+				<iscomment>
+				<div class="formfield validfromdate">
+					<label class="label validfrom">
+					
+						<span class="labeltext">${Resource.msg('paymentinstrumentdetails.validfrom','account',null)}</span>
+						<span class="requiredindicator">*</span>
+					</label>
+					
+					<div class="month"><isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.ccValidFromMonth}" type="input" label="false" xhtmlclass="validfrom_month example_content"/></div>
+					<div class="year"><span class="datedivider">/</span>
+						<isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.ccValidFromYear}" type="input" label="false" xhtmlclass="validfrom_year example_content"/></div>
+					<div class="clear"><!-- FLOAT CLEAR --></div></iscomment>
+					<iscomment>	
+						<div class="defaulttext">
+							<div class="month floatleft">${Resource.msg('billing.month','checkout',null)}</div>
+							<div class="year floatleft leftspacer">${Resource.msg('billing.year','checkout',null)}</div>
+						</div>
+					
+					<div class="clear"><!-- FLOAT CLEAR --></div>			
+				</div></iscomment>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				<div class="formfield expirationdate">
+					<label class="label expires">
+						<span class="labeltext">${Resource.msg('paymentinstrumentdetails.expires','account',null)}</span>
+						<span class="requiredindicator">*</span>
+					</label>
+					<div class="month"><isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.month}" type="input" xhtmlclass="expire_month"/></div>
+					<div class="year"><span class="datedivider">/</span>
+					<isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.year}" type="input" xhtmlclass="expire_year"/></div>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+					<iscomment>
+						<div class="defaulttext">
+							<div class="month floatleft">${Resource.msg('billing.month','checkout',null)}</div>
+							<div class="year floatleft leftspacer">${Resource.msg('billing.year','checkout',null)}</div>
+						</div>
+					</iscomment>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				<iscomment>[QC 262] | Issue Number should not be present. | Naveen Kumar
+				<div class="formfield issuenumber">
+					<span class="issue">
+						<isinputfield formfield="${pdict.CurrentForms.paymentinstruments.creditcards.newcreditcard.issueNumber}" type="input" maxlength="4"/>
+					</span>
+					<div class="clear"><!-- FLOAT CLEAR --></div>					
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				</iscomment>
+			</div>
+			<div class="separator">&nbsp;</div>
+			<div class="button_wrapper">
+					<div id="formaction"></div>			
+					<div class="floatright btn-green-flat">
+							<button id="applyBtn" type="button" value="${Resource.msg('global.apply','locale',null)}">
+								<span class="btn-ic-lock">${Resource.msg('global.savecard','locale',null)}</span>
+								<span class="forward-icon">&nbsp;</span>
+							</button>	
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="floatleft btn-grey-flat">
+							<button id="cancelBtn" type="button" value="${Resource.msg('global.cancel','locale',null)}" class="link_button"><span>${Resource.msg('global.cancel','locale',null)}</span></button>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="clear"><!-- FLOAT CLEAR --></div>	
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+			<input type="hidden" name="${pdict.CurrentForms.paymentinstruments.secureKeyHtmlName}" value="${pdict.CurrentForms.paymentinstruments.secureKeyValue}"/>
+		</fieldset>
+	</form>
+</div><!-- END: creditcard_form -->
+
+<div class="confirmationcontainer" id="confirmationcontainer" style="display:none;">
+	<div class="errorform">${Resource.msg('account.forbidden','account',null)}</div><!-- END: errorform -->
+	<button id="confirmBtn" type="button"><span>${Resource.msg('global.close','locale',null)}</span></button>			
+</div>
+
+<script type="text/javascript"><!--
+function showValidFrom(card){
+	for(i=0; i<paymentCardList.length; i++){
+		if(paymentCardList[i] == card){
+			if(null != lengthRestrictionList[i] && lengthRestrictionList[i] == "true"){
+				$(".creditcard_updated").addClass('creditcard_maestro');
+				$(".creditcard_maestro").removeClass('creditcard_updated');
+				//<!-- #INC000006782556INC000006782459 by:DAMODAR,extend size of filed to accept 21 digit earlier it was 19 -->
+				$(".creditcard_maestro").attr('maxlength','21');
+			}else{
+				$(".creditcard_maestro").addClass('creditcard_updated');
+				$(".creditcard_updated").removeClass('creditcard_maestro');
+				//<!-- #INC000006782556INC000006782459 by:DAMODAR,extend size of filed to accept 19 digit earlier it was 16 -->
+				$(".creditcard_updated").attr('maxlength','19');
+			}
+			break;
+		}
+	}
+}
+
+function clearCardFields(){
+	$('.formfields input:textbox').each(
+		function(){
+			if (!$(this).hasClass("alpha_fr")){
+				$(this).val("");
+			}
+		}
+	)
+}
+	app.URLs.submitDialogURL = '${URLUtils.httpContinue()}';
+	if(!jQuery('#dialogcontainer').dialog('isOpen'))
+	{
+		jQuery('#dialogcontainer').dialog({
+			bgiframe: true,
+			autoOpen: false,
+			modal: true,
+			overlay: {
+	    		opacity: 0.5,
+	     		background: "black"
+			},
+	    	height: "auto",
+	    	width: 550,
+	    	title: '${Resource.msg('paymentinstrumentdetails.header','account',null)}',
+	    	resizable: false
+		});
+		jQuery('#dialogcontainer').dialog('open');
+	 
+		/* for all dialogue boxes - set to center in both orientations - Shahzad */
+	 	 var popupW = jQuery('#dialogcontainer').width();			 
+	 	 jQuery('#dialogcontainer').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%"});
+	 	 	 /* end */
+	}
+	 
+ 	 
+	
+	
+	jQuery(document).ready(function() {
+		//BUG 856862: Removing comma from start and end date of credit card-Praveen
+		//$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/,/g,''));	
+		//$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/,/g,''));
+		// QC 672
+		
+		$('.expirationdate .month .value').append("<div class=\"month caption\">${Resource.msg('billing.month','checkout',null)}<\/div>");
+		$('.expirationdate .year .value').append("<div class=\"year caption leftspacer\">${Resource.msg('billing.year','checkout',null)}<\/div>");
+		//$('.validfromdate .month .value').append("<div class=\"month caption\">${Resource.msg('billing.month','checkout',null)}<\/div>");
+		//$('.validfromdate .year .value').append("<div class=\"year caption leftspacer\">${Resource.msg('billing.year','checkout',null)}<\/div>");
+		
+	
+		if($('.expirationdate .year input:textbox').val().indexOf(",") > -1)
+		{
+			$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/,/g,''));
+			//$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/,/g,''));
+		}
+		if($('.expirationdate .year input:textbox').val().indexOf(".") > -1)
+		{
+			$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/\./g,''));	
+			//$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/\./g,''));
+		}
+		
+		
+		
+		
+		
+		// execute unobtrusive js code
+		app.execUjs();
+		/* Credit Card Values | On Load*/
+		selectboxvalue=jQuery('.selectbox').val();
+		showValidFrom(selectboxvalue);
+		
+		jQuery(".cardtype select").change(function() {
+			showValidFrom(this.value);
+			clearCardFields();
+		}); 
+
+		//QC Defect 828 | The focus is not transferred to submit button on click of Enter key. | Naveen Kumar
+		jQuery('#CreditCardForm').keypress( function(e) {			
+			if(e.which == 13) {				
+				jQuery('#applyBtn').click();
+				return false;
+			}
+			return true;
+		});
+		
+		jQuery('#applyBtn').click( function() {
+			action = "${pdict.CurrentForms.paymentinstruments.creditcards.create.htmlName}";
+			jQuery('#formaction').append("<input name='" + action + "' type='hidden' />");
+			if(jQuery('.errorclient').text()==""){
+				var post = jQuery('#CreditCardForm').serialize();
+		  		jQuery.ajax({
+				   type: "POST",
+				   url: app.URLs.submitDialogURL,
+				   data: post,
+				   dataType: 'html',
+				   success: function(data){
+				   		jQuery("#dialogcontainer").empty().html(data);
+				   },
+				   failure: function(data) {
+				   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+				   },
+				   error : function(XMLHttpRequest, textStatus, errorThrown){
+					   jQuery('#confirmationcontainer').show();	
+					   jQuery('#confirmationcontainer').dialog({
+						   		bgiframe: true,
+								autoOpen: false,
+								modal: true,
+						    	height: 100,
+	    						width: 300,
+						    	resizable: false
+						});
+					    jQuery('#confirmationcontainer').dialog('option', 'title', jQuery('#dialogcontainer').dialog('option', 'title'));	
+						jQuery('#confirmationcontainer').dialog('open');
+						 /* for all dialogue boxes - set to center in both orientations - Shahzad */
+					 	 var popupW1 = jQuery('#confirmationcontainer').width();	
+					 	 jQuery('#confirmationcontainer').parent().css({ "marginLeft":-(popupW1/2)+"px", "left":"50%"});
+					 	  /* end */
+						
+					}
+				});	
+			}	
+		});
+
+		jQuery('#confirmBtn').unbind("click").click( function() {
+            jQuery('.confirmationcontainer').dialog('close');
+            jQuery('#dialogcontainer').dialog('close');      
+      	}); 
+
+		jQuery('#confirmationcontainer').bind('dialogclose', function(event, ui) {
+			jQuery('#dialogcontainer').dialog('close'); 
+		});
+		
+		jQuery('#cancelBtn').click( function() {
+			jQuery('#dialogcontainer').dialog('close');
+		});
+	}); 
+		
+//--></script>

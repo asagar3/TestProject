@@ -1,0 +1,147 @@
+/* CSS for jQuery Orbit Plugin 1.2.3
+ * www.ZURB.com/playground
+ * Copyright 2010, ZURB
+ * Free to use under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ 
+ 
+ 
+/* PUT IN YOUR SLIDER ID AND SIZE TO MAKE LOAD BEAUTIFULLY
+   ================================================== */
+#tier2NewCarousel { 
+	width: 792px;
+	height: 330px;
+	background:#fff url('http://g-ecx.images-amazon.com/images/G/02/MandS/en_GB/core/x-locale/common/ajax-loader.gif') no-repeat center center;
+	overflow: hidden; }
+#tier2NewCarousel>img,  
+#tier2NewCarousel>div,
+#tier2NewCarousel>a { display: none; }
+
+
+/* CONTAINER
+   ================================================== */
+
+div.orbit-wrapper {
+	margin-bottom:12px;
+    width: 956px;
+    height: 330px;
+    position: relative; }
+
+div.orbit {
+    width: 956px;
+    height: 314px;
+    position: relative;
+    overflow: hidden }
+
+.orbit>div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 956px;
+    height: 314px; }
+
+/* Note: If your slider only uses content or anchors, you're going to want to put the width and height declarations on the ".orbit>div" and "div.orbit>a" tags in addition to just the .orbit-wrapper */
+
+
+/* DIRECTIONAL NAV
+   ================================================== */
+
+div.slider-nav {
+    display: block }
+
+div.slider-nav span {
+    width: 22px;
+    height: 25px;
+    text-indent: -9999px;
+    position: absolute;
+    z-index: 1000;
+    top: 50%;
+    margin-top: -12px;
+    cursor: pointer; }
+
+div.slider-nav span.sn_right {
+    background: url("https://images-na.ssl-images-amazon.com/images/G/02/00/00/09/56/26/91/956269102.png") left top no-repeat;
+    right: 0;
+	text-align:left; }
+
+div.slider-nav span.sn_left {
+    background: url("https://images-na.ssl-images-amazon.com/images/G/02/00/00/09/56/26/91/956269122.png") left top no-repeat;
+    left: 0; }
+
+	div.slider-nav span:hover { background-position:left -25px; }
+
+/* BULLET NAV
+   ================================================== */
+
+#vcsContent .orbit-bullets {
+    position: absolute;
+    z-index: 1500;
+    list-style: none;
+    top: 300px;
+    left: 50%;
+	margin-left: -31px;
+    padding: 0; }
+
+#vcsContent .orbit-bullets li {
+	margin:0;
+	padding:0;
+    float: left;
+    cursor: pointer;
+    color: #999;
+    text-indent: -9999px;
+    background: url("https://images-na.ssl-images-amazon.com/images/G/02/00/00/09/56/26/91/956269142.png") left top no-repeat;
+    width: 21px;
+    height: 21px;
+    overflow: hidden; }
+
+#vcsContent .orbit-bullets li.active {
+    color: #222;
+    background-position: left -42px; }
+    
+#vcsContent .orbit-bullets li.has-thumb {
+    background: none;
+    width: 100px;
+    height: 75px; }
+
+#vcsContent .orbit-bullets li.active.has-thumb {
+    background-position: 0 0;
+    border-top: 2px solid #000; }
+
+
+
+
+.content { position:relative; }
+
+.carouselLight, .carouselLight h1, .carouselLight p { color:#fff; }
+.carouselDark, .carouselDark h1, .carouselDark p { color:#4b4b4b; }
+
+.carouseltext { margin:0; padding:40px; width:360px; }
+	.carouseltext h1 { font-size:3.2em; }
+	.carouseltext p { margin:0 0 0.6em; padding:0; font-size:1.4em; line-height:1.4em; }
+	.carouseltext a:link { text-decoration:none; }
+	.carouseltext a:visited { text-decoration:none; }
+	.carouseltext a:hover { text-decoration:underline; }
+	.carouseltext a:active { text-decoration:none; }
+	
+.orbit-bullets{position:absolute; bottom:10px; z-index:99; width:100%; text-align:center; left:0;}
+.orbit-bullets li {
+	display:inline-block;
+}
+* + html .orbit-bullets li {  
+    display:inline;  
+}
+.orbit-bullets li span{background: url("https://images-na.ssl-images-amazon.com/images/G/02/00/00/09/56/26/91/956269142.png") no-repeat scroll left top transparent;
+    color: #999999;
+    cursor: pointer;
+    height: 21px;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    text-indent: -9999px; display:block;
+    width: 21px;}
+
+
+.orbit-bullets li.active span{
+    background-position: left -42px;
+    color: #222222;
+}

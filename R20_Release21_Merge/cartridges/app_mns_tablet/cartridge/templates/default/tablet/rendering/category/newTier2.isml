@@ -1,0 +1,54 @@
+<isset name="CategorgyRenderTemplate" value="landing" scope="page"/>
+
+<iscomment><isset name="DecoratorTemplate" value="search/pt_productsearchresult" scope="page"/></iscomment>
+<isset name="DecoratorTemplate" value="tablet/search/pt_productsearchresult_categorylanding" scope="page"/>
+<isif condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+</isif>
+<isdecorate template="${DecoratorTemplate}">
+
+<iscache type="relative" minute="30" varyby="price_promotion"/>
+
+<isinclude template="tablet/util/modules"/>
+
+<div class="overlay"></div>
+<div class="newTier2 htmlAlign tabletCSS">
+
+<isslot id="newTier2_Module_28_29" description="Simple Header" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_24" description="Image banner with or without Video" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_16" description="Hero Image Inspiration" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isinclude template="tablet/search/components/categoryNavigation"/>
+
+<isslot id="newTier2_Module_7" description="Large Tiles" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_13" description="Engaging Content" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_14" description="Engaging Content" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_9" description="Shop by Products" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_25" description="Shop by Category" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_27" description="Small Tiles 8" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_31" description="Brands carousel x4" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_10" description="Brands Banners" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_30" description="Promotional Banner" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isslot id="newTier2_Module_15" description="T&C text panel" context="category" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isif condition="${pdict.createSlotForKiosk != null }">
+		<iscomment>This slot is created only for content slots for Kiosk</iscomment>			
+		<isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+		<isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+</isif>
+
+<div class="clear"></div>
+</div>
+
+</isdecorate>

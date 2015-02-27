@@ -1,0 +1,240 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+* @input File : String  Name of the local file relative to the Impex share, src folder
+* @output NewFile : String  Name of the local file relative to the Impex share, src folder; changed after modification for Ireland Site
+*-   @input ExampleIn : String This is a sample comment.
+*-   @output ExampleOut : Number
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.object );
+importPackage( dw.catalog );
+importPackage( dw.io );
+importPackage( dw.net );
+
+var siteIdValue : String = "IrelandSite";
+var siteIdAttrName : String = "site-id";
+var attrMap : HashMap;
+var orgFileName : String = "";
+var orgFilePath : String = File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR;	
+	
+function execute( pdict : PipelineDictionary ) : Number
+{
+	orgFileName = pdict.File;
+	//Modify the Master Catalog with the Changes Required for Ireland Site
+	//Praveen:- Code change for CR168
+	var newFileName : String = null;
+	newFileName = orgFileName.replace("Master-Catalog", "Master-Catalog-en_IE");
+	if(null == newFileName || orgFileName.equals(newFileName) || empty(newFileName)){
+			newFileName = orgFileName.replace("Master-Refresh-Catalog", "Master-Refresh-Catalog-en_IE");
+	}
+   	if (!modifyXMLFile(newFileName)){
+		return PIPELET_ERROR;
+	}	
+	pdict.NewFile=newFileName;
+	
+   	return PIPELET_NEXT;
+}
+
+function modifyXMLFile(newFileName : String) : Boolean {
+	//Creating (XML)File Reader
+	var fileIn : File = new File(orgFilePath + orgFileName);
+	var fileReader : FileReader = new FileReader(fileIn);		
+	var xmlReader : XMLStreamReader = new XMLStreamReader(fileReader);
+		
+	//Creating (XML)File Writer	
+	var fileOut : File = new File(orgFilePath + newFileName);
+	if (!fileOut.exists()){
+		fileOut.createNewFile();
+	}	
+	var fileWriter : FileWriter = new FileWriter(fileOut);	
+	var writer : XMLStreamWriter = new XMLStreamWriter(fileWriter);
+	
+	var parseEvent : Number = 0;	
+	var xml_element : XML = null;
+	var isSiteId : Boolean = false;
+	
+	try {
+		//Start Writing the file
+		while (xmlReader.hasNext()) {
+			parseEvent = xmlReader.next();		
+			if (parseEvent==XMLStreamConstants.START_ELEMENT)
+			{	
+				if (hasSiteId(xmlReader)){
+					isSiteId = true;
+					//Create Site Specific Tags
+					createSiteIdElement(xmlReader, writer, isSiteId);
+					isSiteId = false;
+				} else{
+					// Create Normal Tags
+					createElement(xmlReader, writer, isSiteId);
+				}
+			}else if (parseEvent==XMLStreamConstants.END_ELEMENT){
+				writer.writeEndElement();
+				writer.writeRaw("\r\n");	
+			}			
+		}	
+		writer.writeEndElement();
+		writer.writeRaw("\r\n");	
+		writer.writeEndDocument();
+		writer.flush();
+		writer.close();
+		fileWriter.close();
+		Logger.getLogger("modifyMasterCatalog_IE").debug( "modifyMasterCatalog: Changes are done successfully"); 
+	} catch (ex){
+		Logger.getLogger("modifyMasterCatalog_IE").error( "modifyMasterCatalog: Error in making Ireland Specific Chages" + ex );	
+		return true;
+	}	
+	return true;
+}
+
+
+function createSiteIdElement(xmlReader : XMLStreamReader, writer : XMLStreamWriter, isSiteId : Boolean) : XMLStreamReader {
+	var element : XML =  null;
+	var elementName : String = ""; 
+	
+	elementName = xmlReader.getLocalName();
+	  
+	writer.writeStartElement(elementName);
+	// Create Attribues
+	createAttributes(xmlReader, writer, isSiteId);
+	element = xmlReader.XMLObject;
+	// Create SiteID tag's children
+  	writeSiteIdChildren(writer, element);
+  	writer.writeEndElement();
+  	writer.writeRaw("\r\n");
+  	// Start writing site specific tags for Ireland	
+  	writer.writeStartElement(elementName);
+	// Create Attribues
+	createAttributesForIreland(writer);
+	// Create SiteID tag's children
+  	writeSiteIdChildren(writer, element);
+  	writer.writeEndElement();
+  	writer.writeRaw("\r\n");  	  
+  	//isSiteId = false;
+	return xmlReader;
+}
+
+function createElement(xmlReader : XMLStreamReader, writer : XMLStreamWriter, isSiteId : Boolean) : XMLStreamReader {
+	var parseEventTemp : Number = 0;
+	writer.writeStartElement(xmlReader.getLocalName());
+	// Write nameSpace
+	if (xmlReader.getLocalName().equalsIgnoreCase("catalog") && !empty(xmlReader.getNamespaceURI())){
+		writer.writeDefaultNamespace(xmlReader.getNamespaceURI());
+	}
+	
+	// Create Attribues
+	createAttributes(xmlReader, writer, isSiteId);	
+	parseEventTemp = xmlReader.next();
+	//called if it is an empty node
+	if (parseEventTemp==XMLStreamConstants.END_ELEMENT){
+		writer.writeEndElement();
+		writer.writeRaw("\r\n");
+	// If children exist. 
+	} else if (parseEventTemp==XMLStreamConstants.START_ELEMENT){
+		if (hasSiteId(xmlReader)){
+					isSiteId = true;
+					//Create Site Specific Tags
+					createSiteIdElement(xmlReader, writer, isSiteId);
+					isSiteId = false;
+		}else{		
+			createElement(xmlReader, writer, isSiteId);
+		}
+	}else if (parseEventTemp==XMLStreamConstants.CHARACTERS){		
+		createTextElement(xmlReader, writer, parseEventTemp);		
+	} 
+	return xmlReader;
+}
+
+function createTextElement(xmlReader : XMLStreamReader, writer : XMLStreamWriter, eventType : Number) : XMLStreamReader {
+	/* following code is taken from the APIs (method getElementText()). 
+	* getText() method does not return the complete text if it includes some special characters.
+	* and getElementText() moves the xmlReader to next tags, which results the skipping of some tags. | Naveen Kumar	 
+	*/ 	 
+	var buf : String = "" ;	
+	while(eventType != XMLStreamConstants.END_ELEMENT ) {
+	if(eventType == XMLStreamConstants.CHARACTERS || 
+			eventType == XMLStreamConstants.CDATA || 
+			eventType == XMLStreamConstants.SPACE || 
+			eventType == XMLStreamConstants.ENTITY_REFERENCE) { 
+		buf = buf.concat(xmlReader.getText()); 
+	}  
+		eventType = xmlReader.next();
+	}	
+	writer.writeCharacters(buf);
+	writer.writeEndElement();
+	writer.writeRaw("\r\n");
+	return xmlReader;
+}
+
+function createAttributes(xmlReader : XMLStreamReader, writer : XMLStreamWriter, isSiteId : Boolean) : XMLStreamReader {	
+	var index : Number;	
+	var attrName : String;
+	var attrValue : String;
+	attrMap = new HashMap();
+	for (index=0; index<xmlReader.getAttributeCount(); index++){		
+		if (!empty(xmlReader.getAttributePrefix(index))){
+			attrName = xmlReader.getAttributePrefix(index) + ":" + xmlReader.getAttributeLocalName(index);
+		}else {
+			attrName = xmlReader.getAttributeLocalName(index);
+		}	
+		attrValue = xmlReader.getAttributeValue(index);
+				
+		if (isSiteId){
+			
+			attrMap.put(attrName, attrValue);
+		}
+		writer.writeAttribute(attrName, attrValue);
+	}	
+	return xmlReader;
+}
+
+function createAttributesForIreland(writer : XMLStreamWriter) : void {
+	if (attrMap != null){
+		var keySetIterator : Iterator = attrMap.keySet().iterator();
+		while (keySetIterator.hasNext()){
+			var attrName : String = keySetIterator.next();
+			var attrValue : String = attrMap.get(attrName);
+			if (attrName.equalsIgnoreCase(siteIdAttrName)){
+				attrValue = siteIdValue;
+			}
+			writer.writeAttribute(attrName, attrValue);
+		}
+		attrMap = null;	
+	}
+}
+
+function hasSiteId (xmlReader : XMLStreamReader) : Boolean {	
+	var index : Number;	
+	for (index=0; index<xmlReader.getAttributeCount(); index++){		
+		if (xmlReader.getAttributeLocalName(index).equalsIgnoreCase(siteIdAttrName))
+			return true;
+	}	
+	return false;
+}
+
+
+function writeSiteIdChildren (writer : XMLStreamWriter, element : XML) : void {
+	for each( var child : XML in element.children()) {
+		if( child.localName()) {
+			writer.writeStartElement(child.localName().toString());
+			writer.writeCharacters(child.valueOf().toString());
+			writer.writeEndElement();
+		} else if (child.nodeKind("text")){
+			writer.writeCharacters(child.valueOf().toString());
+		}
+	}
+}

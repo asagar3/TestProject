@@ -1,0 +1,63 @@
+/**
+*   @input inputJSON : String 
+*	@input inputPlacement : String
+*	@input remotePlacement : String 
+*   @output productMap : dw.util.HashMap
+* 	@output strategyMessageOutput : String
+*	@output placementOutput : String
+*	@output remotePlacementOutput : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importPackage( dw.catalog );
+
+function execute( pdict : PipelineDictionary ) : Number {
+
+	Logger.debug("-------------- RichRelevance - Get json products ---------------");
+	
+
+	if(empty(pdict.inputJSON) || pdict.inputJSON=="[]"|| pdict.inputJSON==""){
+		return PIPELET_ERROR;
+		
+	} else {
+		Logger.debug("-------------- RichRelevance - GOT IN JSON PARSE ---------------");
+		Logger.debug("JSON VALUE got from RR : " + pdict.inputJSON);
+		var productIdsArrayList : dw.util.List = new dw.util.ArrayList();
+		var productMap : HashMap = new HashMap();		
+		var data : Object = JSON.parse(pdict.inputJSON);
+		var placement: String = pdict.inputPlacement;
+		var remotePlacement:String = pdict.remotePlacement;
+		
+		
+		var placementType = data.placementType;
+		var strategyCode = data.strategy.code;
+		
+		var productIdsArray : Array = data.items;
+		var productURL: String = "";
+		var subProdURL: String = "";
+		var splitIndex: Number; 
+		
+		for each (var product :Object in productIdsArray) {
+			if (product.id != null) {
+		  		//Lucy Milligan - added to substitute the URL from the feed with the correct URL for the site/users locale
+		  		productURL = URLUtils.http('Product-Show') + "?pid=" + product.id;
+		  		splitIndex = product.url.indexOf("ct=")+3;
+		  		subProdURL = product.url.substring(0,splitIndex);
+		  		subProdURL+=productURL;
+	       		productMap.put(product.id, subProdURL );   
+	     	} 
+	     Logger.debug("Product ID : " + product.id);
+		 }
+
+		//productMap.put("Parent_T494300", "" ); //add for debug the pricing.
+		pdict.productMap = productMap;
+	   	pdict.strategyMessageOutput = strategyCode;
+	   	pdict.placementOutput = placement;
+	   	pdict.remotePlacementOutput = remotePlacement;
+	   	return PIPELET_NEXT;
+	}
+
+    
+}

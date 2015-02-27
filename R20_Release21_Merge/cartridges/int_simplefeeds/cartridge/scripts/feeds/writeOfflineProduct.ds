@@ -1,0 +1,75 @@
+/**
+* Demandware Script File
+* Write Products from XML in CSV file which are offline in all sites.
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @input xmlStreamReader : dw.io.XMLStreamReader
+*   @input csvWriter : dw.io.CSVStreamWriter
+*
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+
+var ATTR_PID_NAME : String = "product-id";
+var ATTR_SID_NAME : String = "site-id";
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var xmlReader : XMLStreamReader= args.xmlStreamReader;
+	var element : XML = null;
+	var str : String = "";
+	var arr : Array = null;
+	var flag : Boolean = false;
+	var writer : CSVStreamWriter = args.csvWriter;
+	try
+	{
+	   
+	   var pid : String = getPid(xmlReader);
+	   element = xmlReader.XMLObject;
+	   for each(  var childs : XML  in element.children() ) 
+		{
+	    	if(childs.localName() && childs.localName().equalsIgnoreCase("online-flag") && childs.valueOf().toString().equalsIgnoreCase("true"))
+			{
+					flag = true;
+					break;
+			}
+		}
+		
+		if(!flag)
+		{
+			str = "'" + pid + "'" ;
+			arr = str.split(",");
+			writer.writeNext(arr);
+		}
+	}
+	 catch (ex)
+	 {
+		Logger.error( "WriteOfflineProduct: Error in Creating PidList. " + ex );	
+		return PIPELET_ERROR;
+	 }
+    return PIPELET_NEXT;
+}
+
+
+function getPid(xmlReader : XMLStreamReader) : String {	
+	var index : Number = null;	
+	var attrValue : String = null;
+	//var count : String = xmlReader.getAttributeValue(0);
+	for (index=0; index<xmlReader.getAttributeCount(); index++){	
+			
+		if (ATTR_PID_NAME.equalsIgnoreCase(xmlReader.getAttributeLocalName(index))){
+			attrValue = xmlReader.getAttributeValue(index);
+		}				
+	}	
+	return attrValue;
+}

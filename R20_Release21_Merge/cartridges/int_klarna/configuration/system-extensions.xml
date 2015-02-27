@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="KLARNA_ACTIVE_COUNTRIES">
+                <display-name xml:lang="sv-SE">Active countries</display-name>
+                <description xml:lang="sv-SE">For what countries do you want to have Klarna activated?</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <select-multiple-flag>true</select-multiple-flag>
+                <value-definitions>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Denmark</display>
+                        <value>DK</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Germany</display>
+                        <value>DE</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Finland</display>
+                        <value>FI</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Netherlands</display>
+                        <value>NL</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Norway</display>
+                        <value>NO</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Sweden</display>
+                        <value>SE</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INVOICEFEE_DE">
+                <display-name xml:lang="sv-SE">Invoice fee Germany</display-name>
+                <description xml:lang="sv-SE">The invoice fee in Euro to charge German customers</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+                <default-value>0.0</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INVOICEFEE_DK">
+                <display-name xml:lang="sv-SE">Invoice fee Denmark</display-name>
+                <description xml:lang="sv-SE">The invoice fee in DKK to charge Danish customers</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+                <default-value>0.0</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INVOICEFEE_FI">
+                <display-name xml:lang="sv-SE">Invoice fee Finland</display-name>
+                <description xml:lang="sv-SE">The invoice fee in Euro to charge Finnish customers</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+                <default-value>0.0</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INVOICEFEE_NL">
+                <display-name xml:lang="sv-SE">Invoice fee Netherlands</display-name>
+                <description xml:lang="sv-SE">The invoice fee in Euro to charge Dutch customers</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+                <default-value>0.0</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INVOICEFEE_NO">
+                <display-name xml:lang="sv-SE">Invoice fee Norway</display-name>
+                <description xml:lang="sv-SE">The invoice fee in NOK to charge Norwegian customers.</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+                <default-value>0.0</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INVOICEFEE_SE">
+                <display-name xml:lang="sv-SE">Invoice fee Sweden</display-name>
+                <description xml:lang="sv-SE">The invoice fee in SEK to charge Swedish customers</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+                <default-value>0.0</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_MERCHANT_ID">
+                <display-name xml:lang="sv-SE">Merchant ID</display-name>
+                <description xml:lang="sv-SE">Your Merchant ID at Klarna</description>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_SHARED_SECRET">
+                <display-name xml:lang="sv-SE">Shared secret</display-name>
+                <description xml:lang="sv-SE">Your shared secret that you have received from Klarna.</description>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_SPECIAL_ACTIVE_COUNTRIES">
+                <display-name xml:lang="sv-SE">Active countries for special campaign</display-name>
+                <description xml:lang="sv-SE">The countries that are using the current special campaign</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <select-multiple-flag>true</select-multiple-flag>
+                <value-definitions>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Denmark</display>
+                        <value>DK</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Finland</display>
+                        <value>FI</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Germany</display>
+                        <value>DE</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Netherlands</display>
+                        <value>NL</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Norway</display>
+                        <value>NO</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Sweden</display>
+                        <value>SE</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_SPECIAL_LOGO">
+                <display-name xml:lang="sv-SE">URL to special campaign logotype</display-name>
+                <description xml:lang="sv-SE">The URL to the logotype of the current special campaign</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_TARGET_SYSTEM">
+                <display-name xml:lang="sv-SE">Target system</display-name>
+                <description xml:lang="sv-SE">What system do you want to target? Live or beta-test?</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition default="true">
+                        <display xml:lang="sv-SE">Live</display>
+                        <value>https://payment.klarna.com</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">Beta-test</display>
+                        <value>http://beta-test.klarna.com</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_TAX_CLASS">
+                <display-name xml:lang="sv-SE">Tax class</display-name>
+                <description xml:lang="sv-SE">The tax class ID to be used to calculate the tax amount included in the invoice fee</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>standard</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_TEST_FLAG">
+                <display-name xml:lang="sv-SE">Send test flag</display-name>
+                <description xml:lang="sv-SE">Enable this if you want to create test invoices at Klarna. No invoices will be sent and no money will be paid to the merchant.</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="KLARNA_INTEGRATION_MODE">
+                <display-name xml:lang="x-default">Integration mode</display-name>
+                <description xml:lang="x-default">Advanced or standard integration. With standard you need to use Klarna Online to activate invoices</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition default="true">
+                        <display xml:lang="sv-SE">standard</display>
+                        <value>standard</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="sv-SE">advanced</display>
+                        <value>advanced</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="KLARNA">
+                <display-name xml:lang="sv-SE">Klarna payment settings</display-name>
+                <attribute attribute-id="KLARNA_MERCHANT_ID"/>
+                <attribute attribute-id="KLARNA_SHARED_SECRET"/>
+                <attribute attribute-id="KLARNA_TARGET_SYSTEM"/>
+                <attribute attribute-id="KLARNA_TEST_FLAG"/>
+                <attribute attribute-id="KLARNA_ACTIVE_COUNTRIES"/>
+                <attribute attribute-id="KLARNA_INVOICEFEE_DK"/>
+                <attribute attribute-id="KLARNA_INVOICEFEE_FI"/>
+                <attribute attribute-id="KLARNA_INVOICEFEE_DE"/>
+                <attribute attribute-id="KLARNA_INVOICEFEE_NL"/>
+                <attribute attribute-id="KLARNA_INVOICEFEE_NO"/>
+                <attribute attribute-id="KLARNA_INVOICEFEE_SE"/>
+                <attribute attribute-id="KLARNA_TAX_CLASS"/>
+                <attribute attribute-id="KLARNA_SPECIAL_LOGO"/>
+                <attribute attribute-id="KLARNA_SPECIAL_ACTIVE_COUNTRIES"/>
+                <attribute attribute-id="KLARNA_INTEGRATION_MODE"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+
+    <type-extension type-id="OrderPaymentInstrument">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="KlarnaInvoiceFee">
+                <display-name xml:lang="sv-SE">Invoice fee</display-name>
+                <description xml:lang="sv-SE">The invoice fee charged to the customer when using Klarna Invoice</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="KlarnaInvoiceFeeTaxAmount">
+                <display-name xml:lang="sv-SE">Invoice fee tax amount</display-name>
+                <description xml:lang="sv-SE">The invoice fee tax amount</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="KlarnaMonthlyCost">
+                <display-name xml:lang="sv-SE">Monthly cost</display-name>
+                <description xml:lang="sv-SE">The monthly cost for this transaction</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="KlarnaPClassID">
+                <display-name xml:lang="sv-SE">Pclass used</display-name>
+                <description xml:lang="sv-SE">The PClass used when shopping with Klarna</description>
+                <type>int</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="KlarnaPaymentDescription">
+                <display-name xml:lang="sv-SE">Payment</display-name>
+                <description xml:lang="sv-SE">The description of the Klarna Payment method used.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="KlarnaReferencePerson">
+                <display-name xml:lang="sv-SE">Reference person</display-name>
+                <description xml:lang="sv-SE">When shopping for a company a reference person is needed.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="KlarnaStatus">
+                <display-name xml:lang="x-default">Klarna Status</display-name>
+                <description xml:lang="x-default">The status of the order at Klarna</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>true</externally-managed-flag>
+                <value-definitions>
+                    <value-definition>
+                        <display xml:lang="x-default">ACCEPTED</display>
+                        <value>1</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">PENDING</display>
+                        <value>2</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">DENIED</display>
+                        <value>3</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="KLARNA">
+                <display-name xml:lang="sv-SE">Klarna</display-name>
+                <attribute attribute-id="KlarnaPaymentDescription"/>
+                <attribute attribute-id="KlarnaPClassID"/>
+                <attribute attribute-id="KlarnaInvoiceFee"/>
+                <attribute attribute-id="KlarnaStatus"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+</metadata>

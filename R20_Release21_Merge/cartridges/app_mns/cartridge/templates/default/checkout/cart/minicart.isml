@@ -1,0 +1,131 @@
+<iscomment>This includes global utilities into the pages</iscomment>
+<isinclude template="util/modules"/>
+
+<iscomment>
+	This creates reporting data for the cart. The application assumes that
+	the minicartcontent template will be embeeded into every page, so that the information about
+	an open cart can be report as soon as it is available or changed.
+	Additionally this page must not be cached to allow the correct reporting any time.
+
+	This include also takes care of reporting source codes.
+</iscomment>
+<isinclude template="util/reporting/ReportBasket.isml"/>
+
+<isset name="isRedirectURL" value="${pdict.CurrentSession.custom.isRedirected}" scope="page"/>
+<isif condition="${isRedirectURL != null && isRedirectURL.equals('true')}">
+<isset name="showMiniCart" value="${true}" scope="page"/>
+<isset name="isRedirected" value="${false}" scope="session"/>
+<iselse>
+<isset name="showMiniCart" value="${false}" scope="page"/>
+</isif>
+
+<iscomment> the mini cart total which is always visible</iscomment>
+<div class="basketWrapper">
+<div class="minicarttotal">
+<a id="top" href="javascript:;" title="top"></a>
+<span class="accessibility">${Resource.msg('minicart.productaddedtobasket','checkout',null)}</span>
+
+<div class="minicartBox">
+	<div class="minicartText">
+	<isif condition="${(pdict.Basket != null) && (pdict.Basket.productLineItems.size() > 0 )}">
+	<iscomment>CR 135 Changes for iPAD</iscomment>
+		<div class="mini_basket_hover">
+			<a href="${URLUtils.http('Cart-Show')}" title="${Resource.msg('minicart.basketwithoutcolon','checkout',null)}">${Resource.msg('minicart.basketwithoutcolon','checkout',null)}</a>
+	<iselse>
+		<span class="mini_basket_header">
+			${Resource.msg('minicart.basketwithoutcolon','checkout',null)}:
+		</span>
+	</isif>
+	<iscomment><a href="${URLUtils.url('Cart-Show')}" title="${Resource.msg('minicart.basketwithoutcolon','checkout',null)}">${Resource.msg('minicart.basketwithoutcolon','checkout',null)}</a></span></iscomment> 
+	<isif condition="${(pdict.Basket != null) && (pdict.Basket.productLineItems.size() + pdict.Basket.giftCertificateLineItems.size() > 0 )}">
+		<isscript>
+			// calculate the total number of items in the cart by adding quantities together
+			// do not count bonus line items
+			var cartQty : Number = 0;
+			var pliIt : dw.util.Iterator = pdict.Basket.productLineItems.iterator();
+			
+			while (pliIt.hasNext()) { 
+				var pli : dw.order.ProductLineItem = pliIt.next(); 
+				cartQty += pli.quantity; 
+			}
+			
+			// add the gift certificates to cart quantity
+			cartQty += pdict.Basket.giftCertificateLineItems.size();
+		</isscript>
+		<iscomment><span class="cartlabel">${Resource.msg('minicart.label','checkout',null)}</span></iscomment>
+		<iscomment><a href="${URLUtils.http('Cart-Show')}" title="${Resource.msg('minicart.viewcart','checkout',null)}" class="linkminicart"></iscomment>
+		<iscomment>
+		<isif condition="${cartQty > 1}">
+			<isset name="item_word" value="${Resource.msg('minicart.items','checkout',null)}" scope="page"/>
+		<iselse>
+			<isset name="item_word" value="${Resource.msg('minicart.item','checkout',null)}" scope="page"/>
+		</isif>
+		</iscomment>
+		<span class="greenMini">
+		(&nbsp;<isprint value="${cartQty}" formatter="##" />&nbsp;<isprint value="${item_word}"/>)
+		</span>
+		<iscomment></a></iscomment>
+		<!--  <isprint value="${pdict.Basket.getAdjustedMerchandizeTotalPrice(true).add(pdict.Basket.giftCertificateTotalPrice)}"/> -->
+		<div class="miniCartBG">
+		</div>
+		</div>
+	
+		<iscomment>CR 135 Changes for iPAD</iscomment>
+		<iscomment>
+		<span class="proceedtocheckout">
+			<a href="${URLUtils.http('Cart-Show')}" title="${Resource.msg('minicart.proceedcheckout','checkout',null)}" class="miniLink">${Resource.msg('minicart.proceedcheckout','checkout',null)}</a></iscomment>
+			<iscomment>			<a href="${URLUtils.http('Cart-Show')}" title="${Resource.msg('minicart.proceedcheckout','checkout',null)}">${Resource.msg('minicart.proceedcheckout','checkout',null)}</a></iscomment>
+		<iscomment></span></iscomment>
+		</div>
+	<iselse/>
+		<iscomment>added an ID to the span class. this is done for Omniture impl | Naveen Kumar</iscomment>
+		<span class="cartlabel">${Resource.msg('minicart.label','checkout',null)}</span><span class="emptycart" id="om_emptycart">(0)</span>
+		</div>
+		<div class="miniCartBG"></div>
+	</isif>
+	</div>
+</div><!-- END:minicarttotal -->
+<!-- <div class="minicartArrow"></div> -->
+<iscomment> the dynamically shown view of the last added item </iscomment>
+<isif condition="${!empty(pdict.Basket) && (pdict.Basket.productLineItems.size() > 0 || pdict.Basket.giftCertificateLineItems.size() > 0)}">
+	<div class="minicartcontent" style="display: none;">
+		<div class="inner_wrapper">
+			<iscomment><h3>New item has been added to your cart.</h3></iscomment>
+			<iscomment><div class="clear"><!-- FLOAT CLEAR --></div></iscomment>
+			<div class="checkoutminicart">
+				<isminilineitems p_lineitemctnr="${pdict.Basket}" p_showreverse="${true}" p_productlineitem="${pdict.ProductLineItem}" p_giftcertlineitem="${pdict.GiftCertificateLineItem}"/>
+			</div><!-- checkoutminicart -->
+			<div class="minicarttotals">
+				<iscomment><!-- Asha | Removing. As we don't need fullinfo here -->	</iscomment>
+				<iscomment>
+					<isordertotals p_lineitemctnr="${pdict.Basket}" p_totallabel="Subtotal:"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</iscomment>
+				<div class="link_underline">
+					<a href="${URLUtils.url('Cart-Show')}" title="${Resource.msg('minicart.Editbasket','checkout',null)}">${Resource.msg('minicart.Editbasket','checkout',null)}</a>
+				</div>
+				<div class="ordersubtotal">${Resource.msg('minicart.ordertotal','checkout',null)}<isprint value="${pdict.Basket.getAdjustedMerchandizeTotalPrice(true).add(pdict.Basket.giftCertificateTotalPrice)}"/></div>
+				<isslot id="minicart-banner" description="This is the banner within the minicart, directly above the View Cart/Checkout link." context="global" />
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+				<div class="btn-green-flat floatleft">
+					<div class="link_button">
+						<a href="${URLUtils.url('Cart-Show')}" title="${Resource.msg('minicart.checkout','checkout',null)}" class="btn-ic-lock">${Resource.msg('minicart.checkout','checkout',null)}</a>
+					</div>
+				</div>
+				<div class="clear"></div>
+			<!-- END:link2cart -->
+		</div>
+	</div><!-- END:minicartcontent-->
+</isif>
+</div>
+
+<script type="text/javascript">
+jQ(function(){
+	if(${showMiniCart}){
+		app.minicart.slide();
+		
+	}
+});
+
+</script>

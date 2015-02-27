@@ -1,0 +1,266 @@
+/**
+* This script creates the actual Klarna payment instrument and returns it.
+*
+* @input Basket : dw.order.Basket The basket
+* @input PaymentType : String the type of the payment instrument.
+* @input KlarnaFormInvoice : dw.web.Form The Klarna form
+* @input KlarnaFormPartPayment : dw.web.Form The Klarna form
+* @input KlarnaFormSpecial : dw.web.Form The Klarna form
+* @output PaymentInstrument : dw.order.OrderPaymentInstrument The created payment instrument.
+* @output ErrorMessage : String An error that has occured
+* @output ErrorField : String optional field where error occured
+*/
+ 
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.customer );
+importPackage( dw.value );
+importPackage( dw.util );
+importPackage( dw.object );
+
+importScript("int_klarna:libKlarnaCalc.ds");
+var Logger : Log = dw.system.Logger.getLogger("klarna", "klarna");
+
+function execute( args : PipelineDictionary ) : Number
+{	
+	var basket : Basket = args.Basket;
+	var paymentType : String = args.PaymentType;	
+	var form : dw.web.Form = (paymentType == "KLARNA" ? args.KlarnaFormInvoice : (paymentType == "KLARNA_PARTPAYMENT" ? args.KlarnaFormPartPayment : args.KlarnaFormSpecial));
+	
+	// Reset output variables
+	args.ErrorField = null;
+	args.ErrorMessage = "A unknown error has occured";
+
+	// As we only accept Klarna we simply remove all other payment options except Gift Cards 
+	for each ( var paymentInstrument : PaymentInstrument in basket.getPaymentInstruments() ) {
+		if(paymentInstrument.getPaymentMethod() != "GIFT_CERTIFICATE") {
+			basket.removePaymentInstrument(paymentInstrument);
+		}
+	}
+
+	// Get a collection of the shipments
+	var shipments : Collection = basket.getShipments();
+	
+	//TODO Check for more than one shipment
+	if( shipments.length > 1 ) {
+		args.ErrorMessage = dw.web.Resource.msg("klarna.error_multiple_shipping", "klarna", null);
+		Logger.error(args.ErrorMessage);
+		return PIPELET_ERROR;	
+	}
+
+	// Define some handy shortcuts
+	var shipment : Shipment = shipments[0];
+	var shippingAddress : OrderAddress = shipment.getShippingAddress();
+	var billingAddress : OrderAddress = basket.getBillingAddress();
+	var taxJurisdiction : String = TaxMgr.getTaxJurisdictionID(new ShippingLocation(shippingAddress));
+	var KlarnaCountry : String = shippingAddress.getCountryCode();
+
+	// Bail early if we have a invalid country, this should not happen as klarna should not be shown
+	// as a payment option if that is the case.
+	/*if(KlarnaCountry == 'SE' || KlarnaCountry == 'NO' || KlarnaCountry == 'DK' || KlarnaCountry == 'FI' || KlarnaCountry == 'DE' || KlarnaCountry == 'NL') {
+		args.ErrorMessage = dw.web.Resource.msg("klarna.invalid_country", "klarna", null)
+		return PIPELET_ERROR
+	}*/
+
+	// In germany and austria we need to have concent checkbox, make sure it's checked
+	if(KlarnaCountry == 'DE' || KlarnaCountry == 'AT') {
+		if(!form['concent'].checked) {
+			args.ErrorField = form['concent'].htmlName;
+			args.ErrorMessage = dw.web.Resource.msg("klarna.error_concent", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+	}
+
+	// Make sure we got a proper value for gender
+	if(KlarnaCountry == 'DE' || KlarnaCountry == 'NL' || KlarnaCountry == 'AT') {
+		var gender = ({'f': 0, 'm': 1})[form['gender'].htmlValue];
+		if(gender == undefined) {
+			args.ErrorField = form['gender'].htmlName;
+			args.ErrorMessage = dw.web.Resource.msg("klarna.error_gender", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+
+		if(!form['birthday']['year'].htmlValue.match(/^[1-9][0-9]{3}$/)) {
+			args.ErrorField = form['birthday']['year'].htmlName;
+			args.ErrorMessage = dw.web.Resource.msg("klarna.error_birthday", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+
+		if(!form['birthday']['month'].htmlValue.match(/^[0-1][0-9]$/)) {
+			args.ErrorField = form['birthday']['month'].htmlName;
+			args.ErrorMessage = dw.web.Resource.msg("klarna.error_birthday", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+
+		if(!form['birthday']['day'].htmlValue.match(/^[0-3][0-9]$/)) {
+			args.ErrorField = form['birthday']['day'].htmlName;
+			args.ErrorMessage = dw.web.Resource.msg("klarna.error_birthday", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+	}
+
+	if(KlarnaCountry == 'SE' || KlarnaCountry == 'FI' || KlarnaCountry == 'NO' || KlarnaCountry == 'DK') {
+		if(form['ssn'].htmlValue.length == 0 || (form['is_company'].htmlValue == 'private' && !form['ssn'].isValid())) {
+			args.ErrorField = form['ssn'].htmlName;
+			args.ErrorMessage = dw.web.Resource.msg("klarna.error_ssn", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+	}
+
+	// Create the payment instrument and add it to
+	// the pdicts. TODO Maybe add the invoice fee here
+	var paymentInstr : OrderPaymentInstrument = basket.createPaymentInstrument(paymentType,
+		new Money(basket.getAdjustedMerchandizeTotalGrossPrice().getValue(), basket.currencyCode));
+	args.PaymentInstrument = paymentInstr;
+	var l : dw.object.CustomAttributes = paymentInstr.getCustom();
+
+	// Add some extra Klarna related information to the payment instrument
+	var pclassID : Number = Number(form['pclass'].htmlValue);
+	l["KlarnaPClassID"] = pclassID;
+	
+	
+	if(pclassID == -1) {
+		// Invoice
+		var klarnaTaxClass : String = Site.getCurrent().getCustomPreferenceValue("KLARNA_TAX_CLASS");
+		var invoiceFeeTaxRate : Number = (taxJurisdiction == null || klarnaTaxClass == null ? 0 : TaxMgr.getTaxRate(klarnaTaxClass, taxJurisdiction))+1;
+		l["KlarnaInvoiceFee"] = Number(Site.getCurrent().getCustomPreferenceValue("KLARNA_INVOICEFEE_" + shippingAddress.getCountryCode()));
+		l["KlarnaInvoiceFeeTaxAmount"] = Number(l["KlarnaInvoiceFee"]*(1-1/invoiceFeeTaxRate));
+		l["KlarnaPaymentDescription"] = dw.web.Resource.msg(paymentType + '_description', 'klarna', null);
+	} else {
+		// Get description and calculate monthly cost from PClass
+		try {
+			var pclass : CustomObject = CustomObjectMgr.getCustomObject('Pclasses', pclassID);
+			l['KlarnaPaymentDescription'] = pclass.custom['description'];
+			var orderTotal : Number = basket.getTotalGrossPrice().getValue();
+
+			var monthlyCost : Number = calc_monthly_cost(orderTotal, pclass.custom, 0);
+		} catch (e) {
+			args.ErrorMessage = e.message;
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+
+		if(pclass.custom.type == 3 || pclass.custom.type == 4) {
+			l["KlarnaMonthlyCost"] = null;
+		} else {
+			l["KlarnaMonthlyCost"] = StringUtils.format(dw.web.Resource.msg("klarna.monthly_cost_short", "klarna", null),
+				new dw.value.Money(monthlyCost, basket.getCurrencyCode()));
+		}
+	}
+
+	if(form['is_company'].htmlValue == 'company') {
+		if(pclassID != -1) {
+			args.ErrorMessage = dw.web.Resource.msg("klarna.company_not_allowed", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+
+		// Company purchases only for nordic countries
+		if(KlarnaCountry == 'SE') {
+			// In sweden use the address returned by GetAddresess
+			if(form['addresses'].htmlValue == '') {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.error_missing_address", "klarna", null);
+				Logger.error(args.ErrorMessage);
+				return PIPELET_ERROR;
+			}
+			if(form['reference'].htmlValue.length == 0) {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.error_missing_reference", "klarna", null);
+				Logger.error(args.ErrorMessage);
+				return PIPELET_ERROR;
+			}
+			var klarnaAddress = form['addresses'].htmlValue.split('|');
+			shippingAddress.setCompanyName(klarnaAddress[0]);
+			shippingAddress.setFirstName(""); // FIXME
+			shippingAddress.setLastName(""); // FIXME
+			shippingAddress.setAddress1(klarnaAddress[1]);
+			shippingAddress.setAddress2("");
+			shippingAddress.setPostalCode(klarnaAddress[2]);
+			shippingAddress.setCity(klarnaAddress[3]);
+			l["KlarnaReferencePerson"] = form["reference"].htmlValue;
+
+		} else if(KlarnaCountry == 'FI' || KlarnaCountry == 'DK' || KlarnaCountry == 'NO') {
+			// Make sure company name and reference is set
+			if(form['company_name'].htmlValue.length == 0) {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.error_missing_company", "klarna", null);
+				Logger.error(args.ErrorMessage);
+				return PIPELET_ERROR;
+			}
+			if(form['reference'].htmlValue.length == 0) {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.error_missing_reference", "klarna", null);
+				Logger.error(args.ErrorMessage);
+				return PIPELET_ERROR;
+			}
+
+			shippingAddress.setCompanyName(form['company_name'].htmlValue);
+			billingAddress.setCompanyName(form['company_name'].htmlValue);
+			l["KlarnaReferencePerson"] = form["reference"].htmlValue;
+
+		} else {
+			args.ErrorMessage += dw.web.Resource.msg("klarna.company_not_allowed", "klarna", null);
+			Logger.error(args.ErrorMessage);
+			return PIPELET_ERROR;
+		}
+	} else if(form['is_company'].htmlValue == 'private') {
+		// Private purchase all countries
+		if(KlarnaCountry == 'SE') {
+			// In sweden use the address returned by GetAddresess
+			if(form['addresses'].htmlValue == '') {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.error_missing_address", "klarna", null);
+				Logger.error(args.ErrorMessage);
+				return PIPELET_ERROR;
+			}
+			var klarnaAddress = form['addresses'].htmlValue.split('|');
+			var name = klarnaAddress[0].split(' ');
+			shippingAddress.setFirstName(name[0]);
+			shippingAddress.setLastName(name[1]);
+			shippingAddress.setAddress1(klarnaAddress[1]);
+			shippingAddress.setAddress2("");
+			shippingAddress.setPostalCode(klarnaAddress[2]);
+			shippingAddress.setCity(klarnaAddress[3]);
+
+		} else if(KlarnaCountry == 'DE') {
+			var sstreet : String = "abc34";//shippingAddress.getAddress1();
+			var bstreet : String = "abc34";//billingAddress.getAddress1();
+
+			var bhouse_number = (/[0-9]+(?:[a-zA-Z][a-zA-Z]?(?![a-zA-Z]))?/)(bstreet);
+			if(bhouse_number == null) {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.missing_house_number_billing", "klarna", null);
+				Logger.error(args.ErrorMessage);
+				return PIPELET_ERROR;
+			}
+			bhouse_number = bhouse_number[0];
+			bstreet = bstreet.replace(bhouse_number, "").trim();
+
+			var house_number = (/[0-9]+(?:[a-zA-Z][a-zA-Z]?(?![a-zA-Z]))?/)(sstreet);
+			if(house_number == null) {
+				args.ErrorMessage = dw.web.Resource.msg("klarna.missing_house_number_shipping", "klarna", null);
+				if(sstreet == bstreet) {
+					shippingAddress.setAddress1(billingAddress.getAddress1());
+				} else {
+					Logger.error(args.ErrorMessage);
+					return PIPELET_ERROR;
+				}
+			}
+			house_number = house_number[0];
+			sstreet = sstreet.replace(house_number, "").trim();
+		}
+
+		// Blank reference person that could linger from earlier attempt an company purchase
+		l['KlarnaReferencePerson'] = null;
+	} else {
+		args.ErrorMessage = "ERROR: type needs to be 'private' or 'company'";
+		Logger.error(args.ErrorMessage);
+		return PIPELET_ERROR;
+	}
+
+	/* FIXME: demandware denies valid phone numbers on shipping form, this only for my testing purposes */
+	shippingAddress.setPhone(billingAddress.getPhone());
+	
+    return PIPELET_NEXT;
+}

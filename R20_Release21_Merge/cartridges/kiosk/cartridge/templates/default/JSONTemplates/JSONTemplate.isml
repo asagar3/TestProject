@@ -1,0 +1,2 @@
+<!--- TEMPLATENAME: JSONTemplate.isml --->
+${JSON.stringify(pdict.customObject)}

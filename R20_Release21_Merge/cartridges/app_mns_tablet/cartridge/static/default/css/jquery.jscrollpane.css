@@ -1,0 +1,107 @@
+.jspContainer {
+	POSITION: relative; OVERFLOW: hidden
+}
+.jspPane {
+	POSITION: absolute
+}
+.jspVerticalBar {
+	POSITION: absolute; WIDTH: 13px; BACKGROUND: red; HEIGHT: 100%; TOP: 0px; RIGHT: 0px
+}
+.jspHorizontalBar {
+	POSITION: absolute; WIDTH: 100%; BOTTOM: 0px; BACKGROUND: red; HEIGHT: 13px; LEFT: 0px
+}
+.jspVerticalBar * {
+	PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; PADDING-TOP: 0px
+}
+.jspHorizontalBar * {
+	PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; PADDING-TOP: 0px
+}
+.jspCap {
+	DISPLAY: none;
+}
+.jspHorizontalBar .jspCap {
+	FLOAT: left
+}
+.jspTrack {
+	POSITION: relative; background:url(../images/scrolltrack-bg.gif) repeat-y #fff;
+}
+.jspDrag {
+	POSITION: relative; background:url(../images/scrolldrag-bg.png) bottom; TOP: 0px; CURSOR: pointer; LEFT: 0px;
+	padding: 3px 0;
+}
+.jspDragTop{
+	background:url(../images/scrolldrag-top.png) top;
+	width: 13px;
+	height: 11px;
+	top: -8px;
+	position: absolute;
+	}
+.jspDragLeft{
+	background:url(../images/scrolldrag-left.png) left;
+	width: 12px;
+	height: 13px;
+	left: -7px;
+	position: absolute;
+	}
+.jspDragRight{
+	background:url(../images/scrolldrag-right.png) right;
+	width: 12px;
+	height: 13px;
+	right: -7px;
+	position: absolute;
+	}
+.jspHorizontalBar .jspTrack {
+	FLOAT: left; HEIGHT: 100%; background:url(../images/scrolltrack-bg-horz.gif) repeat-x #fff;
+}
+.jspHorizontalBar .jspDrag {
+	FLOAT: left; HEIGHT: 100%; background:url(../images/scrolldrag-bg-horz.gif) repeat-x right; top:-3px;
+}
+.jspArrow {
+	TEXT-INDENT: -20000px; DISPLAY: block; background:url(../images/scrollarrow.gif) no-repeat #fff; CURSOR: pointer
+}
+.jspDisabled.jspArrow {
+	CURSOR: default;
+	background:url(../images/scrollarrow.gif) no-repeat  #fff;
+}
+.jspVerticalBar .jspArrow {
+	HEIGHT: 24px;
+}
+.jspHorizontalBar .jspArrow {
+	WIDTH: 24px; FLOAT: left; HEIGHT: 100%
+}
+.jspVerticalBar .jspArrow:focus {
+	OUTLINE-STYLE: none; OUTLINE-COLOR: invert; OUTLINE-WIDTH: medium
+}
+.jspCorner {
+	BACKGROUND: #eeeef4; FLOAT: left; HEIGHT: 100%
+}
+.jspArrowDown{
+	background:url(../images/scrollarrow.gif) no-repeat #fff bottom !important;
+	}
+* HTML .jspCorner {
+	MARGIN: 0px -3px 0px 0px
+}
+.searchrefinements .jspContainer{
+width:155px !important;
+max-height:134px !important;
+}
+.refineattributes{
+width:155px !important;
+}
+#sizeChartDialog .contentasset{
+	max-height: 440px;
+	width:700px !important;
+	}
+.jspArrowLeft{
+	background:url(../images/scrollarrowhorz.gif) no-repeat #fff left top !important;
+	}
+.jspArrowRight{
+	background:url(../images/scrollarrowhorz.gif) no-repeat #fff right top !important;
+	}
+.jspDragBottom{
+background:url(../images/scrolldrag-btm.png) no-repeat right bottom;
+width: 13px;
+	height: 11px;
+	bottom: -2px;
+	position: absolute;
+}

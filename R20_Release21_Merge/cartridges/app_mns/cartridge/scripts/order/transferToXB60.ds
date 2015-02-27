@@ -1,0 +1,95 @@
+
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*-   @input ExampleIn : String This is a sample comment.
+*    @input file : String
+*	 @input customerExported : String
+*	 @input orderExported : String
+*	 @output success : String
+*    @output StatusMessage : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage(dw.net); 
+importPackage( dw.io );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	try {
+
+//	var localFile : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "ordercompletion" + File.SEPARATOR + "exported" + File.SEPARATOR + "sampleorder.xml");
+//	var test :XML = new  XML(localFile);
+//	var test1 = test.toLocaleString();
+//	var test2 = test.toString();
+//	var test4 = test.toXMLString();
+		var file = args.file;
+		var localFile : dw.io.File ;
+		var postURL ;
+		if(null != args.customerExported && args.customerExported == "true"){
+			localFile = new File (File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "customer" + File.SEPARATOR + "exported" + File.SEPARATOR + file);
+			postURL = dw.system.Site.getCurrent().preferences.custom.XB60URLCustomer;
+		} else if (null != args.orderExported && args.orderExported == "true"){
+			localFile = new File (File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + "order" + File.SEPARATOR + "exported" + File.SEPARATOR + file);
+			postURL  = dw.system.Site.getCurrent().preferences.custom.XB60URL;
+		}
+		var xmlContent : String;
+		var httpClient : HTTPClient = new HTTPClient();
+		if (!empty(localFile)){
+			Logger.error("The URL to Transfer: " + postURL + "FileName is: " + localFile.name);
+		
+			//var fileReader: dw.io.FileReader = new FileReader (localFile);
+			//var xmlFile :XML = new  XML(fileReader.getString());
+			//xmlContent = xmlFile.toXMLString();	
+			httpClient.setTimeout(120000);
+			httpClient.setRequestHeader("Content-Type", "text/xml");
+			httpClient.open( "POST", postURL, null, null);
+			httpClient.send(localFile);
+ 			
+	}
+		
+//	var xmlContent = encodeURIComponent(xmlContent1);
+//	var xmlContent="<orders xmlns='http://www.demandware.com/xml/impex/order/2006-10-31'><order order-no='00000040'><order-date>2011-03-01T06:06:49.588Z</order-date></order></orders>";
+	
+	
+//	Logger.error("Value of Test "+ test);
+//	Logger.error("Value of Test1 "+ test1);
+
+//var fileReader:  FileReader = new FileReader (localFile);
+//var test1 = fileReader.getString();
+
+//		var file :  File = new File(File.IMPEX+'/src'+'sampleorder.xml');
+	
+ 	 	if (httpClient.statusCode == 200)
+ 			{
+ 				var success = "true";
+ 				args.success = success;
+ 				Logger.error("httpClient.statusCode "+ httpClient.statusCode);
+ 		}else
+ 			{
+ 				var success = "false";
+ 				args.success = success;
+ 				Logger.error("httpClient.statusCode "+ httpClient.statusCode);
+ 		}
+	}catch (e){
+			var success = "false";
+			args.success = success;
+			Logger.error("Error while transferring the order "+e.message);
+			args.StatusMessage =e.message;
+	}
+ 	
+    return PIPELET_NEXT;
+}

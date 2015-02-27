@@ -1,0 +1,364 @@
+/* These are standard sIFR styles... do not modify */
+
+.sIFR-flash {
+	visibility: visible !important;
+	margin: 0;
+}
+
+.sIFR-replaced {
+	visibility: visible !important;
+}
+
+span.sIFR-alternate {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 0;
+	height: 0;
+	display: block;
+	overflow: hidden;
+}
+
+/* Hide Adblock Object tab: the text should show up just fine, not poorly with a tab laid over it. */
+.sIFR-flash + div[adblocktab=true] {
+  display: none !important;
+}
+
+/* These "decoy" styles are used to hide the browser text before it is replaced... the negative-letter spacing in this case is used to make the browser text metrics match up with the sIFR text metrics since the sIFR text in this example is so much narrower... your own settings may vary... any weird sizing issues you may run into are usually fixed by tweaking these decoy styles */
+
+
+
+.sIFR-hasFlash .ms_header_1 {/* products header */
+	
+	margin-top:-3px;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 26px;
+	height:30px;
+	
+}
+/*slide 10*/
+.category_banner_header, .category_banner_header_whiteHeading {
+	font-size: 32px;
+	line-height:35px;
+	font-weight:normal;
+	display: block; /* Accessibilty issue 12oct, 2011 */
+}
+.category_banner_header_whiteHeading {
+	color:#fff;
+}
+
+.sIFR-hasFlash .category_banner_header, .sIFR-hasFlash .category_banner_header_whiteHeading {/* QC 949 */
+	visibility: hidden;
+	font-size: 38px;
+	height:42px;
+	display: block; /* Accessibilty issue 12oct, 2011 */
+}
+
+
+.sIFR-hasFlash .ms_header_cart {/* products header */
+	
+	margin-top:-3px;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 26px;
+	height:30px;
+	
+}
+
+.sIFR-hasFlash .content_grey_header {/* Checkout Delivery page */
+	
+	margin-top:0;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 26px;
+	height:30px;
+	display: block;
+	
+}
+.sIFR-hasFlash .ms_header_login {/* Checkout Sign In Page */
+	
+	margin-top:4px;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 24px;
+	height:28px;
+	display:block; /* accessibility issue 12 oct 2011 */
+	
+}
+.sIFR-hasFlash .ms_header_bottomsection2 {/* cart.isml bottom section */
+	margin-top:4px;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 24px;
+	height:27px;
+	
+}
+.sIFR-hasFlash .ms_header_bottomsection3 {/* Checkout Sign In Page */
+	margin-top:4px;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 24px;
+	height:30px;
+	/*margin-top:5px;	*/
+}
+
+.sIFR-hasFlash .content_grey_header {/* Checkout Delivery page */
+	
+	margin-top:0;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 26px;
+	height:30px;
+	
+}
+
+.sIFR-hasFlash .content_grey_header2 {/* Checkout Delivery page */
+	
+	margin-top:0;
+	letter-spacing: -4px;
+	visibility: hidden;
+	font-size: 26px;
+	height:30px;
+	display:block; /* accessibility | 13 oct 2011 */
+}
+
+
+.sIFR-hasFlash .ms_header_cartlinks {/* cart link */
+	margin-top:0;
+	visibility: hidden;
+	font-size: 16px;
+	height:20px;
+}
+
+
+.sIFR-hasFlash .content_checkout_header {/* right section header */
+	margin-top:0;
+	visibility: hidden;
+	font-size: 21px;
+	height:25px;
+	display:block; /* accessibility | 13 oct 2011 */
+}
+
+.sIFR-hasFlash .ms_header_3 {/* PSP Subproduct Header | 07-apr */
+	margin-top:0;
+	visibility: hidden;
+	font-size: 26px; /* #844502 MattS changed 1.6.2011 - font-size: 18px; */
+	height:30px;/* #844502 MattS changed 1.6.2011 was height:22px; */	
+}
+
+.sIFR-hasFlash .ms_header_4 {/* PDP Main Heading | 07-apr */
+	margin-top:0;
+	visibility: hidden;
+	font-size: 26px;
+	height:30px;
+	display:block; /* accessibility issue 14 oct, 2011 */
+}
+/*.sIFR-hasFlash h3.sideFaqs, .sIFR-hasFlash h3.needhelpHeader{ 
+	visibility: hidden;
+	font-size: 12px;	
+	height:auto; 
+	padding: 5px 0 0 45px;	
+}
+.sIFR-hasFlash .ms_header_5 {
+	margin-top:0;
+	visibility: hidden;
+	font-size: 12px;
+	height:24px;
+}*/
+.sIFR-hasFlash .ms_header_account_login{ /*For Account Login Page*/
+	visibility: hidden;
+	font-size: 24px;
+	height:28px;
+	display:block; /* accessibility issue 13 oct, 2011 */
+}
+.ui-dialog-title{
+	/*visibility: hidden;
+	font-size: 24px;
+	height:28px;*/
+}
+/*slide 3*/
+.home_banner_copy h2, .home_banner_copy_whiteTextHeading h2{
+	font-size: 59px;
+	line-height:63px;
+	font-weight: normal;
+}
+.home_banner_copy_whiteTextHeading h2{
+	color: #fff;
+}
+
+.sIFR-hasFlash .home_banner_copy h2, .sIFR-hasFlash .home_banner_copy_whiteTextHeading h2{
+	/*margin-top:-9px;
+	letter-spacing: 200px;*/
+	visibility: hidden;
+	font-size: 59px;
+	height:63px;
+	letter-spacing: 100px;
+}/* QC 949 */
+
+
+.sIFR-hasFlash .sifr-pw{
+	visibility: hidden;
+	font-size: 32px;
+	height:34px;
+	text-align: center;
+}
+
+.sIFR-hasFlash .errorHeader{
+	visibility: hidden;
+	font-size: 16px;
+	height:auto;
+}
+
+/* MattS - Asha -  Not sure if this class is needed 
+.sIFR-hasFlash .errorNotFound h1.errorHeader{
+	margin-top:-9px;
+	letter-spacing: 200px;
+	visibility: hidden;
+	font-size: 32px;
+	height:34px;
+	text-align: center;
+}
+*/
+
+
+.sitemap h1{
+	visibility: hidden;
+	font-size: 26px;
+	height:26px;	
+} 
+
+
+.sitemap h2{
+	visibility: hidden;
+	font-size: 22px;
+	height:22px;	
+}
+
+
+
+.sIFR-hasFlash h3.faqHead{
+	visibility: hidden;
+	/*font-size: 22px;
+	height:22px;	*/
+	/*display:inline;*/
+	background:transparent;
+}
+
+
+
+/*.sIFR-hasFlash h3.sideFaqs, .sIFR-hasFlash h3.needhelpHeader{
+	visibility: hidden;
+	font-size: 12px;	
+	height:auto; 
+	padding: 5px 0 0 45px;	
+} */
+#homeSmallCarousel h3{
+	font-size: 35px;
+	font-weight:normal;	
+	height:40px;
+	padding: 0;
+	text-align: left;
+}
+.sIFR-hasFlash #homeSmallCarousel h3{
+	visibility: hidden;
+	font-size: 55px;	
+	height:50px;
+	padding: 0;
+}
+div.homepage .small_content_module h3{	
+	height:28px;
+	font-size:22px;
+	font-weight:normal;
+	line-height:22px;
+	margin:0 0 0 3px;
+	background:transparent;
+}
+.sIFR-hasFlash  .small_content_module h3{	
+	visibility: hidden;
+	height:28px;
+	font-size:28px;
+	margin:0 0 0 3px;
+	background:transparent;
+}
+/*821*/
+/*.product_category p.title{
+	font-size:20px;
+	visibility: hidden;
+	height:24px;
+}
+*/
+/*903*/
+div.top_banner_grey  .banner_head .floatleft h2{
+	font-size: 35px;
+	font-weight: normal !important;
+	}
+.sIFR-hasFlash .banner_head h2{
+	visibility: hidden;
+	font-size: 35px;	/* CR 117 */
+	height:35px;
+}
+
+.sIFR-hasFlash .banner_head p{
+	visibility: hidden;
+	font-size: 25px;	/* CR 117 */
+	height:27px;
+}
+
+/*slide12*/
+.sIFR-hasFlash .category_banner_2_headerSifr h2{
+	visibility: hidden;
+	font-size: 34px;	
+	height:38px;
+}
+
+.sIFR-hasFlash div.secondary_cat .promo_ad p{
+	visibility: hidden;
+}
+.sIFR-hasFlash div.secondary_cat div.secondary_cat_style2 .promo_ad p{
+	visibility: hidden;
+}
+
+.sIFR-hasFlash .contentArea h1{
+	visibility: hidden;/* content pages creation */
+}
+
+/*Category Landing Page | cat-landing-slotbottom | slide 13 | CR 117*/
+.sIFR-hasFlash .category_banner_3_header h3{
+	visibility:hidden;
+	font-size:28px;
+	height:32px;
+	padding: 0;
+
+}
+.sIFR-hasFlash .headerHolder div.caption h2, .sIFR-hasFlash .headerHolder div.captionwhite h2{  /* Category Landing - Image Banner Text Sep 5, 2011 */
+	visibility:hidden;
+	font-size:3.5em;
+	height:38px;
+}
+/*Patch for Cat landing page banner*/
+.sIFR-hasFlash .pt_productsearchresult_body .producthits .headerHolder div.caption h2, .sIFR-hasFlash .pt_productsearchresult_body .producthits .headerHolder div.captionwhite h2{  /* Category Landing - Image Banner Text Sep 5, 2011 */
+	visibility:hidden;
+	font-size:3.5em;
+	height:38px;
+}
+.sIFR-hasFlash .top_banner_txtimg h3{  /* Category Landing - Image Banner Text Sep 5, 2011 */
+	visibility:hidden;
+	font-size:38px;
+	height:38px;
+	margin-bottom: 6px;
+}
+.sIFR-hasFlash .flTitleHolder .title{  /* CR 117 */
+	visibility:hidden;
+	font-size:2.8em;
+	height:28px;
+}
+.sIFR-hasFlash .account_heading, .sIFR-hasFlash .account_wrapper h3.overviewHead{visibility:hidden;}
+
+.sIFR-hasFlash .account_heading span{ /* 1028 */
+    font-size: 30px; 
+    font-variant: normal;
+    font-weight: 100;
+    height:30px;
+    display:block;
+}

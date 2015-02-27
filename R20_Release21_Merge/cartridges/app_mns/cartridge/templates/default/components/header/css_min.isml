@@ -1,0 +1,18 @@
+<!--- BEGIN CSS files to merge.(source_path=cartridge/static/default;targetfile=css/global_generated.css) --->
+<link href="${URLUtils.staticURL('/css/ui.core.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/ui.resizable.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/ui.dialog.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/ui.tabs.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/ui.theme.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/jquery.tooltip.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/jquery.jcarousel.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/superfish.css')}" media="screen" rel="stylesheet" type="text/css" />
+<link href="${URLUtils.staticURL('/css/marksandspencer.css')}" type="text/css" rel="stylesheet" title="Demandware Store" />
+<link href="${URLUtils.staticURL('/css/marksandspencer_altics.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/jquery.jscrollpane.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/tier2new-carousel.css')}" type="text/css" rel="stylesheet" />
+<!--- END CSS files to merge --->
+<link href="${URLUtils.staticURL('/css/gnav_mcfp.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/mns_account.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/mns_content.css')}" type="text/css" rel="stylesheet" />
+<link href="${URLUtils.staticURL('/css/ciCarousel.css')}" type="text/css" rel="stylesheet" />

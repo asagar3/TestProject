@@ -1,0 +1,77 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @input paymentMethod : String 
+*   @input ShippingAddressForm : dw.web.FormGroup The address form.
+*   @input BillingAddressForm : dw.web.FormGroup The billing form.
+*-   @output ExampleOut : Number
+*
+*/
+importPackage( dw.system );
+importPackage( dw.web );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var site : String = Site.current.ID;
+	var shippingAddressForm : FormGroup = args.ShippingAddressForm;
+	var billingAddressForm : FormGroup = args.BillingAddressForm;
+
+	
+	Logger.error("Selected Payment Method::" + args.paymentMethod);
+	//Print Shipping form in log
+	Logger.error("<<<<<<<Get Addrees Fields ----Shipping Form Details>>>"+
+		"  Title::" +shippingAddressForm.title.value + 
+		"  First Name::" +shippingAddressForm.firstName.value + 
+		"  Last Name::"+shippingAddressForm.lastName.value+ 
+		"  Address Line1::" +shippingAddressForm.address1.value+ 
+		"  Address Line2::" +shippingAddressForm.address2.value+
+		"  Address Line3::" +shippingAddressForm.address3.value+
+		"  City::" +shippingAddressForm.city.value+
+		"  Postal Code::"+shippingAddressForm.zip.value+
+		"  State::"+shippingAddressForm.states.state.value+
+		"  StreetName::"+shippingAddressForm.streetName.value+
+		"  Residence::"+shippingAddressForm.residence.value+
+		"  Postbox::" +shippingAddressForm.postBox.value+
+		"  CountryCode::"+shippingAddressForm.country.value+
+		"  Phone::"+shippingAddressForm.phone.value+
+		"  Alternate Contact::"+shippingAddressForm.alternateContactNumber.value+
+		"  Is valid::"+shippingAddressForm.isValid().toString()+
+		" - End>>>>>>>>");
+		
+		//Print Billing form in Log
+		 Logger.error("<<<<<<<Get Addrees Fields---Billing Form Details>>>"+
+	    "  Title::" +billingAddressForm.title.value+
+	    "  First Name::" +billingAddressForm.firstName.value + 
+	    "  Last Name::"+billingAddressForm.lastName.value+ 
+	    "  Address Line1::" +billingAddressForm.address1.value+ 
+	    "  Address Line2::" +billingAddressForm.address2.value+ 
+	    "  Address Line3::" +billingAddressForm.address3.value+ 
+	    "  City::"+billingAddressForm.city.value+
+	    "  Postal Code::"+billingAddressForm.zip.value+
+	    "  State::"+billingAddressForm.states.state.value+
+	    "  Postbox::"+billingAddressForm.postBox.value+
+	    "  CountryCode::"+billingAddressForm.country.value+
+	    "  StreetName::"+billingAddressForm.streetName.value+
+		"  Residence::"+billingAddressForm.residence.value+
+	    "  Phone::"+billingAddressForm.phone.value+
+	    "  Alternate Contact::"+billingAddressForm.alternateContactNumber.value+
+	    "  Date of birth::"+billingAddressForm.dateofbirth.value+
+	    "  Gender::"+billingAddressForm.gender.value+
+	    "  Is valid::"+billingAddressForm.isValid().toString()+
+	    "  Email::"+args.CurrentForms.billing.billingAddress.email.emailAddress.value+
+	    "  Confirm Email::"+args.CurrentForms.billing.billingAddress.email.confirmEmailAddress.value+
+	    " - End>>>>>>>>");
+	
+   return PIPELET_NEXT;
+}

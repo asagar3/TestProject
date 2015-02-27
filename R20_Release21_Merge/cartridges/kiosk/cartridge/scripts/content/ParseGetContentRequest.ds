@@ -1,0 +1,40 @@
+/**
+* @input  requestJSONObject : String
+* @output requestContent : Object 
+*
+*/
+importPackage( dw.system );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	try {
+		var reqObject : Object = JSON.parse(pdict.requestJSONObject);
+		var requestContent = new Object();
+		
+		if(reqObject == null){
+			throw new Error("reqObject is null") ;			
+		}
+		
+		
+		var contentType:String = reqObject.contentType ;
+		var contentId:String   = reqObject.contentId ;
+		var categoryId:String  = reqObject.categoryId ;
+		var sizeGuideContent:Boolean  = reqObject.sizeGuideContent != null ? reqObject.sizeGuideContent : false;
+		
+		if (empty(contentType) || empty(contentId )){
+			throw new Error("GetContent: contentType or contentId null ") ;			
+		}
+				
+		requestContent.contentType = contentType ;
+		requestContent.contentId = contentId ;		
+		requestContent.categoryId = categoryId ;
+		requestContent.sizeGuideContent = sizeGuideContent ;
+		
+		pdict.requestContent = requestContent ;
+	}catch(e){				
+		Logger.error("GetContent: Error:::"+e.message) ;
+		return PIPELET_ERROR ;		
+	}
+	
+  return PIPELET_NEXT;
+}

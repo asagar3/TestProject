@@ -1,0 +1,23 @@
+<iscomment>
+	Displays the state of the paging model. It expects the name of the
+	key of the pageable in a parameter "pageable" and a the current
+	page url in a parameter "pageurl".
+</iscomment>
+
+<div class="resultshits pagecountNew">
+	<iscomment>TO DO | ASHA | We need to show here "N Items Found"</iscomment>
+	<isif condition="${!empty(pdict.CurrentHttpParameterMap.view) && pdict.CurrentHttpParameterMap.view == 'carousel'}">
+		<isset name="totalProds" value="${(pdict.pagingmodel.currentPage+1) * pdict.pagingmodel.pageSize}" scope="page">
+		<isif condition="${totalProds > pdict.pagingmodel.count}">
+			<isset name="totalProds" value="${pdict.pagingmodel.count}" scope="page">
+		</isif>
+		<isprint value="${totalProds}" formatter="#"/> ${Resource.msg('pagecomponents.paginginformation.of','pagecomponents',null)}
+	</isif>
+	<iscomment>[QC 387] |   For the single item found using refinement options at the category list page the message displayed is'1 items found'. | Naveen Kumar</iscomment>
+	<isprint value="${pdict.pagingmodel.count}"/>  
+	<isif condition="${pdict.pagingmodel.count > 1}">	 
+		${Resource.msg('paginginformation.results','search',null)}
+	<iselse>	 
+		${Resource.msg('paginginformation.results.single','search',null)}
+	</isif>
+</div><!-- END: resultshits -->

@@ -1,0 +1,14 @@
+<!--- TEMPLATENAME: GenerateCustomEmailSuccessPage.isml --->
+
+ 
+<HTML>
+<HEAD>
+</HEAD>
+<BODY>
+<center>
+<h1>All E-mails have been successfully sent to The User</h1>
+</center>
+</BODY>
+</HTML>
+
+

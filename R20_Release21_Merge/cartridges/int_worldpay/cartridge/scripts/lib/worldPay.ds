@@ -1,0 +1,460 @@
+/**
+* A library for the WorldPay gateway communication.
+* To import the file use the following expression:
+*
+* importScript("int_worldpay:lib/worldPay.ds");
+*
+*/
+
+importPackage( dw.crypto );
+importPackage( dw.net );
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importPackage( dw.order );
+importPackage( dw.value );
+importPackage( dw.customer );
+importScript("int_worldpay:lib/orderXML.ds");
+importScript("int_worldpay:lib/responseData.ds");
+importScript("int_worldpay:lib/worldPayPreferences.ds");
+
+
+function convert2cdata(data : String):XML {
+    return new XML("<![CDATA[" + data + "]]\>");
+}
+
+//create html table
+function table(data : String) : String {
+    return  '<center><table border="1">' + data +  '</table></center>'
+}
+
+// create html table header
+function th(data : String) : String {
+    return "<th>"+ data +"</th>";
+}
+
+// create html table data
+function td(data : String) : String {
+    return "<td>"+ data +"</td>";
+}
+
+// create html table row
+function tr(data : String) : String {
+    return "<tr>"+ data +"</tr>";
+}
+
+/**
+ * Hook function for order content. This function is called during the xml order
+ * creation. This function can be modified if other data or format is desired. 
+ */
+function createOrderContent(basket : Basket) : XML {
+	var rows : String = tr(th("Product ID") + th("Product Name")
+		+ th("Quantity") + th("Price"));
+	var productLineItems : Iterator = basket.getAllProductLineItems().iterator();
+	while(productLineItems.hasNext()){
+		var pli : ProductLineItem = productLineItems.next();
+		rows += tr(td(pli.getProductID()) + td(pli.getProductName()) 
+			 + td(pli.getQuantity())+ td(pli.getPrice().toString()) ); 
+    }
+    rows += tr('<td colspan="4">Your payment will be handled by RBS WorldPay Payments Services'
+    	+ '<br/>This name may appear on your bank statement<br/>http://www.rbsworldpay.com'
+    	+ '</td>');
+    return convert2cdata(table(rows));
+}
+
+/**
+ * Hook function for order description. This function is called during the xml order
+ * creation. This function can be modified if other data or format is desired. 
+ */
+function createOrderDescription(data : String) : String{
+	return "EU Order No " + data;
+}
+
+/**
+ * Hook function for generating session id. This function is called during the xml order
+ * creation. This function can be modified if other session ID format desired.
+ *  
+ */ 
+function createSessionID(data : Object) : String{
+	return data;
+}
+
+/**
+ * Creates the order request object
+ */
+function createRequest(orderNo : String, paymentAmount : Money, 
+	basket : Basket, customer : Customer,bank : String, bankCountry : String, paymentType : String) : String {
+	
+	// Get custom site preferences
+	var preferences : WorldPayPreferences = new WorldPayPreferences();
+	var includePaymentMethods : List = preferences.paymentMethodsIncludes;
+	var testPendingOrders : Boolean =preferences.testPendingOrders;
+	var order : OrderXML = new OrderXML();
+	var shippingAddress : OrderAddress = basket.billingAddress; //billing address will be sent only in case of mister cash
+	
+	if (preferences.missingPreferences()){
+		//Logger.getLogger("worldpay").error("WorldPay preferences are not properly set.");	
+			return null;
+	}	
+	
+	order.content.@merchantCode = preferences.merchantCode;
+	order.content.submit.order.@orderCode = orderNo;
+	order.content.submit.order.description = 
+		createOrderDescription(orderNo.toString());
+	
+	var totalprice : Money = paymentAmount;
+	
+	if (totalprice.available){
+		
+		// Multiply price with 10 power exponent in order to remove the decimal digits or add if not existing
+		var tempPrice : Number = totalprice.getValue();
+		tempPrice = 
+			(tempPrice.toFixed(2) * (Math.pow(10, preferences.currencyExponent))).toFixed(0);
+		order.content.submit.order.amount.@value = tempPrice.toString();
+		
+		// ISO 4217
+		order.content.submit.order.amount.@currencyCode = totalprice.getCurrencyCode();
+		
+		order.content.submit.order.amount.@exponent = preferences.currencyExponent;
+	} else {
+		return null;
+	}
+	//order.content.submit.order.orderContent = "<![CDATA[This is a test my dear friend]]>";
+	order.content.submit.order.orderContent = createOrderContent(basket).toString()
+   //variable to create iDeal specific payment xml component	
+    var paymentIDEAL : XML = new XML();				
+	paymentIDEAL = <IDEAL-SSL shopperBankCode={bank}>
+                <successURL>{preferences.getSuccessURL()}</successURL>
+                <failureURL>{preferences.getFailureURL()}</failureURL> 
+               	<cancelURL>{preferences.getFailureURL()}</cancelURL>
+             </IDEAL-SSL>;
+   
+   	//variable to create Sofort specific payment xml component	
+    var paymentSOFORT : XML = new XML();
+     //<SOFORT-SSL shopperCountryCode='DE'>	
+     		
+	paymentSOFORT = <SOFORT-SSL shopperCountryCode={bankCountry}>
+                <successURL>{preferences.getSuccessURL()}</successURL>
+               	<cancelURL>{preferences.getFailureURL()}</cancelURL>
+                <pendingURL>{preferences.getPendingURL()}</pendingURL> 
+        	 </SOFORT-SSL>;
+      //variable to create MisterCash specific payment xml component
+     var paymentMCASH : XML = new XML();  	 
+     paymentMCASH = <MISTERCASH-SSL shopperCountryCode='BE'>
+                <successURL>{preferences.getSuccessURL()}</successURL>
+               	<cancelURL>{preferences.getFailureURL()}</cancelURL>
+                <pendingURL>{preferences.getPendingURL()}</pendingURL>
+                </MISTERCASH-SSL>;   	 
+        	
+	var payment : XML ;
+	switch(paymentType){
+		case "IDEAL-SSL":
+			payment=paymentIDEAL;
+		    break;
+		    
+		case "SOFORT-SSL":
+			payment=paymentSOFORT;
+		    break;
+		    
+		case "MISTERCASH-SSL":
+			payment=paymentMCASH;
+			
+		    break;
+		
+	}		
+	var sessionXML : XML = new XML();
+	
+	// The result of request.getSession().getSessionID() in Demandware is not NMTOKEN. 
+	// use the createSessionID() function to cutomize the session ID
+	sessionXML = <session shopperIPAddress={request.getHttpRemoteAddress()} id={createSessionID(orderNo)} />;				
+	 //Change the request xml if test pending order is true
+	 if(testPendingOrders){
+	 	var tempXML : XML = new XML(<include code="" />);
+		tempXML.@code = "TRANSFER_NL-BANK";
+		order.content.submit.order.paymentMethodMask.appendChild(tempXML);
+	 }else{
+    	//order.content.submit.order.appendChild(new XML(<paymentDetails></paymentDetails>));
+    	order.content.submit.order.paymentDetails.appendChild(payment);
+		order.content.submit.order.paymentDetails.appendChild(sessionXML);
+	 }
+		
+	order.content.submit.order.shopper.shopperEmailAddress = basket.getCustomerEmail();
+	//Set billing address in the request for mister cash only
+		if(paymentType.equals("MISTERCASH-SSL")){
+			order.content.submit.order.shippingAddress.address.firstName = shippingAddress.firstName;
+			order.content.submit.order.shippingAddress.address.lastName = shippingAddress.lastName;
+			order.content.submit.order.shippingAddress.address.street = shippingAddress.address1;
+			order.content.submit.order.shippingAddress.address.postalCode = shippingAddress.postalCode;
+			order.content.submit.order.shippingAddress.address.city = shippingAddress.city;
+			order.content.submit.order.shippingAddress.address.countryCode = shippingAddress.countryCode;
+			order.content.submit.order.shippingAddress.address.telephoneNumber = shippingAddress.phone;
+			
+		}	
+	trace(order.toString());
+	
+	return sendRequest(order, preferences.paymentServiceURL, 
+		preferences.merchantCode, preferences.XMLPassword);
+}
+
+/**
+ * Posts the order messge 
+ */
+function sendXMLOrder(data : String, url : String, 
+		merchantCode : String, password : String) : String {
+		
+	var httpService : HTTPClient = new HTTPClient();	
+	//Logger.error("password:" + password + "url :"+url);
+	try{
+		httpService.open('POST', url, merchantCode, password);
+		httpService.send(data);
+	
+		if (httpService.statusCode == 200){
+			return httpService.text;
+		} else {
+			Logger.error("Server responded with code:" + httpService.statusCode);
+			
+			return null;
+		}
+	} catch ( ex ) {
+		Logger.error("Server connection failed:" + ex);
+		if(ex.message.indexOf("SocketTimeoutException") != -1)
+		{
+			return ex.message;
+		}
+		return null ;
+	}
+}
+
+/**
+ * Sends the order XML to the server defined by url and returns the answer or null if not successfull
+ */ 
+function sendRequest(requestXML : OrderXML, url : String, merchantCode : String, password : String) : String
+{
+	var orderXMLstring : String = requestXML.getCompleteXML();
+	//Logger.error("Request XML #####"+ orderXMLstring);
+	return sendXMLOrder(orderXMLstring, url, merchantCode, password);
+}
+/**
+ * Sends the order XML to the server defined by url and returns the answer or null if not successfull
+ */ 
+function send3DRequest(requestXML : XML, url : String, merchantCode : String, password : String) : String
+{
+	var orderXMLstring : String = '<?xml version="1.0"?>' +
+						'<!DOCTYPE paymentService PUBLIC "-//RBS WorldPay/DTD RBS WorldPay PaymentService v1//EN" "http://dtd.wp3.rbsworldpay.com/paymentService_v1.dtd">' 
+						+ requestXML.toXMLString();
+	return sendXMLOrder(orderXMLstring, url, merchantCode, password);							
+}
+
+
+/**
+ * Parses the server response
+ */
+function parseResponse(inputString : String) : ResponseData
+{
+	var response : ResponseData = new ResponseData(inputString);
+
+	if (response.getStatus() || response.isError()){
+		return response;
+	} else {
+		Logger.getLogger("worldpay")
+			.error("Error occured on parsing the XML response:\n" + response.toString());
+	}
+}
+
+/**
+ * Calculates the amount to be payed by a non-gift certificate payment instrument based 
+ * on the given basket. The method subtracts the amount of all redeemed gift certificates 
+ * from the order total and returns this value.
+ */
+function calculateNonGiftCertificateAmount( basket : Basket ) : Money
+{
+	// the total redemption amount of all gift certificate payment instruments in the basket
+	var giftCertTotal : Money = new Money( 0.0, basket.currencyCode );
+
+	// get the list of all gift certificate payment instruments 
+	var gcPaymentInstrs : Collection = basket.getGiftCertificatePaymentInstruments();
+	var iter : Iterator = gcPaymentInstrs.iterator();
+	var orderPI : OrderPaymentInstrument = null;
+
+	// sum the total redemption amount
+	while( iter.hasNext() )
+	{
+		orderPI = iter.next();
+		giftCertTotal = giftCertTotal.add( orderPI.getPaymentTransaction().getAmount() );
+	}
+
+	// get the order total
+	var orderTotal : Money = basket.totalGrossPrice;
+
+	// calculate the amount to charge for the payment instrument
+	// this is the remaining open order total which has to be paid
+	var amountOpen : Money = orderTotal.subtract( giftCertTotal );
+
+	// return the open amount
+	return amountOpen;
+}
+
+/**
+ * Creates the notification URL for WorldPay. Depending on your payment status
+ * WorldPay redirects the shopper to one of this URL.
+ */
+ 
+function createRedirectURL(reference : Stirng, orderNo : String) : String {
+
+	var result : String = "";
+	var preferences : WorldPayPreferences = new WorldPayPreferences();
+	if(preferences.testPendingOrders){  
+	result = reference 
+		+ "&language=" + preferences.language  
+		+"&preferredPaymentMethod=TRANSFER_NL-BANK"
+		+ "&country=NL"  
+		+ "&successURL=" + preferences.getSuccessURL()
+		
+		// order number is needed for the order ceation. this param. is mandatory
+		+ "?no=" + orderNo
+		+ "&pendingURL=" + preferences.getPendingURL()
+		+ "&failureURL=" + preferences.getFailureURL();
+	}else{
+		result = reference;
+	}
+	return result;	
+}
+
+/**
+ * Creates the initial order message for 3D Secure integration
+ */
+function createInitialOrderMessage(basket : Basket,
+				orderNo : Number, request : Request) : XML {
+	var preferences : WorldPayPreferences = new WorldPayPreferences();
+	
+	if (preferences.missingPreferences()){
+		//Logger.getLogger("worldpay").error("WorldPay preferences are not properly set.");	
+			return PIPELET_ERROR;
+	}	
+	
+	var paymentInstruments : Collection =
+		 basket.getPaymentInstruments( PaymentInstrument.METHOD_CREDIT_CARD );
+	var ccNumber : Number;
+	var ccValidMonth : String;
+	var ccValidYear : String;
+	var cardHolder : String;
+			
+	for each( var pi : PaymentInstrument in paymentInstruments )
+	{
+        // ignore gift certificate payment instruments
+        if( pi.paymentMethod.equals(dw.order.PaymentInstrument.METHOD_CREDIT_CARD) )
+        {
+			ccNumber = pi.getCreditCardNumber();        	
+			cardHolder = pi.getCreditCardHolder();
+			ccValidMonth = pi.getCreditCardExpirationMonth();
+			ccValidYear = pi.getCreditCardExpirationYear();			
+        }
+	}
+
+	var payment : XML = new XML();				
+	payment = <VISA-SSL>
+				<cardNumber>{ccNumber}</cardNumber>
+				<expiryDate>
+					<date month={ccValidMonth} year={ccValidYear} />
+				</expiryDate>
+				<cardHolderName>{cardHolder}</cardHolderName>
+			</VISA-SSL>;
+					
+	var sessionXML : XML = new XML();
+	
+	// The result of request.getSession().getSessionID() in Demandware is not NMTOKEN. 
+	// use the createSessionID() function to cutomize the session ID
+	sessionXML = <session shopperIPAddress={request.getHttpRemoteAddress()} id={createSessionID(orderNo)} />;				
+	
+	var totalprice : Money = calculateNonGiftCertificateAmount( basket );
+	var amount : Number = totalprice.getValue();
+	amount = (amount.toFixed(2) * (Math.pow(10, preferences.currencyExponent))).toFixed(0);
+	
+	var currency = totalprice.getCurrencyCode();
+	
+	var order : XML = new XML();
+	order = <?xml version="1.0"?>
+		<paymentService version={preferences.XMLVersion} merchantCode={preferences.merchantCode}>
+			<submit>
+				<order orderCode={orderNo}>
+					<description>{createOrderDescription(orderNo.toString())}</description>
+					<amount currencyCode={currency} exponent={preferences.currencyExponent} value={amount} />
+					<orderContent>{createOrderContent(basket)}</orderContent>
+					<paymentDetails>					
+					</paymentDetails>
+					<shopper>
+						<shopperEmailAddress>{basket.getCustomerEmail()}</shopperEmailAddress>
+						<browser>
+							<acceptHeader>{request.getHttpHeaders().get("accept")}</acceptHeader>
+							<userAgentHeader>{request.getHttpUserAgent()}</userAgentHeader>
+						</browser>
+					</shopper>
+				</order>
+			</submit>
+		</paymentService>; 
+	
+	order.submit.order.paymentDetails.appendChild(payment);
+	order.submit.order.paymentDetails.appendChild(sessionXML);
+	return order;
+}
+
+/**
+ * Creates the second order message for 3D Secure integration
+ * It adds additional informations to the initial order messge.
+ */
+function createSecondOrderMessage (basket : Basket,
+				orderNo : Number, request : Request) : XML {
+	
+	var order : XML	= createInitialOrderMessage(basket, orderNo, request);
+	var params : Map = request.getHttpParameters();
+	var paRes : String = 
+		(params.containsKey("PaRes"))? params.get("PaRes")[0] : null;
+	var md : String = 
+		(params.containsKey("MD"))? params.get("MD")[0] : null;
+	
+	if (paRes == null && md == null) {
+		return null;
+	}
+	
+	var info3d : XML = new XML();
+	info3d = 
+		<info3DSecure>
+			<paResponse>{paRes}</paResponse>
+		</info3DSecure>;
+	order.submit.order.paymentDetails.appendChild(info3d);
+	
+	if (session.custom.echoData == null) {
+		return null;
+	}
+	var echoData : XML = new XML();
+	echoData = <echoData>{session.custom.echoData}</echoData>;
+	order.submit.order.appendChild(echoData);
+		
+	return order;				
+}
+
+/**
+ * Creates the order inquery  request message to pull the order status of custom objects
+
+ */
+function createOrderInquiryMessage (orderNo : Number) : XML {
+	
+var preferences : WorldPayPreferences = new WorldPayPreferences();
+	
+	if (preferences.missingPreferences()){
+		//Logger.getLogger("worldpay").error("WorldPay preferences are not properly set.");	
+			return PIPELET_ERROR;
+	}	
+	
+	var order : XML = new XML();
+	order = <?xml version="1.0"?>
+		<paymentService version={preferences.XMLVersion} merchantCode={preferences.merchantCode}>
+			<inquiry> <orderInquiry orderCode={orderNo}/> </inquiry> 
+				
+		</paymentService>; 
+	var orderXMLstring : String = '<?xml version="1.0"?>' +
+						'<!DOCTYPE paymentService PUBLIC "-//RBS WorldPay/DTD RBS WorldPay PaymentService v1//EN" "http://dtd.wp3.rbsworldpay.com/paymentService_v1.dtd">' 
+						+ order.toXMLString();
+	return sendXMLOrder(orderXMLstring, preferences.paymentServiceURL, 
+		preferences.merchantCode, preferences.XMLPassword);
+}

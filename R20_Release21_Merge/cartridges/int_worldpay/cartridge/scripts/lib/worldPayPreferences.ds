@@ -1,0 +1,102 @@
+/**
+ * WorldPayPreferences object contains all configuration data, 
+ * which are necessary to call the worldpay service. 
+ * This data is retrieved from custom site preferences.  
+ * 
+ * To include this script use:
+ * importScript("int_worldpay:lib/worldPayPreferences.ds");
+ */
+importPackage( dw.system );
+importPackage( dw.web );
+ 
+var loggerSource = "[worldPayPreferences.ds]";
+	
+function getSitePeference(preference : String) : String {
+	var result : String = null;
+	result = Site.getCurrent().getCustomPreferenceValue(preference);
+	/*if (empty(result)) {
+		//susspres error. WorldPayPaymentMethodMaskIncludes is not mandatory and can be empty
+		if (!("WorldPayPaymentMethodMaskIncludes".equals(preference))) {
+			Logger.error("{0} Site specific custom preference \"{1}\" is missing.",
+				loggerSource, preference);	
+		}				
+	}*/
+	return result;
+}
+
+
+function WorldPayPreferences(){
+	this.merchantCode = getSitePeference("WorldPayMerchantCode");
+	this.MACSecretCode = getSitePeference("WorldPayMACSecretCode");
+	this.XMLPassword = getSitePeference("WorldPayXMLPassword");
+	this.paymentServiceURL = getSitePeference("WorldPayPaymentServiceURL");
+	this.currencyExponent = getSitePeference("WorldPayCurrencyExponent");
+	this.successURL = getSitePeference("WorldPayRedirectSuccessURL");
+	this.pendingURL = getSitePeference("WorldPayRedirectPendingURL");
+	this.failureURL = getSitePeference("WorldPayRedirectFailureURL");
+	this.termURL = getSitePeference("WorldPayTermURL");
+	this.paymentMethodsIncludes = 
+		getSitePeference("WorldPayPaymentMethodMaskIncludes");
+	this.paymentMethodsExcludes = 
+		getSitePeference("WorldPayPaymentMethodMaskExcludes");
+	this.XMLVersion = "1.4";
+	this.country = this.getLocale().getCountry();
+	this.language = this.getLocale().getLanguage();
+	this.testPendingOrders = getSitePeference("testPendingOrders");
+}
+
+WorldPayPreferences.prototype.missingPreferences = function () : Boolean {
+	return (empty(this.XMLPassword) 
+		|| empty(this.merchantCode)
+		|| empty(this.paymentServiceURL)
+		|| empty(this.currencyExponent)
+		|| empty(this.successURL)
+		|| empty(this.pendingURL)
+		|| empty(this.failureURL));
+}
+
+WorldPayPreferences.prototype.isDefinedPymentMethodsExcludes = function () : Boolean {
+	return (!empty(this.paymentMethodsExcludes))
+}
+
+WorldPayPreferences.prototype.getSuccessURL = function () : String {
+	var result : String = "";
+	result = URLUtils.https(this.successURL);	
+	return result;
+}
+
+WorldPayPreferences.prototype.getPendingURL = function () : String {
+	var result : String = "";
+	result = URLUtils.https(this.pendingURL);	
+	return result;
+}
+
+WorldPayPreferences.prototype.getFailureURL = function () : String {
+	var result : String = "";
+	result = URLUtils.https(this.failureURL);	
+	return result;
+}
+
+WorldPayPreferences.prototype.getTermURL = function () : String {
+	var result : String = "";
+	result = URLUtils.https(this.termURL);	
+	return result;
+}
+
+/**
+ * Returns the current locale of the current site. 
+ * If locale is set to default, the return value is 'en_US'
+ */
+WorldPayPreferences.prototype.getLocale = function () : dw.util.Locale {
+	// assume that en_US is the default locale
+	var result : dw.util.Locale =  dw.util.Locale.getLocale("en_DE");
+	if (Site.getCurrent().getDefaultLocale() != "default") {
+		result = dw.util.Locale.getLocale(Site.getCurrent().getDefaultLocale());
+	}
+	return result;
+}
+WorldPayPreferences.prototype.getTestPending = function () : Boolean {
+	var result : Boolean = false;
+	result = this.testPendingOrders;	
+	return result;
+}

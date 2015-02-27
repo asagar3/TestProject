@@ -1,0 +1,17 @@
+<isloop items="${Order.getPaymentInstruments()}" var="paymentInstr" status="piloopstate">
+	<div class="orderpaymentinstrumentsgc">
+		<div class="label">
+		<isif condition="${paymentInstr.paymentMethod.equals('KLARNA')}">
+			<isinclude template="checkout/billing/klarna_invoice"/>
+		<iselseif condition="${paymentInstr.paymentMethod.equals('KLARNA_PARTPAYMENT')}">
+			<isinclude template="checkout/billing/klarna_partpayment"/>
+		<iselseif condition="${paymentInstr.paymentMethod.equals('KLARNA_SPECIAL')}">
+			<isinclude template="checkout/billing/klarna_special"/>
+		</isif>
+		</div>
+		<div class="paymentamount">
+			<span class="label">${Resource.msg('global.amount','locale',null)}:</span>
+			<span class="value"><isprint value="${paymentInstr.paymentTransaction.amount}"/></span>
+		</div>
+	</div>
+</isloop>

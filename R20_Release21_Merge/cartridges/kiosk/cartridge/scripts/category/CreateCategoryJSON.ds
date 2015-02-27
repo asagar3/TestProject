@@ -1,0 +1,244 @@
+/**
+*
+*  @output customObject : Object
+*
+*/
+importPackage( dw.system );
+importPackage( dw.catalog );
+importPackage( dw.util);
+importPackage( dw.object);
+importPackage( dw.content);
+
+function execute( pdict : PipelineDictionary ) : Object
+{
+	 try{		
+		//Logger.error(new Date().getHours().toString()+"  "+);
+		var categoryObject  = new Object();	/* The master categoryObject */
+		categoryObject.featuredCategories  = new Array();
+		
+		var siteCatalog = CatalogMgr.getSiteCatalog();
+		var root = null;
+		if(siteCatalog!=null) {root = siteCatalog.getRoot();}	
+		
+		var categoryType : String = null;	
+		var topCategories = root.getOnlineSubCategories() ;/*Collection of Topmost categories */
+		var sortingRule:SortingRule = getSortingRule() ;
+		var categoryGroupMap:Map = null ;
+		for each(var topCat:Category in topCategories){/*Top level categories loop*/		
+			categoryType = null ;		
+			if(topCat.custom.showInMenu == true){
+				
+				
+				var topCategory = new Object();/*Top most category JSON String*/
+				topCategory.categoryID = topCat.getID() ;
+				topCategory.categoryDisplayName = topCat.getDisplayName();		
+				categoryGroupMap= new HashMap();	
+				topCategory.categoryGroupDetails = getCategoryGroupDetails(topCat,sortingRule,categoryGroupMap);
+				 
+				topCategory.parentCategoryID = topCat.getParent().getID();
+				var renderingType : String = topCat.custom.renderingType ; 
+				if(renderingType != null){
+					topCategory.renderingType = renderingType ;
+					if((renderingType == "landing" ||renderingType == "topLevelCategory" ||renderingType == "secondLevelCategory")){
+						topCategory.landingPageImageDetails = getLandingPageImageURLDetails(topCat);
+					}					
+				}else {
+					topCategory.renderingType = Site.current.preferences.custom.defaultRenderingType ;
+				}
+			
+				var thumbnailImageURL:MediaFile = topCat.custom.categoryThumbnailImage ;
+				if(thumbnailImageURL != null ){
+					topCategory.thumbnailImageURL = thumbnailImageURL.absURL.toString() ;
+				}else{
+					topCategory.thumbnailImageURL = null ;
+				}
+				topCategory.sortOrder = topCat.custom.sortOrder ;/* Changes done for UJ10 */
+					
+				categoryObject.featuredCategories.push(topCategory);						
+			
+				var subCategories = topCat.getOnlineSubCategories();/*First level sub-categories */
+				var subCategoryList : ArrayList = new ArrayList();			
+				for each(var subCat:Category in subCategories){
+					/*Only add those in the JSON which are displayed on the web site as well*/
+					if(subCat.custom.showInMenu){
+						subCategoryList.add(subCat);					
+					}
+				}			
+			
+				var  propCompare : dw.util.PropertyComparator = new dw.util.PropertyComparator("custom.categoryType");
+				subCategoryList.sort(propCompare);			
+				var map : HashMap = new HashMap();/*Map to hold the refrence of categoryObject*/
+				
+				addSubCategories(subCategoryList,topCategory,categoryType,map,sortingRule,categoryGroupMap);
+			}
+		}	
+		pdict.customObject = categoryObject ; /*Assigning categoryObject back to customObject as to display it in ISML*/
+		
+		
+	}catch(e){
+		Logger.error("GetCategory :: CreateCategoryJSON Script Error:::"+e.message) ;
+			return PIPELET_ERROR;	
+	}
+    return PIPELET_NEXT;
+}
+
+function addSubCategories(subCategoryList:ArrayList,topCategory:Object,
+		categoryType:String,map:Map,sortingRule:SortingRule,categoryGroupMap:Map) : Number{
+			/*Map to hold the reference of topCategory as addSubCategories is being called recursively for each category */
+			if(!map.containsKey(topCategory.categoryID)){
+				map.put(topCategory.categoryID,topCategory); 
+			}
+						
+			topCategory.subCategories = new Array() ;/*Creates a new subCategories property for a category */
+			var subCategory = null ;
+			for each(var subCat:Category in subCategoryList){ /*Loop to add SubCategories*/
+				/*Getting the topCategory json object from the map so as to get the refrence of the parent Category*/
+				topCategory = map.get(subCat.getParent().getID()) ;	
+				subCategory = new Object();				
+				
+				/*Setting the properties of subCategory */											
+				subCategory.categoryID = subCat.getID() ;
+				subCategory.categoryDisplayName = subCat.getDisplayName() ;
+			
+				subCategory.categoryGroupDetails = getCategoryGroupDetails(subCat,sortingRule,categoryGroupMap);
+						
+				subCategory.parentCategoryID = subCat.getParent().getID() ;
+				var renderingType:String = subCat.custom.renderingType ;
+				if(renderingType != null){
+					subCategory.renderingType = renderingType ;
+					if((renderingType == "landing" ||renderingType == "topLevelCategory" ||renderingType == "secondLevelCategory")){
+						subCategory.landingPageImageDetails = getLandingPageImageURLDetails(subCat);				
+					} 
+				}else {
+					subCategory.renderingType = Site.current.preferences.custom.defaultRenderingType ;
+				}	
+		
+				//subCategory.thumbnailImageURL = "http://dev06.store.mns.demandware.net/on/demandware.static/Sites-raunak-Site/Sites-french-catalog/default/v1310034233008/images/slot/landing/cat_prod_0.jpg" ;
+				
+				subCategory.thumbnailImageURL = getFirstProductImage(subCat,sortingRule,categoryGroupMap) ;
+				subCategory.sortOrder = subCat.custom.sortOrder ;/* Changes done for UJ10 */
+				topCategory.subCategories.push(subCategory) ;
+			
+				/*If the subCategory has further categories, then call addSubCategories again with new values */
+				if(subCat.getOnlineSubCategories().size() > 0 ){
+					subCategoryList = subCat.getOnlineSubCategories() ;	
+					topCategory = subCategory ;
+					categoryType = null ;										
+					addSubCategories(subCategoryList,topCategory,categoryType,map,sortingRule,categoryGroupMap)	;
+				}	 
+			}	
+}				
+
+ 
+
+function getCategoryGroupDetails(cat:Category, sortingRule:SortingRule, categoryGroupMap:Map):Object{
+			var categoryGroupDetails =  new Object() ;
+			var categoryGroup:String = cat.custom.categoryType ;
+			var  categoryGroupImage:String = null ; 
+			
+			if(categoryGroup == null){
+				categoryGroup = Site.current.preferences.custom.defaultCategoryType.displayValue ;
+			} 
+			
+			if(categoryGroupMap.containsKey(cat.getParent().ID+categoryGroup)){
+				categoryGroupImage = categoryGroupMap.get(cat.getParent().ID+categoryGroup) ;				
+			}else {
+				categoryGroupImage = getFirstProductImage(cat,sortingRule,categoryGroupMap) ;
+				categoryGroupMap.put(cat.getParent().ID+categoryGroup, categoryGroupImage);
+			}
+			
+			categoryGroupDetails.categoryGroupName = categoryGroup ;
+			categoryGroupDetails.categoryGroupImageURL = categoryGroupImage ;
+			//categoryGroupDetails.categoryGroupImageURL = "http://dev06.store.mns.demandware.net/on/demandware.static/Sites-raunak-Site/Sites-french-catalog/default/v1310034233008/images/slot/landing/cat_banner_2.jpg" ;
+		
+			
+	return categoryGroupDetails ;
+}
+
+function getLandingPageImageURLDetails(topCat:Category):Object{
+	
+	var landingPageImageDetails = new Object() ;		
+	
+	var categoryImageURL:MediaFile = topCat.custom.categoryLandingPageImage ;
+	var catImage:String = null ;
+	if (categoryImageURL != null){						
+	 	catImage = categoryImageURL.absURL.toString();
+	}					
+	landingPageImageDetails.imageURL = catImage ;
+	
+	/*					
+	var co : CustomObject = CustomObjectMgr.getCustomObject("CategoryImageDetails",landingPageID);
+	if(co != null){     				
+		var categoryLandingPageImage:MediaFile = co.custom.image ;
+		if(categoryLandingPageImage != null ){     			
+			landingPageImageDetails.imageURL = categoryLandingPageImage.getAbsURL().toString();
+		}					
+		landingPageImageDetails.title = co.custom.title;
+		landingPageImageDetails.subTitle = co.custom.subTitle ;
+		
+		landingPageImageDetails.bodyText = new Array();
+		
+		var details1 = new Object();
+		details1.linkDetails = co.custom.link1 ;
+		landingPageImageDetails.bodyText.push(details1); 
+		
+		var details2 = new Object();
+		details2.linkDetails = co.custom.link2 ;
+		landingPageImageDetails.bodyText.push(details2);
+		
+		var details3 = new Object();
+		details3.linkDetails = co.custom.link3 ;		
+		landingPageImageDetails.bodyText.push(details3);
+		
+	} */
+	return landingPageImageDetails ;	
+}
+
+function getSortingRule():SortingRule{
+	var sortingRuleID : String = Site.current.preferences.custom.tsopSortingOptionID ;
+	  	var sortingRule : SortingRule = null;		
+		var sortingOptions : List = dw.catalog.CatalogMgr.getSortingOptions();
+		for(var it : Iterator = sortingOptions.iterator(); it.hasNext(); ) {
+			var option : SortingOption = it.next();
+			if(option.getSortingRule().getID() == sortingRuleID ) {
+				sortingRule = option.getSortingRule() ; 
+				
+				break ;
+			}
+		}	
+	return sortingRule ;
+}
+
+function getFirstProductImage(cat:Category,sortingRule:SortingRule,categoryGroupMap:Map):String{ 
+	
+		var searchModel:ProductSearchModel = new ProductSearchModel() ;
+	  	searchModel.setCategoryID(cat.getID());
+		if(sortingRule != null ){
+			searchModel.setSortingRule(sortingRule) ;
+		}		  
+	  	searchModel.search() ;  	
+	  	var thumbnailImageURL:String = null ;	  	
+	  	var iter :Iterator = searchModel.getProducts() ;	   	  
+	  	if(iter.hasNext()){
+	  		var prd :Product = 	iter.next();
+	  		var productImage:MediaFile = prd.getImage('catlanding',0) ;
+	  		if(productImage != null){
+	  			thumbnailImageURL = productImage.absURL.toString() ;
+	  			if(!categoryGroupMap.containsKey(cat.getParent().ID+cat.custom.categoryType)){
+	  				categoryGroupMap.put(cat.getParent().ID+cat.custom.categoryType,thumbnailImageURL) ;
+	  			}	 
+	  		}  		
+	  	}else { 
+	  		var subCategories :Collection = cat.getOnlineSubCategories();
+	  		for each(var subCat:Category in subCategories){
+	  			thumbnailImageURL = getFirstProductImage(subCat,sortingRule) ;
+	  			if(thumbnailImageURL != null && !empty(thumbnailImageURL)){
+	  				break ;
+	  			}
+	  			
+	  		}
+	  	}	  	
+	  	return thumbnailImageURL ;
+	
+	
+}

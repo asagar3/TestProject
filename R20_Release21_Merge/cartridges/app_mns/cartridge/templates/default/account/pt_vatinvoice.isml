@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+
+<iscomment>This includes global utilities into the pages</iscomment>
+<isinclude template="util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+
+<head>
+	<iscomment>
+		Include all important information globally , e.g. meta-data, link information, and
+		javascript.
+	</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+
+	<iscomment>Add page type specific header information here.</iscomment>
+
+</head>
+<body>
+<div id="container" class="pt_vatinvoice">
+	<isinclude template="components/header/headerprint"/>
+	<div id="main">		
+		<div id="content1">
+			<div class="pagetitle">	
+				<h2><div class="content_checkout_header">${Resource.msg('vatinvoice.header','order',null)}</div></h2>
+				<div class="print floatright"><a href="javascript:;" class="printpage">${Resource.msg('vatinvoice.print','order',null)}</a></div>
+				<div class="clear"></div>
+			</div>
+			
+			
+			<div id="vatcontent">
+				<iscontentasset aid="VatInvoiceAddressInfo"/>
+			</div>
+						
+			<isreplace/>
+		</div><!-- END: content -->
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<isinclude template="components/footer/footer_print"/>
+	</div><!-- END: main -->
+	
+</div><!-- END: container -->
+</body>
+</html>

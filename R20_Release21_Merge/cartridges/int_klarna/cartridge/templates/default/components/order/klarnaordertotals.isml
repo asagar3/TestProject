@@ -1,0 +1,21 @@
+<iscomment>Klarna Invoice</iscomment>
+<tr class="ordersalestax">
+	<td><span class="label">${Resource.msg('klarna.invoice_fee','klarna',null)}</span></td>
+	<td><span class="value"><isprint value="${new dw.value.Money(KlarnaInvoiceFee-KlarnaInvoiceFeeTax, KlarnaCurrencyCode)}"/></span></td>
+</tr>
+<iscomment>tax amount</iscomment>
+<tr class="ordersalestax">
+	<td><span class="label">${Resource.msg('ordersummary.ordertax','components',null)}</span></td>
+	<td><span class="value"><isif condition="${LineItemCtnr.totalTax.available}"><isprint value="${LineItemCtnr.totalTax.add(new dw.value.Money(KlarnaInvoiceFeeTax, KlarnaCurrencyCode))}"/><iselse/><!--  ELSE: Show as Empty --></isif></span></td>
+</tr>	
+<iscomment>order total</iscomment>
+<tr class="ordertotal">
+	<isif condition="${LineItemCtnr.totalGrossPrice.available}">
+		<isset name="orderTotalValue" value="${LineItemCtnr.totalGrossPrice.add(new dw.value.Money(KlarnaInvoiceFee, KlarnaCurrencyCode))}" scope="page"/>
+	<iselse/>
+		<isset name="orderTotalValue" value="${LineItemCtnr.getAdjustedMerchandizeTotalPrice(true).add(LineItemCtnr.giftCertificateTotalPrice).add(new dw.value.Money(KlarnaInvoiceFee, KlarnaCurrencyCode))}" scope="page"/>
+	</isif>
+
+	<td><span class="label"><isprint value="${pdict.p_totallabel}"/></span></td>
+	<td><span class="value"><isprint value="${orderTotalValue}"/></span></td>
+</tr>

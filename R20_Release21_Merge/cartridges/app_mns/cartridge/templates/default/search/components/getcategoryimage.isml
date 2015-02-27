@@ -1,0 +1,36 @@
+<!--- TEMPLATENAME: getcategoryimage.isml --->
+<isinclude template="util/modules"/>
+<isset name="scene7ImageForSearchBar" value="" scope="page"/>
+<isset name="scene7ImageType" value="" scope="page"/>
+ 	<isloop items="${dw.system.Site.getCurrent().preferences.custom.ImageTypesDimension}" alias="ImageTypeDimensionObj">	
+		<isscript>
+		if (ImageTypeDimensionObj.getValue() == 'tablet_launchpad') {
+				scene7ImageForSearchBar = ImageTypeDimensionObj.getDisplayValue();
+				scene7ImageType = ImageTypeDimensionObj.getValue();
+				scene7ImageTypeDimension = ImageTypeDimensionObj.getDisplayValue();
+				}
+		</isscript>	
+	</isloop>
+				 <isscript>
+				 importScript('tablet/Utils.ds');
+				 var sortingRule : dw.catalog.SortingRule = dw.catalog.CatalogMgr.getSortingRule("New Arrival");	
+				 </isscript>
+					<div class="sub-category-wrapper">
+						<ul>
+						<isloop items="${pdict.CategoryList}" var="catObj" status="loopstate">
+						<isscript>
+								var scene7ImageUrl :String ="";
+						  	    var catImageUrl  = catObj.thumbnail;
+						  		if(empty(catObj.thumbnail)){
+								var thumbnailUrl : String = getFirstProductImage(catObj,sortingRule);					
+								scene7ImageUrl = thumbnailUrl + scene7ImageForSearchBar;
+								}else{
+								scene7ImageUrl = catImageUrl.URL;
+								}
+						
+						</isscript>
+							<li><a href="${URLUtils.http('Search-Show','cgid', catObj.getID())}" title="${catObj.getDisplayName()}"><img src="${scene7ImageUrl}" alt="${catObj.getDisplayName()}" title="${catObj.getDisplayName()}" /><span><span><isprint value="${catObj.getDisplayName()}"/></span></span></a></li>
+							
+						</isloop>
+						</ul>
+					</div>

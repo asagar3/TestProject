@@ -1,0 +1,86 @@
+<isset name="DecoratorTemplate" value="tablet/error/pt_error" scope="page"/>
+<isif condition="${!empty(pdict.nodecorator) && pdict.nodecorator == true}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+</isif>
+
+<isdecorate template="${DecoratorTemplate}">
+<isinclude template="tablet/util/modules"/>
+
+<isif condition="${pdict.isPageNotFound == 'true'}">
+	<isbreadcrumbs bctext1="${Resource.msg('pagenotfound.pagetitle','error',null)}" />
+<iselseif condition="${pdict.isPageNotFound == 'false'}" />
+	<isbreadcrumbs bctext1="${Resource.msg('generalerror.pagetitle','error',null)}" />
+</isif>
+<div class="errorWrapper">
+<div class="errorNotFound">
+<isif condition="${pdict.isPageNotFound == 'true'}">
+	<h1 class="errorHeader">${Resource.msg('pagenotfound.header','error',null)}</h1>
+	<iscontentasset aid="pagenotfound-page-content"/>
+<iselseif condition="${pdict.isPageNotFound == 'false'}" />
+	<h1 class="errorHeader">${Resource.msg('generalerror.header','error',null)}</h1>
+	<iscontentasset aid="generalerror-page-content"/>
+</isif>	
+	<p class="errSearchContent">${Resource.msg('generalerror.searchCotent','error',null)} <a href="${URLUtils.http('Home-Show')}" value="${Resource.msg('error.goback','error',null)}">${Resource.msg('error.goback','error',null)}</a>.</p>
+</div>
+
+<iscomment>Added by Davinder</iscomment>
+			<div class="tabletCategories">
+			<ul class="first">
+				<!-- loop starts -->
+				<isset name="scene7ImageForSearchBar" value="" scope="page"/>
+			<isset name="scene7ImageType" value="" scope="page"/>
+			<isset name="catCount" value="${new Number('0')}" scope="page"/>
+			<isloop items="${dw.system.Site.getCurrent().preferences.custom.ImageTypesDimension}" alias="ImageTypeDimensionObj">	
+				<isscript>
+					if (ImageTypeDimensionObj.getValue() == 'carousel') {
+						scene7ImageForSearchBar = ImageTypeDimensionObj.getDisplayValue();
+						scene7ImageType = ImageTypeDimensionObj.getValue();
+						scene7ImageTypeDimension = ImageTypeDimensionObj.getDisplayValue();
+					}
+				</isscript>	
+			</isloop>
+				<isscript>
+					var assignedCatalog : dw.catalog.Catalog = dw.catalog.CatalogMgr.getSiteCatalog();
+					var rootCatalog : dw.catalog.Category = null;
+					if(assignedCatalog!=null) {rootCatalog = assignedCatalog.getRoot();}					
+					importScript('app_mns:tablet/Utils.ds');
+					var sortingRule : SortingRule = dw.catalog.CatalogMgr.getSortingRule("New Arrival");
+				</isscript>
+				<isif condition="${rootCatalog != null}">
+					<isloop items="${rootCatalog.getOnlineSubCategories()}" var="topCat" status="loopstate">
+						<isif condition="${('showInMenu' in topCat.custom) && topCat.custom.showInMenu.valueOf() && !topCat.custom.notInLaunchPad}">
+							<iscomment>### Top Level Categories : PRINT #####</iscomment>
+							<isscript>														
+								var scene7ImageUrl :String ="";							
+								var catImageUrl  = topCat.thumbnail;
+						  		if(empty(topCat.thumbnail)){
+									var thumbnailUrl : String = getFirstProductImage(topCat,sortingRule);													
+									scene7ImageUrl = thumbnailUrl + scene7ImageForSearchBar;
+								}else{
+									scene7ImageUrl = catImageUrl.URL;
+								}							
+								<iscomment>var imgPath : String = getFirstProductImage(topCat, sortingRule);	
+								var scene7ImageUrl : String = imgPath + scene7ImageForSearchBar;</iscomment>											
+							</isscript>												
+							<li>
+								<div class="tcCont">
+									<div class="tcImg"><a href="${URLUtils.http('Search-Show', 'cgid', topCat.getID())}"><img src="${scene7ImageUrl}" alt="${topCat.displayName}"></a></div>
+									<h3><a href="${URLUtils.http('Search-Show', 'cgid', topCat.getID())}">${topCat.displayName}</a></h3>
+								</div>
+							</li>
+							<isset name="catCount" value="${catCount+1}" scope="page">
+						</isif>
+					</isloop>
+				</isif>
+				
+				<!-- loop ends -->
+				<isif condition="${catCount%3!=0}">
+					<isslot id="filler_promotions_home" description="Filler Promotioins for Home Page" context="global" />
+					<isslot id="filler_promotions_home_2" description="Filler Promotioins for Home Page Two" context="global" />
+				</isif>
+			</ul>
+			<div class="cl"></div>
+			</div>
+			
+</div>
+</isdecorate>

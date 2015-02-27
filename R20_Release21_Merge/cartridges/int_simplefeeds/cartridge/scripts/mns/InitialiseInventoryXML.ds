@@ -1,0 +1,81 @@
+/**
+	<inventory xmlns="http://www.demandware.com/xml/impex/inventory/2007-05-31">
+ 	<inventory-list>
+ 	<header list-id="inventory">
+ 	<default-instock>false</default-instock>
+	</header>
+	<records>
+	<record product-id="000000022079741002">
+	<allocation>0.0</allocation>
+	</record>
+	</records>
+	</inventory-list>
+	</inventory>
+ * @input TempFolder : String 
+ * @input FilePattern : String 
+ * @output inventoryWriter : dw.io.XMLStreamWriter
+ * @output inventoryFile : String  
+ * @output message : String
+ */
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+
+function execute( args : PipelineDictionary ) : Number
+{	
+	var tempFolder: String = args.TempFolder;
+	var zeroInventoryFile : String = args.FilePattern;
+	try {				
+		if ( !createTempFolder( tempFolder ) )
+		{
+			return PIPELET_ERROR;
+		}	
+		var calendar : Calendar = dw.system.Site.calendar;		
+		var fileName : String = zeroInventoryFile +'_'+ Site.current.name + '_' + StringUtils.formatCalendar(calendar,"yyyyMMddhmmss");	 	
+		var fileObj : File = new File(File.IMPEX+"/src"+File.SEPARATOR+tempFolder + File.SEPARATOR + fileName + '.xml');
+		args.inventoryFile = tempFolder+ File.SEPARATOR + fileObj.name;	
+		// write XML document and root element
+		var inventoryWriter : XMLStreamWriter = initZeroInventoryFile(fileObj);		
+		args.inventoryWriter = inventoryWriter;
+		Logger.getLogger("Zero inventory file").debug("Initialised zero inventory file " + fileObj);
+		}	
+	catch(e){
+				args.message = e.message;
+				return PIPELET_ERROR
+			}
+return PIPELET_NEXT;
+}
+
+function createTempFolder( tempFolder : String ) : boolean
+{
+	var folder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + tempFolder );
+	if ( folder.exists() )
+ 	{	
+		return true;
+	}
+	// create folder	
+	var result : boolean = folder.mkdirs();
+	if ( !result )
+	{
+		return false;
+	}
+	return true;
+}
+		
+function initZeroInventoryFile(file : File) : XMLStreamWriter 
+{
+	var fw : FileWriter = new FileWriter(file, "UTF-8", false);
+	var xsw : XMLStreamWriter = new XMLStreamWriter(fw);
+	xsw.writeStartDocument( "UTF-8", "1.0" );
+	xsw.writeStartElement( "inventory" );
+	xsw.writeDefaultNamespace("http://www.demandware.com/xml/impex/inventory/2007-05-31");
+	xsw.writeStartElement( "inventory-list" );		
+	xsw.writeStartElement( "header" );
+	xsw.writeAttribute("list-id","inventory");
+	xsw.writeStartElement( "default-instock" );
+	xsw.writeCharacters("false");
+	xsw.writeEndElement();
+	xsw.writeEndElement();
+	xsw.writeStartElement( "records" );		
+	return xsw;
+}

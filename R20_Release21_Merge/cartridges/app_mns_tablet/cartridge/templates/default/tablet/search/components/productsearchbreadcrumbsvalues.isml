@@ -1,0 +1,114 @@
+<iscomment>This template renders the breadcrumb navigation for product search results</iscomment>
+<iscomment>get the current paging model for convenient reuse</iscomment>
+<isset name="pagingModel" value="${pdict.ProductPagingModel}" scope="page"/>
+<iscomment>REFINEMENT INFO </iscomment>
+<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+<script type="text/javascript">
+			var refinementTypes = "";
+			var refinementsWithValues = "";
+			var lastRefinementType = "";
+			var lastRefinementWithValue = "";
+		</script>
+<isif condition="${!empty(pdict.ProductSearchResult) && (pdict.ProductSearchResult.refinedByPrice || pdict.ProductSearchResult.refinedByAttribute)}">
+	<div class="filterTags">
+		<isif condition="${(pdict.ProductSearchResult.refinements.priceRefinementDefinition && pdict.ProductSearchResult.refinedByPrice) || (pdict.ProductSearchResult.refinements.refinementDefinitions.size() > 0)}"> <span class="refinedby">${Resource.msg('searchbreadcrumbs.refinedby','search',null)}</span> </isif>
+		<div class="clear"></div>
+		<iscomment>Price</iscomment>
+		<isif condition="${pdict.ProductSearchResult.refinements.priceRefinementDefinition && pdict.ProductSearchResult.refinedByPrice}">
+			<isscript> // for price refinements, we use the display value of the price refinement definition's value
+				var breadcrumbLabel = null
+				
+				var refinements = pdict.ProductSearchResult.refinements;
+				var prdValues = refinements.getRefinementValues(refinements.priceRefinementDefinition);
+				if(prdValues.iterator().hasNext())
+				{
+				breadcrumbLabel = prdValues.iterator().next().getDisplayValue();
+				} </isscript>
+			<span class="refinementname">
+			<isprint value="${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}"/>
+			:</span> 
+			<script type="text/javascript">
+				refinementTypes = "${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}" + ":";
+				lastRefinementType = "${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}";				
+			</script> 
+			<span class="refinementvalue">
+			<isif condition="${!empty(pagingModel) && (pagingModel != null)}"> <a class="relax" href="${pagingModel.appendPaging(pdict.ProductSearchResult.urlRelaxPrice('Search-Show'), 0)}"><img src="${URLUtils.staticURL('/images/icon_remove.gif')}" alt="${Resource.msg('global.remove','locale',null)}"/></a> </isif>
+			<span>
+			<isif condition="${!empty(breadcrumbLabel)}">
+				<isprint value="${breadcrumbLabel}"/>
+				<script type="text/javascript">
+						refinementsWithValues = "${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}" + "|" + "${breadcrumbLabel}" + ":" ;
+						lastRefinementWithValue = "${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}" + "|" + "${breadcrumbLabel}" ;
+					</script>
+				<iselse>
+				<isprint value="${pdict.ProductSearchResult.priceMin}"/>
+				${Resource.msg('searchbreadcrumbs.to','search',null)}
+				<isprint value="${pdict.ProductSearchResult.priceMax}"/>
+				<script type="text/javascript">
+						refinementsWithValues = "${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}" + "|" + "${pdict.ProductSearchResult.priceMin}" + "${Resource.msg('searchbreadcrumbs.to','search',null)}" + "${pdict.ProductSearchResult.priceMax}" + ":" ;
+						lastRefinementWithValue = "${pdict.ProductSearchResult.refinements.priceRefinementDefinition.displayName}" + "|" + "${pdict.ProductSearchResult.priceMin}" + "${Resource.msg('searchbreadcrumbs.to','search',null)}" + "${pdict.ProductSearchResult.priceMax}" ;
+					</script> 
+			</isif>
+			</span> </span> </isif>
+		<iscomment>attributes</iscomment>
+		<isloop items="${pdict.ProductSearchResult.refinements.refinementDefinitions}" var="definition" status="attributes">
+			<isif condition="${definition.isAttributeRefinement() && pdict.ProductSearchResult.isRefinedByAttribute(definition.attributeID)}">
+				<iscomment>
+					<isif condition="${pdict.ProductSearchResult.refinedByPrice}"> <span class="attributedevider">${Resource.msg('searchbreadcrumbs.attributedivider','search',null)}</span> </isif>
+				</iscomment>
+				<span class="refinementname">
+				<isprint value="${definition.displayName}"/>
+				</span> 
+				<script type="text/javascript">
+					refinementTypes = refinementTypes + "${definition.displayName}" + ":" ;
+					lastRefinementType = "${definition.displayName}";					
+				</script>
+				<isloop items="${pdict.ProductSearchResult.refinements.getRefinementValues(definition)}" var="value" status="values">
+					<isif condition="${pdict.ProductSearchResult.isRefinedByAttributeValue(definition.attributeID, value.value)}">
+						<isif condition="${!values.first}"> <span class="valuedivider">,</span> </isif>
+						<script type="text/javascript">
+							refinementsWithValues = refinementsWithValues + "${definition.displayName}|${value.displayValue}:";
+							lastRefinementType = "${definition.displayName}";
+						</script> 
+						<span class="refinementvalue">
+						<isif condition="${!empty(pagingModel) && (pagingModel != null)}"><a class="relax" href="${pagingModel.appendPaging(pdict.ProductSearchResult.urlRelaxAttributeValue('Search-Show', definition.attributeID, value.value), 0)}"><img src="${URLUtils.staticURL('/images/icon_remove.gif')}" alt="${Resource.msg('global.remove','locale',null)}"/></a></isif>
+						<span>
+						<isprint value="${value.displayValue}"/>
+						</span> </span> </isif>
+				</isloop>
+			</isif>
+			<isif condition="${attributes.last}"> 
+				<script type="text/javascript">								
+					lastRefinementWithValue = "${definition.displayName}" + "|" + "${value.displayValue}" ;
+					
+					if (jQuery('#clearallfilters').length != 0){
+					}								
+				</script> 
+				<span class="refinementvalue clear-all" id="clearallfilters">
+				<a class="relax" href="javascript:void(0)">
+					<img src="${URLUtils.staticURL('/images/icon_remove.gif')}" alt="${Resource.msg('global.remove','locale',null)}"/>
+					</a> 
+				<span>${Resource.msg('global.clearall','locale',null)}</span> 
+				<script type="text/javascript">
+				jQuery('#clearallfilters').css("cursor","pointer");
+							jQuery('#clearallfilters').click(function(){
+								var location = window.location.href;
+								var locate = location.split('#&')[0];
+								if (locate.indexOf('Search-Show') != -1){
+									//console.log(location);
+									var locate = location.split('#&')[0];
+									//locate = locate.substring(0, locate.length-1);
+								//	console.log(locate);
+									app.search.result.updateGrid(locate);
+									return false;
+								}
+								
+								app.search.result.updateGrid(locate);
+							});
+						
+						</script> 
+				</span> </isif>
+		</isloop>
+		<div class="clear"></div>
+	</div>
+</isif>

@@ -1,0 +1,78 @@
+<isif condition="${!pdict.pagingmodel.empty}">
+	<isscript>
+		current = pdict.pagingmodel.start;
+		totalCount = pdict.pagingmodel.count;
+		pageSize = pdict.pagingmodel.pageSize;
+		pageURL = pdict.pageurl;
+		currentPage = pdict.pagingmodel.currentPage;
+		maxPage = pdict.pagingmodel.maxPage;
+
+		lr = 2; // number of explicit page links to the left and right
+		if ( maxPage <= 2*lr )
+		{
+			rangeBegin = 0;
+			rangeEnd = maxPage;
+		}
+		else
+		{
+			rangeBegin = Math.max( Math.min( currentPage - lr, maxPage - 2*lr ), 0 );
+			rangeEnd = Math.min( rangeBegin + 2*lr, maxPage );
+		}
+	</isscript>
+	
+	<iscomment>QC Defect 882 | UAT - Page pagination not returning user to the top of the next/previous page | Naveen Kumar</iscomment>
+	<script type="text/javascript">	
+		function gotoFirstProduct(){
+			  $("html,body").scrollTop(150);
+		}
+	</script>
+	
+	<iscomment>Avoid empty paging div or empty div with empty ul</iscomment>
+	<isif condition="${pdict.pagingmodel.pageCount > 1}">
+		<isif condition="${pdict.comingFromOrderHistory}">
+			<div class="orderhistorypagination">
+		<iselse>
+			<div class="pagination">
+		</isif>
+			<ul>
+				<isif condition="${(currentPage > 0) && (maxPage > 0)}">
+					
+					<iscomment><li class="firstlast">
+						<a class="pagefirst" href="${pdict.pagingmodel.appendPaging( pageURL, 0)}"><span>&lt;&lt;</span></a>
+					</li></iscomment>
+					<li class="background_arrowlesser">
+						<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+						<a class="pagefirst" onclick="javascript: gotoFirstProduct();" href="${pdict.pagingmodel.appendPaging( pageURL, current - pageSize)}"> ${Resource.msg('paginginformation.previous','search',null)} </a>
+						<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+					</li>
+				</isif>
+
+				<isif condition="${maxPage >= 1}">
+					<isloop status="i" begin="${rangeBegin}" end="${rangeEnd}">
+						<isif condition="${i.index != currentPage}">
+							<li>
+								<iscomment>This long line is needed to avoid extra whitespaces in the link text</iscomment>
+								<a class="page-<isprint value="${i.index + 1}" style="0"/>" onclick="javascript: gotoFirstProduct();" href="${pdict.pagingmodel.appendPaging( pageURL, current + (i.index - currentPage) * pageSize)}"><isprint value="${i.index + 1}" style="0"/></a>																
+							</li>
+						<iselse>
+							<li class="currentpage"><isprint value="${i.index + 1}" style="0"/></li>
+						</isif>
+					</isloop>
+					<isif condition="${(current < totalCount - pageSize) && (maxPage > 0)}">
+						
+						<li class="background_arrowgreater">
+							<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>							
+							<a class="pagelast" onclick="javascript: gotoFirstProduct();" href="${pdict.pagingmodel.appendPaging( pageURL, current + pageSize)}">${Resource.msg('paginginformation.next','search',null)} </a>
+							<iscomment>Praveen:- SEO Changes Technical Changes-0.2</iscomment>
+						</li>
+						<iscomment><li class="firstlast">
+							<a class="pagelast" href="${pdict.pagingmodel.appendPaging( pageURL, current + (maxPage - currentPage) * pageSize)}"><span>&gt;&gt;</span></a>
+						</li></iscomment>
+					</isif>
+				</isif>
+				<iscomment>To Do | ASHA | Add Next when required. I've added at temporary place
+				<li class="background_arrowgreater"><a href="${pdict.pagingmodel.appendPaging( pageURL, current + 1)}">${Resource.msg('paginginformation.next','search',null)}  </a></li></iscomment>
+			</ul>
+		</div>
+	</isif>
+</isif>

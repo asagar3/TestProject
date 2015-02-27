@@ -1,0 +1,44 @@
+<isdecorate template="account/pt_account_landing_signin">
+<isinclude template="util/modules"/>
+<div class="accountlogin">
+	<iscomment><!--  Header is not required as per VD | Asha | 04-march-2011 --></iscomment>
+	<iscomment><h1>${Resource.msg('account.header','account',null)}</h1></iscomment>
+	<script type="text/javascript">
+		//Variables added for Omniture Tagging | Naveen Kumar	
+		//this event var is used on chkout signin and account signin pages
+		s.events = "${Resource.msg('omniture.events.signin','omniture',null)}" ;
+	</script>
+	<isinclude template="account/login/logininclude"/>
+	<div class="logincreate">
+		<iscomment><!--  added class in h3 | Asha | 04-march-2011 --></iscomment>
+		<iscomment><!-- Added sIFR implementaion | Asha | 08-mar-2011 --></iscomment>
+		<h3 class="logincreateHeader"><span class="ms_header_account_login"><isprint value="${Resource.msg('globalaccount.createnewaccount1','locale',null)}"/></span><span class="ms_header_account_login"><isprint value="${Resource.msg('globalaccount.createnewaccount2','locale',null)}"/></span></h3>
+		<iscomment><!-- This section is not required as per VD. Commented out | Asha | 04-mar-2011 --></iscomment>
+		
+		<div class="createaccount">
+			<iscomment><p>${Resource.msg('globalaccount.createmessage','locale',null)}</p></iscomment>
+			<iscontentasset aid="create-account-benefits"/>
+			
+			<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.login.htmlName}_register">
+					<iscomment><!-- added styles to button | Asha --></iscomment>
+					<div class="floatleft btn-green-flat">
+							<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.login.register.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>
+					</div>
+					<!-- END: createaccountbutton -->
+					<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+			</form>
+			<iscomment><!-- commented out this section to match with VD | Asha --></iscomment>
+			<iscomment><div class="createbenefits">
+				<iscontentasset aid="create-account-benefits"/>
+			</div><!-- END: createbenefits -->
+			</iscomment>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: createaccount -->
+	</div><!-- END: logincreate -->
+	<iscomment><!-- Moved to top | As per vd --><isinclude template="account/login/logininclude"/></iscomment>
+	<iscomment><!-- moved to top as per VD | Asha --></iscomment>
+	
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: accountlogin -->
+<iscontentasset aid="account-footer"/>
+</isdecorate>

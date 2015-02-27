@@ -1,0 +1,70 @@
+/**
+ * Update the given billing address and copies the address details 
+ * stored in the given address form to the billing address.
+ *
+ * @input Basket : dw.order.Basket
+ * @input BillingAddress : dw.order.OrderAddress The address to update.
+ * @input AddressForm : dw.web.FormGroup The address form.
+ */
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.web );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	//Praveen : Extracting the shipping address from basket.
+	var shipments : dw.util.Collection = pdict.Basket.getShipments();
+	var shipment : Shipment = shipments[0];
+	var shippingAddress : OrderAddress = shipment.getShippingAddress(); 
+
+	var billingAddress : OrderAddress = pdict.BillingAddress;
+	var addressFields : FormGroup = pdict.AddressForm.addressFields;
+	
+	// copy the address details
+	
+	billingAddress.setFirstName( addressFields.firstName.value );
+	billingAddress.setLastName( addressFields.lastName.value );
+	billingAddress.setAddress1( addressFields.address1.value );
+	billingAddress.setAddress2( addressFields.address2.value );
+	billingAddress.setCity( addressFields.city.value );
+	billingAddress.setPostalCode( addressFields.zip.value );
+	billingAddress.setStateCode( addressFields.states.state.value );
+	billingAddress.setCountryCode( addressFields.country.value );
+	var phone : String = "";
+	if (addressFields.phone.value!=null) {
+		phone = addressFields.phone.value.replace(/\s+/g, "");
+	} else {
+		phone = addressFields.phone.value;
+	}
+	billingAddress.setPhone( phone );
+	billingAddress.setTitle( addressFields.title.value );
+	billingAddress.setPostBox( addressFields.postBox.value );
+
+	if (!empty(addressFields.address3)){
+		billingAddress.custom.address3 = addressFields.address3.value;
+	}
+	
+	var alternatePhone : String = "";
+	if (addressFields.alternateContactNumber.value!=null) {
+		alternatePhone = addressFields.alternateContactNumber.value.replace(/\s+/g, "");
+	} else {
+		alternatePhone = addressFields.alternateContactNumber.value;
+	}
+
+	billingAddress.custom.alternateContactNumber = alternatePhone;
+	billingAddress.custom.residence = addressFields.residence.value;
+	billingAddress.custom.streetName =  addressFields.streetName.value ;
+	
+	//Praveen: Copying klarnaHouseNo and klarnaStreetName from shipping address for Klarna
+	if(!empty(shippingAddress.custom.klarnaHouseNo)){
+		billingAddress.custom.klarnaHouseNo =shippingAddress.custom.klarnaHouseNo;
+	}
+	if(!empty(shippingAddress.custom.klarnaStreetName)){
+		billingAddress.custom.klarnaStreetName =shippingAddress.custom.klarnaStreetName;	
+	}
+	if(!empty(shippingAddress.custom.klaraHouseExtension)){
+	//	billingAddress.custom.klarnaStreetName =shippingAddress.custom.klaraHouseExtension;	
+		billingAddress.custom.klaraHouseExtension =shippingAddress.custom.klaraHouseExtension;
+	}
+    return PIPELET_NEXT;
+}

@@ -1,0 +1,29 @@
+<isscript>
+var TopRatedVar:Number;
+var AvgRatingInPercent:Number=0;
+var Title=0;
+	if(!empty(Product.custom.TopRated) && Product.custom.TopRated > 0)
+	{
+	    TopRatedVar=parseFloat(Product.custom.TopRated);	
+		AvgRatingInPercent=Math.round((TopRatedVar/5)*100);
+		Title=Product.custom.TopRated;
+	}	
+var IsBazaarVoiceEnabled:Boolean= dw.system.Site.getCurrent().getCustomPreferenceValue("IsBazaarVoiceEnabled");					
+</isscript>
+<isif condition="${IsBazaarVoiceEnabled}">
+<div class="starRatings">	
+<isif condition="${AvgRatingInPercent>0 && AvgRatingInPercent<=100}">
+	<a class="starRating" href="${URLUtils.url('Product-Show')}?pid=${Product.ID}#BVCustomerRatings"  title="${Title}/5">	
+		<span class="greyStars">
+			<span class="yellowStars" style="width:${AvgRatingInPercent}%"></span>
+		</span>	
+	</a>
+</isif>
+</div>
+</isif>
+
+
+
+
+
+

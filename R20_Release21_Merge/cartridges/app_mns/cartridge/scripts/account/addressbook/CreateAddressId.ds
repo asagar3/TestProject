@@ -1,0 +1,33 @@
+/**
+* Demandware Script File
+* this Scripts uses Utils.ds to determine the unique address id 
+*
+* 	@input Profile : dw.customer.Profile
+* 	@input addressCity : String
+*	@input formAddress : dw.web.Form
+*   @output addressId : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.web );
+
+importScript( "account/Utils.ds" );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+
+	var addressBook : AddressBook = pdict.Profile.addressBook;
+	var addressCity : String = pdict.addressCity;
+	var usedAddress : Form = pdict.formAddress;
+	
+	if(getEquivalentCustomerAddress(addressBook, usedAddress)== null)
+	{
+
+
+		var addressID : String = determineUniqueAddressID(addressCity, addressBook);
+
+		pdict.addressId = addressID;
+	}
+ 
+  return PIPELET_NEXT;
+}

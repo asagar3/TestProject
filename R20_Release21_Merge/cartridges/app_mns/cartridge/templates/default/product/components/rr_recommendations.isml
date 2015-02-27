@@ -1,0 +1,59 @@
+<!--- TEMPLATENAME: rr_recommendations.isml --->
+<iscomment>INT-263 oformby: Rich Relevance: Recommend
+Product (Horizontal)</iscomment>
+<iscomment>jsCallBack taken from reccommendations_vertical
+and merge here to remove duplication; a call to the same function twice
+query the pipeline twice to retrieve different slots in the array for
+richrelevance</iscomment>
+
+
+<iscomment>call the name here and use to parse into the pipeline from http ${rr_type}</iscomment>
+	<!--[if IE 7]>
+		<script src="${URLUtils.staticURL('/js/json2.js')}" type="text/javascript"></script>
+	<![endif]-->
+<script language="JavaScript">
+	function jsCallBack(obj) {
+		if (obj != null) {
+			if ((JSON.stringify(obj)) != "[]" && (JSON.stringify(obj)) != "") {
+				var url = "${URLUtils.http('RichRelevance-GetProductItems')}";
+				var json = "";				
+				
+				/*	Split rr_type to array to then loop to call getProductItemsJSON per placement	*/
+				var rrType = "${rr_type}";
+				var rrTypeArray = rrType.split(",");
+				
+				for (var i = 0; i < obj.length; i++)
+					{
+						
+						json = "remotePlacement=remote_incl_"+rrTypeArray[i]+"&placement=" + rrTypeArray[i] + "&param=" + encodeURIComponent(JSON.stringify(obj[i]));
+						
+						getProductItemsJSON(url, json);
+					}
+			}
+		}
+	}
+
+	function getProductItemsJSON(url, json) {
+		
+		url = url;
+		jQuery.ajax({
+			url : url,
+			type : "post",
+			data : json,
+			cache : false,
+			dataType : "html",
+			success : function(response) {
+				if (response.indexOf("verticalrecommendations") >= 0) {
+					jQuery('.richRelevanceRecommendations').html(response);
+				} else if (response.indexOf("horizontalrecommendations") >= 0) {
+					jQuery('.richRelevanceRecommendationsHorizontal').html(
+							response);
+				}
+			},
+			error : function(response) {
+			
+			}
+		});
+		
+	}
+</script>

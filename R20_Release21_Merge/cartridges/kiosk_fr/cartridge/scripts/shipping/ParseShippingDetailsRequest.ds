@@ -1,0 +1,43 @@
+/**
+* @input  requestJSONObject : String
+* @input  sessionID : String
+* @output requestShippingDetails : Object 
+*
+*/
+importPackage( dw.system );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	
+	try {
+		var reqObject : Object = JSON.parse(pdict.requestJSONObject);
+		var requestShippingDetails = new Object();
+		
+		if(reqObject == null){
+			throw new Error("GetShippingDetails: Request is null ") ;	
+		}
+		
+		
+		var postCode:String = reqObject.postCode ;
+		var city:String = reqObject.city ;
+		var countryCode:String = reqObject.countryCode ;
+		
+		if (empty(postCode) || empty(city ) || empty(countryCode)){
+			throw new Error("GetShippingDetails: Input parameters null ") ;
+						
+		}
+		
+		
+		requestShippingDetails.postCode = postCode ;
+		requestShippingDetails.city = city ;
+		requestShippingDetails.countryCode = countryCode ;
+		
+		pdict.requestShippingDetails = requestShippingDetails ;
+	}catch(e){
+	
+		Logger.error("GetShippingDetails: error:::"+e.message) ;
+		return PIPELET_ERROR ;		
+	}
+	
+  return PIPELET_NEXT;
+}

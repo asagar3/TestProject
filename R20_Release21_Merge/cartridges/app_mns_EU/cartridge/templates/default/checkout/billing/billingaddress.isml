@@ -1,0 +1,179 @@
+<!--- TEMPLATENAME: billingaddress.isml --->
+
+<isinclude template="util/modules"/>
+<iscomment><!-- TODO: MattS - Please check width of grey header block - it's slightly narrower than the one above. Added extra style to header <h5>${Resource.msg('billing.addressheader','checkout',null)}</h5> --></iscomment>
+<h5 class="grey_block_header_checkout"><span><strong class="content_grey_header">${Resource.msg('billing.addressheader','checkout',null)}</strong></span></h5>
+<iscomment>display select box with stored addresses if customer is authenticated and there are saved addresses</iscomment>
+<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.profile.addressBook.addresses.size() > 0}">
+  <div class="addresslist">
+    <iscomment> [919752] | discussed with Rachna and as per her, it is not required | Naveen Kumar
+      <div class="selectaddress"> <span class="selectaddressstar"></span> <span class="selectaddressmessage"></span>
+        <div class="clear"><!-- FLOAT CLEAR --></div>
+      </div>
+    </iscomment>
+    <!-- END: selectaddress -->
+    <label for="${pdict.CurrentForms.billing.addressList.htmlName}" class="hideLabel"> ${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName} </label>
+    <select id="${pdict.CurrentForms.billing.addressList.htmlName}" name="${pdict.CurrentForms.billing.addressList.htmlName}">
+      <option value="${Resource.msg('global.selectaddress','locale',null)}" selected="selected">${Resource.msg('global.selectaddress','locale',null)}</option>
+      <isif condition="${pdict.CurrentCustomer.profile.addressBook.addresses.size() == 0}">
+        <option value="">There are currently no Saved Addresses</option>
+        <iselse>
+        <isloop items="${pdict.CurrentCustomer.profile.addressBook.addresses}" var="address">
+          <option value="${address.ID}">
+	        <isprint value="${address.address1}"/>,
+			<isprint value="${address.city}"/>,
+			<isif condition="${address.stateCode != null && !empty(address.stateCode)}">
+				<isprint value="${address.stateCode}"/>,
+			</isif>
+			<isif condition="${address.postalCode != null && !empty(address.postalCode)}">
+				<isprint value="${address.postalCode}"/>,
+			</isif>
+			<isprint value="${address.countryCode}"/>
+          </option>
+          <iscomment>End: Bug Fixing-Changing the format of saved addresses in drop down</iscomment>
+        </isloop>
+      </isif>
+    </select>
+  </div>
+</isif>
+<div class="formfield title">
+	<label for="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="label">
+		<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span>
+		<span class="requiredindicator">*</span>
+	</label>							
+	<isscript>
+		importScript('checkout/Utils.ds');
+		var titleMap : dw.util.Map = getTitleMap();					
+	</isscript>
+	<div class="value">
+	<select id="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="selectbox title required">
+		<option value="">${Resource.msg('forms.select','forms',null)}</option>
+		<isloop items="${titleMap.keySet().iterator()}" var="key">
+			<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+		</isloop>
+	</select>
+	</div>
+</div><!-- END: title -->
+
+<div class="formfield firstname">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" label="false"/>
+</div>
+<!-- END: firstname -->
+<div class="formfield lastname">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" label="false"/>
+</div>
+<!-- END: lastname -->
+
+ 			<isscript>
+		    	var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+		    </isscript>
+ 			<div class="formfield country">
+		    	<label for="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="label">
+					<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+					<span class="requiredindicator">*</span>
+				</label>
+				<div class="value">
+		    		<select id="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.country.htmlName}" class="selectbox country required">
+						<option value="">${Resource.msg('forms.select','forms',null)}</option>
+						<isloop items="${countryCodes}" var="countryCode">
+							<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+						</isloop>
+					</select>
+				</div>
+		    </div><!-- END: country -->
+
+<!-- END: country -->
+
+<div class="formfield address1">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address1}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address1}" type="input" label="false"/>
+</div>
+<div class="formfield address2">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address2}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address2}" type="input" label="false"/>
+</div>
+<div class="formfield address3">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address3}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.address3}" type="input" label="false"/>
+</div>
+  <iscomment>  
+<!-- END: address1 -->
+<div class="formfield streetname">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.streetName}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.streetName}" type="input" label="false"/>
+</div>
+
+<!-- END: address2 -->
+<div class="formfield residence">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.residence}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.residence}" type="input" label="false"/>
+</div>
+<div class="formfield postbox">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.postBox}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.postBox}" type="input" label="false"/>
+</div>
+  </iscomment>  
+<iscomment>
+  <div class="formfield country">
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.country}" type="input" value="false"/>
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.country}" type="input" label="false"/>
+  </div>
+  <!-- END: country --> 
+</iscomment>
+  
+  <!-- END: state --> 
+<div class="formfield city">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.city}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.city}" type="input" label="false" xhtmlclass="startWithAlphabet"/>
+</div>
+<!-- END: city -->
+<div class="formfield state">
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.states.state}" type="input" value="false"/>
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.states.state}" type="input" label="false"/>
+  </div>
+  
+<div class="formfield zip">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.zip}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.zip}" type="input" label="false" xhtmlclass="billingpage"/>
+  <div class="formfieldtooltip">
+             <istooltip content_id="help-billingPostCode"/>
+  </div>
+  <div class="clear"><!-- FLOAT CLEAR --></div>
+</div>
+<!-- END: zip -->
+
+
+<iscomment>
+  <div class="formfield phone">
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.phone}" type="input" value="false"/>
+    <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.phone}" type="input" label="false"/>
+    <div class="formfieldtooltip">
+      <istooltip content_id="help-telephone"/>
+    </div>
+  </div>
+  <!-- END: phone --> 
+</iscomment>
+			
+<div class="clear"></div>
+<script type="text/javascript"><!--
+jQuery(document).ready(function() {
+	// select address from list
+	jQuery(".addresslist select").change(function() {
+		var addressID = jQuery(this).val();
+		if(!addressID) return false;
+		populateAddressForm(addressID);
+		return false;
+	});
+	 // added below function for CR 810
+	jQuery(".country select").change(function() {
+		var countryVal = jQuery(this).val();
+		if(countryVal == "GB"){
+			jQuery(".state .labeltext").html("${Resource.msg('forms.state.uk','forms',null)}:");
+		}else{
+			jQuery(".state .labeltext").html("${Resource.msg('forms.state','forms',null)}:");
+		}
+	});
+});
+//--></script>

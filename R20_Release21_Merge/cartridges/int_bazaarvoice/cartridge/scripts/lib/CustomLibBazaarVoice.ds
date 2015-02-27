@@ -1,0 +1,244 @@
+ 
+ importPackage( dw.system );
+ importPackage( dw.util );
+ importPackage( dw.io);
+ importPackage( dw.catalog );
+ importScript( "app_mns:common/stringReplace.ds" );
+var countryRatingMap:HashMap=new HashMap();
+var countryReviewMap:HashMap=new HashMap();
+var countryLocaleMap:HashMap=new HashMap();
+
+var xsw : XMLStreamWriter=null;
+function initFeed(xsw:XMLStreamWriter,file : File) : XMLStreamWriter {
+
+    var date : Date = new Date();
+   // var CreatedDate : String = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate();    
+    var xmlns:String="http://www.demandware.com/xml/impex/catalog/2006-10-31";
+	   xsw.writeStartDocument("UTF-8", "1.0");	   
+	   xsw.writeCharacters("\n");
+	   xsw.writeStartElement("catalog");
+	   xsw.writeAttribute("catalog-id","master-catalog");	
+	   xsw.writeAttribute("xmlns", xmlns);    
+    return xsw;
+}
+
+function initageProductstag(xsw : XMLStreamWriter,pid:String):XMLStreamWriter {
+    var rating:String='0';
+    var review:Number=0;
+    xsw.writeCharacters("\n");
+    xsw.writeStartElement("product"); 
+    xsw.writeAttribute("product-id", pid);
+    	xsw.writeStartElement("custom-attributes");       
+	return xsw; 
+}
+
+function writerproductcustomattributes(xsw : XMLStreamWriter,country:String,rating:Number,review:Number):XMLStreamWriter{
+	
+	  var dwlocales : HashSet =Site.getCurrent().getCustomPreferenceValue("DWLocale");	 
+	      for(var i:Number=0 ; i< dwlocales.length ; i++){
+	          var locale=dwlocales[i].value; 
+	          if(locale.substr(3)==country){	                
+	                //write top rated value into dwcustom xml
+		            xsw.writeStartElement("custom-attribute");    	
+					xsw.writeAttribute("attribute-id","TopRated");
+					xsw.writeAttribute("xml:lang",locale.replace("_","-"));
+						 xsw.writeStartElement("value");
+						 if(rating>0){
+						 xsw.writeCharacters(String(rating));
+						 }
+						 xsw.writeEndElement();
+					xsw.writeEndElement();
+					
+					//write MostReviewedCount value into dwcustom xml
+					xsw.writeStartElement("custom-attribute");
+					xsw.writeAttribute("attribute-id","MostReviewedCount");
+					xsw.writeAttribute("xml:lang",locale.replace("_","-"));
+						 xsw.writeStartElement("value");
+						 if(review>0){
+						 xsw.writeCharacters(String(review));
+						 }
+						 xsw.writeEndElement();			
+					xsw.writeEndElement();
+	            }
+	       }                
+return xsw;
+}     
+
+
+function closeProductstag(xsw : XMLStreamWriter) :XMLStreamWriter{
+	xsw.writeEndElement();
+	xsw.writeEndElement();
+	return xsw;
+}
+
+function finalizeFeed(xsw : XMLStreamWriter) {
+    xsw.writeCharacters("\n");   
+    xsw.writeEndElement(); 
+	xsw.writeEndDocument();    
+    xsw.close();
+}
+
+function getcountryLocale()
+{    
+	var countrySet:HashSet = new HashSet();	
+	var dwlocales:ArrayList = Site.getCurrent().getCustomPreferenceValue("DWLocale");
+    for(var i:Number=0 ; i<dwlocales.length ; i++){
+		var locale=dwlocales[i].value;
+	    var a=locale.split('_');
+		    countrySet.add(a[1]);	
+		}
+			
+	var countryItr:Iterator=countrySet.iterator();
+	while(countryItr.hasNext())
+       {
+  		var country=countryItr.next();
+  		var languageSet:HashSet=new HashSet();
+		for(var i:Number=0 ; i<dwlocales.length ; i++){
+	       	var locale=dwlocales[i].value;
+   			var a=locale.split('_');
+	       	if(country==a[1]){
+	       	 languageSet.add(a[0]);
+	       	}				
+		 }	
+	  countryLocaleMap.put(country,languageSet);			  
+      }
+}
+
+function ratingReviewByCountry(bvlocale:String,bvAverageRating:Number,bvReviewCount:Number){
+	
+	var country:String;
+	//check locale in xml whether it belong to  dw m&s Intrn sites or .com ==en_GB
+    var dotcomLocle:String=Site.getCurrent().getCustomPreferenceValue("dotcomLocle");
+	if(bvlocale==dotcomLocle){
+		var countryItr:Iterator=countryLocaleMap.keySet().iterator();
+		while(countryItr.hasNext()){
+			country=countryItr.next();	
+		   calcualteRatingReview(country,bvAverageRating,bvReviewCount);	    
+		}	
+	}else{
+		if(bvlocale.length==5){
+		    country=bvlocale.substr(3);
+			if(countryLocaleMap.keySet().contains(country)){				
+				calcualteRatingReview(country,bvAverageRating,bvReviewCount); 
+			}
+		}	
+    }    
+}
+
+function calcualteRatingReview(country:String,bvAverageRating:Number,bvReviewCount:Number) {
+	
+	var calculatedValue:Number=0;
+	var newValue:Number=0;
+	var ratingMap:HashMap= new HashMap();
+	var reviewMap:HashMap= new HashMap();
+	
+	if(bvAverageRating>0 && bvReviewCount>0){
+		//calculate rating as : rating=raiting1 X review1 + raiting2 X review2 +......
+		if(!empty(countryRatingMap.get(country))){
+		    if(!empty(countryRatingMap)){	
+				calculatedValue=countryRatingMap.get(country);
+			}
+		}			
+		newValue=bvAverageRating*bvReviewCount;					
+		newValue=newValue +calculatedValue ;
+		countryRatingMap.put(country,newValue);			
+				
+		//calculate review count as review=review1 + review2 + .....
+	    calculatedValue=0;
+	    newValue=0;
+	    if(!empty(countryReviewMap.get(country)))
+	    {				    
+		    if(!empty(countryReviewMap)){	
+				calculatedValue=countryReviewMap.get(country);
+		     }
+	    }		
+			newValue=calculatedValue +bvReviewCount;
+			countryReviewMap.put(country,newValue);			
+   }
+}
+	
+function avgRatingCalculation(pid:String,xsw:XMLStreamWriter){
+	
+	var countryItr:Iterator=countryLocaleMap.keySet().iterator();
+	var AvgRating:Number;
+	var review:Number;
+	initageProductstag(xsw,pid);
+	while(countryItr.hasNext())
+		{
+		    var country=countryItr.next();
+			var rating=countryRatingMap.get(country);
+			    review=countryReviewMap.get(country);
+			if(!empty(review) && review>0){
+				AvgRating=rating/review;
+				//AvgRating=Decimal(AvgRating).round(1);
+				AvgRating=Number(AvgRating.toFixed(1));
+			}else{
+				AvgRating=0;
+				review=0;
+			}	
+    writerproductcustomattributes(xsw,country,AvgRating,review); 	
+ 	
+	   }
+ closeProductstag(xsw);
+//flush  rating / review maps after calculation so that it could be user for next product
+countryRatingMap.clear();
+countryReviewMap.clear();
+}
+
+
+//Export product feed catalog required functions
+
+function getProductPageURL(product:Product,currentLocale:String):String{
+var seoURL:Boolean=Site.getCurrent().getCustomPreferenceValue("seoURL");
+var productPageURL:String="";
+	if(seoURL){
+	     productPageURL=SEOProductURL(product.name,product.ID,currentLocale);
+	}else{
+		productPageURL=URLUtils.http('Product-Show','pid',product.ID);		
+	}
+return productPageURL;
+}
+
+
+
+
+
+function getProductImageURL(product:Product):String{
+	var ImageURL:String="";
+    var imageType:String = Site.getCurrent().getCustomPreferenceValue("bvProductImageType").toString();
+	if(!empty(imageType) && !empty(product.getImage(imageType))) {
+		ImageURL = product.getImage(imageType).getAbsURL();
+	}
+	if(empty(ImageURL) && product.master){
+		try{
+    	var pvm:ProductVariationModel=product.variationModel;
+    	if(pvm.getProductVariationAttributes().length()>0){
+	    	var firstvariant:Variant=pvm.getProductVariationAttributes()[0];
+		    if(!empty(firstvariant.getImage(imageType))){
+		     	ImageURL = firstvariant.getImage(imageType).getAbsURL();
+		     }
+          }
+	}catch(e){ 
+		Logger.error("BV-within write product, get image" + product.ID);
+		Logger.error("BV-within write product get image" + e.message);
+		}
+	}
+	return ImageURL;
+}
+function SEOProductURL(pname:String,pid:String,locale:String):String{
+	
+	   //SEO URL FORMAT:http://www.marksandspencer.fr/Pure-Egyptian-Cotton-Supersoft-Towels/Parent_T362850E,en_FR,pd.html
+	    var protocol : String = request.httpProtocol;  // http://	
+	    pname=replaceAll(pname,new RegExp(" "), "-");
+	    pname=dw.crypto.Encoding.toURI(pname);
+	 	var sitename:String=Site.getCurrent().getCustomPreferenceValue("httpHostRedirection");
+	 	var seoproducturl=protocol+"://"+sitename+"/"+pname+"/"+pid+","+locale+",pd.html";
+        return seoproducturl;
+
+}
+
+
+
+
+
+

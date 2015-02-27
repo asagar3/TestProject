@@ -1,0 +1,193 @@
+/**
+ * This script will be used to create/update cookie & to get the browser settings.
+ *
+ *
+ 
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+
+/* 
+	Logic to get browser locale is written by refering to the BRD 'BRD_EU_Website_v0 5_final.docx'
+	locale examples:
+	'fr_FR', 'en_IE', 'bs_BA_Cyrl', 'en_US' etc.	
+*/
+
+// Overlay Options
+var SHOW_OVERLAY_YES = "yes";
+var SHOW_OVERLAY_NO = "no";
+// Country Constants
+var COUNTRY_AUSTRIA = "AT";
+var COUNTRY_BELGIUM = "BE";
+var COUNTRY_GERMANY = "DE";
+var COUNTRY_NETHERLAND = "NL";
+var COUNTRY_SPAIN = "ES";
+var COUNTRY_FRANCE = "FR";
+var COUNTRY_LUXEMBOURG = "LU";
+// Language Constants 
+var LANG_DUTCH = "nl";
+var LANG_ENGLISH = "en";
+var LANG_FRENCH = "fr";
+var LANG_GERMAN = "de";
+var LANG_SPANISH = "es";
+
+function createOrUpdateCookie(localeStr : String){
+	var cookie : dw.web.Cookie = new dw.web.Cookie("LocaleCookie",localeStr);
+	//cookie.setDomain("dev06.store.mns.demandware.net"); 	NOT REQUIRED; domain name is set automatically
+	//cookie.setDomain(System.getInstanceHostname());		NOT REQUIRED; domain name is set automatically
+	cookie.setMaxAge(7776000); // 90Days
+	cookie.setPath("/");
+	response.addHttpCookie(cookie);
+}
+
+function setSessionVar(localeStr : String){
+	session.custom.localeStr = localeStr;
+}
+/*
+function getBrowserSettings() : String{
+	return request.httpLocale;
+}
+*/
+
+function getDefaultLocale() : String {
+	return (LANG_ENGLISH + "_" + COUNTRY_GERMANY);
+}
+
+function getDefaultLocaleForFR() : String {
+	return (LANG_FRENCH + "_" + COUNTRY_FRANCE);
+}
+
+function updateURL(URL : String, newLocale : String, oldLocale : String) : String{
+	var updatedURL : String = updateURLWithENLocale (URL, newLocale, oldLocale);
+	updatedURL = updatedURL.replace("/en/", "/"); 
+	return updatedURL;
+}
+
+function updateURLWithENLocale(URL : String, newLocale : String, oldLocale : String) : String{
+	var updatedURL : String = URL.replace(oldLocale, newLocale);
+	if (updatedURL.indexOf(newLocale) < 0){
+		var lastChar: String = updatedURL.charAt(updatedURL.length-1);		
+		if (lastChar.equals("/")){
+			updatedURL = updatedURL + newLocale;
+		} else {
+			updatedURL = updatedURL + "/" + newLocale;
+		}		
+	}
+	return updatedURL;
+}
+
+function ifDisplayOverLay (localeToCheck : String, validLocalesMap: HashMap) : Boolean{ 
+	if (validLocalesMap.get(localeToCheck).toString().equals(SHOW_OVERLAY_NO)){
+		return false;
+	}
+	return true;
+}
+
+/*
+	method to get locale value as per the BRD rules. 
+	it takes country and language as input and return the locale to redirect to
+*/
+function getLocaleToRedirect(lang : String, country : String, validLocalesMap : HashMap) : String {
+	switch (country) {
+		case COUNTRY_AUSTRIA:
+			//if language is available but is not a valid language for this country, as per the BRD set the language as Englsih
+			if (!empty(lang)) {
+				lang = LANG_ENGLISH;
+			} else {
+				lang = LANG_GERMAN;
+			}
+			break;
+						
+		case COUNTRY_BELGIUM: // 'en' in both scenarios
+			// @TODO: may need to check for 'de' language, after RCT
+			lang = LANG_ENGLISH;			
+			break;
+		
+		case COUNTRY_GERMANY:
+			//if language is available but is not a valid language for this country, as per the BRD set the language as Englsih
+			if (!empty(lang)) {
+				lang = LANG_ENGLISH;
+			} else {
+				lang = LANG_GERMAN;
+			}
+			break;
+		
+		case COUNTRY_NETHERLAND:
+			//if language is available but is not a valid language for this country, as per the BRD set the language as Englsih
+			if (!empty(lang)) {
+				lang = LANG_ENGLISH;
+			} else {
+				lang = LANG_DUTCH;
+			}
+			break;
+		
+		case COUNTRY_SPAIN:
+			//if language is available but is not a valid language for this country, as per the BRD set the language as Englsih
+			if (!empty(lang)) {
+				lang = LANG_ENGLISH;
+			} else {
+				lang = LANG_SPANISH;
+			}
+			break;
+		
+		case COUNTRY_LUXEMBOURG:
+			//if language is available but is not a valid language for this country, as per the BRD set the language as Englsih
+			if (!empty(lang)) {
+				lang = LANG_ENGLISH;
+			} else {
+				lang = LANG_GERMAN;
+			}
+			break;
+			
+		default:
+			switch (lang) {
+				case LANG_DUTCH:
+					country = COUNTRY_NETHERLAND;
+					break;
+					
+				case LANG_ENGLISH:
+					country = COUNTRY_GERMANY;
+					break;
+					
+				case LANG_FRENCH:
+					country = COUNTRY_BELGIUM;
+					break;
+					
+				case LANG_GERMAN:
+					country = COUNTRY_GERMANY;
+					break;
+					
+				case LANG_SPANISH:
+					country = COUNTRY_SPAIN;
+					break;									
+				default:
+					country = COUNTRY_GERMANY;
+					lang = LANG_ENGLISH;					
+			}		
+	}
+	var localeName = (lang + "_" + country);
+	
+	if (!validLocalesMap.containsKey(localeName)){
+		localeName = (LANG_ENGLISH + "_" + COUNTRY_GERMANY);
+	}
+	return localeName ;
+}
+
+function getLocaleMap(validLocalesMap : HashMap) : HashMap{
+	if (validLocalesMap.isEmpty() || validLocalesMap.length < 1) {
+		var validLocalesMapFromBM : Array = dw.system.Site.getCurrent().preferences.custom.validLocaleAndOverlayFlagMap;
+		var localeName : String = "";
+		var overlayFlag : String = "";		
+		validLocalesMap = new HashMap();
+		for (var i=0; i < validLocalesMapFromBM.length; i++) {
+			overlayFlag = validLocalesMapFromBM[i].getDisplayValue();
+			if (empty(overlayFlag)){
+				overlayFlag = SHOW_OVERLAY_NO;
+			}
+			localeName = validLocalesMapFromBM[i].getValue();
+			validLocalesMap.put(localeName, overlayFlag);
+		}
+	}
+	return validLocalesMap
+}

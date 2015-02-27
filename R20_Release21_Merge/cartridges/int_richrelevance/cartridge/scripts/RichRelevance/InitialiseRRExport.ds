@@ -1,0 +1,67 @@
+/**
+* @output Message : String
+* @output RemoteFileName : String
+* @output RemoteFilePath : String
+* @output XmlFile : dw.io.File
+* @output XmlStreamWriter:dw.io.XMLStreamWriter
+*/
+
+
+importPackage( dw.io );
+importPackage( dw.util );
+importPackage( dw.system );
+
+importScript( "int_richrelevance:RichRelevance/MNSExtractCatalog.ds");	
+
+	var CATALOG = "CATALOG";
+	var CATALOG_APIKEY = "APIKEY";
+	var CATALOG_XMLNS = "xmlns";
+	var PRODUCTS = "PRODUCTS";
+
+
+
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	 
+	 var xsw : XMLStreamWriter;
+	 try {
+    	
+    	
+		
+		var filePath: String =  dw.io.File.IMPEX +'/src/rr/';
+		pdict.RemoteFilePath = filePath;
+		
+		//creates the directory /src/rr
+		(new dw.io.File(filePath)).mkdirs();
+		
+		//generate the filenames 
+		var calendar : Calendar = dw.system.Site.calendar;
+		
+	
+		//.xml
+		var fileName : String = dw.system.Site.current.preferences.custom.rrCatalogPrefix + '_' + StringUtils.formatCalendar(calendar,"yyyyMMdd") +  '_1';
+		pdict.RemoteFileName = fileName;
+		var file : File = new dw.io.File(filePath + fileName + '.xml');
+		
+		var exportFileWriter : FileWriter = new FileWriter(file);
+		var xsw : XMLStreamWriter  = new XMLStreamWriter(exportFileWriter);
+		xsw.writeStartDocument();
+		xsw.writeStartElement(CATALOG);
+		
+		xsw.writeAttribute(CATALOG_APIKEY, dw.system.Site.current.preferences.custom.rrAPIKey);
+		xsw.writeAttribute(CATALOG_XMLNS, "urn:rrXML");
+		xsw.writeStartElement(PRODUCTS);
+		pdict.XmlStreamWriter = xsw;
+		pdict.XmlFile = file;
+	
+	 } catch(ex) {
+	        Logger.error("RichRelevance: InitialiseRRExport.ds: Error Message While Initialising RR product export flow :" +  ex.message);
+	        pdict.Message = "RichRelevance: InitialiseRRExport.ds: Error Message While Initialising RR product export flow :" + ex.message;       
+			xsw.flush();
+			xsw.close();	            
+	        return PIPELET_ERROR;    
+	 }  
+
+   return PIPELET_NEXT;
+}

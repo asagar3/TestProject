@@ -1,0 +1,229 @@
+/* CART
+--------------------------------------------------------------------------------------- */
+.cart table.carttable tbody td.imagecolumn, .checkoutplaceorder table.placeordertable tbody td.action, .cart table.carttable tbody td.itemtotalcolumn {border-bottom:1px dotted #ABABAB !impotant;}
+.producttile{width:184px !important;}
+/*button.addtocartbutton{padding:10px 0 10px 0 !important;}*/
+.addtocartbutton span{}
+.productdetail .addtocartbar .addtocart .quanity {float:left;}
+.productSubWrapper{padding-right:10px;}
+
+
+div.sitesearch{width:357px !important;display:block;}
+
+.minicart .minicartArrow{width:202px;}
+.navgroup .refineattributes .Color li a {text-indent: 0 !important;}
+/* needs to be specified in iE7 */
+h5.grey_block_header span{width:574px;}
+.account_heading_description {margin:72px -187px;}
+
+/* view order button on IE7 */
+button.expandable-btn{background: url("../images/ui-icons_button_states_new.png") no-repeat scroll left 1px transparent;}
+button.expandable-btn span {background: url("../images/ui-icons_button_states_new.png") no-repeat scroll right -31px transparent;height:29px;color: #525252;margin-left:-22px;display: inline-block;border:none !important; padding:0px 20px 0px 5px!important;line-height:26px;}
+button.expandable-btn:hover{background-position:left -69px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+button.expandable-btn:hover span{background-position:right -101px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */ color:#fff;}
+.orderinfotable .expandable-btn{background: url("../images/ui-icons_button_states_new.png") no-repeat scroll left 1px transparent;}
+.orderinfotable button.expandable-btn span {background: url("../images/ui-icons_button_states_new.png") no-repeat scroll right -30px transparent;height:29px;color: #525252;margin-left:-12px;display: inline-block;border:none !important; padding:0px 20px 0px 5px!important;line-height:26px;}
+.orderinfotable button.expandable-btn:hover{background-position:left -69px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+.orderinfotable button.expandable-btn:hover span{background-position:right -100px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */ color:#fff;}
+.account_wrapper .registration .email, .account_wrapper .registration .password {
+    margin-top: 25px;
+}
+/* used to align links in the middle of the category page */
+
+div.secondary_cat .promo_ad p{
+		float:left;
+	}
+
+
+
+/* used to align links in the products of the secondary category page */
+.content {
+    top: 50%;
+    left: 0;
+    }
+
+.content .inner {
+    position: relative;
+    top: -50%;
+	zoom:1;
+    }
+
+.product_area{zoom:1; display:block; float:left;}
+
+/* ie 7 only styles */
+.valignCntrTable{display:table;   position:relative; width:300px; border:1px solid orange; }
+.valignCntrTableCell{position:absolute; height:100%; border:1px solid purple; width:100%;}
+div.helpTitleHolder{width:273px; padding:0 0 0 20px; border:1px solid yellow; position:absolute; top:50%; margin-top:-20px;/* top:50%;  position:relative; display:block; vertical-align:top; */}
+
+
+.helpmainContentWrapper .accordion h3 a.ieFl{float:left;}
+.helpmainContentWrapper .accordion h3 a{display:inline; zoom:1;}
+/*.helpmainContentWrapper .accordion h3 span{ display:inline; zoom:1;}*/
+
+.clear{height:1px;}
+.clearfix {
+    zoom: 1;     /* triggers hasLayout */
+    }  /* Only IE can see inside the conditional comment
+    and read this CSS rule. Don't ever use a normal HTML
+    comment inside the CC or it will close prematurely. */
+
+    
+.account_wrapper .registration .emailsignupcheckbox{margin:22px 4px 0 170px}
+.account_wrapper .registration .button_curve{margin:12px 0px 0px 15.8em}
+
+.ui-dialog .ui-dialog-titlebar {height:61px;}
+    
+.checkoutlogin {margin-bottom:14px;}
+.continue_checkout .btn-green-flat{margin-top:60px}
+.continue_checkout {min-height:183px;}
+.checkout_generic_bottom .divider {width:938px;}
+.mini_basket_hover{background-position: 5px 2px}
+/*** Button fix | IE7 ***/
+.btn-green-flat button{width:10%; padding:8px 8px 8px 10px !important} /* update button Issue */
+.btn-green-flat button span{font-size:0.9em;}
+.btn-green-flat .btn-ic-basket{padding-left:30px !important; padding-right:12px}
+.btn-ic-lock{padding-right:0px !important; padding-left:20px !important}
+/*** Button fix | IE7 ***/
+
+.sizinginformation{margin-left:20px;} 
+.account_wrapper .createaccount{padding-bottom:38px}
+.registrationform .clear, .creditcardform .clear{height:0px;}
+
+.cart TD.quantitycolumn{width:150px; text-align:right;}
+.updatequantity .roundedBtn button_curve{padding-left:60px}
+table TH.qty{padding-right:72px}
+.account_wrapper .createaccount{padding-bottom:38px}
+
+.sendtofriend .stfmessage textarea{margin-left:-9px; width:226px}
+.productdetail .attributecontentlink{margin-top:-14px}
+
+/*Quick View Send to friend alignment*/
+#QuickViewDialog .productdetail .productactions{float:left;clear:both; width:400px}
+#QuickViewDialog .productdetail .sendtofriend{/*float:left;*/ float:right; padding-left:0px; margin-right:130px}
+#QuickViewDialog .productdetail .facebook_like{float:left; width:100px;}
+
+
+.zeroresults .searchbox .content{width: 559px; top:0px}
+
+/***** Checkout Delivery****************/
+/*.shippingmethods input[type="radio"]{margin-top:-35px !important;}QC 513*/
+.shipping-method-002 .value, .shipping-method-001 .value{width:300px;}/*QC 513*/
+
+.creditcardform .formfield .month.caption, .creditcardform .formfield .year.caption{clear:both;}/*QC 672*/
+.paymentform .formfield .month.caption, .paymentform .formfield .year.caption{clear:both;}/*QC 672*/
+
+.minicartcontent .btn-green-flat{margin-bottom:0px}
+.minicartcontent{padding-bottom:10px}
+.btn-green-flat .link_button {padding-left:10px !important;padding-right:10px !important;}
+
+/***** SHADOW EFFECT *****/
+.category_banner_3{	border-left:1px solid #dddddd; /* slide 13 */}
+
+.category_banner_2{	border-left:1px solid #dddddd; /* slide 12 */}
+
+.searchresultsheader {margin:0 0 0 0;/* slide 21 */}
+.sorthitscontainer .itemsperpage { margin-right: 0px;/* slide 21 */}
+.top_banner_txtimg {margin-right: 0px;/* slide 21 */}
+#sizeChartDialog .sizetable {padding-bottom:15px;}/* Size Guide Content Updation */
+div.top_banner_grey {margin-right: 0px;width: 771px;/* slide 21 */}
+.producttile .swatches A.swatch{margin: 0px -2px 0px 0px} /*Defect 860*/
+
+.headerHolder {padding-bottom:5px }/* CR 117 shadow effects */
+div.secondary_cat .banner_head {
+	width: 765px;
+	}
+div.secondary_cat .banner_head_shadow{
+    width: 765px;
+} /* CR 117 shadow effects */
+
+.helpmainContentWrapper .accordion h3{float:left; width:528px;}/* FAQs */
+.radio input{background: none;  border:none; border-left:0px solid #bdbdbd !important;	}
+
+.radio span{padding-right:10px;}
+
+.sHmCarousel .content{
+top: 0;
+}
+.ui-dialog .ui-widget-content{
+    padding-right: 0px !important; /* Scroller issue on the Quick View  Divlayer */
+}
+.orderinfotable .expandable-btn{background: url("../images/ui-icons_button_states_new.png") no-repeat scroll left 2px transparent;	padding: 0 0 0 7px; }
+.orderinfotable button.expandable-btn span {background: url("../images/ui-icons_button_states_new.png") no-repeat scroll right -30px transparent;}
+.orderinfotable button.expandable-btn:hover{background-position:left -68px; text-decoration:none !important;}/* Grey buttons in order listing page */
+
+.checkoutminisummary .helpBox .header {
+    overflow: hidden;
+}
+.mini_basket_header{ /* cart icon on header */
+display: block;
+float: left;
+margin-left: 20px;
+padding-top: 0;
+}
+.mini_basket_hover{
+	line-height: 20px;
+}
+.mini_basket_hover a {
+	float: left;
+	margin-left: 5px;
+	padding-top: 0;
+}
+.btn-ic-basket { /* add to cart button on PDP */
+    display: block;
+    line-height: 20px;
+}
+button.addtocartbutton{
+padding-top: 5px !important;
+}
+.account_wrapper ul.dashTabs li p{float:left; width:auto !important; padding-right: 15px; margin-right:15px; background:url("../images/link_arrow.png") no-repeat scroll right 3px transparent;}/* arrow icons issue on dashboard */
+.account_wrapper ul.dashTabs li p a{
+	background:none;
+	padding-right: 0px; color:#333 !important;
+}
+.expirationdate div.errorclient { /* Expiry date label extra gap RS-1337412 */
+    margin: 0;
+    display: inline;
+    padding: 0;
+}
+.formfield {
+border: 1px solid transparent;
+}
+div.errorclient { /* error icons fixed */
+    display: inline;
+    clear: both;
+}
+.successIcon { /* success icons fixed */
+    padding-top: 2px !important;
+}
+.errorIcon{ /* error, success icons fixed */
+display: block;
+float: right;
+margin: -20px 140px; 
+}
+.title select, .state select, .cardtype select { /* error, success icons fixed */
+    float: left;
+}
+
+.newHomePage #home_banner_links li{display:inline;}
+
+/*appending span for template alignment IE7 */
+#content_categorylanding .htmlAlign .jspContainer div.tr_contentText p a.greyLink_sml_arrow{
+	background: none;
+	padding: 0 10px 0 0;
+}
+a.greyLink_sml_arrow > span{
+	width: 4px;
+	height: 7px;
+	display: inline;
+    zoom: 1;
+	background: url(../images/3033/next-arrow.png) no-repeat top right;
+	padding: 0 0 3px 10px;
+}
+#contactUsDialog{overflow-x:hidden;}
+.newContactDialog{width:503px;}
+.newContactDialog div.errorclient{clear:both; display:block;}
+
+.ie7Arrows div.slider-nav span.right{height:27px; top: 231px; width: 33px; z-index: 9999; right: -10px; background:url(../images/right_arrow.png) left top no-repeat !important;}
+.ie7Arrows div.slider-nav span.left{width: 33px; left: 10px; top: 231px; height:27px; z-index: 9999;background: url(../images/left_arrow.png) left top no-repeat !important;}
+.ie7Arrows .orbit-wrapper .orbit-bullets, .ie7Arrows div.slider-nav span.sn_right, .ie7Arrows div.slider-nav span.sn_left{display:none !important;}
+.spotlightImage{display:none !important}

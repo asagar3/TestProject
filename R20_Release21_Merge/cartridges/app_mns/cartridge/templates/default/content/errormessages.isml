@@ -1,0 +1,73 @@
+<script type="text/javascript"><!--
+	
+	app.minicart.url 					= "${URLUtils.url('Cart-MiniAddProduct')}";
+	app.URLs.getProductUrl 				= "${URLUtils.url('Product-Show')}";
+	app.URLs.getVariants 				= "${URLUtils.url('Product-GetVariants')}";
+	app.URLs.getAvailability			= "${URLUtils.url('Product-GetAvailability')}";
+	app.URLs.loadingSmallImg 			= "${URLUtils.staticURL('/images/loading-small.gif')}";
+	app.URLs.formatMoney				= "${URLUtils.url('Product-FormatPrices')}";
+	app.URLs.fetchVariantsAvailability  = "${URLUtils.url('Product-FetchAvailability')}";
+	app.URLs.s7ImageSet  = "${URLUtils.url('Product-S7ImageSet')}";
+	app.URLs.s7MainImage  = "${URLUtils.url('Product-S7MainImage')}";
+	app.URLs.s7NoImageLarge  = "${URLUtils.staticURL('/images/noimagelarge.png')}";
+	app.resources["BACK_TO_TOP"] 		= "${Resource.msg('back_to_top.message','common',null)}";
+	app.resources["MISSINGVAL"] 		= "${Resource.msg('global.missingval','locale',null)}";
+	app.resources["MISSINGVAL_CONFIRM_EMPTY"] 		= "${Resource.msg('global.missingval_confirmempty','locale',null)}";
+	app.resources["MISSINGVAL_CONFIRM_PWD_EMPTY"] 		= "${Resource.msg('global.missingval_confirmpwdempty','locale',null)}";
+	app.resources["MISSINGVAL_UNIQUE_CONTACTUS_QUERY"] 		= "${Resource.msg('global.missingval_contactusquery','locale',null)}";
+	app.resources["SERVER_ERROR"] 		= "${Resource.msg('global.servererror','locale',null)}";
+	app.resources["MISSING_LIB"] 		= "${Resource.msg('global.missinglib','locale',null)}";
+	app.resources["BAD_RESPONSE"]		= "${Resource.msg('global.badresponse','locale',null)}";
+	app.resources["INVALID_PHONE"]		= "${Resource.msg('global.invalidphone','locale',null)}";
+	app.resources["CARD_PERSON_NAME"]	= "${Resource.msg('global.formerrors.cardpersonname','forms',null)}";
+	app.resources["INVALID_POSTCODE_FR"]= "${Resource.msg('global.formerrors.postcode','forms',null)}";
+	app.resources["INVALID_POSTCODE_CP"]= "${Resource.msg('global.formerrors.postcode.noresults','forms',null)}";
+	app.resources["INVALID_CREDITCARD"]= "${Resource.msg('creditcard.numbervalueerror','forms',null)}";
+	app.resources["INVALID_CREDITCARD_VALIDFROM"]= "${Resource.msg('global.formerrors.cardenddate','forms',null)}";
+	app.resources["INVALID_CREDITCARD_EXPIRES_MONTH"]= "${Resource.msg('global.formerrors.cardexpmonth','forms',null)}";
+	app.resources["INVALID_CREDITCARD_EXPIRES_YEAR"]= "${Resource.msg('global.formerrors.cardexpyear','forms',null)}";
+	app.resources["INVALID_CREDITCARD_EXPIRES_DATE"]= "${Resource.msg('global.formerrors.cardexpdate','forms',null)}";
+	app.resources["INVALID_CREDITCARD_VALIDFROM_DATE"]= "${Resource.msg('global.formerrors.cardvalidfromdate','forms',null)}";
+
+	app.resources["INVALID_REALDATE"]= "${Resource.msg('global.formerrors.realdate','forms',null)}";
+	app.resources["INVALID_CVN"] = "${Resource.msg('creditcard.cvnrangeerror','forms',null)}";
+	app.resources["INVALID_EXPIRY_MONTH"] = "${Resource.msg('creditcard.expmonth','forms',null)}";
+	app.resources["INVALID_EMAIL"] = "${Resource.msg('billingaddress.email','forms',null)}";
+	app.resources["INVALID_CONFIRMEMAIL"] = "${Resource.msg('billingaddress.confirmemail','forms',null)}";
+	app.resources["INVALID_PASSWORD"] = "${Resource.msg('global.formerrors.passwordlength','forms',null)}";
+	//CR 3103
+	app.resources["INVALID_NEW_PASSWORD"] = "${Resource.msg('global.formerrors.newpasswordlength','forms',null)}";
+	app.resources["INVALID_CONFIRMPASSWORD"] = "${Resource.msg('account.passworderror','account',null)}";
+	app.resources["SELECT_TNC_ERROR"] = "${Resource.msg('billingaddress.tnc.error','forms',null)}";
+	app.resources["INVALID_POSITIVE_NUMBER"] = "${Resource.msg('global.formerrors.numeric','forms',null)}";
+	app.resources["COUNTRY_CODE"] = "${Resource.msg('country.code','forms',null)}"
+	app.resources["INVALID_CITY_FIELD"] = "${Resource.msg('global.formerrors.cityField','forms',null)}";
+	//For tablet: add 'more'/'less' text in LHN on PLP
+	app.resources["MORE"] = "${Resource.msg('search.lhn.more','search',null)}";
+	app.resources["LESS"] = "${Resource.msg('search.lhn.less','search',null)}";
+	// for back to top 
+	app.resources["BACK_TO_TOP"]="${Resource.msg('back_to_top.message','common',null)}";
+	
+	/* TODO: make this refference a little cleaner 
+	reference used in sifr_replace.js */
+	var sifr_fonts = sifr_fonts ? sifr_fonts : {};
+	var dlc = document.location;
+	/* strange though it may seem sIFR requies http in https  in IE 
+	(possibly only if the certificate is invalid as with Demandware dev environments)
+	TODO: if it is the invalid certificate use the first protocol-sensitive version.
+	This is prefered if it will work ok in IE7 live.*/
+	/**Tested Fragment A with caching on for all sIFR display | Asha **/
+	//sifr_fonts["helvNeueUltraLight"] = ('https:' == dlc.protocol ? 'https' : 'http')+"://"+dlc.host+"${URLUtils.staticURL('/fonts/helvneueultralight.swf')}";
+	//sifr_fonts["helvNeueUltraLight"] = "http://"+dlc.host+"${URLUtils.staticURL('/fonts/helvneueultralight.swf')}";
+	sifr_fonts["helvNeueUltraLight"] = "${URLUtils.staticURL('/fonts/helvneueultralight.swf')}";
+
+	
+//--></script>
+
+<!--[if IE 6]>
+<script type="text/javascript">	
+	jQuery(document).ready(function(){	
+		app.util.ie6ButtonFix();
+    });
+</script>
+<![endif]-->

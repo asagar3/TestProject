@@ -1,0 +1,107 @@
+/**
+ * Copies the address attribtues of the shipping address form to the
+ * billing address form.
+ *
+ * @input ShippingAddressForm : dw.web.FormGroup The address form.
+ * @input BillingAddressForm : dw.web.FormGroup The gift options form.
+ * @input Basket : dw.order.Basket
+ */
+ 
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.web );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	
+	var site : String = Site.current.ID;
+	var basket : dw.order.Basket = pdict.Basket;
+	var shippingAddressForm : FormGroup = pdict.ShippingAddressForm;
+	var billingAddressForm : FormGroup = pdict.BillingAddressForm;
+	var paymentMethod : String = pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.value;
+	var shippingAddress : dw.order.OrderAddress = basket.defaultShipment.shippingAddress;
+	if (shippingAddress != null)
+	{
+		Logger.error("<<<<<<<CopyAddressFormFields.ds--Shipping Address in Basket>>>"+"title "+shippingAddress.title+" firstName "+shippingAddress.firstName+" lastName "+shippingAddress.lastName+" address1 "+shippingAddress.address1+
+	   	" address2 "+shippingAddress.address2+" city "+shippingAddress.city+" postalCode "+shippingAddress.postalCode+" stateCode "+
+	   	shippingAddress.stateCode+" countryCode "+shippingAddress.countryCode+"<<<<<<<<<<<<<<<END>>>>>>>>>>>>>>>>>>>>>>>");
+	}
+	else
+	{
+		Logger.error("<<<CopyAddressFormFields.ds--Shipping Address in Basket NULL>>>");
+	}
+	Logger.error("<<<<<<<CopyAddressFormFields.ds----START>>>>>>>> PAYMENT METHOD::" + paymentMethod);
+	if(site.equalsIgnoreCase("EUSite"))
+	{
+		Logger.error("<<<<<<<CopyAddressFormFields.ds ----Shipping Form Details>>>"+
+			"  Title::" +shippingAddressForm.title.value + 
+			"  First Name::" +shippingAddressForm.firstName.value + 
+			"  Last Name::"+shippingAddressForm.lastName.value+ 
+			"  Address Line1::" +shippingAddressForm.address1.value+ 
+			"  Address Line2::" +shippingAddressForm.address2.value+
+			"  Address Line3::" +shippingAddressForm.address3.value+
+			"  City::" +shippingAddressForm.city.value+
+			"  Postal Code::"+shippingAddressForm.zip.value+
+			"  State::"+shippingAddressForm.states.state.value+
+			"  StreetName::"+shippingAddressForm.streetName.value+
+			"  Residence::"+shippingAddressForm.residence.value+
+			"  Postbox::" +shippingAddressForm.postBox.value+
+			"  CountryCode::"+shippingAddressForm.country.value+
+			"  Phone::"+shippingAddressForm.phone.value+
+			"  Alternate Contact::"+shippingAddressForm.alternateContactNumber.value+
+			"  Is valid::"+shippingAddressForm.isValid().toString()+
+			" - End>>>>>>>>");
+	}
+	if(shippingAddressForm.country.value=="" || shippingAddressForm.country.value==null)
+		{
+			shippingAddressForm.country.value= dw.web.Resource.msg('country.code','forms',null) ;
+			//address.setCountryCode(dw.web.Resource.msg('country.code','forms',null) );
+		}
+	// copy the address attributes
+	if(basket!= null && !basket.defaultShipment.shippingMethodID.equals(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))){
+		
+		billingAddressForm.firstName.value = shippingAddressForm.firstName.value;
+		billingAddressForm.lastName.value =  shippingAddressForm.lastName.value;
+		billingAddressForm.title.value = shippingAddressForm.title.value;	
+	}
+	billingAddressForm.address1.value =  shippingAddressForm.address1.value;
+	billingAddressForm.address2.value =  shippingAddressForm.address2.value;
+	billingAddressForm.city.value = shippingAddressForm.city.value;
+	billingAddressForm.zip.value = shippingAddressForm.zip.value;
+	billingAddressForm.states.state.value =  shippingAddressForm.states.state.value;
+	billingAddressForm.country.value = shippingAddressForm.country.value;
+	billingAddressForm.streetName.value = shippingAddressForm.streetName.value;
+	billingAddressForm.residence.value = shippingAddressForm.residence.value;
+	billingAddressForm.postBox.value = shippingAddressForm.postBox.value;
+	billingAddressForm.phone.value = shippingAddressForm.phone.value;
+	billingAddressForm.alternateContactNumber.value = shippingAddressForm.alternateContactNumber.value;
+	if (null != shippingAddressForm.address3 && !empty(shippingAddressForm.address3.value)){
+		billingAddressForm.address3.value = shippingAddressForm.address3.value ;
+	}
+	if(site.equalsIgnoreCase("EUSite"))
+	{	
+	    Logger.error("<<<<<<<CopyAddressFormFields.ds---Billing Form Details>>>"+
+		    "  Title::" +billingAddressForm.title.value+
+		    "  First Name::" +billingAddressForm.firstName.value + 
+		    "  Last Name::"+billingAddressForm.lastName.value+ 
+		    "  Address Line1::" +billingAddressForm.address1.value+ 
+		    "  Address Line2::" +billingAddressForm.address2.value+ 
+		    "  Address Line3::" +billingAddressForm.address3.value+
+		    "  City::"+billingAddressForm.city.value+
+		    "  Postal Code::"+billingAddressForm.zip.value+
+		    "  State::"+billingAddressForm.states.state.value+
+		    "  Postbox::"+billingAddressForm.postBox.value+
+		    "  CountryCode::"+billingAddressForm.country.value+
+		    "  StreetName::"+billingAddressForm.streetName.value+
+			"  Residence::"+billingAddressForm.residence.value+
+		    "  Phone::"+billingAddressForm.phone.value+
+		    "  Alternate Contact::"+billingAddressForm.alternateContactNumber.value+
+		    "  Date of birth::"+billingAddressForm.dateofbirth.value+
+		    "  Gender::"+billingAddressForm.gender.value+
+		    "  Is valid::"+billingAddressForm.isValid().toString()+
+		    "  Email::"+pdict.CurrentForms.billing.billingAddress.email.emailAddress.value+
+		    "  Confirm Email::"+pdict.CurrentForms.billing.billingAddress.email.confirmEmailAddress.value+
+		    " - End>>>>>>>>");
+	}
+    return PIPELET_NEXT;
+}

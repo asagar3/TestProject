@@ -1,0 +1,32 @@
+/**
+* This script is used for creation of TSOP custom objects instances. These instance are read by another TSOP service named "GetCategory-Show". 
+* @input customObject : Object
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	try {
+	    deleteCustomObject("KioskCategoryDetails");// function call to delete instances of KioskCategoryDetails
+	    deleteCustomObject("KioskProdCategoryDetails");// function call to delete instances of KioskProdCategoryDetails
+	} 
+	catch(e)
+	{
+		Logger.error("DeleteCategoryCustomObject :: DeleteCategoryCustomObject Script Error:::"+e.message);
+		return PIPELET_ERROR;	
+	}
+ 	return PIPELET_NEXT;
+}
+
+/**
+* This function will remove existing instances of custom Object passed as parameter.
+* @param customObjectName : String,The custom object name
+*/
+function deleteCustomObject(customObjectName:String)
+{
+    var customObjects = CustomObjectMgr.getAllCustomObjects(customObjectName);
+    for each(var customObject:CustomObject in customObjects){
+		CustomObjectMgr.remove(customObject);
+	}
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="Order_Watch_Fault_Value">
+                <display-name xml:lang="x-default">Order Watch Fault Value</display-name>
+                <description xml:lang="x-default"/>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="OrderWatchEmails">
+                <display-name xml:lang="x-default">Order Watch Email List</display-name>
+                <description xml:lang="x-default"/>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+                <field-length>0</field-length>
+                <field-height>0</field-height>
+            </attribute-definition>
+           <attribute-definition attribute-id="Order_Watch_Fault_Value_Off_Hours">
+                <display-name xml:lang="x-default">Order Watch Fault Off Hours Value</display-name>
+                <description xml:lang="x-default"/>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+            </attribute-definition>
+            
+           <attribute-definition attribute-id="Order_Watch_Off_Hours">
+                <display-name xml:lang="x-default">Order Watch Off Hours</display-name>
+                <description xml:lang="x-default"/>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <searchable-flag>false</searchable-flag>
+            </attribute-definition>
+
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="Order_Watcher">
+                <display-name xml:lang="x-default">Order Watcher Config</display-name>
+                <attribute attribute-id="Order_Watch_Fault_Value"/>
+                <attribute attribute-id="Order_Watch_Fault_Value_Off_Hours"/>
+                <attribute attribute-id="Order_Watch_Off_Hours"/>
+                <attribute attribute-id="OrderWatchEmails"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+</metadata>

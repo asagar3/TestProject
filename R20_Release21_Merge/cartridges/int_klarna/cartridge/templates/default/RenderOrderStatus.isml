@@ -1,0 +1,4 @@
+<!--- TEMPLATENAME: RenderOrderStatus.isml --->
+<isif condition="${pdict.OrderStatus == 1}">ACCEPTED</isif>
+<isif condition="${pdict.OrderStatus == 2}">PENDING</isif>
+<isif condition="${pdict.OrderStatus == 3}">DENIED</isif>

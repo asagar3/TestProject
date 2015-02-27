@@ -1,0 +1,81 @@
+/**
+
+* @input  requestJSONObject : String
+* @input  sessionID : String
+* @output requestBasket : Object 
+*
+*/
+importPackage( dw.system );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	
+	
+	try{
+		var reqObject : Object = JSON.parse(pdict.requestJSONObject);
+			var requestBasket = new Object();
+		
+		if(reqObject == null){			
+			throw new Error("reqObject is null") ;
+		}
+		
+		var quantity:Number = reqObject.quantity ;
+		var productId:String = reqObject.productId ;
+		var modifiedProductId:String = reqObject.modifiedProductId ;
+		var action:String = reqObject.action ;
+		var couponCode:String = reqObject.couponCode ;
+		var shippingMethodId:String = reqObject.shippingMethodId ;
+		
+		
+		if(empty(action)){
+			throw new Error("Action is null") ;
+		}
+		
+		if(action == "addProduct" || action == "modifyProduct"){			
+			if( empty(productId) || ( empty(quantity) || quantity < 0 )){
+				throw new Error("ProductID is null or quantity is null or quantity is less than 0") ;		
+			}
+					
+		}else if(action == "removeProduct"){
+			
+			if(empty(productId) ){
+				throw new Error("ProductID is null ") ;
+			}		
+			
+		}else if(action == "addCoupon" || action == "removeCoupon"){
+			
+			if(empty(couponCode)){
+				throw new Error("Coupon code is null") ;	
+			}
+			
+		}else if(action == "shippingMethod"){
+		
+			if(empty(shippingMethodId)){
+				throw new Error("Shipping method ID is null") ;	
+			}	
+			
+		}else if(action == "getBasket"){
+			//DO nothing
+			
+		}else { // Invalid Action
+			throw new Error("Invalid Action ") ;
+		}
+		
+		
+	
+		requestBasket.quantity = reqObject.quantity ;
+		requestBasket.productId = reqObject.productId ;
+		requestBasket.modifiedProductId = reqObject.modifiedProductId ;
+		requestBasket.action = reqObject.action ;
+		requestBasket.couponCode = reqObject.couponCode ;
+		requestBasket.shippingMethodId = reqObject.shippingMethodId ;	
+	
+		pdict.requestBasket = requestBasket ; 
+	}catch(e){		
+		var errorMessage:String = e.message;		
+		Logger.error("ManageBasket: Error:::"+errorMessage) ;
+		return PIPELET_ERROR ;		
+	}
+	
+   return PIPELET_NEXT;
+}

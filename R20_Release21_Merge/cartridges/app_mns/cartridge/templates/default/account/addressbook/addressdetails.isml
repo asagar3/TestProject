@@ -1,0 +1,358 @@
+<isinclude template="util/modules"/>
+<div id="AddressForm" class="edit_address_form" ><iscomment><!--TODO:16/03/2011 Use address fields from singleshipping.isml --></iscomment>	
+	<form method="post" name="EditAddressForm" id="EditAddressForm">
+		<fieldset>
+			<div id="editprofile" class="editaddress">
+			
+				<isif condition="${pdict.Status != null && pdict.Status.isError()}">				 
+					<span class="error">
+						<isprint value="${Resource.msg('addressdetails.' + pdict.Status.code, 'account',null)}"/>
+					</span>
+				</isif>
+				<iscomment>
+				<div class="requiredcaption">
+					<span class="requiredindicator">*</span><strong>${Resource.msg('global.requiredfield','locale',null)}</strong></strong>
+				</div>
+				</iscomment>
+				
+				<div class="formfield addressid" style="display:none">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.addressid}" type="input"/>
+					<div class="clear"></div>
+				</div>
+				
+				<div class="formfield">
+					<label class="label" for="${Resource.msg('title.titleMme','forms',null)}">
+						<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span> 
+						<span class="requiredindicator">*</span>
+					</label>
+					
+					<isscript>
+						importScript('checkout/Utils.ds');
+						var titleMap : dw.util.Map = getTitleMap();					
+					</isscript>
+					<div class="value">
+						<div class="radio">
+						<isloop items="${titleMap.keySet().iterator()}" var="key" status="loopstatus">						
+							<span>							
+								<isif condition="${loopstatus.first}"> 
+									<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.profile.address.title.htmlName}" checked/>							
+								<iselse/>
+		                     		<input type="radio" value="${key}" id="${key}" name="${pdict.CurrentForms.profile.address.title.htmlName}" <isif condition="${pdict.CurrentForms.profile.address.title.value==key}">checked</isif>/>
+		                     	</isif>                            	
+                            	<label class="nonbold" for="${key}">
+                            		${titleMap.get(key)}
+                            	</label>
+                           	</span>						
+						</isloop>
+                        </div>				
+					</div>					
+					<div class="clear"></div>
+				</div>
+				<div class="formfield firstname">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.firstname}" type="input"/>
+					<div class="clear"></div>
+				</div>
+				<div class="formfield lastname">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.lastname}" type="input"/>
+					<div class="clear"></div>
+				</div>				
+		<!-- CR 810 : Show drop-down for UK , Monaco and France -->	
+ 				<isscript>
+		    		var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+		    	</isscript>
+			    <div class="formfield country">
+			    	<label for="${pdict.CurrentForms.profile.address.country.htmlName}" class="label">
+						<isif condition="${!pdict.CurrentForms.profile.address.country.valid}">
+							<span class="labeltext errorlabel">
+						<iselse>
+							<span class="labeltext">
+						</isif>
+							${Resource.msg('forms.country','forms',null)}</span>
+						<span class="requiredindicator">*</span>
+					</label>
+					<div class="value">
+			    		<select id="${pdict.CurrentForms.profile.address.country.htmlName}" name="${pdict.CurrentForms.profile.address.country.htmlName}" <isif condition="${!pdict.CurrentForms.profile.address.country.valid}">class="selectbox country required errorclient" <iselse> class="selectbox country required"</isif>>
+							<option value="">${Resource.msg('forms.select','forms',null)}</option>
+							<isloop items="${countryCodes}" var="countryCode">
+								<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.profile.address.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+							</isloop>
+						</select>
+						<isif condition="${!pdict.CurrentForms.profile.address.country.valid}">
+							<span class="errorIcon"></span>
+							<div class="errorclient" generated="true" htmlfor="${pdict.CurrentForms.profile.address.country.htmlName}">${Resource.msg('forms.address.country.missing','forms',null)} </div>
+						</isif>
+					</div>
+					<div class="clear"></div>
+			    </div><!-- END: country -->
+			    
+	<!-- CR 810 : Dynamic area to show temaplate UK or Non-UK -->	
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<span class="dynamicFields">
+		   
+			<isif condition="${pdict.CurrentForms.profile.address.country.value != 'GB'}">
+				<isinclude template="account/addressbook/addressdetailsnouk"/>
+			<iselse>
+				<isinclude template="account/addressbook/addressdetailsuk"/>
+			</isif>
+		</span>	
+		
+		
+		<iscomment>
+				<div class="formfield address1">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.address1}" type="input"/>
+					<div class="clear"></div>
+				</div>
+				<div class="formfield streetname">
+			    	<isinputfield formfield="${pdict.CurrentForms.profile.address.streetName}" type="input" />
+	    		
+			    	<div class="clear"></div>			
+		    	</div>
+				<div class="formfield address2">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.address2}" type="input"/>
+					<div class="clear"></div>
+				</div>
+				<div class="formfield residence">
+			    	<isinputfield formfield="${pdict.CurrentForms.profile.address.residence}" type="input" />	    		
+			    	<div class="clear"></div>			
+			    </div>
+			    <div class="formfield postbox">
+			    	<isinputfield formfield="${pdict.CurrentForms.profile.address.postBox}" type="input"/>	    		
+			    	<div class="clear"></div>			
+		   	    </div>
+				<div class="formfield postcode_fr">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.zip}" type="input"/>
+					<div class="clear"></div>
+				</div>
+			   	<div class="formfield city">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.city}" type="input"/>
+					<div class="clear"></div>
+				</div>
+
+<!-- CR 3030 : Start of comment to show drop-down for Monaco and France --></iscomment>
+<iscomment>
+  				<div class="formfield country">
+					<label for="" class="label">
+						<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+						<span class="requiredindicator">*</span>
+					</label>
+					<div class="value">			
+						<input type="text" maxlength="35" value="${Resource.msg('country.francemetro','forms',null)}" disabled="disabled" name="${pdict.CurrentForms.profile.address.country}" id="${pdict.CurrentForms.profile.address.country}" class="textinput disabled_textfield" />
+					</div>
+		    		<div class="clear"></div>
+		    	</div>
+</iscomment>		    	
+<!-- CR 3030 : End of comment to show drop-down for Monaco and France -->
+<iscomment>	
+<!-- CR 3030 : Start of code to show drop-down for Monaco and France -->	
+ 				<isscript>
+		    		var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+		    	</isscript>
+			    <div class="formfield country">
+			    	<label for="${pdict.CurrentForms.profile.address.country.htmlName}" class="label">
+						<isif condition="${!pdict.CurrentForms.profile.address.country.valid}">
+							<span class="labeltext errorlabel">
+						<iselse>
+							<span class="labeltext">
+						</isif>
+							${Resource.msg('forms.country','forms',null)}</span>
+						<span class="requiredindicator">*</span>
+					</label>
+					<div class="value">
+			    		<select id="${pdict.CurrentForms.profile.address.country.htmlName}" name="${pdict.CurrentForms.profile.address.country.htmlName}" <isif condition="${!pdict.CurrentForms.profile.address.country.valid}">class="selectbox country required errorclient" <iselse> class="selectbox country required"</isif>>
+							<option value="">${Resource.msg('forms.select','forms',null)}</option>
+							<isloop items="${countryCodes}" var="countryCode">
+								<option value="${countryCode.getValue()}" <isif condition="${pdict.CurrentForms.profile.address.country.value==countryCode.getValue()}">selected</isif>><isprint value="${countryCode.getDisplayValue()}"/></option>
+							</isloop>
+						</select>
+						<isif condition="${!pdict.CurrentForms.profile.address.country.valid}">
+							<span class="errorIcon"></span>
+							<div class="errorclient" generated="true" htmlfor="${pdict.CurrentForms.profile.address.country.htmlName}">${Resource.msg('forms.address.country.missing','forms',null)} </div>
+						</isif>
+					</div>
+					<div class="clear"></div>
+			    </div><!-- END: country -->
+</iscomment>	
+<!-- CR 3030 : Start of code to show drop-down for Monaco and France -->		    		
+				<iscomment>			    
+				<div class="formfield country">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.country}" type="select" />
+					<div class="clear"></div>
+				</div>
+					<div class="formfield state">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.states.state}" type="select"/>
+					<div class="clear"></div>
+					</div>
+		</iscomment>	
+				<div class="formfield phone contactNum">
+					<isinputfield formfield="${pdict.CurrentForms.profile.address.phone}" type="input"/>
+					<iscomment>
+						<span class="formfieldtooltip">(<a class="tooltip" href="javascript:;">${Resource.msg('singleshipping.phonerequired','checkout',null)}<div class="tooltip-body" style="display:none"><div class="tooltipcontainer"><iscontentasset aid="help-telephone"/></div></div></a>)</span>
+					</iscomment>
+					<div class="clear"></div>
+                	
+		  		</div>
+		  		</br>				
+				<div class="formfield alternatecontactnumber">
+			    	<isinputfield formfield="${pdict.CurrentForms.profile.address.alternateContactNumber}" type="input" xhtmlclass="phone contactNum"/>	    		
+			    	<div class="clear"></div>			
+		    	</div>				
+			</div>		
+			<div class="actions">	
+				<div id="addressformaction"></div>		
+				<div class="button_wrapper">
+					<div class="floatleft btn-grey-dark">
+							<button id="applyBtn" type="button" value="${Resource.msg('global.save','locale',null)}"><span>${Resource.msg('global.save','locale',null)}</span><span class="forward-icon-white">&nbsp;</span></button>
+					</div>
+					<div class="floatright btn-grey-flat">
+							<button id="cancelBtn" type="button" value="${Resource.msg('global.cancel','locale',null)}"><span>${Resource.msg('global.cancel','locale',null)}</span></button>
+					</div>
+				</div>
+				<iscomment>
+					<isif condition="${!empty(pdict.EditMode)}">
+						<button id="deleteBtn" type="button" value="${Resource.msg('global.delete','locale',null)}"><span>${Resource.msg('global.delete','locale',null)}</span></button>
+					</isif>
+				</iscomment>
+			</div>
+			<div class="clear"></div>
+			<input type="hidden" name="${pdict.CurrentForms.profile.secureKeyHtmlName}" value="${pdict.CurrentForms.profile.secureKeyValue}"/>
+		</fieldset>
+			
+	</form>
+</div>
+
+<div class="confirmationcontainer" id="confirmationcontainer" style="display:none;">
+	<div class="errorform">${Resource.msg('account.forbidden','account',null)}</div>
+	<button id="confirmBtn" type="button"><span>${Resource.msg('global.close','locale',null)}</span></button>			
+</div>	
+	
+<script type="text/javascript"><!--
+	app.URLs.submitDialogURL = '${URLUtils.httpContinue()}';
+	
+		jQuery('#dialogcontainer').dialog({
+			bgiframe: true,
+			autoOpen: false,
+			modal: true,
+			overlay: {
+	    		opacity: 0.5,
+	     		background: "black"
+			},
+	    	height: "auto",
+	    	width: 600,
+	    	resizable: false
+		});
+		jQuery('#dialogcontainer').dialog('open');
+		
+	jQuery(document).ready(function() {	
+		
+		app.execUjs();
+
+		jQuery('#dialogcontainer').dialog('option', 'title', <isif condition="${!empty(pdict.EditMode)}">'${Resource.msg('editaddress.editaddress','account',null)}'<iselse>'${Resource.msg('editaddress.addaddress','account',null)}'</isif>);
+	
+		jQuery('#applyBtn').click( function() {
+			action = "${pdict.CurrentForms.profile.address.create.htmlName}";
+		  	if(jQuery('.errorclient').text()==""){
+				postData(action);
+		  	}
+		});
+
+		//QC Defect 828 | The focus is not transferred to submit button on click of Enter key. | Naveen Kumar
+		jQuery('#EditAddressForm').keypress( function(e) {			
+			if(e.which == 13) {				
+				jQuery('#applyBtn').click();
+				return false;
+			}
+			return true;
+		});
+		
+		
+		jQuery('#cancelBtn').click( function() {
+			jQuery('#dialogcontainer').dialog('close');
+		});
+		
+		jQuery('#deleteBtn').click( function() { 			
+			var accepted = confirm("${Resource.msg('forms.customeraddress.deleteaddressconfirm','forms',null)}");
+			if( accepted ) {
+	   			action = "${pdict.CurrentForms.profile.address.remove.htmlName}";
+				postData(action);
+			}	
+		});
+		
+		jQuery('#confirmBtn').unbind("click").click( function() {
+            jQuery('.confirmationcontainer').dialog('close');
+            jQuery('#dialogcontainer').dialog('close');      
+      	}); 
+
+		jQuery('#confirmationcontainer').bind('dialogclose', function(event, ui) {
+			jQuery('#dialogcontainer').dialog('close'); 
+		});
+
+	//CR 810 : To set on-change event on country drop-down
+	jQuery("select[name=${pdict.CurrentForms.profile.address.country.htmlName}]").change(function() {
+		 fillDynamicAddress(jQuery(this).val());			
+	});
+	
+      	
+		function postData(action) {
+			jQuery('#addressformaction').append("<input name='" + action + "' type='hidden' />");
+			var post = jQuery('#EditAddressForm').serialize();
+			
+	  		jQuery.ajax({
+			   type: "POST",
+			   url: app.URLs.submitDialogURL,
+			   data: post,
+			   dataType: 'html',
+			   success: function(data){   
+			   		jQuery("#dialogcontainer").empty().html(data);
+			   },
+			   failure: function(data) {
+			   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+			   },
+			   error : function(XMLHttpRequest, textStatus, errorThrown){	  
+				   	jQuery('#confirmationcontainer').show();	
+			   		jQuery('#confirmationcontainer').dialog({
+					   		bgiframe: true,
+							autoOpen: false,
+							modal: true,
+					    	height: 100,
+    						width: 300,
+					    	resizable: false
+					});
+				    jQuery('#confirmationcontainer').dialog('option', 'title', jQuery('#dialogcontainer').dialog('option', 'title'));	
+					jQuery('#confirmationcontainer').dialog('open');
+				}
+			});						
+		}
+	});
+//CR 810 : To get template when country change
+	function fillDynamicAddress(countryVal){
+		//var countryVal = jQuery(this).val();
+		var url = app.util.appendParamToURL("${URLUtils.https('Util-GetAddressFields')}","country", countryVal);
+		jQuery.ajax({
+			   url: url,
+			   success: function(data){
+			
+					jQuery(".dynamicFields").html(data);
+					addressdata=data;
+					if(addressdata != null && addressdata.address != null){
+						jQuery("input[name=${pdict.CurrentForms.profile.address.addressline1.htmlName}]").val(addressdata.address.address1);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.addressline2.htmlName}]").val(addressdata.address.address2);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.address3.htmlName}]").val(addressdata.address.address3);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.county.htmlName}]").val(addressdata.address.stateCode);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.city.htmlName}]").val(addressdata.address.city);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.zip.htmlName}]").val(addressdata.address.postalCode);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.phone.htmlName}]").val(addressdata.address.phone);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.alternateContactNumber.htmlName}]").val(addressdata.address.alternateContactNumber);
+						jQuery("input[name=${pdict.CurrentForms.profile.address.title.htmlName}]").filter("[value="+addressdata.address.title+"]").attr("checked","checked");
+					} 
+					//$("div.ui-widget-overlay, div.pleaseWaitDialog").remove();	
+			   },
+			   failure: function(data) {				   	
+			   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+			   }
+			});
+	}
+
+//--></script>
+
+
+

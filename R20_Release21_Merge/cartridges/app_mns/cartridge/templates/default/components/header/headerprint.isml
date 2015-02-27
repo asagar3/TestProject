@@ -1,0 +1,13 @@
+<div id="header">
+	<iscomment>LOGO: Logo set with CSS as background image edit within CSS</iscomment>
+    <h1 class="logo"><a href="${URLUtils.httpHome()}" title="${Resource.msg('global.storename','locale',null)}">${Resource.msg('global.storename','locale',null)}</a></h1>
+    <div class="clear"></div>
+    <div class="printheadbar1"></div>
+	<div class="printheadbar"></div>    
+    
+	
+	
+</div><!-- END: header -->
+
+<iscomment>Cookies and Javascript enabled check</iscomment>
+<isinclude template="components/browsertoolscheck"/>

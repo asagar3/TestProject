@@ -1,0 +1,52 @@
+/**
+* Demandware Script File
+* Writes the given content to a file whose name has to be provided as well.
+*
+* @input OrderNo :   String 
+* @input FileContent : String the content to write into the file
+* @input Encoding 	 : String The file encoding. If null or an empty string, "ISO-8859-1" is assumed.
+*
+* @Author Danny Gehl
+*/
+
+importPackage( dw.system );
+importPackage( dw.io );
+
+/*
+*/ 
+function execute( pdict : PipelineDictionary ) : Number
+{
+	//var file	 : File = pdict.File;
+	var content  : String = pdict.FileContent;
+	var encoding : String = pdict.Encoding;
+	var OrderNo :String = pdict.OrderNo;
+	
+	var localFolder :File = new dw.io.File(dw.io.File.IMPEX+'/payerauth');
+	if(!(localFolder.exists())){
+		localFolder  =new dw.io.File(dw.io.File.IMPEX+'/payerauth').mkdirs();
+	}
+	var file : File =new dw.io.File(dw.io.File.IMPEX+'/payerauth/proofxml_'+OrderNo+'_'+dw.util.StringUtils.format("{0,date,yyyyMMddHHmmss}",dw.util.DateUtils.nowForSite())+'.xml')
+	if(file == null || content == null){
+		Logger.error("Input parameters 'FileName' and 'FileContent' must be specified!");
+		if(file != null){
+			Logger.error("Error while writing File "+file.name+"!");
+		}
+		return PIPELET_ERROR;
+	}
+		
+	return writeFile(file, content, encoding) ? PIPELET_NEXT : PIPELET_ERROR;
+}
+function writeFile(file:File,content:String,encoding:String)
+{
+	try{
+		var file : File = file;
+		var fileWriter : FileWriter = new FileWriter(file);
+		var stringWriter : XMLStreamWriter = new XMLStreamWriter(fileWriter);
+		stringWriter.writeRaw(content);
+		stringWriter.flush();
+		stringWriter.close();
+	}catch (e) {
+		Logger.error( "errror in writing proofXML : Error " + e );
+		//Logger.getLogger("ShrinkFeed").debug( "ShrinkFeed: Error " + e );
+	}
+}

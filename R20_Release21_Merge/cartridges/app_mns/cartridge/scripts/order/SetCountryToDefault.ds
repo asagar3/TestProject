@@ -1,0 +1,29 @@
+
+
+/** This script is updating shipping and billing address country field to FR in case user 
+ * select Monacco so that Order Summary page shows FR as deafult for country  
+ *  
+ *
+ * @input Basket : dw.order.Basket
+ * 
+ */
+
+importPackage( dw.order );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var shippingAddress : OrderAddress = pdict.Basket.defaultShipment.getShippingAddress();
+	var billingAddress : OrderAddress = pdict.Basket.getBillingAddress();
+	
+	//CR 3030 : If any new country is added, then also country code FR will be sent to all the third party systems
+	 if(shippingAddress.getCountryCode().value.equals("MC"))
+    {
+		shippingAddress.setCountryCode(dw.web.Resource.msg('country.code','forms',null) );
+    }
+    if(billingAddress.getCountryCode().value.equals("MC"))
+    {
+		billingAddress.setCountryCode(dw.web.Resource.msg('country.code','forms',null) );
+    }
+    return PIPELET_NEXT;
+}
+

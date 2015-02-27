@@ -1,0 +1,1317 @@
+<iscomment>
+	Renders product detail page both quickview and normal view.
+	If the product is a product set or bundle, then it also includes subproduct template to 
+	render sub product details.
+	
+	params:
+	pdict.CurrentHttpParameterMap.source - Search(ajax), quickview, cart - in these cases there is no decorator (empty) thus final 
+	html does not include header, footer or left nav.
+	
+	product.js - app.Product object
+	contains the javascript code related to the dynamic behavior of the product detail page
+	e.g. pricing, image management, selecting/deselecting variation attributes, options, enable/disable A2C button,  A2WL, Gift registry and other links etc.
+	Initializes jquery plugins to create horizontal carousel, tabs, and binds different event handlers. 
+	
+	This template creates 
+	app.Product instances with product json (productjson.isml) and assigns it to global var app.ProductCache
+	in case of a set/bundle, for each subproduct
+		create product instances of app.Product with product json (productjson.isml)
+		add them to the main product
+			app.ProductCache.subProducts.push
+		call app.Product.show() which does UI initializations and jQuery events binding etc.
+	
+	call app.ProductCache.show which does UI initializations and jQuery events binding etc.
+	
+</iscomment> 
+<isset name="DecoratorTemplate" value="tablet/product/pt_productdetails" scope="page"/>
+<iscomment>pwr = power review write</iscomment>
+<iscomment> add the Omniture tagging code if the Quick View Window is opened | Naveen Kumar </iscomment>
+<isif condition="${pdict.CurrentHttpParameterMap.pwr.stringValue == 'true' || pdict.CurrentHttpParameterMap.source.stringValue == 'search' || pdict.CurrentHttpParameterMap.source.stringValue == 'quickview' || pdict.CurrentHttpParameterMap.source.stringValue == 'cart'}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+	<script src="${URLUtils.staticURL('/lib/adobe/omniture/s_code.js')}" type="text/javascript"></script>
+</isif>
+
+<isdecorate template="${DecoratorTemplate}">
+	<iscache type="relative" minute="1440" varyby="price_promotion"/>
+	<isinclude template="tablet/util/modules"/>
+	<isscript>
+var presetvar : String = dw.system.Site.getCurrent().preferences.custom.s7Preset;
+</isscript>
+
+<iscomment>Setting the omniture variable | Praveen</iscomment>
+<script>
+	var productIds = "" ;
+</script>
+<iscomment>INTP-22 Long description requires delimiter handling </iscomment>
+<isscript>
+	importScript("app_mns:/product/ProductStringUtils.ds"); 
+	var descList:List=splitString(pdict.Product.longDescription.toString()); 
+</isscript>
+<isif condition="${pdict.Product.productSet}">
+
+	<isloop items="${pdict.Product.getProductSetProducts()}" var="productSetProduct">
+		<script>
+			productIds = productIds + ";" + "${productSetProduct.custom.tNumber}" + ",";
+		</script>
+	</isloop>
+</isif>
+	<isset name="outofStock" value="${Resource.msg('product.outofstockstring','product',null)}" scope="page"/> 
+	<isset name="inStock" value="${Resource.msg('product.instockstring','product',null)}" scope="page"/> 
+	<input type="hidden" name="outOfStockMessage" id="outOfStockMessage" value="${outofStock}"/>
+	<input type="hidden" name="inStockMessage" id="inStockMessage" value="${inStock}"/>
+	
+	<input type="hidden" id="presetvar" value="${presetvar}" />
+	<isif condition="${pdict.CurrentHttpParameterMap.source.stringValue == 'quickview' || pdict.CurrentHttpParameterMap.source.stringValue == 'cart'}">
+		<isset name="isQuickView" value="${true}" scope="page"/>
+	<iselse>
+		<isset name="isQuickView" value="${false}" scope="page"/>
+	</isif>
+	<isif condition="${!isQuickView}">
+		<isinclude template="components/productbreadcrumbs"/>
+	</isif>
+	<isif condition="${pdict.Product.productSet}">
+		<div id="pdpMain" class="productdetail productgroup pad-bottom">
+			<div class="groupHeaderTitle">
+
+				<iscomment>INT-450 - PIM - New product set indicators - display the title regardless</iscomment>
+				<h1 class="productname"><isprint value="${pdict.Product.name}"/></h1>
+				
+				<isinclude template="tablet/product/components/pricing"/>
+				<div class="clear"></div>
+			</div>
+		
+	<iselse>
+		<div id="pdpMain" class="productdetail">
+	</isif>
+		
+	<div class="product_wrapper_tablet" >
+	
+		<div class="productdetailimage_tablet">
+		
+		<div class="productdetailcolumn productimages"  id="pdp-single-big-pic" >
+			
+				
+				<iscomment><!-- TODO: Scene7 viewer::: 18th May 2011  If the backend dev version does not already handle this then
+				  				add the condition so the main image doesn't appear for sets or bundles
+								allScene7 viewers appear only for the sub-products. 
+								set the masterID -->
+				</iscomment>
+				<isscript>
+				var prod = pdict.Product;
+				if(pdict.Product.productSet){
+				var prodList =  pdict.Product.getProductSetProducts();
+				for each(var tempProd in prodList){
+					if(tempProd.online){
+					prod = tempProd;
+					break;
+					}
+				}
+				}
+			var subProductID = prod.ID;		
+			var masterID = null;
+			if (prod.isMaster()) {
+				masterID = prod.ID;
+			} else if (prod.isVariant()) {
+				masterID = prod.variationModel.getMaster().ID;
+			} else {
+				masterID = prod.ID;
+			}
+				subProductID = subProductID.replace(/[^0-9a-z_]+/ig , '_');
+				masterID = masterID.replace(/[^0-9a-z_]+/ig , '_');
+				var tempProd = pdict.Product;
+				pdict.Product = prod;
+				</isscript>			
+				<iscomment><!-- TODO: Scene7 viewer  add the ID --></iscomment>
+				
+				
+						<div class="productimage ${masterID}"  id="productimage--${masterID}--${subProductID}"><!-- Product Image -->
+						 
+			  	<isinclude template="tablet/product/components/scene7flyout"/> 
+					</div>				
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				 
+				<isset name="Product" value="${tempProd}" scope="pdict"/>
+				
+		</div><!-- END: productdetailcolumn -->
+			<iscomment><isif condition="${!isQuickView}">
+					<div class="maywerecommend"><!-- Product Links Carousel -->
+						<isinclude template="tablet/product/components/recommendations"/>
+					</div>
+				</isif></iscomment>
+		
+
+		
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+			
+
+		<iscomment> :: Davinder Kumar :: Adding addthis.com sharing :: </iscomment>
+		<isif condition="${pdict.Product.master && pdict.CurrentVariationModel && pdict.CurrentVariationModel.variants.size() > 0}">
+			<isset name="imageProduct" value="${pdict.CurrentVariationModel.variants[0]}" scope="page"/>
+		<iselseif condition="${pdict.Product.productSet}">  
+			<isset name="imageProduct" value="${prod}" scope="page"/>
+		<iselse/>
+			<isset name="imageProduct" value="${pdict.Product}" scope="page"/>
+		</isif>
+		<!-- AddThis Button BEGIN -->				 
+		<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+			<a class="addthis_button_twitter"></a>
+			<a class="addthis_button_facebook"></a>
+			<a class="addthis_button_pinterest_share"></a>
+			<a class="addthis_button_google_plusone_share"></a>
+			<a class="addthis_button_email"></a>
+		</div>
+		<script type="text/javascript">var addthis_config = {"data_track_addressbar":false};</script>
+		<script type="text/javascript" src="${dw.system.Site.current.preferences.custom.addthis}"></script>
+		<!-- AddThis Button END -->
+	 
+		
+		<div class="recommandation">
+			
+
+<isif condition="${!(pdict.Product.productSet)}">
+			 
+			<iscomment><!-- TODO: Scene7 viewer::: 18th May 2011  If the backend dev version does not already handle this then
+			  				add the condition so the main image doesn't appear for sets or bundles
+							allScene7 viewers appear only for the sub-products. 
+							set the masterID -->
+			</iscomment>
+			<isscript>
+				var subProductID = pdict.Product.ID;
+		var masterID = null;
+		if (pdict.Product.isMaster()) {
+			masterID = pdict.Product.ID;
+		} else if (pdict.Product.isVariant()) {
+			masterID = pdict.Product.variationModel.getMaster().ID;
+		} else {
+			masterID = pdict.Product.ID;
+		}
+			subProductID = subProductID.replace(/[^0-9a-z_]+/ig , '_');
+			masterID = masterID.replace(/[^0-9a-z_]+/ig , '_');
+			</isscript>			
+			<iscomment><!-- TODO: Scene7 viewer  add the ID --></iscomment>
+					
+			  <isif condition="${!isQuickView}">
+					<div class="maywerecommend"><!-- Product Links Carousel -->
+						<isinclude template="tablet/product/components/recommendations"/>
+					</div>
+				</isif> 
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			 <!-- END: productdetailcolumn -->
+		 
+		</isif>	
+			
+		</div>
+		
+		
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div>
+		
+		<div class="product_details_tablet">
+		<isobject object="${pdict.Product}" view="detail">
+	
+			<iscomment>
+				render previous/next if the search result contains products
+				currentProdUrl is being initialized here and might be changed by productnav.isml in case we are coming from a search page 
+				in which case all the search params or refinements must remain part of the url i.e. url always preserved 
+			</iscomment>
+			<isset name="currentProdUrl" value="${URLUtils.url('Product-Show','pid', pdict.Product.ID)}" scope="page"/>
+			<isif condition="${!empty(pdict.ProductSearchResult) && pdict.ProductSearchResult.count > 0}">		
+				<div class="hidden">
+				<isinclude template="search/productnav"/>
+				</div>
+			</isif>
+		
+			<script type="text/javascript">
+			
+			//<![CDATA[
+	
+				// constants
+				app.constants.AVAIL_STATUS_IN_STOCK 		= "${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_IN_STOCK}";
+				app.constants.AVAIL_STATUS_PREORDER 		= "${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_PREORDER}";
+				app.constants.AVAIL_STATUS_BACKORDER 		= "${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_BACKORDER}";
+				app.constants.AVAIL_STATUS_NOT_AVAILABLE 	= "${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_NOT_AVAILABLE}";
+				
+				// product availability messages
+				app.resources["${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_IN_STOCK}"] = "${StringUtils.format(Resource.msg('global.instock','locale',null))}";
+				app.resources["QTY_${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_IN_STOCK}"] = "${StringUtils.format(Resource.msg('global.quantityinstock','locale',null))}";
+				app.resources["${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_PREORDER}"] = "${StringUtils.format(Resource.msg('global.allpreorder','locale',null))}";
+				app.resources["QTY_${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_PREORDER}"] = "${StringUtils.format(Resource.msg('global.quantitypreorder','locale',null))}";
+				app.resources["REMAIN_${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_PREORDER}"] = "${StringUtils.format(Resource.msg('global.remainingpreorder','locale',null))}";
+				app.resources["${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_BACKORDER}"] = "${StringUtils.format(Resource.msg('global.allbackorder','locale',null))}";
+				app.resources["QTY_${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_BACKORDER}"] = "${StringUtils.format(Resource.msg('global.quantitybackorder','locale',null))}";
+				app.resources["REMAIN_${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_BACKORDER}"] = "${StringUtils.format(Resource.msg('global.remainingbackorder','locale',null))}";
+				app.resources["${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_NOT_AVAILABLE}"] = "${StringUtils.format(Resource.msg('global.allnotavailable','locale',null))}";
+				app.resources["REMAIN_${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_NOT_AVAILABLE}"] = "${StringUtils.format(Resource.msg('global.remainingnotavailable','locale',null))}";
+				app.resources["IN_STOCK_DATE"] = "${Resource.msg('global.inStockDate','locale',null)}";
+				app.resources["NON_SELECTED"] = "${StringUtils.format(Resource.msg('global.nonSelected','locale',null))}";
+				app.resources["MISSING_VAL"] = "${StringUtils.format(Resource.msg('product.missingval','product',null))}";
+				app.resources["SIZECHART_TITLE"] = "${StringUtils.format(Resource.msg('product.sizecharttitle','product',null))}";
+				app.resources["SEND_TO_FRIEND"] = "${Resource.msg('account.sendfriend','account',null)}";				
+				
+				// THIS MUST BE CALLED BEFORE ANY app.product calls!!!
+				// execute unobtrusive js code
+				app.execUjs();
+				
+				jQuery(document).ready(function(){
+					 
+					app.ProductCache = new app.Product({data: <isinclude template="product/productjson"/>});
+					
+					   rqaTabSelectAction = function (n,i) {		
+						 $("#pdpTab" + i).addClass("ui-tabs-hide");
+						$("#pdpShipMethodsTab" + i).addClass("active");
+						$('.genTab').find('a[href="#pdpShipMethodsTab"]').click();
+					}
+					
+					pdpTabSelection = function(n,i) {
+						$("#pdpShipMethodsTab" +i).addClass("ui-tabs-hide");
+						$("#pdpTab" + i).addClass("active");
+						$('.genTab').find('a[href="#pdpTab"]').click();
+					} 
+					
+					/*Toggle script of product details*/
+					
+					jQ('.tabItem > div').hide();
+					
+					jQ('.tab a').on('click' , function() {   
+						 
+						jQ(this).toggleClass("activeTab");
+						jQ(this).parent().next("div.tabItem").children(0).toggleClass("active").slideToggle("slow");
+					});	
+				});
+
+				//CR018 |  Naveen Kumar
+				function changeErrorStatusIcon(pid){
+				iconId = pid + "sizedropdownErrorIcon";
+				msgId = pid + "sizedropdownError";
+				if (document.getElementById(iconId).className.indexOf("errorIcon") >= 0) {						
+					document.getElementById(iconId).className = "successIcon"; /*change from error icon to success icon*/
+					document.getElementById(msgId).style.display = "none";
+				}
+					document.getElementById(pid + "quantity_dropdown").value = "1";	
+					jQuery('#' + pid + 'qtySpan').text = '1';
+					document.getElementById(pid + "quantityErrorIconID").className = "";						
+					jQuery("#"+ pid.replace(" ","_") + "quantityErrorMessage").empty();	
+					jQuery('.pdp-size').parent().removeClass("red-border-size");
+					var isProductSet = "${pdict.Product.productSet}";
+				
+					if(isProductSet == "true") {
+						var productSetPriceIndicator = "${pdict.Product.custom.productSetPriceIndicator}";
+					/*INT-450 - PIM - Change product set price indicators, new value 3 instead of 0,1*/
+						//if(productSetPriceIndicator == "1" || productSetPriceIndicator == "0") {
+						  if(productSetPriceIndicator == "3") {
+							var colorSelected = jQuery("#"+ pid.replace(" ","_")+"_colorvalue").text();
+							if(colorSelected != null && colorSelected != "") {
+								updateProductSetPrice();
+							}
+						}
+					}					
+				}
+
+				/*
+					this method checks for the span tag, which has the ID as 'om_emptycart'. 
+					if the span is found (which will be in the case of 0 items in basket)
+					returns TRUE; otherwise FALSE.
+				*/
+				function isZeroItemInHTML(){
+					if (document.getElementById('om_emptycart') != null)
+						return true;					
+					else
+						return false;					
+				}		
+				/*
+					this variable works as a map to save the products variant data 
+					with the colorId as key. this is used to implement the JS caching 
+					strategy on color swatch. now if the data for selected colorId 
+					is available in this object, no ajax call to the server will be made.
+				*/  				
+				var variantDataMap = new Object();
+				
+				//]]>
+</script> 
+
+	<iscomment><!--<isif condition="${!isQuickView && !pdict.Product.productSet}">
+		<isinclude template="product/components/recommendations_vertical_tablet"/>
+	</isif>-->
+				</iscomment>
+				
+				
+		<iscomment>Added for tablet basket preview </iscomment>		
+	<isif condition="${isQuickView}">
+			<div class="pdpyourDetailsLink">
+				${Resource.msg('product.changeProductDetails','product',null)}
+			</div>
+		</isif>		
+			<isif condition="${!pdict.Product.productSet}">
+		<div class="productdetailcolumn productinfo" > 
+		<!-- dwMarker="product" dwContentID="${pdict.Product.UUID}" -->
+	</isif>
+				
+				<iscomment><!--  TODO if font-size changes see sifr_replace.js to update text wrapping limits
+				-->
+				</iscomment>
+				<isif condition="${pdict.Product.productSet}">
+					<div class="productGroupHeader ">
+						
+				</isif>
+				<!-- Product Name Display CR-135 -->	
+							
+				<isif condition="${!pdict.Product.productSet}">
+				
+				
+				<iscomment><!-- Adam's Edit - INT 494 --></iscomment>
+				<isif condition="${pdict.Product.custom.productBrand != null && !empty(pdict.Product.custom.productBrand)}">
+				<h1 class="brand"><span><isprint value="${pdict.Product.custom.productBrand}"/></span></h1>
+				</isif>
+				<h1 class="productname"><span><isprint value="${pdict.Product.name.replace(pdict.Product.custom.productBrand, '')}"/></span></h1> 	
+					<div class="itemNo productID"><span class="itemConstant">${Resource.msg('product.item','product',null)}</span> <span class="itemNumber"><isprint value="${ pdict.Product.custom.tNumber }"/></span>
+							<isinclude template="tablet/product/components/pricing"/>
+					
+					</div><!-- END: productid -->
+				<isset name="showTieredPrice" value="${true}" scope="page"/>
+				
+				<iscomment>Praveen: Code changes for CR3007</iscomment>
+				<isset name="minListPrice" value="${pdict.Product.priceModel.getMinPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+				<isset name="maxListPrice" value="${pdict.Product.priceModel.getMaxPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+				
+				<iscomment>Praveen: Code changes for CR3007</iscomment>
+				
+			
+				</isif>
+				 
+				<!-- END: productDescription -->
+					<iscomment>[QC: 424] | Dotted Border should be inside this if block, to avoid it from appearing on Product Set Page and displaying an extra dotted line</iscomment>
+					 
+				
+				<isinclude template="tablet/product/components/promotions"/>
+				 
+				<isif condition="${pdict.Product.productSet}">
+					</div>
+				</isif>
+					
+				 
+				 
+			 
+				<isif condition="${pdict.Product.productSet}">
+					<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+					<script type="text/javascript">//<![CDATA[
+					
+						/* 
+							Praveen:-This method gets called for each "Add to basket" button on PSP.
+						*/
+						function setOmnitureVariablesForProductSetAdd(obj, pid){
+							var colorValId = pid + "_colorvalue";
+							var sizeValId = pid + "_sizedropdown";
+							if (document.getElementById(colorValId).innerHTML == ""){								
+								return true;		// no Omniture call if color is not selected
+							}
+							if (document.getElementById(sizeValId).value == ""){							
+								return true;		// no Omniture call if size is not selected
+							}
+							if (${pdict.isBaksetNullOrEmpty} & isZeroItemInHTML()){
+								s.linkTrackEvents = "${Resource.msg('omniture.pdp.linkTrackEvents.firstproductadd','omniture',null)}";
+								s.events = "${Resource.msg('omniture.events.firstproductadd','omniture',null)}";
+							} else{
+								s.linkTrackEvents = "${Resource.msg('omniture.pdp.linkTrackEvents.productadd','omniture',null)}";
+								s.events = "${Resource.msg('omniture.events.productadd','omniture',null)}";
+							}
+							s.linkTrackVars = "${Resource.msg('omniture.pdp.linkTrackVars','omniture',null)}";
+							s.products = ";" + pid;
+							s.tl(obj,'o', obj.getAttribute("value"));
+							return true;
+						}
+						//]]>
+						
+					</script>	
+					
+					<div id="pdpProductSetDiv" class="productWrapper">
+						<iscomment>Display Product Set Individual Products</iscomment>
+						<iscomment>Preserve the current product instance</iscomment>
+						<isset name="ProductSet" value="${pdict.Product}" scope="pdict"/>						 
+						<isset name="subProductCount" value="${pdict.ProductSet.getProductSetProducts().length}" scope="page"/>
+						<isloop items="${pdict.ProductSet.getProductSetProducts()}" var="SetProduct" status="productSetLoop">
+							<isif condition="${SetProduct.online}">								
+								<isset name="Product" value="${SetProduct}" scope="pdict"/>
+								<isset name="ProductCount" value="${productSetLoop.count}" scope="pdict"/>
+								<isobject object="${pdict.Product}" view="setproduct">
+											<isif condition="${pdict.ProductCount == subProductCount}">
+												<div class="productSubWrapperLastItem subProductDiv" id="subProduct${pdict.ProductCount}Div">
+											<iselse>
+												<div class="productSubWrapper subProductDiv" id="subProduct${pdict.ProductCount}Div">
+											</isif>
+												<isinclude template="tablet/product/components/subproduct"/>
+											</div>	 
+								</isobject>
+			
+								<script type="text/javascript">//<![CDATA[
+
+									jQuery(document).ready(function(){
+										var subProduct = new app.Product({data: <isinclude template="product/productjson"/>});
+										app.ProductCache.subProducts.push(subProduct);
+										subProduct.show({containerId: "subProduct${pdict.ProductCount}Div", append: true, source: "${pdict.CurrentHttpParameterMap.source.stringValue}"});								
+									});
+									//]]>
+</script>
+							</isif>
+						</isloop>
+						<iscomment>Restore the current product instance</iscomment>
+						
+					
+					  	<isset name="Product" value="${pdict.ProductSet}" scope="pdict"/>
+						<iscomment>Add all to basket is not requied for tablet, putted hide class</iscomment>
+						<iscomment><div id="pdpATCDivpdpMain" class="addtocartbar addallitems floatright hide">
+							<div class="btn-green-flat floatleft clear">
+								<button type="button" onclick="setOmnitureVariables(this);" title="${Resource.msg('global.addallitemstocart','locale',null)}" value="${Resource.msg('global.addallitemstocart','locale',null)}" class="addtocartbutton">	
+									<span class="btn-ic-basket">${Resource.msg('global.addallitemstocart','locale',null)}</span>
+								</button>
+							</div>
+							
+							<div class="clear"></div> 
+						
+						</div></iscomment>
+						
+						<!-- END: addtocartbar -->
+					 
+											<div class="clear"></div>
+					</div><!-- END: productset -->
+				</isif>
+				<isif condition="${pdict.Product.bundle && pdict.Product.getBundledProducts().size() > 0}">
+					<div id="pdpBundleDiv" class="bundle">					
+						<iscomment>Display bundle Individual Products</iscomment>
+						<iscomment>Preserve the current product instance</iscomment>
+						<isset name="ProductBundle" value="${pdict.Product}" scope="pdict"/>
+						<isloop items="${pdict.Product.getBundledProducts()}" var="BundledProduct" status="bundleLoop">
+							<isset name="Product" value="${BundledProduct}" scope="pdict"/>
+							<isset name="ProductCount" value="${bundleLoop.count}" scope="pdict"/>
+
+							<isobject object="${pdict.Product}" view="setproduct">
+								<isinclude template="tablet/product/components/subproduct"/>
+							</isobject>
+		
+							<script type="text/javascript">//<![CDATA[
+
+								jQuery(document).ready(function(){
+									var bundledProduct = new app.Product({data: <isinclude template="product/productjson"/>});
+									app.ProductCache.subProducts.push(bundledProduct);
+									bundledProduct.show({containerId: "subProduct${pdict.ProductCount}Div", append: true, source: "${pdict.CurrentHttpParameterMap.source.stringValue}"});								
+								});
+							//--></script>
+		
+						</isloop>
+						<iscomment>restore the current product instance</iscomment>
+						<isset name="Product" value="${pdict.ProductBundle}" scope="pdict"/>
+					</div><!-- END: bundle -->
+				</isif>
+				
+				<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+				<script type="text/javascript">
+				//<![CDATA[
+					/* 
+						INT-499 oformby # added showMiniCart() to onclick on addtobasket button; so when clicked the page
+						scrolls down to the tablet-minicart div.
+					*/	
+				
+				    function showMiniCart()
+				    {
+				    	$('html, body').animate({scrollTop:$('.tablet-minicart').position().top}, 'slow');
+				    }
+						
+					/* 
+					/* 
+						called on click of 'add to basket' on product detail page(PDP) and product set page(PSP).
+					*/			
+					function setOmnitureVariables(obj){
+
+						var productDiv = jQuery(".variationattributes");
+						for (var i=0; i<productDiv.length; i++ ){
+							if ($(productDiv[i]).find(".selectedvarval:first").html() == ""){
+								return true;
+							}							
+							if ($(productDiv[i]).find("div select:first").val() == ""){
+								return true;
+							}
+						}
+						
+						if (${pdict.isBaksetNullOrEmpty} & isZeroItemInHTML()){
+							s.linkTrackEvents = "${Resource.msg('omniture.pdp.linkTrackEvents.firstproductadd','omniture',null)}";
+							s.events = "${Resource.msg('omniture.events.firstproductadd','omniture',null)}";
+						} else{
+							s.linkTrackEvents = "${Resource.msg('omniture.pdp.linkTrackEvents.productadd','omniture',null)}";
+							s.events = "${Resource.msg('omniture.events.productadd','omniture',null)}";
+						}
+						s.linkTrackVars = "${Resource.msg('omniture.pdp.linkTrackVars','omniture',null)}";					
+						//Praveen:- Changing code for replacing tNumber from ID.
+						
+						if("${pdict.Product.productSet}" === "true"){//For PSP
+							s.products = productIds;
+						}
+						else{//For Normal Prod
+							s.products = ";${pdict.Product.custom.tNumber}";
+						}
+						
+						
+						s.tl(obj,'o', obj.getAttribute("value"));
+						return true;
+					}					
+					s.events = "${Resource.msg('omniture.events.productview','omniture',null)}";
+					//s.products = ";${pdict.Product.ID}";
+					//Praveen:- Changing code for replacing tNumber from ID.
+					if("${pdict.Product.productSet}" === "true"){//For PSP
+						s.products = productIds;
+					}
+					else{//For Normal Prod
+						s.products = ";${pdict.Product.custom.tNumber}";
+					}
+					//]]>
+				</script>	
+			
+				<isset name="productVariants" value="${(pdict.Product.variant ? pdict.Product.masterProduct.variationModel : pdict.Product.variationModel)}" scope="page"/>
+					<isloop items="${productVariants.getVariants()}" var="VV">
+							<isset name="varId" value="${VV.getPriceModel().getPrice()}" scope="page"/>
+					</isloop>
+				<isset name="qtyDisplayOrder" value="0" scope="page"/>
+				<isif condition="${!pdict.ProductSet}">
+		<div class="dotted_border"></div>
+		</isif>
+				<isinclude template="tablet/product/components/variations"/>
+				<div class="mainattributes"><!-- Displays Product Main Attributes -->
+					<isset name="pam" value="${pdict.Product.getAttributeModel()}" scope="page"/>
+					<isset name="group" value="${pam.getAttributeGroup('mainAttributes')}" scope="page"/>
+					<isinclude template="tablet/product/components/group"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div><!-- END: mainattributes -->
+				<isinclude template="tablet/product/components/options"/>
+				<isif condition="${!pdict.Product.productSet}">
+					<iscomment>Nadeem:added class hidden to remove the text below size dropdown</iscomment>
+						
+					<div class="availability hidden">
+						<span class="label">${Resource.msg('global.availability','locale',null)}: </span><span class="value"><!-- Product Availability Message --></span>
+					</div><!-- END: availability -->
+				</isif>				
+				<isscript>
+							var pid : String = pdict.Product.ID;
+							var prod : dw.catalog.Product = dw.catalog.ProductMgr.getProduct(pid);
+							var prodShipModel : dw.order.ProductShippingModel = dw.order.ShippingMgr.getProductShippingModel(prod);
+							var shippingMethods : dw.util.ArrayList = prodShipModel.applicableShippingMethods;
+							var regularShipping : boolean = false;
+							var expressShipping : boolean = false;
+						</isscript>
+				<isif condition="${!(pdict.Product.productSet || pdict.Product.bundle)}">
+					<div id="pdpATCDivpdpMain" class="addtocartbar">
+							 <isscript>	
+									var maxQty: Number = dw.system.Site.getCurrent().getCustomPreferenceValue("maximumQuantity");
+								 
+								var qtyValue = new Array(maxQty);
+								var index = 0;
+									var qtyValue1 = 1; 
+								while(index< maxQty) {
+									qtyValue[index++] = index;
+								}
+							</isscript>	
+							
+					<script type="text/javascript">
+
+					jQ(document).ready(function(){
+						
+						jQ('.qty-count').focus(function(){
+							jQ('.qty-count').blur();
+						});
+						
+						var qty1 = parseInt(jQ(".qty-count").val());
+						 
+						productID = '${pdict.Product.ID}';
+						
+						jQ(".variantdropdown select").change(function(){
+							jQ('input#' + productID + 'quantity_dropdown').val('1');
+							jQ('#' + productID + 'qtySpan').empty().html('1');
+							qty1 = 1;
+							jQ("#pdp-qty-minus").addClass("disabled");
+							
+						});
+						
+						jQ("#pdp-qty-minus").click(function(e){					  
+							 if(qty1 >1){ 
+								  qty1 = qty1 -1;  
+								  jQ(".qty-count").val(qty1);
+								  jQ("#pdp-qty-plus").removeClass("disabled");
+								calledOnChange(qty1, '${pdict.Product.ID}');
+								//alert(qty1 +  '${pdict.Product.ID}');
+								if(qty1 == 1)
+								{ 
+								 jQ("#pdp-qty-minus").addClass("disabled");
+								 jQ("#pdp-qty-plus").removeClass("disabled");
+								}
+								 jQ('.pdpqtyshow').empty().html(qty1);
+							  }
+							 else { 
+								 jQ(this).click(false);
+								 return(false)}
+							 
+						});
+							
+						jQ("#pdp-qty-plus").click(function(e){
+							 
+									 if(qty1 < ${maxQty}){ 
+										  qty1 = qty1 +1;  
+										  jQ(".qty-count").val(qty1);											 
+										 calledOnChange(qty1, '${pdict.Product.ID}')
+										  jQ("#pdp-qty-minus").removeClass("disabled");
+										
+										 //alert(qty1 +  '${pdict.Product.ID}');
+										  if(qty1 == ${maxQty} )
+											{ 
+											 jQ("#pdp-qty-plus").addClass("disabled");
+											 jQ("#pdp-qty-minus").removeClass("disabled");
+											}
+										  jQ('.pdpqtyshow').empty().html(qty1); 
+									  }
+									 else { 
+										 jQ(this).click(false);
+										 
+											 return(false)}
+										
+						}) ;
+							})
+							 
+							</script>
+							
+							<span class="label">
+								<label for="${pdict.Product.ID}quantity_dropdown">${Resource.msg('global.quantity','locale',null)}:</label><span id="${pdict.Product.ID}qtySpan" class="value pdpqtyshow">${Number(qty).toFixed()}</span>
+							</span>
+							<iscomment><input class="quantityinput" value="${Number(empty(pdict.CurrentHttpParameterMap.Quantity.stringValue) ? 1 : pdict.CurrentHttpParameterMap.Quantity.stringValue).toFixed()}"/></iscomment>
+							
+					  <div class="tablet-qty genericinputbox">
+								<button onclick="javascript:;"  class="qty-sign disabled" id="pdp-qty-minus" type="button">&minus;</button>
+								<input type="text" readonly="true" class="qty-count" id="${pdict.Product.ID}quantity_dropdown" value="${Number(qty).toFixed()}">				   
+								</input>
+								<button onclick="javascript:;" class="qty-sign" id="pdp-qty-plus" type="button" >&plus;</button>
+							 
+							</div> 
+							<!-- <select id="${pdict.Product.ID}quantity_dropdown" class="quantity_dropdown" onchange="calledOnChange(this, '${pdict.Product.ID}' );">
+								<isloop items="${qtyValue}" var="qty">
+									<option value="${Number(qty).toFixed()}">${Number(qty).toFixed()}</option>
+								</isloop>	
+							</select>
+							
+							 -->
+							
+							<iscomment>Praveen: Setting the variable for cart-Editlineitemif the page is coming from basket page</iscomment>
+							<span style="display:none!important" class="hidden" id="${pdict.Product.ID}quantityErrorIconID"></span>
+							<isif condition="${isQuickView && !empty(pdict.CurrentRequest.httpParameters.Quantity)}">
+								<isset name="cartEditLI" scope="session" value="${pdict.Product.ID}"/>
+							</isif> 
+							
+							<iscomment>INT-499 oformby # added extra function to onclick to show minicart </iscomment>
+							<div class="btn-green-flat floatleft clear">
+								<button type="button" onclick="setOmnitureVariables(this);showMiniCart();" title="${Resource.msg('global.addtocart','locale',null)}" value="${Resource.msg('global.addtocart','locale',null)}" class="addtocartbutton"><a class="btn-ic-basket arrow-btn">${Resource.msg('global.addtocart','locale',null)}</a></button>
+							</div> 
+							
+							<iscomment>
+							<div class="REMOVE_ME">
+								<button type="button" title="${Resource.msg('global.addtocart','locale',null)}" value="${Resource.msg('global.addtocart','locale',null)}" class=""><span>${Resource.msg('global.addtocart','locale',null)}</span></button>
+							</div></iscomment>
+							<iscomment><isinclude template="tablet/product/components/pricing"/></iscomment>
+							<div class="clear"></div>
+							<div id="${pdict.Product.ID.replace(' ','_')}quantityErrorMessage" class="errorclient clear">
+		     				</div>
+							 
+							<!-- END: quantityErrorMessage --> 
+		     		</div>
+		    
+		     		<!-- END: addtocartbar -->     		
+		     		 
+				</isif>	
+		<isif condition="${!pdict.Product.productSet}">	
+				<iscomment><isif condition="${!empty(pdict.Basket) && (pdict.Basket.productLineItems.size() > 0 || pdict.Basket.giftCertificateLineItems.size() > 0)}"></iscomment>
+								<div class="tablet-minicart"></div>
+				<iscomment></isif></iscomment>
+			<div class="dotted_border dotted_border_bottom"></div>
+		</isif>			
+				<iscomment><div class="productreview">
+					Product Ratings (PowerReviews)
+					<isif condition="${!isQuickView}">
+		        	<isinclude template="product/components/reviewsmini"/>
+					<div class="reviewlinks">
+						<a id="pdpReadReview" title="${Resource.msg('global.readreviews','locale',null)}">${Resource.msg('global.readreviews','locale',null)}</a><span class="divider">|</span><a id="pdpWriteReview" href="${URLUtils.url('PowerReviews-WriteReview')}?pid=${pdict.Product.ID}" title="${Resource.msg('global.writeareview','locale',null)}">${Resource.msg('global.writeareview','locale',null)}</a>
+					</div><!-- END: review_links -->
+					</isif>
+				</div></iscomment><!-- END: productreview -->
+				
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+				 
+			 <isif condition="${!pdict.Product.productSet}">
+					<isloop items="${shippingMethods}" var="shippingMethod" status="shippingMethodLoop">
+					<isif condition="${shippingMethod.defaultMethod}">
+						<isscript>
+							regularShipping = true;
+						</isscript>
+						<span class="delivery_link_std">
+							<isprint value="${shippingMethod.custom.deliveryLeadTime}"/>
+							<iscomment><!-- <isif condition="${!isQuickView && (shippingMethods.size() == 1)}">
+								<a onclick="rqaTabSelectAction(0,'');" href="#pdpShipMethodsTab" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+							</isif> --></iscomment>
+						</span>
+					</isif>
+					</isloop>
+					<isloop items="${shippingMethods}" var="shippingMethod" status="shippingMethodLoop">
+						<isif condition="${!shippingMethod.defaultMethod && (!shippingMethod.ID.equalsIgnoreCase('STORE_COLLECTION') || pdict.CurrentSession.custom.isStoreCollActive )}">
+							<isscript>
+								expressShipping = true; 
+								var classValue : String = "delivery_link_" + shippingMethod.ID.toLowerCase();
+							</isscript>
+							<span class="${classValue}">
+								<isprint value="${shippingMethod.custom.deliveryLeadTime}"/>	
+								<iscomment><!-- <isif condition="${!isQuickView}">
+									<a onclick="rqaTabSelectAction(0,'');" href="#pdpShipMethodsTab" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+								</isif> --></iscomment>
+							</span>
+						</isif>
+					</isloop>
+						<iscomment> CR023 | new Content asset is created for extra text on PDP and PSP pages | Naveen Kumar </iscomment>
+						<div class="collect_from_uk"><iscontentasset aid="PDP_COLLECT_FROM_UK">
+						<iscomment><!-- <isif condition="${!isQuickView}">
+							<a onclick="rqaTabSelectAction(0,'');" href="#pdpShipMethodsTab" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+						</isif> --></iscomment></div>							
+			</isif>
+					
+						
+				
+			<isset name="vags" value="${pam.getVisibleAttributeGroups()}" scope="page"/>
+			<isset name="mainGroup" value="${pam.getAttributeGroup('PDPAttr')}" scope="page"/>
+			<isif condition="${!pdict.Product.productSet && !pdict.Product.bundle && !isQuickView}">
+			<div id="pdpTabsDivNew" class="product_tabs">
+				<div class="genTab">
+					 
+						<isif condition="${!empty(pdict.Product.custom.productDetailsBulletPoints) || 
+												   !empty(pdict.Product.custom.careInstructions) || 
+												   !empty(pdict.Product.custom.composition) || 
+												   !empty(pdict.Product.custom.IntlEnglishText) || 
+												   !empty(pdict.Product.custom.IngredientsListing) ||
+												   !empty(pdict.Product.custom.CompositionList) ||
+												   !empty(pdict.Product.custom.Footwear_Sole) ||
+												   !empty(pdict.Product.custom.HomeMaterial)||
+												   !empty(pdict.Product.custom.usageInstructions) ||
+												   !empty(pdict.Product.custom.safetyWarning) ||
+												   !empty(pdict.Product.custom.careInstructions) ||
+												   !empty(pdict.Product.custom.GenericCMSContentID_Panel) ||
+												   !empty(pdict.Product.custom.GenericCMSContentID_Panel2)}">
+                        <isset name="firstTabexists" value="true" scope="page"/>
+                        <div id="pdpTabItems" class="first tab">
+                        	<a><h3>${Resource.msg('product.tab2','product',null)}</h3></a>
+                         </div>
+                        </isif>
+				<div  class="tabItem">
+                    <isif  condition="${firstTabexists == 'true'}">
+						<div id="pdpTab">
+						
+						
+ <isset name="showTieredPrice" value="${false}" scope="page"/>
+					<isif condition="${pdict.Product.productSet}">
+						<div id="productDescription" class="productSubContent">
+							<p>
+					<iselse>
+						<div id="productDescription" class="product_detail_precis_tablet">
+                     </isif>	
+						<!-- shown only in quick view -->
+						<isif condition="${! empty(pdict.Product.longDescription) && pdict.Product.longDescription.markup.length > 0}">	
+							<iscomment>INTP-22 Long description requires delimiter handling </iscomment>
+							<isloop items="${descList}" var="longdesc" status="loopStatus">
+								<isprint value="${longdesc}" encoding="off"/>																
+								<br><br>									
+							</isloop> 
+						</isif>
+                        
+						<isif condition="${pdict.Product.productSet}">
+							</p>		
+						  
+                        </isif>	
+                        </div>
+						<iscomment>INTP-24 PIM: Care Instructions and Composition Bullet Attributes, Product details and Bullet points</iscomment>
+								<isif  condition="${firstTabexists == 'true'}"> 								
+								<isinclude template="product/components/productDetailsBulletPoints"/>
+								</isif>
+						</div>
+					</isif>
+					</div> 
+					
+						<isif condition="${firstTabexists == 'true'}">
+                        	<div id="shipMethodItems" class="last tab">
+                         <iselse>
+                          	<div id="shipMethodItems" class="first last tab">
+                         </isif>
+                         <a id="pdpShipMethodsTab">
+                         	<h3>${Resource.msg('product.tab5','product',null)}</h3>
+                         </a>
+                         </div>
+                    <div  class="tabItem">
+                    <isif condition="${regularShipping || expressShipping}">	
+					    <iscomment>Shashi: Making changes to display the store collection info based on condition</iscomment>
+					    <div id="pdpShipMethods">
+					    
+							<isif condition= "${pdict.CurrentSession.custom.isStoreCollActive}">	
+									<iscontentasset aid = "CA_MS_REGULAR_AND_EXPRESS_SHIPPING_STORE_DELIVERY">				
+							<iselse>
+									<iscontentasset aid = "CA_MS_REGULAR_AND_EXPRESS_SHIPPING">
+							</isif>
+						</div>
+					</isif>
+					 </div>
+						 
+					</div>
+					 
+					
+              
+				</div>
+           </div>
+			</isif>
+			<div class="clear"><!-- FLOAT CLEAR -->	</div>
+			
+			
+			<isif condition="${!pdict.Product.productSet}">
+				<div class="productactions">
+					<iscomment><isif condition="${!(pdict.Product.productSet)}">
+						<isif condition="${!empty(pdict.CurrentHttpParameterMap.source.stringValue)}">
+							<isset name="wishlistUrl" value="${URLUtils.https('Wishlist-Add', 'source', pdict.CurrentHttpParameterMap.source.stringValue)}" scope="page"/>
+						<iselse>
+							<isset name="wishlistUrl" value="${URLUtils.https('Wishlist-Add')}" scope="page"/>
+						</isif>
+						<div class="addtowishlist"><a href="${wishlistUrl}">${Resource.msg('global.addtowishlist','locale',null)}</a></div>
+						<div class="addtoregistry"><a href="${URLUtils.https('GiftRegistry-AddProduct')}">${Resource.msg('global.addtogiftregistry','locale',null)}</a></div>				
+					</isif></iscomment>
+					
+				</div><!-- END: productactions -->
+		</isif>
+		
+
+		<isif condition="${isQuickView}">
+			<div id="pdpFullDetailsLink" class="pdpFullDetailsLink">
+				<a href="${currentProdUrl}" title="${pdict.Product.name}" class="ms_call_to_action_2">${Resource.msg('product.seeproductdetails','product',null)}</a>
+			</div>
+		</isif>	
+			<isif condition="${!pdict.Product.productSet}">	
+				</div><!-- END: productdetailcolumn -->
+			</isif>
+
+
+<!-- common shipping icons in product set. as per vd tablet -->
+                     <isif condition="${pdict.Product.productSet}">
+					 	<div class="set-shipping-cont">
+							<isscript>
+								var shipmethodtabhref = "#pdpShipMethodsTab" + pdict.ProductCount;
+								var pdpTabhref = "#pdpTab" + pdict.ProductCount;
+								var pdpShipMethodHref = "#pdpShipMethods" + pdict.ProductCount;
+							</isscript>
+							<isloop items="${shippingMethods}" var="shippingMethod" status="shippingMethodLoop">
+								<isif condition="${shippingMethod.defaultMethod}">
+									<isscript>
+										regularShipping = true;
+									</isscript>
+									<span class="delivery_link_std">
+										<isprint value="${shippingMethod.custom.deliveryLeadTime}"/>
+										<isif condition="${!isQuickView && (shippingMethods.size() == 1)}">
+											<a onclick="rqaTabSelectAction(0,${pdict.ProductCount});" href="${shipmethodtabhref}" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+										</isif>
+									</span>
+								</isif>
+							</isloop>
+							<isloop items="${shippingMethods}" var="shippingMethod" status="shippingMethodLoop">
+								<isif condition="${!shippingMethod.defaultMethod}">
+									<isscript>
+										expressShipping = true;
+										var classValue : String = "delivery_link_" + shippingMethod.ID.toLowerCase();
+									</isscript>
+									<span class="${classValue}">
+										<isprint value="${shippingMethod.custom.deliveryLeadTime}"/>	
+										<isif condition="${!isQuickView}">
+											<a onclick="rqaTabSelectAction(0,${pdict.ProductCount});" href="${shipmethodtabhref}" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>					
+										</isif>
+									</span>
+								</isif>
+							</isloop>
+							<iscomment> CR023 | new Content asset is created for extra text on PDP and PSP pages | Naveen Kumar </iscomment>
+							<span class="collect_from_uk"><iscontentasset aid="PDP_COLLECT_FROM_UK"></span>							
+									
+							<iscomment><isif condition="${standardDeliveryLeadTime != null}">
+								<span class="delivery_link_std">
+									<isprint value="${standardDeliveryLeadTime}"/>
+								</span>
+							</isif>
+							<isif condition="${expDeliveryLeadTime != null}">
+								<span  class="delivery_link_express">
+									<isprint value="${expDeliveryLeadTime}"/>
+									<a onclick="rqaTabSelectAction(0,${pdict.ProductCount});" href="${shipmethodtabhref}" class="delivery_link_moredetails"><isprint value="${Resource.msg('global.moredetails','locale',null)}"/></a>						
+								</span>
+							</isif>
+							</iscomment>
+							<div class="clear"></div>
+					 					 	
+						<div class="genTab">
+								<div class="tab" id="shipMethodItems${pdict.ProductCount}">
+									 <a id="pdpShipMethodsTab${pdict.ProductCount}">
+										 <h3>${Resource.msg('product.tab5','product',null)}</h3>
+									 </a>						 
+								 </div>
+								 <div class="tabItem">				
+									<isif condition="${regularShipping || expressShipping}">						
+										<div id="pdpShipMethods${pdict.ProductCount}">
+											<iscomment>Shashi: Making changes to display the store collection info based on condition</iscomment>
+											<isif condition= "${pdict.CurrentSession.custom.isStoreCollActive}">					
+												<iscontentasset aid = "CA_MS_REGULAR_AND_EXPRESS_SHIPPING">
+											<iselse>
+												<iscontentasset aid = "CA_MS_REGULAR_AND_EXPRESS_SHIPPING_NO_STORE_DELIVERY">
+											</isif>
+										</div>
+									</isif>
+								</div>
+						</div>
+						<div class="clear"></div>
+						</div>
+					 </isif>
+			
+			<iscomment>christina: commented because it needs to be set before addthis & subproduct.isml include
+			<isif condition="${pdict.Product.master && pdict.CurrentVariationModel && pdict.CurrentVariationModel.variants.size() > 0}">
+				<isset name="imageProduct" value="${pdict.CurrentVariationModel.variants[0]}" scope="page"/>
+			<iselse/>
+				<isset name="imageProduct" value="${pdict.Product}" scope="page"/>
+			</isif>
+			</iscomment>
+		
+			<isif condition="${!empty(imageProduct.getImage('hero',0))}">
+				<isset name="imageUrl" value="${imageProduct.getImage('hero',0).URL}" scope="page"/>
+				<isset name="imageAlt" value="${imageProduct.getImage('hero',0).alt}" scope="page"/>
+				<isset name="imageTitle" value="${imageProduct.getImage('hero',0).title}" scope="page"/>
+			<iselse/>
+				<isset name="imageUrl" value="${URLUtils.staticURL('/images/noimagelarge.png')}" scope="page"/>
+				<isset name="imageAlt" value="${pdict.Product.name}" scope="page"/>
+				<isset name="imageTitle" value="${pdict.Product.name}" scope="page"/>
+			</isif>
+		
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</isobject>	
+		</div><!-- END: product_details_tablet -->
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: product_wrapper_tablet -->
+		 <div class="clear"><!-- FLOAT CLEAR --></div>        
+			 
+	<script type="text/javascript">//<![CDATA[
+
+		function updateProductSetPrice() {
+			var productSetTotal = new Number(0);
+			var priceSymbol = "";
+			jQuery("#pdpProductSetDiv").find(".subProductDiv .variantdropdown select").each(function(){
+				var ddTextValue = this.options[this.selectedIndex].text;
+				if(this.selectedIndex != 0) {
+					var price = ddTextValue.split(" - ");
+					if(price[1] != null) {
+						var subProductPrice = Number(price[1].substring(1,price[1].length).replace(',','') || 0);
+						productSetTotal = (new Number(productSetTotal) + new Number(subProductPrice)).toFixed(2);
+						if(priceSymbol == ""){
+							priceSymbol = price[1].substring(0,1);
+						}
+					}
+				}
+			});
+			
+			var priceString = new String(productSetTotal);
+			var beforeDotString = priceString.split('.');
+			if(beforeDotString[0].length > 5) {
+				priceString = beforeDotString[0].substring(0,beforeDotString[0].length-5) + "," + beforeDotString[0].substring(beforeDotString[0].length-5,beforeDotString[0].length-3) + "," + beforeDotString[0].substring(beforeDotString[0].length-3,beforeDotString[0].length)+"."+beforeDotString[1];
+			}else if(beforeDotString[0].length > 3) {
+				priceString = beforeDotString[0].substring(0,beforeDotString[0].length-3) + "," + beforeDotString[0].substring(beforeDotString[0].length-3,beforeDotString[0].length)+"."+beforeDotString[1];
+			}
+			
+			var productSetTotalPrice = priceSymbol+priceString;
+			if(productSetTotal > 0){				 				
+				var priceHtml = '<div class="salesprice">' + productSetTotalPrice + '</div>';
+				jQuery(".productGroupHeader").find(".price").html(priceHtml);
+			}else {
+				jQuery(".productGroupHeader").find(".price").empty();
+			}			
+		}
+		function calledOnChange(currentValue, pid){		
+			if(pid != null) {
+				var errorClientID ="#"+pid.replace(" ","_")+"quantityErrorMessage";	
+				if(app.ProductCache.selectedVar != null)				
+				{
+					var selectedQuantity = currentValue.value;
+					if(app.ProductCache.selectedVar.ATS != null && app.ProductCache.selectedVar.ATS < selectedQuantity)
+					{
+						document.getElementById(pid + "quantityErrorIconID").className = "errorIcon";
+						jQuery(errorClientID).html("${Resource.msg('product.outofstock.message.one','product',null)}"+" "+ app.ProductCache.selectedVar.ATS+" "+"${Resource.msg('product.outofstock.message.two','product',null)}");
+						currentValue.value = app.ProductCache.selectedVar.ATS;
+					}
+					else{
+						document.getElementById(pid + "quantityErrorIconID").className = "successIcon";
+						jQuery(errorClientID).empty();
+					}
+				} else if(app.ProductCache.subProducts != null) {
+					for (var i = 0; i < app.ProductCache.subProducts.length; i++) {
+						var subProduct = app.ProductCache.subProducts[i];
+						if (pid == subProduct.pid){
+							var selectedQuantity = currentValue.value;
+							if(subProduct.selectedVar != null && subProduct.selectedVar.ATS < selectedQuantity)
+							{
+								document.getElementById(pid + "quantityErrorIconID").className = "errorIcon";
+								jQuery(errorClientID).html("${Resource.msg('product.outofstock.message.one','product',null)}"+" "+ subProduct.selectedVar.ATS+" "+"${Resource.msg('product.outofstock.message.two','product',null)}");
+								currentValue.value = subProduct.selectedVar.ATS;
+							}
+							else{
+								document.getElementById(pid + "quantityErrorIconID").className = "successIcon";
+								jQuery(errorClientID).empty();
+							}
+						}					                          					
+					}
+				}
+			}
+		}
+		jQuery(document).ready(function(){
+			app.ProductCache.show({containerId: "pdpMain", append: false, source: "${pdict.CurrentHttpParameterMap.source.stringValue}"});
+			// used for send to friend
+			// dialogopen is a very generic name, may be it should be specific to send to friend
+			jQuery(document).bind('dialogopen', function(event, msg) {
+				jQuery('#dialogcontainer').dialog('option', 'title', '${Resource.msg('account.sendfriend','account',null)}');
+	
+			    jQuery("[name=${pdict.CurrentForms.sendtofriend.message.htmlName}]");
+			    jQuery("[name=${pdict.CurrentForms.sendtofriend.subject.htmlName}]").val("${Resource.msg('product.sendfriendemailsubject','product',null)}");
+		     	jQuery("[name=${pdict.CurrentForms.sendtofriend.messagelink.htmlName}]").val("${URLUtils.http('Product-Show', 'pid', pdict.Product.ID)}");
+			    jQuery("[name=${pdict.CurrentForms.sendtofriend.messagelinktext.htmlName}]").val("${Resource.msg('product.sendfriendemailsubject','product',null)}");
+			});
+	
+			app.URLs.sendToFriend = '${URLUtils.http('SendToFriend-Start')}';			
+		});
+		//]]>
+</script>
+	<script type="text/javascript">
+	//<![CDATA[
+
+		function changeURLTwitter()
+		{
+			var tinyURLService="http://json-tinyurl.appspot.com/?url=" + encodeURIComponent(window.location.href) + "&callback=?";
+			var result = app.ajax.getJson({
+			url: tinyURLService,
+			callback: function(data) 
+			{
+				if(data && data.tinyurl)
+					var url="http://twitter.com/home?status=" + encodeURIComponent(data.tinyurl);
+				else
+					var url="http://twitter.com/home?status=" +encodeURIComponent(window.location.href);
+				window.open(url);
+			}
+		});
+		}
+
+		//Method to update the size dropdown for the selected color swatch 
+		function updateSizeDropdown (data, productId,calledonpageload){
+			var inStockStatus = "${dw.catalog.ProductAvailabilityModel.AVAILABILITY_STATUS_IN_STOCK}";
+			if (!data) {
+				return;
+			}
+			var isProductSet = "${pdict.Product.productSet}";
+			// update the data in the variant
+			var sizeDropDown = document.getElementById(productId+"_sizedropdown");
+			if(sizeDropDown != null && sizeDropDown.options != null)
+			{
+				var sourcePage = "${pdict.CurrentHttpParameterMap.source}";
+				if(null != "${pdict.CurrentHttpParameterMap.pagesource}" && "${pdict.CurrentHttpParameterMap.pagesource}" != ""){
+					sourcePage = "${pdict.CurrentHttpParameterMap.pagesource}";
+				}
+				if(sourcePage != "cart" || calledonpageload == "false")
+				{
+					sizeDropDown.value = sizeDropDown.options[0].value;
+					
+					document.getElementById(productId + "sizedropdownErrorIcon").className = "";
+					document.getElementById(productId + "sizedropdownError").style.display = "none";
+					document.getElementById(productId + "colorswatchError").style.display = "none";
+					document.getElementById(productId + "quantity_dropdown").value = "1";
+					document.getElementById(productId + "quantityErrorIconID").className = "";	
+					var errorClientID ="#"+productId.replace(" ","_")+"quantityErrorMessage";					
+					jQuery(errorClientID).empty();
+					if(isProductSet == "true" && calledonpageload == "false") {
+						var productSetPriceIndicator = "${pdict.Product.custom.productSetPriceIndicator}";
+						/*INT-450 - PIM - Change product set price indicators, new value 3 instead of 0,1*/
+						//if(productSetPriceIndicator == "1" || productSetPriceIndicator == "0") {
+						  if(productSetPriceIndicator == "3") {
+							updateProductSetPrice();
+						}
+					}
+				}
+				var outOfStockText = document.getElementById('outOfStockMessage');
+				var inStockText = document.getElementById('inStockMessage');
+				if(data != null && data.inventory != null) {
+					for(var i=0; i<sizeDropDown.options.length; i++) {
+						var foundInLatestInventory = false;
+						var textValue = null;
+						if(sizeDropDown.options[i].value == "") {
+							continue;
+						}
+						if(sizeDropDown.options[i].text != null)
+						{
+							textValue=(sizeDropDown.options[i].text).split(" -");
+						}else {
+							textValue = new Array(1) ;
+							textValue[0] = "";
+						}
+						for(var j=0;j<data.inventory.length; j++) {
+							
+							if(sizeDropDown.options[i].id == data.inventory[j].Sizeid || sizeDropDown.options[i].value == data.inventory[j].Sizeid)
+							{
+								if(data.inventory[j].avStatus == inStockStatus)
+								{
+									sizeDropDown.options[i].text = textValue[0] + " - "+data.inventory[j].variantPrice+" - " + inStockText.value;
+									sizeDropDown.options[i].disabled = false;
+								}else {
+									
+									sizeDropDown.options[i].text = textValue[0] + " - "+ outOfStockText.value;
+									sizeDropDown.options[i].disabled = true;
+								}
+								foundInLatestInventory = true;
+								break;
+				   			}
+						}
+						if(!foundInLatestInventory) {
+							sizeDropDown.options[i].text = textValue[0] + " - "+ outOfStockText.value;
+							sizeDropDown.options[i].disabled = true;
+						}
+					}
+				}
+			}
+		}
+		
+		function variantPriceAndAvailability(productId,colorId,calledonpageload,variantData){
+			var variantKey = productId + colorId;
+
+			/*
+				if variantData is passed, add it to the variantDataMap 
+			
+			*/	
+			if (typeof(variantData) != "undefined") {
+				variantDataMap[variantKey] = variantData;
+			}	
+			
+			/*
+				if data for colorid is not available in the variantDataMap
+				make the AJAX call otherwise get the data from the variantDataMap
+			*/
+			if (typeof(variantDataMap[variantKey]) != "undefined"){
+				updateSizeDropdown(variantDataMap[variantKey], productId,calledonpageload);
+			} else {				
+				app.ajax.getJson({
+					url		: app.URLs.fetchVariantsAvailability,
+					data	: {"pid": productId, "colorId": colorId, "format": "json"},
+					callback: function (data){
+							variantDataMap[variantKey] = data; 
+							updateSizeDropdown(data, productId,calledonpageload);
+						}
+				});
+			}			
+		}
+		//]]>
+		
+	</script>
+	<script type="text/javascript">
+	//<![CDATA[
+
+$(document).ready(function(){
+	var pageSource = "${pdict.CurrentHttpParameterMap.source}";
+	var isProductSet = ${pdict.Product.productSet};
+	var linkName = "${Resource.msg('global.moredetails','locale',null)}";
+	
+	if(pageSource == "cart") 
+	{
+		var qtyValue= "${pdict.CurrentHttpParameterMap.Quantity}";
+		jQuery(".quantity_dropdown").val(Number(qtyValue).toFixed());
+	}
+	/*To hide title bar look and feel from Quick View Dialog to match with Design*/
+	if(${isQuickView}) {
+		/*removed title bar from quickview */
+		jQuery(".ui-widget-header").removeClass("ui-dialog-titlebar").removeClass("ui-widget-header").find(".ui-dialog-title").remove();
+	}else if(!isProductSet){
+		//commented for tablet VD by shahzad
+		//jQuery(".collect_from_uk").find(".contentasset").append('<a href="#" class="delivery_link_moredetails" onclick="rqaTabSelectAction(0,\'\')">' +linkName+'</a>');
+	}
+	if(isProductSet){
+		var count = 1;
+		jQuery(".collect_from_uk").each(function(){
+			var shipmethodtabhref = "#pdpShipMethods"+count;
+			//commented for tablet VD by shahzad
+			//	var vaId = jQuery(this).find(".contentasset").append('<a href="'+shipmethodtabhref+'" class="delivery_link_moredetails" onclick="rqaTabSelectAction(0,'+count+')">' +linkName+'</a>');
+			count = count + 1;
+		});
+	} 
+});
+//]]>
+
+</script>
+<isif condition="${pdict.Product.productSet}">
+<script>
+jQuery(document).ready(function(){	
+ 
+	jQ('.qty-count').focus(function(){
+		jQ('.qty-count').blur();
+	});
+	
+	
+	jQ('.setImage-tab').css({'position':'absolute', 'left':'-99999px'});
+	 
+	var firstClickDone=false;
+	jQ(".productinfo").on("click", function() {
+		 if(!firstClickDone){
+			 firstClickDone = true;
+			 var temp = jQ('#pdp-single-big-pic .productimage .scene7flyoutviewer');
+			 jQ('#subProduct1Div .setImage .productimage').html(temp.clone(true, true));
+				
+		 }
+		var s7ImageID = jQ(this).attr('id').replace('miniimage--' , 'productimage--');
+	    /*alert('1');*/
+	  	
+	  	var masterPID = s7ImageID.split('--')[2];
+	  	jQ("#pdp-single-big-pic").empty()
+		var bigPic = jQ('.'+  masterPID);
+		jQ("#pdp-single-big-pic").html(bigPic.clone(true,true));
+		
+		jQ("#pdp-single-big-pic").find('.borderinside').bind('mouseenter', function(e){mouseenterhandler(e,masterPID);});
+		$("#pdp-single-big-pic").find('ul').eq(0).jcarousel();
+	});
+	
+	function mouseenterhandler(e,thisMasterPID){
+		/* to have a custom cursor icon we do this */
+		var flyoutimage =$(e.target).parents('li').eq(0).find('img').eq(0).attr("src").replace(/\?.+/ , "");
+		if(!sjFlyout){return false;}/* script not loaded yet. */
+		sjFlyout("flyzoom"+ '--' +thisMasterPID , flyoutimage);
+		$(e.target).parents('ul').find('.borderinside').removeClass('borderinsideactive');
+		$(e.target).addClass('borderinsideactive');
+		//setTimeout(setcustomcursor ,250);
+	}
+	  		
+	 
+/*-toggling of sets-*/
+jQ('.tabItem-set > div').hide();
+					
+					jQ('.tab-set a').off('click').on('click' , function(e) {   
+						e.preventDefault(); 
+						jQ(this).toggleClass("activeTab");
+						jQ(this).parent().toggleClass("dotted-border tab-close");
+						jQ(this).parent().next("div.tabItem-set").children(0).toggleClass("active").slideToggle(500);
+						 	
+					});	
+});
+</script>
+</isif>
+
+<iscomment> add the Omniture tagging code if the Quick View Window is opened | Naveen Kumar </iscomment>
+<isif condition="${pdict.CurrentHttpParameterMap.pwr.stringValue == 'true' || pdict.CurrentHttpParameterMap.source.stringValue == 'search' || pdict.CurrentHttpParameterMap.source.stringValue == 'quickview' || pdict.CurrentHttpParameterMap.source.stringValue == 'cart'}">
+	<!-- SiteCatalyst code version: H.23.3.
+	Copyright 1996-2011 Adobe, Inc. All Rights Reserved
+	More info available at http://www.omniture.com -->
+	<script type="text/javascript"><!--
+	/* You may give each page an identifying name, server, and channel on
+	the next lines. */
+	//s.trackingServer="metrics.marksandspencer.fr"
+	//s.trackingServerSecure="smetrics.marksandspencer.fr"
+	/************* DO NOT ALTER ANYTHING BELOW THIS LINE ! **************/
+	var s_code=s.t();if(s_code)document.write(s_code)//--></script>
+	<script type="text/javascript"><!--
+	if(navigator.appVersion.indexOf('MSIE')>=0)document.write(unescape('%3C')+'\!-'+'-')
+	//--></script><!--/DO NOT REMOVE/-->
+	<!-- End SiteCatalyst code version: H.23.3. -->
+</isif>
+</isdecorate>

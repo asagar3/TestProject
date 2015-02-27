@@ -1,0 +1,58 @@
+
+<isdecorate template="tablet/account/pt_account_landing"/>
+<iscomment><!-- changed decorator | Asha --></iscomment>
+<isinclude template="tablet/util/modules"/>
+<div class="accountoverview surround">
+	<!-- isslot id="account-dashboard-banner" description="Banner for My Account pages" context="global" /  -->
+	<div class="dashBorder">
+		<div class="dashboardHeader">	
+			 <h3 class="overviewHead">${Resource.msg('account.header','account',null)}</h3>			
+			 <div class="headerHighlight">
+			 <iscomment><!-- following html changes need to be made to all the pages where the balloon appears | 869912 --></iscomment>
+				<div class="highlightcontent">
+				<div class="holder">
+   					<div class="content">
+      					<div class="inner">
+         					<h4>         						
+	         					<isif condition="${pdict.fromFlow != null && pdict.fromFlow == Resource.msg('dashboard.from.registration','account',null)}">
+	         						<isprint value="${Resource.msg('account.hello2','account',null).replace('$&',pdict.CurrentCustomer.profile.firstName)}">
+	         					<iselse/>
+	         						<isprint value="${Resource.msg('account.hello','account',null).replace('$&',pdict.CurrentCustomer.profile.firstName)}">
+	         					</isif>
+         					</h4>
+         					<iscomment>text comes from content asset <p>${Resource.msg('account.welcomeback','account',null)} </p> </iscomment>
+							<iscontentasset aid="account-dashboard-banner-text"/>       
+      					</div>
+   					</div>
+				</div>
+				</div>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div>	
+	</div>
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+	
+	<div class="accountlanding">		
+		<div class="accountlanding_wrapper">
+		 	<div class="myaccountSubHeading">
+		 		<p class="textBold">${Resource.msg('accountoverview.welcome','account',null)} <isprint value="${pdict.CurrentCustomer.profile.firstName}"/>${Resource.msg('accountoverview.welcome2','account',null)}!</p>
+		 		<p>${Resource.msg('account.welcomeback','account',null)}</p>
+		 	</div>	
+			<iscontentasset aid="account-landing"/>	
+			<div class="myaccountLandingOrderInfo">
+				<p class="textBold">${Resource.msg('account.orderinformation','account',null)}</p>
+				<p>${Resource.msg('account.orderinformessage','account',null)}</p>
+				<p>
+					<ul>
+						<li><a href="${URLUtils.https('Order-History')}" title="${Resource.msg('accountlogin.orderheader','account',null)}">${Resource.msg('accountlogin.orderheader','account',null)}</a></li>
+						<li><a href="${URLUtils.https('Order-History')}" title="${Resource.msg('account.makechanges','account',null)}">${Resource.msg('account.makechanges','account',null)}</a></li>
+						<li><a href="${URLUtils.https('Order-History')}" title="${Resource.msg('account.youraccount','account',null)}">${Resource.msg('account.youraccount','account',null)}</a></li>
+					</ul>
+				</p>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div>
+	</div>
+</div><!-- END: accountoverview -->
+<iscontentasset aid="account-footer"/>
+</isdecorate>

@@ -1,0 +1,2 @@
+s7jsonResponse(
+{"IMAGE_SET":"mandsintl/CP_HF_T36_1999_EM_SP11_EC_0;mandsintl/CP_HF_T36_1999_EM_SP11_EC_0,mandsintl/CP_HF_T36_1999_GF_SP11_EC_0;mandsintl/CP_HF_T36_1999_GF_SP11_EC_0,mandsintl/CP_HF_T36_1999_JT_SP11_EC_0_2_2_2;mandsintl/CP_HF_T36_1999_JT_SP11_EC_0_2_2_2,mandsintl/CP_HF_T36_1999_KU_SP11_EC_0;mandsintl/CP_HF_T36_1999_KU_SP11_EC_0"},"imageSetTEST_1");

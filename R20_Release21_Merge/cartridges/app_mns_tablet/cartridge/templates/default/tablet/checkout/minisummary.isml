@@ -1,0 +1,99 @@
+<isinclude template="tablet/util/modules"/>
+<iscomment>
+	This template renders the summary of the current basket at the right hand side
+	of all checkout pages. It includes an order summary including order totals,
+	a list of all included shipments as well as the payment methods used to pay
+	the basket.
+</iscomment>
+<isset name="displayInCheckout" value="${true}" scope="pdict"/>
+<isif condition="${!empty(pdict.checkoutstep)}">
+	<isset name="checkoutstep" value="${pdict.checkoutstep}" scope="page"/>
+</isif>
+
+<isif condition="${!empty(checkoutstep) && (checkoutstep >= 2)}">
+<iscomment>aliddl: html structure for expanding subheader</iscomment>
+<div class="pageSubHeader">
+	<h3 class="content_grey_header" id="miniSummaryHeader">${miniSummaryHeader}</h3>
+	<div id="subHeaderDetailsLink" class="bottomBorder">
+		<span class="sprite plusminus plus"></span>
+		<isif condition="${(pdict.Basket != null) && (pdict.Basket.productLineItems.size() + pdict.Basket.giftCertificateLineItems.size() > 0 )}">
+			<isscript>
+				// calculate the total number of items in the cart by adding quantities together
+				// do not count bonus line items
+				var cartQty : Number = 0;
+				var pliIt : dw.util.Iterator = pdict.Basket.productLineItems.iterator();
+				
+				while (pliIt.hasNext()) { 
+					var pli : dw.order.ProductLineItem = pliIt.next(); 
+					cartQty += pli.quantity; 
+				}
+				
+				// add the gift certificates to cart quantity
+				cartQty += pdict.Basket.giftCertificateLineItems.size();
+			</isscript>
+			<span class="content_grey_header" id="miniSummarySubHeader">${miniSummarySubHeader}</span>
+			<span class="orderTotalItems">
+				<isprint value="${cartQty}" formatter="##" /> ${Resource.msg('minicart.items3','checkout',null)} 
+				<isif condition="${pdict.Basket.totalGrossPrice.available}">
+				 	<isset name="orderTotalPrice" value="${pdict.Basket.totalGrossPrice}" scope="page"/>
+				<iselse/>
+					<isset name="orderTotalPrice" value="${pdict.Basket.getAdjustedMerchandizeTotalPrice(true).add(LineItemCtnr.giftCertificateTotalPrice)}" scope="page"/>
+				</isif>
+				<span class="bold"><isprint value="${orderTotalPrice}"/></span>
+				</span>
+				<isif condition="${checkoutstep == 4}">
+					<span id="addressPartial">
+						
+					</span>
+					<span>...</span>
+				</isif>
+				
+		</isif>
+	</div>
+	<div class="clear"></div>
+	<div id="subHeaderDetails">
+		<div class="summarySurroundTop">	
+		<isif condition="${checkoutstep < 5}">
+		
+			
+			
+		
+		<div class="checkoutminicart">
+			<isminilineitems p_lineitemctnr="${pdict.Basket}"/>
+		</div><!-- END: check_minicart -->
+	</isif>
+
+	<iscomment>render the order totals</iscomment>
+	<div class="checkoutordertotals">
+		<isif condition="${checkoutstep > 3}">
+			<isordertotals p_lineitemctnr="${pdict.Basket}" p_showshipmentinfo="${true}" p_shipmenteditable="${true}" p_totallabel="${Resource.msg('cart.ordertotal','checkout',null)}"/>
+		<iselse>
+			<isordertotals p_lineitemctnr="${pdict.Basket}" p_showshipmentinfo="${false}" p_shipmenteditable="${false}" p_totallabel="${Resource.msg('cart.estimatedtotal','checkout',null)}"/>
+		</isif>
+	</div><!-- END: checkoutordertotals -->
+</div>	<!-- END : summarySurroundTop  -->	
+		<iscomment><!-- TODO: MattS Implement this image into a css background style  --></iscomment>
+		
+
+	<iscomment>render single shipment boxes</iscomment>
+	
+	
+	<isif condition="${!empty(checkoutstep) && (checkoutstep > 3)}">
+		<isinclude template="tablet/checkout/shipping/minishipments"/>
+	</isif>
+
+	<iscomment>render billing information: billing address and payment instruments</iscomment>
+	<isif condition="${!empty(checkoutstep) && (checkoutstep > 4)}">
+		<isinclude template="tablet/checkout/billing/minibillinginfo"/>
+	</isif>
+	<iscomment>nadeem : moved the content asset and changed the content as per VD </iscomment>
+	 <iscomment><iscontentasset aid="cs-contact-number"/></iscomment>
+	
+	</div>
+</div>
+<isset name="displayInCheckout" value="${false}" scope="pdict"/>
+
+	<isinclude template="tablet/checkout/trimAddressSummary"/>
+
+
+</isif>

@@ -1,0 +1,36 @@
+<isscript>
+	var instanceType = dw.system.System.getInstanceType();
+	var production = dw.system.System.PRODUCTION_SYSTEM;
+	var staging = dw.system.System.STAGING_SYSTEM;
+</isscript>
+
+<isif condition="${instanceType != production}">
+	<div id="build_information" style="display : none; position: absolute; top:15px; left:170px; z-index: 999; background-color:#FFFFCC; padding:5px; border:1px solid #000000;">
+		<div class="close" style="width: 100%; text-align:right;"><a href="${'#'}" style="color: blue;" onclick="jQuery('${'#'}build_information').hide()">Close</a></div>
+		<table width="100%">
+			<tbody>
+				<tr>
+					<td style="width: 200px;"  nowrap="nowrap">Build Date:</td>
+					<td width="100%">@BUILD_DATE@</td>
+				</tr>
+				<tr>
+					<td style="width: 200px;"  nowrap="nowrap">Built By:</td>
+					<td width="100%">@BUILT_BY@</td>
+				</tr>
+				<tr>
+					<td style="width: 200px;"  nowrap="nowrap">Deployment Project:</td>
+					<td width="100%">@DEPLOYMENT_PROJECT@</td>
+				</tr>
+				<tr>
+					<td style="width: 200px;"  nowrap="nowrap">Deployment Version:</td>
+					<td width="100%">@DEPLOYMENT_VERSION@</td>
+				</tr>
+				<tr>
+					<td style="width: 200px;"  nowrap="nowrap">Revision:</td>
+					<td width="100%">@REVISION@</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</isif>	
+

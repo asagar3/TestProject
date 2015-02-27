@@ -1,0 +1,272 @@
+/* CSS for jQuery Orbit Plugin 1.2.3
+ * www.ZURB.com/playground
+ * Copyright 2010, ZURB
+ * Free to use under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ 
+/* CONTAINER
+   ================================================== */
+div.orbit-betawrapper {
+    padding-bottom:0px;
+    width: 100%;
+    height: auto;
+    position: relative;
+}
+div.orbit {
+    width: 954px;
+   height: 100%;
+    position: relative;
+    overflow: hidden
+}
+.orbit>div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  
+	
+}
+/* Note: If your slider only uses content or anchors, you're going to want to put the width and height declarations on the ".orbit>div" and "div.orbit>a" tags in addition to just the .orbit-wrapper */
+
+/* DIRECTIONAL NAV
+   ================================================== */
+div.slider-nav {
+    display: block;
+}
+div.slider-nav span {
+    width: 22px;
+    height: 25px;
+    text-indent: 0px;
+    position: absolute;
+    z-index: 1000;
+    top: 50%;
+    cursor: pointer;
+}
+div.slider-nav span.sn_right {
+    background:transparent;
+    width:80px;
+    height:38px;
+    padding-top:12px;
+    right: 0;
+    color:#fff;
+    transition: background .50s ease-out;
+    -moz-transition: background .50s ease-out;
+    -webkit-transition: background .50s ease-out;
+}
+div.slider-nav span.sn_right:hover {
+    background:#000;
+    opacity:0.5;
+    filter:alpha(opacity=50);
+	
+}
+div.slider-nav span.sn_right span.arrowR {
+    background: url("/on/demandware.static/Sites-Site/Sites/en_FR/v1392773368143/MCFPBbeta/carousel-controls.png") -40px -239px no-repeat;
+    width:22px;	
+    height:29px;
+    right: 0;
+    position:relative;
+    top:0;
+    display:block;
+    float:right;
+}
+div.slider-nav span.sn_left {
+    background:transparent;
+    width:80px;
+    height:38px;
+    padding-top:12px;
+    color:#fff;
+    transition: background .50s ease-out;
+    -moz-transition: background .50s ease-out;
+    -webkit-transition: background .50s ease-out;
+}
+div.slider-nav span.sn_left:hover {
+    background:#000;
+    opacity:0.5;
+    filter:alpha(opacity=50);
+	
+}
+div.slider-nav span.sn_left span.arrowL {
+    background: url("/on/demandware.static/Sites-Site/Sites/en_FR/v1392773368143/MCFPBbeta/carousel-controls.png") 8px -239px no-repeat;
+    width:22px;
+    height:25px;
+    left: 0;
+    position:relative;	
+    top:0;
+    display:block;
+    float:left;
+}
+div.slider-nav span.sn_left:hover span.arrowL {
+    background-position:0 0;
+	  background: url("/on/demandware.static/Sites-Site/Sites/en_FR/v1392773368143/MCFPBbeta/carousel-controls.png") 8px -299px no-repeat;
+}
+div.slider-nav span.sn_right:hover span.arrowR {
+    background-position:0 0;
+	background: url("/on/demandware.static/Sites-Site/Sites/en_FR/v1392773368143/MCFPBbeta/carousel-controls.png") -40px -299px no-repeat;
+}
+div.slider-nav span.sn_left span.num {
+    float:left;
+    position:relative;
+    top:0;
+    opacity:0.0;
+    filter:alpha(opacity=0);
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-out;
+    -webkit-transition: all .25s ease-out;
+}
+div.slider-nav span.sn_left:hover span.num {
+    opacity:0.8;
+    filter:alpha(opacity=80);
+}
+div.slider-nav span.sn_right span.num {
+    float:right;
+    position:relative;
+    top:0;
+    opacity:0.0;
+    filter:alpha(opacity=0);
+    transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-out;
+    -webkit-transition: all .25s ease-out;
+}
+div.slider-nav span.sn_right:hover span.num {
+    opacity:0.8;
+    filter:alpha(opacity=80);
+}
+.num {
+    color:#fff;
+    padding:0 10px;
+    width:50px;
+    height:25px;
+    line-height:25px;
+    display:block;
+    font-family: Georgia,"Times New Roman",sans-serif;
+    font-style:italic;
+    letter-spacing:2px;
+    font-size:12px;
+}
+/* BULLET NAV
+   ================================================== */
+ #vcsContent .orbit-bullets {
+    position: absolute;
+    z-index: 1500;
+    list-style: none;
+    top: 300px;
+    left: 50%;
+    margin-left: -31px;
+    padding: 0;
+}
+#vcsContent .orbit-bullets li {
+    margin:0;
+    padding:0;
+    float: left;
+    cursor: pointer;
+    color: #999;
+    text-indent: -9999px;
+    background: url("https://images-na.ssl-images-amazon.com/images/G/02/00/00/09/56/26/91/956269142.png") left top no-repeat;
+    width: 21px;
+    height: 21px;
+    overflow: hidden;
+}
+#vcsContent .orbit-bullets li.active {
+    color: #222;
+    background-position: left -42px;
+}
+#vcsContent .orbit-bullets li.has-thumb {
+    background: none;
+    width: 100px;
+    height: 75px;
+}
+#vcsContent .orbit-bullets li.active.has-thumb {
+    background-position: 0 0;
+    border-top: 2px solid #000;
+}
+.content {
+    position:relative;
+}
+.content img{
+ width:100%;
+ display:block;
+
+}
+.carouseltext {
+	position:absolute;
+	left:3%;
+	top:27%;
+
+}
+.carouseltext p{
+	padding:0px;
+	margin:13px 0 0 0!important;
+	color:#000!important;
+	font-size:100%;
+	}
+.carouseltext a{	
+	color:#000!important;
+	text-decoration:none;
+	}	
+	
+.carouseltext-center {
+	position:absolute;
+	left:31%;
+width:37%;
+	top:50%;
+	
+}
+
+.carouseltext-center p{
+	padding:0px;
+	margin:10px 0 18px 0!important;
+	text-align:center;
+	color:#000!important;
+	font-size: 1.4vw;
+	}
+.carouseltext-center a{ background-color:#000; margin:0 0 0 0!important; padding:8px 12px; color:#fff!important; text-decoration:none;}	
+
+.hp_carousel {
+    display:block;
+    width:954px;
+    height:480px;
+    position:relative;
+}
+
+.carouselLight, .carouselLight h1, .carouselLight p {
+    color:#fff;
+}
+.carouselDark, .carouselDark h1, .carouselDark p {
+    color:#4b4b4b;
+	
+}
+.hp_carouselcopy {
+    position:absolute;
+}
+.ct_textlink {
+    display:inline-block;
+    margin:0;
+    padding:0;
+    font-size:1em;
+    line-height:1em;
+}
+.carouselLight .ct_textlink {
+    background:#fff;
+    color:#000;
+}
+.carouselDark .ct_textlink {
+    background:#000;
+    color:#fff;
+}
+.ct_link {
+    display:block;
+    margin:0;
+    padding:1em 1.2em;
+}
+
+
+
+.ct1 {
+	POSITION: absolute; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; PADDING-TOP: 0px; TOP: 177px; LEFT: 35px
+}
+.ct2 {
+	POSITION: absolute; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; PADDING-TOP: 0px; TOP: 158px; LEFT: 35px
+}
+.ct3 {
+	POSITION: absolute; TEXT-ALIGN: center; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 318px; PADDING-RIGHT: 0px; PADDING-TOP: 0px; TOP: 333px; LEFT: 318px
+}

@@ -1,0 +1,8 @@
+<!--- TEMPLATENAME: test.isml --->
+
+<script type="text/javascript">
+	var loc = "${pdict.redirectURL}";
+	if (loc != ""){
+		window.location.href = loc;
+	}
+</script>

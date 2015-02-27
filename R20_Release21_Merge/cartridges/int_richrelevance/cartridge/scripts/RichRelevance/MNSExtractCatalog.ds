@@ -1,0 +1,180 @@
+/*
+*
+*	Demandware Rich Relevance Catalog Extract File
+*
+*   @output Message : String
+*   @output RemotePath : String
+*   @output RemoteFileName : String
+*   @output XmlFile : dw.io.File
+*
+*/
+
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.customer );
+importPackage( dw.io );
+importPackage( dw.net );
+importPackage( dw.object );
+importPackage( dw.campaign );
+importPackage( dw.web );
+importPackage( dw.value );
+importPackage( dw.object );
+
+	
+	var PRODUCT = "PRODUCT";
+	var PRODUCT_GENEREID = "GENEREID";
+	var PRODUCTNAME = "PRODUCTNAME";
+	
+	var LISTPRICE = "LISTPRICE";
+	var PRODUCTURL = "PRODUCTURL";
+	var IMAGEURL = "IMAGEURL";
+	
+	var BRAND = "BRAND";
+	var INSTOCK = "INSTOCK";
+	var CATEGORYMAP = "CATEGORYMAP";
+	var GENRE = "GENRE";
+	var CATEGORIES = "CATEGORIES";
+	var CATEGORY = "CATEGORY";
+	var CATEGORYNAME =  "CATEGORYNAME";
+
+	//Common Attributes
+	var ID = "ID";
+	var NAME="NAME";
+
+function exportCategory(cat : Category, exportXMLStreamWriter : XMLStreamWriter){
+	
+	exportXMLStreamWriter.writeStartElement(CATEGORY);
+	exportXMLStreamWriter.writeAttribute(ID, cat.ID);
+	var categoryName = cat.displayName.replace('&', '');
+	var catName: String = cat.ID + "|C|" + categoryName;
+	exportXMLStreamWriter.writeAttribute(NAME, catName);
+	
+	if(!cat.onlineSubCategories.empty)	{
+		exportXMLStreamWriter.writeStartElement(CATEGORIES);
+		for each(var c in cat.onlineSubCategories) {
+			exportCategory(c, exportXMLStreamWriter);
+		} 
+		exportXMLStreamWriter.writeEndElement();
+	}
+	exportXMLStreamWriter.writeEndElement();	
+}
+
+
+
+function exportProduct(product : Product, exportXMLStreamWriter : XMLStreamWriter) {
+
+	exportXMLStreamWriter.writeStartElement(PRODUCTNAME);
+	exportXMLStreamWriter.writeCharacters(product.ID + '|P|' + product.name);
+	exportXMLStreamWriter.writeEndElement();	
+	
+	exportXMLStreamWriter.writeStartElement(LISTPRICE);
+	exportXMLStreamWriter.writeCharacters(product.priceModel.getPrice());
+	exportXMLStreamWriter.writeEndElement();	
+	
+	exportXMLStreamWriter.writeStartElement(PRODUCTURL);
+	exportXMLStreamWriter.writeCharacters("/Product-Show?pid=" + product.ID);
+	exportXMLStreamWriter.writeEndElement();
+	
+	exportXMLStreamWriter.writeStartElement(IMAGEURL);
+	exportXMLStreamWriter.writeCharacters("image.jpg");
+	exportXMLStreamWriter.writeEndElement();
+	
+		
+	exportXMLStreamWriter.writeStartElement(BRAND);
+	exportXMLStreamWriter.writeCharacters(product.custom.productBrand);
+	exportXMLStreamWriter.writeEndElement();
+	
+	exportXMLStreamWriter.writeStartElement(INSTOCK);
+	var inStock : Number = 0;
+	if(!product.getVariants().isEmpty()){
+		var variants : Iterator = product.variationModel.variants.iterator();
+		var v : Product;
+		while(variants.hasNext())
+		{
+			
+			if(checkStock(variants.next(), "variant", product)){
+			inStock = 1;
+			break;
+			}
+			
+		}
+	}
+	else{
+		if(checkStock(product, "not variant", product)){
+				inStock = 1;
+		}
+	}
+	exportXMLStreamWriter.writeCharacters(inStock);
+	exportXMLStreamWriter.writeEndElement();
+	
+	/*END PRODUCT CHILDREN*/
+
+	/*START CATEGORIES UNDER PRODUCT NODE*/
+	exportXMLStreamWriter.writeStartElement(CATEGORIES);
+	var cat : Category = null;
+	for each(cat in product.onlineCategories)	{
+		exportXMLStreamWriter.writeStartElement(CATEGORY);
+		exportXMLStreamWriter.writeAttribute(ID, cat.ID);
+		exportXMLStreamWriter.writeStartElement(CATEGORYNAME);
+		exportXMLStreamWriter.writeCharacters(cat.displayName.replace('&', ''));
+		exportXMLStreamWriter.writeEndElement();
+		exportXMLStreamWriter.writeEndElement();
+	}
+	exportXMLStreamWriter.writeEndElement();
+	
+
+}
+
+function writeProducts(prods : SeekableIterator, exportXMLStreamWriter : XMLStreamWriter){
+	
+	//for each product write the product nodes using exportProduct
+	while(prods.hasNext()){
+		
+		var product : Product = prods.next();
+		
+		
+		if(product.online && product.searchable && product.categorized && !product.variant && !product.productSet)	{
+			exportXMLStreamWriter.writeStartElement(PRODUCT);
+			exportXMLStreamWriter.writeAttribute(ID, product.ID);
+			exportProduct(product, exportXMLStreamWriter); //writes the product child nodes.
+		    exportXMLStreamWriter.writeEndElement();
+		}
+	}
+	 exportXMLStreamWriter.writeEndElement();
+	
+}	
+
+function writeCategories(siteCatalog: Catalog, exportXMLStreamWriter : XMLStreamWriter){
+	
+	exportXMLStreamWriter.writeStartElement(CATEGORYMAP);
+	exportXMLStreamWriter.writeStartElement(GENRE);
+	exportXMLStreamWriter.writeStartElement(CATEGORIES);
+	
+	for each(var c in siteCatalog.root.onlineSubCategories){
+		
+		exportCategory(c, exportXMLStreamWriter); //writes category nodes
+	} 
+	
+	exportXMLStreamWriter.writeEndElement();
+	exportXMLStreamWriter.writeEndElement();
+
+	exportXMLStreamWriter.writeEndElement();
+}
+
+function checkStock(product: Product, type: String, productP: Product):boolean {
+	
+	if(!empty(product)){
+		if(product.availabilityModel.getInventoryRecord()!=null && product.availabilityModel.getInventoryRecord().getStockLevel()!=null){		
+			var stockLevelValue: Number = product.availabilityModel.getInventoryRecord().getATS().getValue();
+			if (stockLevelValue > dw.system.Site.current.preferences.custom.rrStockThreshold){
+				return true;
+			}
+		}
+	}else{		
+		Logger.error("ARB MNSExtractCatalog.ds product is null="+product+" type="+type);
+		Logger.error("Site="+Site.getCurrent().getID()+ " parent="+productP.ID);
+	}
+	return false;
+	
+}

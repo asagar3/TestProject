@@ -1,0 +1,2 @@
+
+<isredirect location="${URLUtils.https('COSummary-PlaceOrder')}" permanent="false" />

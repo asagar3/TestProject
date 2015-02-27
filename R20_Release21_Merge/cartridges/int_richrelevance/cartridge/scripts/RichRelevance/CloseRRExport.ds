@@ -1,0 +1,30 @@
+/**
+* @input XmlStreamWriter : dw.io.XMLStreamWriter;
+* @output Message : String
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+
+    	try{
+		
+		var xsw:XMLStreamWriter=pdict.XmlStreamWriter;
+
+		xsw.writeEndDocument();
+
+		
+		xsw.flush();
+		xsw.close();
+		
+    }
+    catch (e){
+    	
+    	Logger.error("RichRelevance CloseRRExport.ds: Error while closing XMLStream for Product Feed:" +  e.message);
+    	pdict.Message = "RichRelevance CloseRRExport.ds: Error while closing XMLStream for Product Feed:"+ e.message; 
+    	return PIPELET_ERROR;
+    }
+
+    return PIPELET_NEXT;
+}

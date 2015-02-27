@@ -1,0 +1,35 @@
+/**
+*
+*   @input productDetails : Object
+*   @input catObject: Object
+*   @input item: Object
+*   @output productDetails : Object
+
+*/
+importPackage( dw.system );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var prodJSON : Object = args.catObject;
+	prodJSON.quantity = args.item.Quantity;
+	prodJSON.productId =args.item.ProductUPC;
+	//Praveen: adding the master-prodID of the variant product
+	var prod : dw.catalog.Product = dw.catalog.ProductMgr.getProduct(args.item.ProductUPC);
+	if(prod.isVariant()){
+		var master : dw.catalog.Product = prod.variationModel.getMaster();
+		prodJSON.masterProdID = master.ID;	
+		
+	}
+	//var vbObject : Object = args.vbObject;
+	var productDetails : Object = args.productDetails;
+    if(empty(productDetails)){
+    	var productDetails : Object = new Object();
+    }
+    if(empty(productDetails.products)){
+   		productDetails.products = new Array();
+    }
+  	productDetails.productCount = productDetails.products.length+1;
+   	productDetails.products.push(prodJSON);
+	args.productDetails = productDetails;
+    return PIPELET_NEXT;
+}

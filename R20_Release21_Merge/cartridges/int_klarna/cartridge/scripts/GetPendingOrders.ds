@@ -1,0 +1,49 @@
+/**
+ * This script searches through all orders that were paid using a Klarna payment instrument
+ * and retrieves the ones that have a "PENDING" Klarna status.
+ *
+ * @output PendingOrders : Array
+ * @output KlarnaError : String
+ */
+importPackage( dw.system );
+importPackage( dw.object );
+importPackage( dw.util );
+importPackage( dw.order );
+
+//var Logger : Log = dw.system.Logger.getLogger("klarna", "getpendingorders");
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var pending : Array = []
+	try {
+		
+		//var it : SeekableIterator = SystemObjectMgr.getAllSystemObjects("Order");
+		//Praveen: Changing the way to get the pending orders, same as CS Conversion Report
+		/*var query : String = "exportStatus =" + Order.EXPORT_STATUS_NOTEXPORTED + "d";
+		query += " and confirmationStatus =0d";
+		//query += " and status !=" + Order.ORDER_STATUS_OPEN+ "d";
+		query += " and custom.orderStatus == 'REVIEW'"+"d";*/
+	
+		var newQuery : String = "exportStatus = {0} AND custom.orderStatus = {1}";
+		var it : SeekableIterator = OrderMgr.queryOrders(newQuery, "orderNo asc", Order.EXPORT_STATUS_NOTEXPORTED,"REVIEW");
+	
+		
+		for each(var order : Order in it) { 
+			var payments : SeekableIterator = order.getPaymentInstruments();
+			for each (var pInstrument : PaymentInstrument in payments){
+				if (pInstrument.paymentMethod.equals(dw.order.PaymentInstrument.METHOD_BML)) {
+					pending.push(order);
+					break;
+				}
+			}
+		}
+		args.PendingOrders = pending;
+	} catch(e) {
+		var ex : Error = e;
+		args.KlarnaError = ex.toString();
+		Logger.error(args.KlarnaError);
+		return PIPELET_ERROR;
+    }
+
+	return PIPELET_NEXT;
+}

@@ -1,0 +1,122 @@
+/**
+* Helper WorldPay Server XML Responses.
+* 
+*/
+importPackage( dw.system );
+
+function ResponseData(responseXML : String)
+{
+	this.status = false;
+	this.error = false;
+	this.report=false;
+	this.erorrMessage = "";
+	this.errorCode = "";
+	
+	try {
+		//Logger.error("@@@@@@Response recieved@@@@@@ "+responseXML);
+		//responseXML =responseXML.replace(/[&]/g, "&amp;");//replacing '&' with html chars 
+		this.content = new XML(responseXML);
+	} catch ( ex ){
+		this.status = false;
+		Logger.error("XML input was not proper:" + ex);
+		Logger.error("XML input was not proper:" + responseXML);
+		return;
+	}
+	var c = this.content;
+	try {
+		if (this.content.localName() == "paymentService"){
+			var temp = this.content;
+			this.merchantCode = temp.@merchantCode; 
+			//var tempError = temp.reply.orderStatus.valueOf();
+			
+			if (('reply' in temp) && ('error' in temp.reply.valueOf())){
+				this.error = true;
+				temp = temp.reply.valueOf();
+				this.errorMessage = temp.error;
+				this.errorCode =temp.error.@code;
+				Logger.getLogger("worldpay").error("Payment service error response, code {0} : {1} ",
+					temp.error.@code, temp.error);		
+			}
+			
+			if (('reply' in temp) && ('orderStatus' in temp['reply'])){
+				temp = temp.reply.orderStatus.valueOf();
+				if('error' in temp){
+					this.error=true;
+					this.errorMessage = temp.error;
+					this.errorCode =temp.error.@code;
+					Logger.getLogger("worldpay").error("Payment service error response, code {0} : {1} ",
+					temp.error.@code, temp.error);	
+				}
+				this.orderCode = temp.@orderCode;
+				if ('reference' in temp) {
+					temp = temp.reference.valueOf();
+					this.referenceID = temp.@id;
+					this.reference = temp;
+					this.status = true;
+				}
+				if ('payment' in temp) {
+					this.lastEvent = temp.payment.lastEvent;
+					this.riskScore = temp.payment.riskScore;
+					this.status = true;
+				}
+				
+			}
+			
+			//Code to parse order notification xml
+			if (('notify' in temp) && !('report' in temp['notify'])){
+				temp = temp.notify.orderStatusEvent.valueOf();
+				this.orderNo = temp.@orderCode;
+				if ('payment' in temp) {
+					this.lastEvent = temp.payment.lastEvent;
+					this.riskScore = temp.payment.riskScore;
+				}
+				temp = temp.journal.valueOf();
+				this.decision = temp.@journalType;
+				this.status = true;
+				
+			}else if(('report' in temp['notify'])){
+				
+				this.report = true;
+				
+			}
+			if ('request3DSecure' in temp.requestInfo) {
+					trace("requestInfo");
+					this.issuerURL = temp.requestInfo.request3DSecure
+						.issuerURL.valueOf().toString();
+					this.paRequest = temp.requestInfo.request3DSecure
+						.paRequest.toString();
+					this.echoData = temp.echoData.toString();
+					this.status = true;
+			}
+		} 
+	} catch ( ex ){
+		this.status = false;
+		this.error = true;
+		Logger.getLogger("worldpay").error("Invalid XML response");
+		return;
+	}
+		
+}
+
+ResponseData.prototype.setStatus = function (status : boolean) {
+	this.status = status;
+}
+ResponseData.prototype.isReport = function (): Boolean {
+	return this.report;
+}
+
+ResponseData.prototype.getStatus = function() : Boolean {
+	return this.status;
+}
+
+ResponseData.prototype.toString = function() : String {
+	return this.content.toString();
+}
+
+ResponseData.prototype.isError = function() : Boolean {
+	return this.error;
+}
+
+ResponseData.prototype.getErrorMessage = function() : String {
+	return this.errorMessage;
+}

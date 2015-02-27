@@ -1,0 +1,234 @@
+#footer{height:auto;}
+.upperFooter{background:#fff url(../images/upper-foot.gif) repeat-x 0 100%; padding:10px;}
+.upperFooter .cl{clear:both; height:1px;}
+.upperFooter .mnsFLogo, .upperFooter .newsLetter{float:left;}
+.upperFooter .mnsFLogo{margin:0 22px 0 0;}
+.upperFooter img{vertical-align:middle;}
+.upperFooter .socialIcons{float:right; font:bold 12px arial; padding:10px 0 0;}
+.upperFooter .socialIcons img{margin:0 0 0 5px;}
+.upperFooter .newsLetter h3{display:inline; background:none; margin:0 10px 0 0; padding:0; font:normal 17px/22px arial;}
+.upperFooter .newsLetter .inp{border:1px solid #e5e5e5!important; background:#fff; padding:2px!important; float:left; margin:0 5px 0 0; width:200px;}
+.upperFooter .newsLetter .btn{background:#000; color:#fff; margin:0; font:bold 12px arial; padding:3px 12px!important; height:auto; float:left;}
+#footer .footer_links_wrapper{margin:0 0 11px;}
+#countryShadow{background:#fff; width:100%; position:absolute; left:0; top:0; z-index:10000;}
+#countryOverlay{width:430px; background:url(../images/over-b-shadow.png) no-repeat 0 100%; padding:0 0 9px; left:50%; top:130px; position:absolute; margin-left:-200px; z-index:100000;}
+#countryOverlay .rShadow{background:#fff url(../images/over-r-shadow.png) repeat-y 100% 0; border-bottom:1px solid #e2e4e5; padding:0 7px 0 0;}
+#countryOverlay .close{width:24px; height:24px; background-position:0 -2561px; position:absolute; right:13px; top:6px; text-indent:-999em; overflow:hidden; z-index:1001; cursor:pointer;}
+#countryOverlay h3{background-position:0 -2490px; background-repeat:repeat-x; font:normal 20px/63px arial; padding:0 0 0 20px; border:1px solid #e2e4e5; border-width:0 1px;}
+#countryOverlay ul{border:1px solid #e2e4e5; width:190px; padding:20px 20px 1px; margin:-6px 0 0; font:normal 18px arial; color:#5b5b5b; background:#fff;}
+#countryOverlay ul.firstFlags{border-width:1px 0 0 1px; float:left; padding-right:0;}
+#countryOverlay ul.lastFlags{border-width:1px 1px 0 0; padding-left:0; float:right; width:191px;}
+#countryOverlay ul li{padding:0 0 14px; overflow:hidden;}
+#countryOverlay ul li a{display:block; margin:0 0 6px; padding:0 0 0 30px; line-height:22px; color:#5b5b5b;}
+#countryOverlay ul li a.countryAT{background-position:0 -510px;}
+#countryOverlay ul li a.countryBE{background-position:0 -787px;}
+#countryOverlay ul li a.countryDE{background-position:0 -557px;}
+#countryOverlay ul li a.countryES{background-position:0 -601px;}
+#countryOverlay ul li a.countryFR{background-position:0 -417px;}
+#countryOverlay ul li a.countryIE{background-position:0 -695px;}
+#countryOverlay ul li a.countryNL{background-position:0 -648px;}
+#countryOverlay ul li a.countryLU{background-position:0 -742px;}
+#countryOverlay ul li a.countryUK{background-position:0 -463px;}
+#countryOverlay ul li.cl{width:auto; padding:0; float:none; height:1px;}
+.checkout .genericinputbox input, .editaddress .genericinputbox input{width:270px;}
+.checkout .formfield{float:left; width:100%; height:auto}
+.dobError{margin:0 0 0 200px;}
+.ui-dialog .editaddress .formfield{margin:0 0 12px; height:auto;}
+.checkout .requiredmessagewrapper{text-align:right;}
+.checkout .addressoptions div.label{background:none; width:180px; padding-right:20px;}
+.checkout .textbox{width:325px; height:70px;}
+.checkout .label, .ui-dialog .editaddress .label{width:190px; padding:0 20px 0 0; margin:0; float:left; font-weight:500;}
+.checkout .label span.cLimit{color:#888; font:italic 12px arial; display:block;}
+.checkout .addressoptions .fieldSet{padding:0 0 0 200px;float: left;	position: relative;}
+.addressoptions .fieldSet .formfieldtooltipAdjust{
+	float:none; 
+	left:auto; 
+	top:auto; 
+	position: absolute;
+    right: -24px;
+    top: 0;
+}
+.checkout .addressoptions div.label, .checkout .addressoptions{margin:0;}
+.checkout .paymentmethods input, .checkout .gender input{background:#000; font-size:12px; border:0!important; z-index:1;}
+.checkout .actions{text-align:left; margin:10px 0 0;}
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+.checkout .actions{margin:30px 0 0}
+}
+
+.checkout .actions span{margin:0 20px 0 0;}
+.checkout .mnsNLetter{width:280px;}
+.checkout .mnsNLetter input{float:left;}
+.checkout .mnsNLetter p{margin:0 0 0 20px; font:12px arial;}
+.checkout .mnsNLetter p a{color:#034181; text-decoration:underline;}
+span.radio label{
+	font-size: 11px;
+	color: #000;
+	font-weight: normal;
+}
+.addressoptions .checkbox input{display: none;}
+.pt_checkout .lowerFooter .cards, .pt_checkout_wrapper .lowerFooter .cards{float:none;}
+.pt_checkout #footer{width:960px;}
+.pt_checkout #rightcolumn{float:right;}
+#header_checkout .progressbar{float:right;}
+.checkout{width:610px; position:relative;}
+
+.checkout #addressform .collapsibleArea #shippingmethodform {margin-left:0px;}
+.checkout .collapsibleArea .giftmessage{margin:0; padding:0 0 12px;}
+.homeDelivery .delivery_instructions{padding:0 20px;}
+
+.pt_storefront #content{max-width:none; float:none;}
+.pt_account #main #content{width:auto; max-width:none; float:none;}
+.checkoutlogin .logincustomers{float:right;}
+.pt_checkout_wrapper #footer{width:auto;}
+.footer_links_header_1{padding-left:20px;}
+.edit_address_form .contactNum input, .edit_address_form .alternatecontactnumber input{width:270px !important;}
+.edit_address_form .postcode_fr input{width:98px !important;}
+#AddressForm{padding:0 10px;}
+
+.ui-dialog #AddressForm .button_wrapper{padding-right:0;}
+.editaddress .requiredcaption{text-align:right; margin:25px 0 12px; font:11px arial; color:#666;}
+.editaddress .requiredcaption .requiredindicator{margin:0;}
+
+#paymentmethods{padding:25px 0 0;}
+.checkout .paymentmethods{float:right; width:405px; margin:0;}
+.checkout .paymentmethods ul li{margin:0 0 12px;}
+.checkout .paymentmethods ul li input{margin:0;}
+.checkout .paymentmethods ul li label{margin:0; display:inline-block; font:500 14px/23px arial; padding:0 0 0 100px; color:#333;}
+
+.checkout .paymentmethods ul li.is-CREDIT_CARD label{background:url(../images/pay-by-cards.jpg) no-repeat 10px 50%;}
+
+.checkout .paymentmethods ul li.is-IDEAL-SSL label{background:url(../images/i-deal.gif) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-SOFORT-SSL_en_DE label{background:url(../images/sofort_en.png) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-SOFORT-SSL_de_DE label{background:url(../images/sofort_de.png) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-SOFORT-SSL_de_AT label{background:url(../images/sofort_de.png) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-SOFORT-SSL_en_AT label{background:url(../images/sofort_en.png) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-BML label{background:url(../images/klarna.png) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-BML label.disabledText{opacity:.3; filter: alpha(opacity = 30);}
+.checkout .paymentmethods ul li.is-BML .formfieldtooltip{position:absolute; margin-top:3px;}
+.checkout .paymentmethods ul li.is-BML .formfieldtooltip .tooltip_icon{margin-top:0;}
+
+.checkout .paymentmethods ul li.is-CREDIT_CARD_MISTERCASH label{background:url(../images/mr-cash.jpg) no-repeat 10px 50%;}
+
+div.homepage .sectHolder{min-height:200px;}
+
+h5.grey_block_header_checkout {background:none; padding:2px 0 2px 198px; margin:0 0 18px;}
+.newPaymentPage .newGrey{background:#f3f3f3; padding:10px;}
+
+.newPaymentPage .checkoutbilling{padding:0;}
+.newPaymentPage .mandatoryMsg{margin:0 0 12px; text-align:right;}
+.newPaymentPage .billingAddressFields .zip{margin:0 0 32px;}
+.newPaymentPage .emailsignup .label{width:190px;}
+.checkout .selectcreditcard .selectcreditcardmessage{font-size:inherit;}
+.newPaymentPage a{color:#08427d; text-decoration:underline;}
+.newPaymentPage .cAsset .value{max-width:200px; float:left;}
+.newPaymentPage .cAsset, .newPaymentPage .klarna, .newPaymentPage .klarna label{font-size:14px;}
+.newPaymentPage .klarna{padding:0 0 15px;}
+.newPaymentPage .klarna .name div.value,
+.newPaymentPage .klarna .line1,
+.newPaymentPage .klarna .line2,
+.newPaymentPage .klarna .city,
+.newPaymentPage .klarna .state,
+.newPaymentPage .klarna .zip,
+.newPaymentPage .klarna .country
+{font-weight:bold;font-style: italic;}
+.newPaymentPage .klarna div.value{
+	
+    
+}
+.newPaymentPage .klarna div.value .line1 .state{
+	background-color: #adadad;
+	padding-left: 3px;
+	padding-right: 5px;
+}
+.newPaymentPage .klarna div.value .line1 .state + .state{
+	padding-left: 5px;
+}
+.newPaymentPage .klarna div.value .line1 .state + .state + .state{
+	padding: 0;	
+}
+.newPaymentPage .klarna div.value .line2, .newPaymentPage .klarna div.value .city, .newPaymentPage .klarna div.value .country, .newPaymentPage .klarna div.value .state, .newPaymentPage .klarna div.value .zip{
+	padding-left: 3px;
+}
+.newPaymentPage .klarna .formfield.gender .value{
+	font-style: normal;
+	font-weight: normal;
+	color: #666666;
+}
+.newPaymentPage .klarna .day .genericinputbox input{width:25px;}
+.newPaymentPage .klarna .month .genericinputbox input{width:30px;}
+.newPaymentPage .klarna .year .genericinputbox input{width:40px;}
+.newPaymentPage .klarna .datedivider{float:left; font-size:14px; font-weight:normal; }
+.newPaymentPage .billingAddressFields .klarna .country{margin:0;}
+.newPaymentPage .value p{font:14px arial; margin:0 0 10px;}
+.newPaymentPage .email .textinput.disabled_textfield{background:none; font-style:italic;}
+.newPaymentPage .saveCard span{font-size:14px; margin:0 10px 0 0;}
+.newPaymentPage .name .formfieldtooltip .tooltip_icon{margin-top:0;}
+.newPaymentPage .billingAddressFields select.country{margin:0;}
+.newPaymentPage .cAsset .label{text-align:right;}
+.checkout .addresslist{margin:0 0 12px 10px;}
+.klarnaCondition .head{font:14px arial;}
+.klarnaCondition .value{max-width:342px;}
+.klarnaCondition .value input{float:left; z-index:1; border:0 !important; margin-top:0px; background:#000;}
+.klarnaCondition .value div.kContDiv{clear:right; font-size:11px; padding:0 0 0 20px; font-size:11px;}
+.klarnaCondition .value div.kContDiv p{font-size:11px;}
+.accounteditaddress .defaultselection{margin:0 0 19px;}
+.accountaddress .miniaddress{margin:0 0 21px;}
+.klarnaText{padding:0 0 0 20px;}
+
+.formfield.orderno{width:270px;}
+.formfield.orderemail{width:343px;}
+.account_wrapper .checkorder form .label,
+.account_wrapper .checkorder form .email .label{font-size:1.3em; width:auto !important;}
+
+.orderpayment table.orderpaymentdetailstable td.orderbilling, .orderpaymentBrief table.orderpaymentdetailstable td.orderbilling{width:39%;}
+input[name=klarnagender] + .errorIcon{
+	position: relative;
+	top: -5px;
+}
+.gender .value{
+	width: 175px;
+}
+#birthday_year + .errorIcon{
+	position: relative;
+	top: -5px;
+} 
+.checkout .shippingmethods{width:auto; float:none;}
+.checkout .shippingmethods legend{float:left; width:180px; text-align:right; padding:3px 20px 0 0; font-size:13px;}
+.checkout .shippingmethods .shippngRight{float:right; width:360px;}
+.checkout .shippingmethods .contentasset{float:right; width:360px;}
+.shippingmethods .returns_info{padding:0 0 15px 70px;}
+.cartfooter .cartOptions h3, .cartfooter .cartTotal h3{color:#000; font:normal 16px/20px arial; padding:0 0 15px; margin:0 0 20px; border-bottom:1px dotted #a0a0a0; background:none;}
+.cartfooter .cartTotal h3{font:bold 14px/20px arial; text-align:right;}
+.checkout .collapsibleArea .mMessage{font-size:1.2em;}
+/*************** Davinder Kumar :: Bottom Summary ::***************/
+.bSummary{margin:0 0 20px; clear:both;}
+.bSummary .checkoutminicart *{font-size:13px;}
+.bSummary .checkoutordertotals *{font-size:12px;}
+.bSummary .checkoutsummaryheader{padding:3px 0 4px 10px;}
+.bSummary .checkoutordertotals{background:#eee;padding:10px; border-top:1px solid #E4E4E4;}
+.bSummary .checkoutminicart{max-height:220px; overflow-y:auto;background:none;}
+.bSummary .checkoutminicart table th, .bSummary .checkoutminicart table td{color:#5b5b5b; padding:10px;}
+.bSummary .checkoutminicart table th{background:none; font-weight:bold;}
+.bSummary .checkoutminicart table td{vertical-align:top; padding-bottom:30px;}
+.bSummary .checkoutminicart table td.bImage{text-align:center;}
+.bSummary .checkoutminicart table td.bImage img{height:70px; widht:auto;}
+.bSummary .checkoutminicart table td.bTitle{font-weight:bold; padding-right:30px;}
+.bSummary .bSLeft{width:310px; float:left;}
+.bSummary .bSRight{width:275px; float:right; text-align:right;}
+.bSummary .checkoutordertotals .ordertotals table.ordertotalstable{width:100%; border:0;}
+.bSummary .checkoutordertotals .ordertotals table.ordertotalstable tr{border:0;}
+.bSummary .ordertotals .value, .bSummary .checkoutordertotals .ordertotals .ordertotal .value,
+.bSummary .checkoutordertotals .ordertotals table.ordertotalstable .label{padding:0;}
+.bSummary .checkoutminisummary .checkoutordertotals .ordertotal{background:none; border:0;}
+.bSummary  .checkoutordertotals .ordertotals table.ordertotalstable .ordertotal .label,
+.bSummary .checkoutordertotals .ordertotals table.ordertotalstable .ordertotal .value{font:bold 15px arial !important; color:#000; }
+.bSummary .checkoutordertotals .ordertotals table.ordertotalstable .ordertotal td{padding:15px 0 0;}
+.bSummary .standard, .bSummary .standardExp, .bSummary .standardStore{padding:0 0 0 45px;}
+.bSummary .standard{background:url(../images/standard_cart_icon.png) no-repeat  0 center;}
+.bSummary .standardExp{background:url(../images/express_cart_icon.png) no-repeat  0 center;}
+.bSummary .standardStore{background:url(../images/store-collection.gif) no-repeat  0 center;}
+.bSummary .label{float:none; width:auto; dipaly:inline; padding:0;}
+.bSummary .checkoutminisummary span.value{color:#5b5b5b;}
+.bSummary table .bPrice{padding-left:30px;}
+.checkout .bSummary .discount{background:none;}
+.chkContent a{text-decoration:underline;}

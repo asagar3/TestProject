@@ -1,0 +1,17 @@
+<!--- TEMPLATENAME: error.isml --->
+<isdecorate template="application/MenuFrame">
+<iscontent type="text/html" charset="UTF-8">
+<isinclude template="inc/Modules">
+
+<isset name="TOP_URL"   value="${URLUtils.url('SiteNavigationBar-ShowMenuitemOverview', 'CurrentMenuItemId', 'orders')}" scope="PAGE">
+<isbreadcrumb name1="orders" url1="${TOP_URL}" name2="Klarna"/>
+
+<div class="klarna error">
+	<isif condition="${pdict.KlarnaError != null}">
+		<isprint value="${pdict.KlarnaError}" encoding="on"/>
+	<iselse>
+		No error message set
+	</isif>
+</div>
+
+</isdecorate>

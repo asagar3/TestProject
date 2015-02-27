@@ -1,0 +1,274 @@
+/**
+ * CalculateCart.ds
+ *
+ * This script implements a typical shopping cart calculation algorithm.
+ * The script is provided with the Demandware reference application. Some
+ * parts of the calculation script are specific to the reference application
+ * logic and might not be applicable to our customer's storefront applications.
+ * However, the shopping cart calculation script can be customized to meet
+ * specific needs and requirements.
+ *
+ * The script implements a complete recaculation of the shopping cart. This
+ * includes the following steps:
+ * - determine the prices of products contained in the cart
+ * - determine the shipping cost for the shipments of the cart
+ * - determine the tax rates of all line items of the cart
+ * - determine and apply all types of promotions
+ * - calculate the totals of shipments as well as the cart
+ *
+ * The script also handles gift certificate line items. In particular,
+ * gift certificates are:
+ * - not being taxed
+ * - are not count towards order-level promotions
+ * - are not count towards order-level shipping cost
+ *
+ * The script uses the shipping address associated with a shipment to determine 
+ * the tax jurisidiction. If no shipping address is available, the default tax 
+ * jurisdiction is used.
+ *
+ * Shipping cost for a shipment are calculated if a shipping method is assigned
+ * to the shipment. If no shipping method is assigned to a shipment, shipping
+ * is not calculated and set to N/A.
+ *
+ * @input  Order : dw.order.Order
+ */
+
+
+ importPackage( dw.system );
+ importPackage( dw.web );
+ importPackage( dw.value );
+ importPackage( dw.util );
+ importPackage( dw.order );
+ importPackage( dw.campaign );
+ importPackage( dw.catalog );
+ importPackage( dw.customer );
+
+
+/**
+ * Function: execute
+ *
+ * Main function of the calculation script.
+ */
+function execute( pdict : PipelineDictionary ) : Number
+{
+    // ===================================================
+	// =====     	PROCESS INPUT PARAMETERS 		 =====
+    // ===================================================
+
+	var basket : Order = pdict.Order;
+	
+    // ===================================================
+	// =====   CALCULATE PRODUCT LINE ITEM PRICES    =====
+    // ===================================================
+
+	calculateProductPrices(basket);
+	
+	 // ===================================================
+	// =====   REMOVE ALL ORDER LEVEL DISCOUNTS    =====
+    // ===================================================
+	
+	
+	removeOrderDiscounts(basket);
+	
+	    // ===================================================
+	// =====   APPLY PROMOTION DISCOUNTS			 =====
+	// =====   Apply product and order and 			 =====
+	// =====   shipping promotions.                  =====
+    // ===================================================
+
+	//PromotionMgr.applyDiscounts(basket);
+	
+	
+    // ===================================================
+	// =====         CALCULATE BASKET TOTALS         =====
+    // ===================================================
+	
+	basket.updateTotals(); 
+
+    // ===================================================
+	// =====            DONE                         =====
+    // ===================================================
+	
+    return PIPELET_NEXT;
+}
+
+
+/**
+ * FUNCTION: calculateProductPrices
+ *
+ * Calculates product prices based on line item quantities. Set calculates prices
+ * on the product line items.
+ */
+function calculateProductPrices(basket : Order)
+{
+	// iterate all product line items of the basket and set prices
+	var productLineItems : Iterator = basket.getAllProductLineItems().iterator();
+	var apportionmentPromoIDMap : HashMap = new HashMap();
+	var apportionmentPromoID = Resource.msg('order.apportionmentpromoid', 'order', null);
+	var pliMap :HashMap = new HashMap();	
+	var discountedAmount : Money = getOrderLevelDiscount(basket);
+	if(empty(discountedAmount) || discountedAmount.value <= 0.0){
+		 Logger.error("no order discount");
+		 return PIPELET_NEXT;
+	}
+	var totalOrderPrice : Money = getOrderTotal(basket);
+	// get the discounted amount
+	
+	//store order level discount in a custom attribute
+	basket.custom.orderLevelDiscount = discountedAmount.value;
+	Logger.error("Order Total::"+totalOrderPrice+"---discount::::" + discountedAmount + "----order number:::"+ basket.orderNo);
+	while(productLineItems.hasNext())
+	{
+		var productLineItem : ProductLineItem = productLineItems.next();
+		//=========================================================================
+		//============ function to get order level discount applied on this pli====
+		//=========================================================================
+		apportionmentPromoIDMap.put(productLineItem, getOrderLevelPromo(productLineItem));
+		//=========================================================================
+		//=========================================================================
+		
+		var product : Product = productLineItem.product;		
+		if(product != null)
+		{
+			/** 
+			  *	Formula is (pliPrice / totalOrderPrice) * discountedAmount 
+			**/
+			 
+			// get the adjusted price (to get rid of any price adjustment, already done due to product level discount)
+			//var pliPrice : Money = productLineItem.getAdjustedPrice(false);
+			//NAVEEN: BOGO promotions are not working fine if one product is priced as Zero because of BOGO
+			//var pliAdjustedPriceMap : Map = productLineItem.getProratedPriceAdjustmentPrices();
+			var pliAdjustedPrice : Money = productLineItem.getAdjustedPrice().subtract(productLineItem.getAdjustedPrice(true));
+			
+			//put the prorated prices in a map  
+			//NAVEEN: BOGO promotions are not working fine if one product is priced as Zero because of BOGO
+			//pliMap.put(productLineItem.productID, pliAdjustedPriceMap);
+			pliMap.put(productLineItem.productID, pliAdjustedPrice);
+			
+			//Logger.error("GetAdjustedPrice :: " +  productLineItem.getAdjustedPrice() +" ::::::::::GetAdjustedPrice (With Order Level Discount) :: " +  productLineItem.getAdjustedPrice(true) + " @@@@@@@@@@@@@@@@@@@@@@ProductName: " + product.getName() );
+			
+		}
+	}
+	productLineItems =basket.getAllProductLineItems().iterator();
+	while(productLineItems.hasNext())
+	{	
+		var productLineItem : ProductLineItem = productLineItems.next();
+		var product : Product = productLineItem.product;
+		var amountToSubtract : Money = new Money(0.0,Site.getCurrent().currencyCode);
+	
+ 		if(product != null )
+		{
+			
+			apportionmentPromoID = apportionmentPromoIDMap.get(productLineItem);
+		
+	  		//(pliPrice.subtract(pliAdjustedPrice)).multiply(-1);			 			 
+			amountToSubtract = pliMap.get(productLineItem.productID);		 
+			Logger.error("PLI amount to subtract:::" + amountToSubtract + "---Prorated Pice :::" + productLineItem.getProratedPrice() +"without order discount::::"+productLineItem.grossPrice+ " @@@@@@@@@@@@@@@@@@@@@@ProductName: " + product.getName() );															
+
+			// we assume that a bonus line item has only one price adjustment
+			var adjustment : PriceAdjustment = productLineItem.getPriceAdjustmentByPromotionID(apportionmentPromoID);
+			if (amountToSubtract!=null && amountToSubtract.getValue() <= 0){
+				adjustment = null;
+			}			
+			//a flag to identify, if the order adjustment exist
+			var isOrderPromoExist : Boolean = false;
+			//Create Order promo, if it doesnt exist
+			if(adjustment!=null){
+				isOrderPromoExist=true;
+			}
+			if (!isOrderPromoExist && amountToSubtract.valueOrNull > 0){
+				productLineItem.createPriceAdjustment(apportionmentPromoID);
+				//Logger.error("@@@@@@@@@Inside new ....ProductName: " + product.getName());
+				adjustment = productLineItem.getPriceAdjustmentByPromotionID(apportionmentPromoID);
+				adjustment.setLineItemText(apportionmentPromoID);				
+				adjustment.setPriceValue(amountToSubtract.valueOrNull * -1);
+				adjustment.updateTax(productLineItem.taxRate);
+			}			
+		} // close outer 'if'
+    } //close 'while' loop
+  
+} //close 'calculateProductPrices'
+
+function getOrderTotal(basket : Order) : Money {	
+	return basket.getAdjustedMerchandizeTotalPrice(false);
+	
+}
+function removeOrderDiscounts(basket : Order)  {	
+	var allPriceAdjustment :Collection =  basket.priceAdjustments;
+	var iterator :Iterator =allPriceAdjustment.iterator();
+	while(iterator.hasNext()){
+		var adjustment : PriceAdjustment =iterator.next();
+		basket.removePriceAdjustment(adjustment);
+	}
+}
+
+function getOrderLevelDiscount(basket : Order) : Money {
+	return basket.getAdjustedMerchandizeTotalPrice(false).subtract(basket.getAdjustedMerchandizeTotalPrice(true)) ;
+}
+
+function setPliPromoValueToZero(productLineItem : ProductLineItem){
+	var product : Product = productLineItem.product;		
+		
+	 	if(product != null)
+		{
+			/** 
+			  *	Formula is (pliPrice / totalOrderPrice) * discountedAmount 
+			**/
+			  
+			// get the adjusted price (to get rid of any price adjustment, already done due to product level discount)
+			var pliPrice : Money = productLineItem.adjustedPrice.multiply(0);			
+															
+			var adjustments : Collection = productLineItem.priceAdjustments;			
+	
+			if(!adjustments.isEmpty())
+			{
+				var adjustments_i : Iterator = adjustments.iterator();								
+				while (adjustments_i.hasNext()){					
+					var adjustment : PriceAdjustment = adjustments_i.next();
+					if (adjustment.promotionID.equalsIgnoreCase(apportionmentPromoID)) {
+						//adjustment.setLineItemText(null);					
+						adjustment.setPriceValue(pliPrice.valueOrNull);
+						adjustment.setLineItemText(orderLevelPromoID);
+						break;
+					}					
+				}				
+			}
+		}	
+}
+
+
+
+
+
+function getOrderLevelPromo(pli : ProductLineItem): String
+{
+	var map : HashMap = null;
+	var priceAdjustmentSet : HashSet = null;
+	var orderLevelPromo : String = "OL";
+	var priceAdjustment : PriceAdjustment = null;
+	var promotion : Promotion = null;
+	map = pli.getProratedPriceAdjustmentPrices();
+	if (!empty(map)) {
+		// get all price adjustments
+		priceAdjustmentSet = map.keySet();
+		if (!empty(priceAdjustmentSet)) {
+			// iterate over price adjustments
+			var iterator : Iterator = priceAdjustmentSet.iterator();
+			while(iterator.hasNext())
+			{
+				priceAdjustment = iterator.next();
+				//get promotion class
+				promotion = priceAdjustment.getPromotion();
+				if(promotion != null && promotion.getPromotionClass().equals(Promotion.PROMOTION_CLASS_ORDER))
+				{
+					//check for promtion id and class as order
+					orderLevelPromo = orderLevelPromo.concat("_"+promotion.getID());			
+				}	
+			}
+		}
+	}
+	if (orderLevelPromo.equals("OL")) {
+		return "null";
+	}
+	return orderLevelPromo;	
+}

@@ -1,0 +1,30 @@
+/**
+ * SetDefaultAddress.ds
+ *
+ * This script sets the default address for the customer addressbook. CR-810
+ *
+ * @input Address : dw.customer.CustomerAddress
+ *  */
+importPackage( dw.customer );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var customerAddress : CustomerAddress = pdict.Address;
+
+  if(customerAddress.getCountryCode()=="FR" || customerAddress.getCountryCode()=="MC")
+	{
+		customerAddress.setStateCode("");
+		customerAddress.custom.address3="";
+	} 
+ else if(customerAddress.getCountryCode()=="IE")
+ 	{
+ 		customerAddress.setPostalCode(".");
+ 	} 	
+ else
+ {
+ 	customerAddress.custom.streetName="";
+ 	customerAddress.custom.residence="";
+ 	customerAddress.setPostBox("");
+ }	
+    return PIPELET_NEXT;
+}

@@ -1,0 +1,73 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*-   @input ExampleIn : String This is a sample comment.
+*-   @output ExampleOut : Number
+* 	 @output impexFiles : dw.util.Collection
+*
+*/
+importPackage( dw.system );
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.web );
+importPackage( dw.net );
+importPackage( dw.object );
+importPackage( dw.net ); 
+importPackage( dw.io );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+
+    try 
+	{
+		var date = new Date();
+		//var fileLocation : String = "/orderUpdate/modifiedStatus/";
+		var fileLocation : String = Site.getCurrent().getCustomPreferenceValue("orderExportLocation");
+		var impexFiles : Collection = listImpexFiles(fileLocation);
+		pdict.impexFiles = impexFiles;
+    		if (impexFiles.size() > 0)
+    		{
+    			
+    		}	
+			else {
+				Logger.error("No Order Update files found " + date);
+			}
+	} catch(e){
+			return PIPELET_ERROR;
+		}
+	return PIPELET_NEXT;	
+
+}
+	
+	function listImpexFiles (fileLocation : String) : Collection{
+		
+	var folderObj : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + fileLocation + File.SEPARATOR);
+	
+	var files : Array;
+	
+	var remoteFiles : Collection = new ArrayList();
+	if ( folderObj.exists() ) {
+		for each ( var file : File in folderObj.listFiles() )
+		{
+			// filter out directories; this will automatically remove the current folder from the list
+			if ( !file.directory )
+			{
+				Logger.getLogger("simplefeeds").debug( "PickFeed: Listing file: " + file.name );
+				remoteFiles.add( file );
+			}		
+		}
+	}
+	return remoteFiles;
+}

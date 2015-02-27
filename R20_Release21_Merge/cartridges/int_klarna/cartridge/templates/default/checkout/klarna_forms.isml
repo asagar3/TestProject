@@ -1,0 +1,170 @@
+<isinclude template="util/klarnamodules"/>
+<iscomment>Beginning of Klarna. Only display Klarna if we fulfill the country/currency condition</iscomment>
+<isset name="shippingCountry" value="${pdict.Basket.shipments[0].shippingAddress.countryCode.value}" scope="page"/>
+<isset name="KlarnaCountry" value="${pdict.Basket.shipments[0].shippingAddress.countryCode.value}" scope="page"/>
+<isset name="KlarnaLanguage" value="${pdict.CurrentRequest.getLocale().split('_')[0]}" scope="page"/>
+<isset name="KlarnaCurrency" value="${pdict.Basket.currencyCode}" scope="page"/>
+<isset name="invoiceFee" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_INVOICEFEE_'+KlarnaCountry)}" scope="page"/>
+<isset name="KlarnaInvoiceFee" value="${invoiceFee}" scope="page"/>
+<isset name="merchantID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_MERCHANT_ID')}" scope="page"/>
+
+
+<isinclude template="klarna_enable.isml"/>
+<isif condition="${countryCurrencyMatches == true}">	
+<isif condition="${active == true}">
+<iscomment>For Dutch customers we only allow to checkout with Klarna is payment amount is below 250 euro</iscomment>
+<isif condition="${!(pdict.PaymentAmount > 250 && KlarnaCountry == "NL")}">
+	
+	<iscomment><script src="${URLUtils.staticURL('js/jquery.rule.js')}" type="text/javascript"></script></iscomment>
+	<script type="text/javascript" language="javascript">
+	var klarna_get_addresses_url = '${URLUtils.url('KlarnaPayment-GetAddresses')}'
+	var klarna_languagepack_url = '${URLUtils.url('KlarnaPayment-LanguagePack')}'
+	var select_byear = 1970
+	var select_part_byear = 1970
+	var select_spec_byear = 1970
+
+	//TODO Clean up the JS code. No hard coded links or element names
+	jQuery(document).ready(function() {
+		// Insert background image rules here where URLUtils can be used
+		
+		// Update volatile data in forms when changing payment method
+		$('input[name=${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}]').change(function() {
+			$(this).trigger("triggerChoosePaymentOption", [ $(this).val() ])
+		})
+
+		// This will be triggered when the payment methods are refreshed by selecting address
+		if(typeof klarnaGeneralReady != 'undefined') {
+			moveBaloons()
+			setTimeout("doDocumentIsReady()", 0)
+		}
+	});
+
+	function dw_extra_ready() {
+		// Call getAdress on pno changef for SE
+		<isif condition="${KlarnaCountry == 'SE'}">
+		$(document).find('.Klarna_pnoInputField').each(function (){
+			var pnoField = $(this);
+			var typeField = $(this).parents('.klarna').find('input.is_company');
+
+			$(this).bind("keyup change blur focus", function (){
+				getAddress($(this), ($(this).parents('.klarna_box').attr("id") == "klarna_box_invoice"), ($(this).parents('.klarna_box').attr("id") == "klarna_box_invoice" ? pnoField : null), typeField);
+			});
+		});
+		</isif>
+	}
+	</script>
+
+	<isinclude template="checkout/invoice_form"/>
+	<isinclude template="checkout/partpayment_form"/>
+
+	<isif condition="${activeSpecial == true}">
+		<isinclude template="checkout/special_form"/>
+		<iselse>
+			<div id="PaymentMethod_KLARNA_SPECIAL" class="paymentform klarna_special">
+			<iscomment>If we havent activated special campaigns for the current shippingcountry we remove the radio button</iscomment>
+			<script>
+				jQuery(document).ready(function() {
+					jQuery("#is-KLARNA_SPECIAL").remove()
+					jQuery('label[for=is-KLARNA_SPECIAL]').remove()
+				});
+			</script>
+			</div>
+	</isif>
+
+	<script type="text/javascript">
+	<!--
+		var global_countryCode = '${KlarnaCountry.toLowerCase()}';
+		var gender = '0';
+		var global_language_invoice = '${KlarnaLanguage}';
+		var lang_companyNotAllowed = '${Resource.msg('klarna.company_not_allowed', 'klarna', null)}';
+		var lang_orgNum = '${Resource.msg("klarna.orgnum", 'forms', null)}'
+		var lang_personNum = '${Resource.msg("klarna.ssn", 'forms', null)}'
+		var global_type = 'invoice';
+
+		if(typeof klarnaGeneralLoaded == 'undefined') {
+			document.write('<scr'+'ipt src="${URLUtils.staticURL('js/klarnaGeneral.js')}" type="text/javascript"></scr'+'ipt>');
+		}
+
+		if(typeof klarnaAgreementLoaded == 'undefined') {
+			document.write('<scr'+'ipt src="https://static.klarna.com/external/js/klarnaConsentNew.js" type="text/javascript"></scr'+'ipt>');
+			klarnaAgreementLoaded = true;
+		}
+
+		$('head').append('<link type="text/css" rel="stylesheet" href="${URLUtils.staticURL('css/klarna.css')}" />');
+
+
+		<isif condition="${pdict.KlarnaError!=null}">
+		$(function() {
+			$("#klarna_red_baloon_content").html("<div>${pdict.KlarnaError}</div>")
+		})
+		</isif>
+	//-->
+	</script>
+	<script type="text/javascript">
+		openAgreement('${KlarnaCountry.toLowerCase()}');
+	</script>
+
+	<div class="klarna_baloon" id="klarna_baloon" style="display: none">
+		<div class="klarna_baloon_top">
+		</div>
+		<div class="klarna_baloon_middle" id="klarna_baloon_content">
+			<div></div>
+		</div>
+		<div class="klarna_baloon_bottom">
+		</div>
+	</div>
+	<div class="klarna_red_baloon" id="klarna_red_baloon" style="display: none">
+		<div class="klarna_red_baloon_top">
+		</div>
+		<div class="klarna_red_baloon_middle" id="klarna_red_baloon_content">
+			<div></div><!-- FIXME, some race condition with positioning and the good position is also borked  -->
+		</div>
+		<div class="klarna_red_baloon_bottom">
+		</div>
+	</div>
+	<div class="klarna_blue_baloon" id="klarna_blue_baloon" style="display: none">
+		<div class="klarna_blue_baloon_top">
+		</div>
+		<div class="klarna_blue_baloon_middle" id="klarna_blue_baloon_content">
+			<div></div>
+		</div>
+		<div class="klarna_blue_baloon_bottom">
+		</div>
+	</div>
+
+	<iselse>
+		<div id="PaymentMethod_KLARNA" class="paymentform klarna">	
+			${Resource.msg('klarna.error_amount_to_high', 'klarna', null)}
+		</div>
+		<div id="PaymentMethod_KLARNA_PARTPAYMENT" class="paymentform klarna">	
+			${Resource.msg('klarna.error_amount_to_high', 'klarna', null)}
+		</div>
+			<div id="PaymentMethod_KLARNA_SPECIAL" class="paymentform klarna">	
+			${Resource.msg('klarna.error_amount_to_high', 'klarna', null)}
+		</div>
+	</isif>
+
+	<iselse>
+		<div id="PaymentMethod_KLARNA" class="paymentform klarna">	
+		${Resource.msg('klarna.not_active_in_country','klarna',null)}
+	</div>
+	<div id="PaymentMethod_KLARNA_PARTPAYMENT" class="paymentform klarna">	
+		${Resource.msg('klarna.not_active_in_country','klarna',null)}
+	</div>
+		<div id="PaymentMethod_KLARNA_SPECIAL" class="paymentform klarna">	
+		${Resource.msg('klarna.not_active_in_country','klarna',null)}
+	</div>	
+	</isif>
+
+	<iselse>
+	<div id="PaymentMethod_KLARNA" class="paymentform klarna">	
+		${Resource.msg('klarna.error_wrong_currency_country', 'klarna', null)}
+	</div>
+	<div id="PaymentMethod_KLARNA_PARTPAYMENT" class="paymentform klarna">	
+		${Resource.msg('klarna.error_wrong_currency_country', 'klarna', null)}
+	</div>
+		<div id="PaymentMethod_KLARNA_SPECIAL" class="paymentform klarna">	
+		${Resource.msg('klarna.error_wrong_currency_country', 'klarna', null)}
+	</div>
+	</isif>
+	<iscomment>End of Klarna</iscomment>

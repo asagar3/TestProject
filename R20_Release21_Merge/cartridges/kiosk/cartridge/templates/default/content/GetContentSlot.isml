@@ -1,0 +1,22 @@
+{ "body" : 
+<isif condition="${null != pdict.requestContent.categoryId}">
+	<iscomment>Add multiple if conditions of all the different category slots</iscomment>
+	<isif condition="${pdict.requestContent.contentId == 'cat-landing-banner-kiosk'}">
+		<isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${dw.catalog.CatalogMgr.getCategory(pdict.requestContent.categoryId)}"/>		
+	
+	<iselseif condition="${pdict.requestContent.contentId == 'cat-listing-banner-kiosk'}">
+
+		<isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${dw.catalog.CatalogMgr.getCategory(pdict.requestContent.categoryId)}"/>
+	
+	</isif>	
+<iselse>
+	<iscomment>Add multiple if conditions of all the different globals slots</iscomment>
+		<isif condition="${pdict.requestContent.contentId == 'shop-home-promotion-kiosk'}">
+			<isslot id="shop-home-promotion-kiosk"
+				description="Banner for kiosk shop home page" context="global" />
+		</isif>
+</isif>,
+  "description" : null,
+  "id" : "${pdict.requestContent.contentId}",
+  "name" : null
+}

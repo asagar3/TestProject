@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<iscomment><!-- TODO | Fixed Web Acc. | Please make sure "fr" should appear from properties file |Asha | 10-mar-2011--></iscomment>
+<isinclude template="util/modules"/>
+<head>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+</head>
+<body>
+
+<iscomment><!-- Added new header isml file for checkout pages | asha | 07-mar-11 --></iscomment>
+	<isinclude template="components/header/headerlogin"/>	
+	<script type="text/javascript">
+		s.pageName = "${pdict.omniPageName}" ;
+		s.server = "${dw.system.System.getInstanceHostname()}" ;
+		s.prop24 = "${Resource.msg('omniture.prop24.checkout','omniture',null)}" ;
+		s.channel = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+		s.prop1 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+		s.prop18 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+		s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"
+	</script>	
+
+<div id="container" class="pt_account pt_checkout_wrapper">
+<iscomment><!-- Web acc fix |  asha | 10-mar-2011 --></iscomment>
+<a class="accessible" href="#main">.</a>
+	<iscomment> Not Available in HTMLs |  Naveen | <isinclude template="components/header/header"/> </iscomment>	
+	<div id="main">
+		<iscomment><!-- Leftnavigation is not required on accounts pages. Commented out | Asha | 04-march-2011 --></iscomment>
+		<iscomment>
+		<div id="leftcolumn">
+			<isinclude url="${URLUtils.url('Account-IncludeNavigation')}"/>
+			<div class="accountnavtext"><iscontentasset aid="account-nav-text"/></div><!-- END: accountnavtext -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: leftcolumn -->
+		</iscomment>
+		<div id="content">
+			<iscomment><!-- Breadcrumb not required as per VD | asha | 07-mar-11 --></iscomment>
+			<iscomment>
+				<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="My Account"/>
+			</iscomment>
+			<isreplace/>
+		</div><!-- END: content -->
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<isinclude template="components/footer/footer_checkout"/>		
+	</div><!-- END: main -->
+</div><!-- END: container -->
+</body>
+</html>

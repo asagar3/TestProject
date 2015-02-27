@@ -1,0 +1,24 @@
+<iscomment>
+Dumps variation attributes values as name value pairs.
+e.g. color: red
+
+params:
+pdict.product
+
+</iscomment>
+
+<iscomment> Following file is changed by Atul Madanpotra to display the Product Attributes from Product Line items object</iscomment>
+<isif condition="${pdict.product != null && pdict.product.isVariant()}">
+	<isloop items="${pdict.product.variationModel.getProductVariationAttributes()}" var="VA">
+		<isset name="VAID" value="${VA.ID}" scope="page"/>
+		<isset name="SelectedVariationValue" value="${pdict.product.variationModel.getSelectedValue(VA)}" scope="page"/>
+		<p style="margin-top:1px;margin-bottom:0;font-family:Arial, Helvetica, sans-serif; font-size:11px; color:#666666;">
+			${VA.displayName}:
+				<isif condition="${SelectedVariationValue != null}">
+					<span style="color:#000000;"><isprint value="${SelectedVariationValue.displayValue}"/></span>
+				<iselse>
+					-
+				</isif>
+		</p>
+	</isloop>
+</isif>

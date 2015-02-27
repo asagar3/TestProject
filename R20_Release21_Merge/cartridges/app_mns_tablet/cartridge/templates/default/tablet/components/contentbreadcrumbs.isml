@@ -1,0 +1,13 @@
+<div class="breadcrumb">
+	<iscomment>HOME BREADCRUMB</iscomment>
+	<a href="${URLUtils.httpHome()}" class="home" title="${Resource.msg('global.home','locale',null)}">${Resource.msg('global.home','locale',null)}</a>
+	
+	<iscomment> SHOW CONTENT NAME </iscomment>
+	<isif condition="${null != pdict.Content}">
+		<span class="divider">.</span><span class="currentpage"><isprint value="${pdict.Content.name}"/></span>
+	<iselseif condition="${null != pdict.HelpContent}">	
+		<span class="divider">.</span><span class="currentpage"><isprint value="${Resource.msg('global.help','locale',null)}"/></span>	
+    <iselseif condition="${!empty(pdict.ProductSearchResult.category)}">
+		<span class="divider">.</span><span class="currentpage"><isprint value="${pdict.ProductSearchResult.category.displayName}"/></span>
+	</isif>
+</div><!-- END: breadcrumb -->

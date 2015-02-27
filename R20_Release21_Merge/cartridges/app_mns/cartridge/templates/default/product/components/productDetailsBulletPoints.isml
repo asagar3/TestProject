@@ -1,0 +1,172 @@
+<iscomment> Christina D. INT-493 INTP-24 - PIM - new format of
+product details bullet points. </iscomment>
+<isset name="language" value="${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).language}" scope="page" />
+<isscript>
+importScript("app_mns:/product/ProductDetailsBulletPoints.ds");
+
+ 
+var bulletMap:LinkedHashMap=getBulletPoints(pdict.Product,language); </isscript>
+
+<div id="pdpTab">
+	<iscomment> <a class="printpage">${Resource.msg('global.print','locale',null)}</a>
+	<isprint value="${pdict.Product.longDescription}" encoding="off" /></iscomment>
+
+	<iscomment>INT-493 - TODO remove bullet points</iscomment>
+	<iscomment>
+	<ul class="prodTab_leftsection">
+		<isif condition="${pdict.Product.custom.bullet1 != null}"> <isloop
+			items="${pdict.Product.custom.bullet1}" alias="bullet">
+		<li><isprint value="${bullet}" encoding="off"></li>
+		</isloop> </isif>
+	</ul>
+	</iscomment>
+	<iscomment>INT-493 - add new bullet points instead, INTP-21
+	- added extra condition</iscomment>
+	<isif
+		condition="${ ( !empty(pdict.Product.custom.productDetailsBulletPoints) ||
+						!empty(pdict.Product.custom.IntlEnglishText))}">
+
+	<div class="bulletPointsLeft">
+
+		<isif
+			condition="${!empty(pdict.Product.custom.productDetailsBulletPoints)}">
+		<isset name="bulletString"
+			value="${pdict.Product.custom.productDetailsBulletPoints}"
+			scope="page" /> <isloop items="${bulletMap.keySet().iterator()}"
+			var="key" status="loopstatus"> <isif
+			condition="${!(key.trim()).equals('')}"> <isif
+			condition="${!key.substring(0,5).equals(getNoTitlePrefix())}">
+		<p>
+			<b>${key}</b>
+		</p>
+		</isif> </isif>
+		<ul class="productDetailsBulletPoints">
+			<isloop items="${bulletMap.get(key)}" var="bullet">
+			<li><isprint value="${bullet}" encoding="off"></li>
+			</isloop>
+		</ul>
+		<br>
+		</isloop> </isif>
+		<iscomment> INTP-21 - IntlEnglishText as bullet point </iscomment>
+		<isif condition="${!empty(pdict.Product.custom.IntlEnglishText)}">
+		<ul class="productDetailsBulletPoints">
+			<li><isprint value="${pdict.Product.custom.IntlEnglishText}"
+					encoding="off"></li>
+		</ul>
+		<br>
+		</isif>
+	</div>
+
+	</isif>
+
+	<iscomment> INT-24 OLD CODE TO REMOVE, PIM: Care
+	Instructions and Composition Bullet Attributes </iscomment>
+	<iscomment>INT-560 OFORMBY :line 77 onwards get content
+	asset to print Message</iscomment>
+
+	<iscomment>
+	<ul class="prodTab_rightsection">
+
+		<isif condition="${pdict.Product.custom.careInstructions != null}">
+		<li><span class="bold">${Resource.msg('product.careinstruction','product',null)}</span>
+			<isprint value="${pdict.Product.custom.careInstructions}"
+				encoding="off"></li>
+		</isif>
+		<isif condition="${!empty(pdict.Product.custom.composition)}">
+		<li><span class="bold">${Resource.msg('product.composition','product',null)}</span>
+			<isloop items="${pdict.Product.custom.composition}"
+				alias="composition"> <isprint value="${composition}"
+				encoding="off"></isloop></li>
+		</isif>
+
+		<isif
+			condition="${pdict.Product.custom.GenericCMSContentID_Panel!= null}">
+		<br>
+		<iscontentasset
+			aid="${pdict.Product.custom.GenericCMSContentID_Panel}" /> </isif>
+		<isif
+			condition="${pdict.Product.custom.GenericCMSContentID_Panel2!= null}">
+		<br>
+		<iscontentasset
+			aid="${pdict.Product.custom.GenericCMSContentID_Panel2}" /> </isif>
+
+	</ul>
+	</iscomment>
+
+	<div class="bulletPointsRight">
+
+		<isif
+			condition="${!empty(pdict.Product.custom.IngredientsListing) ||
+						!empty(pdict.Product.custom.CompositionList) ||
+						!empty(pdict.Product.custom.Footwear_Sole) ||
+						!empty(pdict.Product.custom.HomeMaterial)}">
+
+		<span class="bold">${Resource.msg('product.composition','product',null)}</span>
+		<ul class="productDetailsBulletPoints">
+			<isif condition="${!empty(pdict.Product.custom.IngredientsListing)}">
+			<li><isprint value="${pdict.Product.custom.IngredientsListing}"
+					encoding="off"></li>
+			</isif>
+			<isif condition="${!empty(pdict.Product.custom.CompositionList)}">
+			<li><isprint value="${pdict.Product.custom.CompositionList}"
+					encoding="off"></li>
+			</isif>
+			<isif condition="${!empty(pdict.Product.custom.Footwear_Sole)}">
+			<li><isprint value="${pdict.Product.custom.Footwear_Sole}"
+					encoding="off"></li>
+			</isif>
+			<isif condition="${!empty(pdict.Product.custom.HomeMaterial)}">
+			<isscript>							    
+	 			var homeMaterial = mergeList(pdict.Product.custom.HomeMaterial, ", ");
+			</isscript>			
+			<li><isprint value="${homeMaterial}"
+					encoding="off"></li>
+			</isif>
+		</ul>
+		<br>
+		</isif>
+		<isif
+			condition="${!empty(pdict.Product.custom.usageInstructions) ||
+						!empty(pdict.Product.custom.safetyWarning) ||
+						!empty(pdict.Product.custom.careInstructions)}">
+
+		<span class="bold">${Resource.msg('product.careinstruction','product',null)}</span>
+		<ul class="productDetailsBulletPoints">
+			<isif condition="${!empty(pdict.Product.custom.usageInstructions)}">
+			<li><isprint value="${pdict.Product.custom.usageInstructions}"
+					encoding="off"></li>
+			</isif>
+			<isif condition="${!empty(pdict.Product.custom.safetyWarning)}">
+			<li><isprint value="${pdict.Product.custom.safetyWarning}"
+					encoding="off"></li>
+			</isif>
+			<isif condition="${!empty(pdict.Product.custom.careInstructions)}">
+			<li><isprint value="${pdict.Product.custom.careInstructions}"
+					encoding="off"></li>
+			</isif>
+		</ul>
+		<br>
+		</isif>
+
+		<isif
+			condition="${!empty(pdict.Product.custom.GenericCMSContentID_Panel)}">
+		<ul class="productDetailsBulletPoints">
+			<li><iscontentasset
+					aid="${pdict.Product.custom.GenericCMSContentID_Panel}" /></li>
+		</ul>
+		</isif>
+		<br>
+		<isif
+			condition="${!empty(pdict.Product.custom.GenericCMSContentID_Panel2)}">		
+		<ul class="productDetailsBulletPoints">
+			<li><iscontentasset
+					aid="${pdict.Product.custom.GenericCMSContentID_Panel2}" /></li>
+		</ul>
+		
+		</isif>
+	</div>
+
+
+	<div class="clear"></div>
+
+</div>

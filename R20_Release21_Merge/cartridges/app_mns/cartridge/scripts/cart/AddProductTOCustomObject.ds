@@ -1,0 +1,83 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+* CR 3072
+* For example:
+*
+*    @input ProductList : dw.util.ArrayList
+*
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+importPackage( dw.order );
+importPackage(dw.catalog);
+importPackage( dw.util );
+
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+    var prodList : ArrayList = pdict.ProductList;
+    
+    var basketPids : String ="";
+    if(prodList!=null && prodList.length>0)
+    {
+    	for(var i : number=0; i<prodList.length;i++){
+			var pli : ProductLineItem = prodList[i];
+			var prod : Product = pli.getProduct();
+		
+			if(empty(prod.custom.customTaxClass) || prod.custom.customTaxClass.equalsIgnoreCase =="undefined"){
+				if(basketPids==""){
+					basketPids = prod.getID();	
+				}
+				else{
+					basketPids = basketPids + ","+ prod.getID();
+				}
+			}
+		}
+    }
+    
+   //To DO: empty check
+    if(basketPids==""){
+		return PIPELET_NEXT;
+	}
+	
+	else{
+		try{	
+	   		var noTaxClasses : Iterator =CustomObjectMgr.queryCustomObjects('CustomNoTaxClassIds', '', 'lastModified asc', '' );
+	   		var NoTaxClassPIds : String = "NoTaxClassPIds";
+	   		var taxIdsList : dw.util.List =  noTaxClasses.asList();	 
+	   		if(taxIdsList.length==0){
+	   			var customNoTaxClassObject : dw.object.CustomObject = CustomObjectMgr.createCustomObject('CustomNoTaxClassIds', NoTaxClassPIds+1);
+	   			customNoTaxClassObject.custom.productId=basketPids;
+	   		}
+		   else{
+		   	    var newCustomObjNumber : number = taxIdsList.length+1;	       		
+	       		var customNoTaxClassObject : CustomObject= taxIdsList.pop();
+	       	    var limit:Number = Site.current.preferences.custom.customStringObjLimit;
+	       	    //var limit:Number = 60;
+		   		var eo : dw.object.CustomAttributes = customNoTaxClassObject.getCustom();
+		        var newString : String =	eo.productId + "," + basketPids;
+		   		if(newString.length <= limit){
+		   			customNoTaxClassObject.custom.productId	= newString;
+		   		}
+		   		else{		   			
+		   			customNoTaxClassObject = CustomObjectMgr.createCustomObject('CustomNoTaxClassIds', NoTaxClassPIds+newCustomObjNumber);
+					customNoTaxClassObject.custom.productId	=basketPids;
+		   		}
+		   }
+		}
+		catch(e){
+				Logger.error("Error in saving productids in Custom object", "CustomNoTaxClassIds");
+		    	return PIPELET_NEXT;
+		}
+	}	   
+   return PIPELET_NEXT;
+}

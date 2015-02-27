@@ -1,0 +1,12 @@
+
+
+
+	<isif condition="${pdict.CurrentCustomer.authenticated == true}">
+			<div class="floatright welcomeText">
+				${Resource.msg('headercustomerinfo.welcome2','components',null)}
+				<isprint value="${pdict.CurrentCustomer.profile.firstName}" />
+				<span class="divider">.</span>
+       			<a title="Sign Out" href="${URLUtils.https('Login-Logout')}" class="usersignout">${Resource.msg('headercustomerinfo.signout','components',null)}</a>
+			</div>
+	</isif> 
+	

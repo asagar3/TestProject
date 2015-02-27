@@ -1,0 +1,520 @@
+<iscomment>
+	Displays order details, such as order number, creation date, payment information,
+	order totals and information for each contained shipment.
+	This template module can be used in order confirmation pages as well as in the
+	order history to render the details of a given order. Depending on the context
+	being used in, one might omit rendering certain information.
+
+	Parameters:
+
+	order		: the order whose details to render
+	orderstatus	: if set to true, the order status will be rendered
+	              if set to false or not existing, the order status will not be rendered
+</iscomment>
+<isset name="Order" value="${pdict.order}" scope="page"/>
+<div class="orderpayment">
+	<div class="orderconfirmationheader">
+		<h5>${Resource.msg('orderdetails.paymentinfo','components',null)}</h5>
+		<div class="floatright">${Resource.msg('orderdetails.orderplaced','components',null)} <isprint value="${Order.creationDate}" formatter="dd MMMM yyyy"></isprint></div>
+		<div class="clear"></div>
+	</div>
+	<div class="orderpaymentdetails">
+		<table class="orderpaymentdetailstable" summary="Order Payment Details">
+			<tr>
+				<iscomment><!-- TODO | Added new section in static HTML to match with VD | Asha -->TODO | Naveen Kumar Change Static HTML</iscomment>
+				<isset name="shipmentForAddress" value="${Order.shipments[0]}" scope="page" /> 
+				<td class="deliveryaddress">
+					<div class="label">${Resource.msg('orderdetails.shippingaddress','components',null)}</div>	
+					
+					<isif condition="${Order.shipments[0].shippingMethod.ID == 'COLLECTION_POINT'}">
+						<isminiaddresscollectionpoint p_showphone="true" p_address="${shipmentForAddress.shippingAddress}"/>
+					<iselse>
+						<isminiaddress p_showphone="true" p_address="${shipmentForAddress.shippingAddress}"/>				
+					</iselse>
+					</isif>
+					
+				</td>
+				<isif condition="${empty(Order.paymentInstruments[0].paymentTransaction.custom.paymentInstrument)||!(pdict.Order.paymentInstruments[0].paymentTransaction.custom.paymentInstrument.equals(dw.order.PaymentInstrument.METHOD_BANK_TRANSFER))}">
+				<td class="orderbilling">
+					<div class="label">${Resource.msg('orderdetails.billingaddress','components',null)}</div>
+					<isminiaddress  p_showphone="true" p_address="${Order.billingAddress}"/>
+				</td>
+				</isif>
+				<td class="orderpaymentinstruments">
+					<isif condition="${Order.paymentInstruments.length == 1}">
+						<div class="label">${Resource.msg('orderdetails.paymentmethod','components',null)}</div>
+					<iselse/>
+						<div class="label">${Resource.msg('orderdetails.paymentmethods','components',null)}</div>
+					</isif>					
+									
+					<iscomment>Render Credit Card</iscomment>
+					<isloop items="${Order.getPaymentInstruments(dw.order.PaymentInstrument.METHOD_CREDIT_CARD)}" var="paymentInstr" status="piloopstate">
+						<isminicreditcard p_card="${paymentInstr}" p_show_expiration="${false}"/>	
+					</isloop>
+					<iscomment>INT 585: Render PayPal for payment method</iscomment>
+					<isloop items="${Order.getPaymentInstruments('PayPal')}" var="paymentInstr" status="piloopstate">
+						<div class="minipaymentmethod">
+							<div class="name">
+								<span> ${Resource.msg('orderdetails.paymentmethodPayPal','components',null)} </span>	
+							</div>
+						</div>
+					</isloop>
+					<isloop items="${Order.getPaymentInstruments(dw.order.PaymentInstrument.METHOD_BANK_TRANSFER)}" var="paymentInstr" status="piloopstate">
+					  <isinclude template="account/payment/banktransfer"/>
+					</isloop>
+					<isloop items="${Order.getPaymentInstruments('CREDIT_CARD_MISTERCASH')}" var="paymentInstr" status="piloopstate">
+					  <isinclude template="account/payment/banktransfer"/>
+					</isloop>
+					<iscomment>Praveen: Adding the condition for BML(Klarna)</iscomment>
+					<isloop items="${Order.getPaymentInstruments(dw.order.PaymentInstrument.METHOD_BML)}" var="paymentInstr" status="piloopstate">
+					  <div class="miniaddress">
+						<div class="name">
+							<span>${Resource.msg('paymentmethod.klarna','locale',null)}</span>
+							</div>
+						</div>
+					</isloop>						
+				</td>
+			</tr>
+		</table>
+	</div><!-- END: orderpaymentdetails -->
+</div><!-- END: orderpayment -->
+
+<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+<isscript>
+	var totalDiscount : dw.value.Money = new dw.value.Money(0, Order.currencyCode);	
+</isscript>
+<script type="text/javascript">
+	var productListForOmniture = "";
+	var om_event = "${Resource.msg('omniture.events.orderconfirmation','omniture',null)}";
+	var om_promoCodes = "";	
+	var deliveryMethod = "";
+</script>
+
+
+<iscomment>render a box for each shipment</iscomment>
+<div class="ordershipments">
+	<isloop items="${Order.shipments}" var="shipment" status="shipmentloopstate">
+		<isif condition="${Order.shipments.size() > 1}">
+			<h3>Shipment ${'#' + shipmentloopstate.count}</h3>
+		</isif>
+		<isif condition="${shipment.productLineItems.size() > 0}">
+			<div class="ordershipment">
+				<iscomment>Shipment items table</iscomment>
+				<iscomment><!--  TODO | Please add class called "qty" and "price" for quantity and price columns in TD. CSS has been written |  Asha--> TODO | Naveen Kumar</iscomment>
+				<table class="ordershipmenttable" summary="Order Shipment">
+					<thead>
+						<tr>
+							<th>${Resource.msg('global.product','locale',null)}</th>
+							<th class="rightalignheader">${Resource.msg('global.quantity','locale',null)}</th>
+							<th class="rightalignheader" colspan="2">${Resource.msg('global.price','locale',null)}</th>
+						</tr>
+					</thead>
+					<isloop items="${shipment.productLineItems}" var="productLineItem" status="pliloopstate">
+						<tr>
+							<td>
+								<iscomment><!-- Adam's Edit - INT 494 --></iscomment>
+								<div class="brand">
+								<isprint value="${productLineItem.product.custom.productBrand}"/>
+								</div>
+									
+								<iscomment>Display product line and product using module</iscomment>
+								<isdisplayliproduct p_productli="${productLineItem}" p_editable="${false}"/>
+							</td>
+
+						    <td class="qty">
+						    	<iscomment>Render quantity. If it is a bonus product render word 'Bonus'</iscomment>
+						    	<isif condition="${productLineItem.bonusProductLineItem}">
+						    		<span class="bonusitem">${Resource.msg('global.bonus','locale',null)}</span>
+						    		<iscomment> Variables added for Omniture Tagging | Set Quantity | Naveen Kumar</iscomment>				
+						    		<isset name="omQuantity" value="${Resource.msg('global.bonus','locale',null)}" scope="page" />
+						    	<iselse/>
+						    		<isprint value="${productLineItem.quantity}"/>
+						    		<iscomment> Variables added for Omniture Tagging | Set Quantity | Naveen Kumar</iscomment>				
+						    		<isset name="omQuantity" value="${productLineItem.quantity.value.toFixed()}" scope="page" />	    		
+						    	</isif>
+					    	</td>
+							<iscomment>Praveen: QC defect fixing 704</iscomment>
+							<isscript>
+						    	var priceAdjustments : dw.util.Collection =productLineItem.getPriceAdjustments();
+						    	var iterator : dw.util.Iterator = priceAdjustments.iterator();
+						    	var apportionedPrice :dw.order.PriceAdjustment = null;
+						    	var promoId : String = null;
+						    	if(iterator != null)
+						    	{
+							    	while(iterator.hasNext())
+							    	{
+							    		promoId = iterator.next().getPromotionID();
+							    		if(promoId.indexOf("OL_") == 0)
+							    		{
+							    			apportionedPrice = productLineItem.getPriceAdjustmentByPromotionID(promoId);
+							    		}  
+							    	
+							    	}
+							    }
+						     </isscript>
+						    <td class="price">
+						   		<isif condition="${productLineItem.adjustedPrice == 0}" > 
+						    		<span class="yousave">${Resource.msg('cart.yousave','checkout',null)}</span>
+						    	<iselse>
+						    		${Resource.msg('ordersummary.itemtotal','components',null)} 
+						    	</isif>
+						    </td>
+						     <td class="price">						     
+						    <iscomment>
+							    <isscript>
+							    	var apportionedPrice :dw.order.PriceAdjustment =productLineItem.getPriceAdjustmentByPromotionID(Resource.msg('order.apportionmentpromoid','order',null));
+							    	
+							    </isscript>
+						   	</iscomment>
+						    	<isif condition="${!empty(apportionedPrice)}">
+						    		<isprint value="${productLineItem.adjustedPrice.subtract(apportionedPrice.getPrice())}"/>
+						    	<iselse>
+						    		<isif condition="${productLineItem.adjustedPrice == 0}" > 
+						    			<isprint value="${productLineItem.basePrice}"/>
+						    		<iselse>
+						    			<isprint value="${productLineItem.adjustedPrice}"/>
+						    		</isif>
+						 		</isif>					            
+					            <isif condition="${productLineItem.optionProductLineItems.size() > 0}">
+									<isloop items="${productLineItem.optionProductLineItems}" var="optionLI">
+										<p>+ <isprint value="${optionLI.adjustedPrice}"/></p>
+									</isloop>
+								</isif>
+							</td>			
+						</tr>
+						
+						<tr>							
+						<isif condition="${!empty(productLineItem.custom.processedQuantity)}">
+						    <td>	
+						    	<div class="trackingnumber">
+						    		<span class="newlabel">Quantity Processed:</span>
+						    		<span class="value"><!-- Tracking Number --><isprint value="${productLineItem.custom.processedQuantity}"/></span>
+						    	</div>
+						    </td>
+						</isif>
+							    	
+				    	<isif condition="${!empty(productLineItem.custom.status)}">
+						    <td>	
+						    	<div class="trackingnumber">
+						    		<span class="newlabel">Status Description:</span>
+						    		<span class="value"><!-- Tracking Number --><isprint value="${productLineItem.custom.status}"/></span>
+						    	</div>
+						    </td>
+				    	</isif>
+						</tr>
+						
+						<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+							
+							<script type="text/javascript">
+								if('${Order.shipments[0].shippingMethodID}' == 'STANDARD'){
+									deliveryMethod = 'standard_delivery';
+								}
+								else if('${Order.shipments[0].shippingMethodID}' == 'COLLECTION_POINT'){
+									deliveryMethod = 'collection_point';
+								}
+								else{
+									deliveryMethod = 'store_collection';
+								}
+								
+							</script>
+						
+						
+							<script type="text/javascript">
+								//productListForOmniture = productListForOmniture +  ";${productLineItem.product.variationModel.master.ID};${omQuantity};${productLineItem.adjustedPrice.value}";
+								//Praveen:- Changing code for replacing tNumber from ID, 6157467.
+								
+								//Int 443 - Added delivery method for omniture tracking
+								if('${productLineItem.product.variationModel.master.custom.tNumber}' != 'null' && '${productLineItem.product.variationModel.master.custom.tNumber}' != ''){
+									productListForOmniture = productListForOmniture +  ";${productLineItem.product.variationModel.master.custom.tNumber};${omQuantity};${productLineItem.adjustedPrice.value};;eVar65=" + deliveryMethod;
+								}else{
+									productListForOmniture = productListForOmniture +  ";${productLineItem.product.custom.tNumber};${omQuantity};${productLineItem.adjustedPrice.value};;eVar65=" + deliveryMethod;
+								}
+					
+							</script>
+							<isif condition="${!pliloopstate.last}">
+								<script type="text/javascript">
+									productListForOmniture = productListForOmniture +  ",";
+								</script>						
+							</isif>
+					</isloop>
+				</table>
+			</div><!-- END: ordershipment -->
+		</isif>
+
+		<isif condition="${shipment.giftCertificateLineItems.size() > 0}">
+			<div class="ordershipment">
+				<iscomment>Shipment Gift Certificate</iscomment>
+				<table class="ordershipmenttable" summary="Order Shipment">
+					<thead>
+						<tr>
+							<th>${Resource.msg('global.product','locale',null)}</th>
+							<th>${Resource.msg('global.price','locale',null)}</th>
+							<th>${Resource.msg('orderdetails.shippingdetails','components',null)}</th>
+						</tr>
+					</thead>					
+					<isloop items="${shipment.giftCertificateLineItems}" var="giftCertificateLineItem" status="gcliloopstate">
+						<tr>
+							<td class="ordergiftcertattributes">
+								<div class="label">${Resource.msg('global.giftcertificate','locale',null)}</div>
+								<div class="ordergiftcertto">
+									<span class="label">${Resource.msg('orderdetails.giftcertto','components',null)}</span>
+									<span class="value"><isprint value="${giftCertificateLineItem.recipientName}"/><br />
+									<ismask p_string="${giftCertificateLineItem.recipientEmail}" p_maskchars="${6}"/></span>
+								</div>
+								<div class="ordergiftcertfrom">
+									<span class="label">${Resource.msg('orderdetails.giftcertfrom','components',null)}</span>
+									<span class="value"><isprint value="${giftCertificateLineItem.senderName}"/><br />
+									<ismask p_string="${giftCertificateLineItem.senderEmail}" p_maskchars="${6}"/></span>
+								</div>
+							</td>
+							<td>
+								<isprint value="${giftCertificateLineItem.price}"/>
+							</td>
+							<td class="ordershipmentdetails">
+								<div class="ordershipmentaddress">
+						    		<div class="label">${Resource.msg('orderdetails.giftcertshippingaddress','components',null)}</div>
+						    		<div class="ordergiftcertto">
+										<div class="value"><isprint value="${giftCertificateLineItem.recipientName}"/></div>
+										<div class="value"><ismask p_string="${giftCertificateLineItem.recipientEmail}" p_maskchars="${6}"/></div>
+									</div>
+						    	</div>
+								<div class="shippingmethod">
+						    		<span class="label">${Resource.msg('orderdetails.shippingmethod','components',null)}</span>
+						    		<span class="value">${Resource.msg('orderdetails.giftcertshipping','components',null)}</span>
+						    	</div>							
+							</td>
+						</tr>
+					</isloop>					
+				</table>
+			</div>
+		</isif>
+	</isloop>
+</div><!-- END: orderpayment -->
+
+<iscomment><!-- HTML Snippet for Delivery Service, Gift Message and Order Total Section | Asha --> TODO |Test | Naveen Kumar</iscomment>
+<div class="orderpaymentBrief">
+	<div class="orderpaymentdetails">
+		<table class="orderpaymentdetailstable" summary="Order Payment Details">
+			<tr>
+				<iscomment><!-- TODO | Added new section in static HTML to match with VD | Asha --></iscomment>
+				<td class="deliveryaddress">
+					<div class="label">${Resource.msg('confirmation.delivery','checkout',null)}</div>
+					<div class="miniaddress">
+						<div><isprint value="${Order.shipments[0].shippingMethod.displayName}" />
+							<isprint value="${dw.order.ShippingMgr.getShipmentShippingModel(Order.shipments[0]).getShippingCost(Order.shipments[0].shippingMethod).getAmount()}">
+						</div><!-- END: name and price -->
+						<isif condition="${Order.shipments[0].shippingMethodID == Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}">
+							<div><isprint value="${pdict.storeCollectionDate}" /></div><!-- END: name -->						
+						<iselse>
+							<div><isprint value="${Order.shipments[0].shippingMethod.description}" /></div><!-- END: name -->
+						</isif>
+					</div>
+				</td>
+				
+					<isif condition="${Order.shipments[0].gift}">
+						<isif condition="${!empty(Order.shipments[0].giftMessage)}">
+							<td class="orderbilling borderleft">
+								<div class="label">${Resource.msg('orderdetails.giftmessage','components',null)}</div>
+								<div class="miniaddress"><iscomment>INT 732: Removed truncation of gift message on order confirmation page</iscomment>
+								 <isif condition="${Order.shipments[0].giftMessage.length > 240}">
+									<isscript>
+									   var startIndex : Number = 0;
+									   var endIndex : Number= (Order.shipments[0].giftMessage.length)/240;
+									</isscript>
+								 
+									<isloop status="i" begin="${startIndex}" end="${endIndex}">
+										<isprint value="${Order.shipments[0].giftMessage.substring(startIndex,startIndex+240)}"/><br/>
+										<isscript>
+											startIndex = startIndex+240;
+										</isscript>
+									</isloop>
+								<iselse>
+									<isprint value="${Order.shipments[0].giftMessage}"/>
+								</isif>
+								</div>
+							</td>
+						<iselse>
+							<td class="orderbilling"></td>		
+						</isif>
+					<iselse>
+						<isif condition = "${!empty(Order.shipments[0].giftCertificateLineItems.iterator()) && (null != Order.shipments[0].giftCertificateLineItems.iterator())}">
+							<isset name="theGiftCert" value="${Order.shipments[0].giftCertificateLineItems.iterator().next()}" scope="page"/>	
+						</isif>
+						<iscomment>Praveen: Removing NullPointerException</iscomment>
+						<td class="orderbilling">
+							<isif condition="${null != theGiftCert && !empty(theGiftCert.message)}">
+								<div class="label">${Resource.msg('orderdetails.giftmessage','components',null)}</div>
+								<div class="miniaddress">
+									<isprint value="${theGiftCert.message}"/>
+								</div>
+							</isif>
+						</td>	
+					</isif>
+								
+				<td class="confirmationtotal">
+					<!-- isordertotals p_lineitemctnr="${Order}" p_showshipmentinfo="${false}" p_shipmenteditable="${false}" p_totallabel="${Resource.msg('global.ordertotal','locale',null)}"/  -->
+					<table summary="Order Totals Table" class="ordertotalstable">
+						<tbody>
+							<iscomment>Order Sub Total</iscomment>
+							<isscript>
+								var orderDiscount : dw.value.Money = new dw.value.Money(0, dw.system.Site.getCurrent().getCurrencyCode());
+								if (!empty(Order.custom.orderLevelDiscount)){
+									orderDiscount = new dw.value.Money(Order.custom.orderLevelDiscount,dw.system.Site.getCurrent().getCurrencyCode());								
+									totalDiscount = totalDiscount.add(orderDiscount);
+								}
+							</isscript>
+							<tr class="ordersubtotal">							
+								<td><span class="label">${Resource.msg('ordersummary.ordersubtotal','components',null)}</span></td>
+								<td><span class="value"><isprint value="${Order.getAdjustedMerchandizeTotalPrice(false).add(orderDiscount).add(Order.giftCertificateTotalPrice)}"/></span></td>
+							</tr>
+							<iscomment>calculate order level discounts</iscomment>
+							
+							<isif condition="${!empty(orderDiscount) && orderDiscount.value > 0.0}">									
+								<tr class="ordersubtotal">
+									<td><span class="label promo">${Resource.msg('summary.promoapplied','checkout',null)}:</span></td>
+									<td><span class="value promo"><isprint value="${orderDiscount.multiply(-1)}"/></span></td>
+								</tr>
+							</isif>								
+							<iscomment>Order Shipment Type</iscomment>
+							<tr class="ordertotal">	
+								<!-- Praveen - Bug Fixing: 954952 -->
+								<iscomment><td><span class="label">${Resource.msg('ordersummary.ordershipping','components',null)}</span></td></iscomment>
+								<td><span class="label"><isprint value="${Order.shipments[0].shippingMethod.displayName}"/></span></td>
+								<!-- Praveen - Bug Fixing: 954952 -->
+								<td>
+									<span class="value">
+										<isif condition="${Order.shippingTotalPrice.available}">
+											<isprint value="${Order.shipments[0].shippingTotalPrice}"/>
+											<iscomment> Variables added for Omniture Tagging | Naveen Kumar </iscomment>
+											<isif condition="${Order.shipments[0].shippingTotalPrice.value > 0}">
+												<script type="text/javascript">												
+													productListForOmniture = productListForOmniture + ",;${Resource.msg('omniture.products.order.shipping','omniture',null)};;;${Resource.msg('omniture.events.order.shipping','omniture',null)}=${Order.shipments[0].shippingTotalPrice.value}";
+													om_event = om_event + ",${Resource.msg('omniture.events.order.shipping','omniture',null)}";												
+												</script>
+											</isif>
+										<iselse/>
+											&nbsp;
+										</isif>							
+									</span>
+								</td>
+							</tr>							
+							
+							<iscomment>calculate shipping discount</iscomment>
+							<isscript>
+								var shippingExclDiscounts : dw.value.Money = Order.shippingTotalPrice;
+								var shippingInclDiscounts : dw.value.Money = Order.getAdjustedShippingTotalPrice();
+								var shippingDiscount : dw.value.Money = shippingExclDiscounts.subtract( shippingInclDiscounts );
+								totalDiscount = totalDiscount.add(shippingDiscount);
+							</isscript>
+							<isif condition="${!empty(shippingDiscount) && shippingDiscount.value > 0.0}">
+								<isif condition="${pdict.p_showshipmentinfo}">
+									<tr class="ordershippingdiscount">
+										<td nowrap="nowrap"><span class="label">${Resource.msg('ordersummary.ordershippingdiscount','components',null)}</span></td>
+										<td nowrap="nowrap"><span class="value"><isprint value="${shippingDiscount.multiply(-1)}"/></span></td>
+									</tr>
+								<iselse/>
+									<tr class="ordershippingdiscount">
+										<td nowrap="nowrap"><span class="label">${Resource.msg('ordersummary.ordershippingdiscount','components',null)}</span></td>
+										<td nowrap="nowrap"><span class="value"> <isprint value="${shippingDiscount.multiply(-1)}"/></span></td>
+									</tr>
+								</isif>
+							</isif>														
+							<iscomment>Order Total</iscomment>
+							<tr class="ordertotalfinal">
+								<isif condition="${Order.totalGrossPrice.available}">
+								 	<isset name="orderTotalValue" value="${Order.totalGrossPrice}" scope="page"/>
+								<iselse/>
+									<isset name="orderTotalValue" value="${Order.getAdjustedMerchandizeTotalPrice(true).add(Order.giftCertificateTotalPrice)}" scope="page"/>
+								</isif>
+								<iscomment>Praveen: QC Defect fixing 797</iscomment>
+								<td nowrap="nowrap"><span class="label"><isprint value="${Resource.msg('global.ordertotal','locale',null)}"/></span></td>
+								<td nowrap="nowrap"><span class="value"><isprint value="${orderTotalValue}"/></span></td>
+							</tr>
+						</tbody>
+					</table>
+				</td>				
+			</tr>
+</table>
+	</div><!-- END: orderpaymentdetails -->
+	
+</div><!-- END: orderpayment -->
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar </iscomment>	
+	<isloop items="${Order.priceAdjustments}" var="priceAdjustment" status="cliloopstate">
+		<script type="text/javascript">
+			om_promoCodes = om_promoCodes + "${priceAdjustment.promotion.name}";		
+			if(${!cliloopstate.last}){
+				om_promoCodes = om_promoCodes + " - ";		
+			}
+		</script>
+	</isloop>
+	<isloop items="${Order.allShippingPriceAdjustments}" var="shippingPriceAdjustment" status="cliloopstate">
+		<script type="text/javascript">
+			if(om_promoCodes != ""){
+				om_promoCodes = om_promoCodes + " - "; 
+			}
+			om_promoCodes = om_promoCodes + "${shippingPriceAdjustment.promotion.name}";		
+			if(${!cliloopstate.last}){
+				om_promoCodes = om_promoCodes + " - ";		
+			}
+		</script>
+	</isloop>	
+	
+	<isif condition="${!empty(totalDiscount) && totalDiscount.value > 0.0}">		
+		<script type="text/javascript">
+			productListForOmniture = productListForOmniture + ",;${Resource.msg('omniture.products.order.promotion','omniture',null)};;;${Resource.msg('omniture.events.order.promotion','omniture',null)}=${totalDiscount.value}";
+			om_event = om_event + ",${Resource.msg('omniture.events.order.promotion','omniture',null)}";												
+		</script>								
+	</isif>	
+	<script type="text/javascript">		
+		s.events = om_event;						
+		s.products = productListForOmniture; 
+		s.eVar9 = om_promoCodes;
+	</script>
+
+<iscomment>Jira ID : INT-277 Trusted Shop Pod on Order Confirmation POD</iscomment>
+<isif condition="${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country == 'DE'}">
+	<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('trustedShopEnabled')}">
+		<isinclude template="components/order/trustedshoponorderconfirmation.isml"/>
+	</isif>
+</isif>
+	
+<div class="confirmcheckout_bottom">
+	<div class="checkout_generic_bottom floatleft trackorder">
+		<div class="inner_wrapper">
+			<h3 class="track_icon"><div class="ms_header_login">${Resource.msg('cart.trackorder','checkout',null)}</div></h3>
+		</div>
+		<div class="detail_section">
+			<h4>${Resource.msg('cart.trackordermsg','checkout',null)}</h4>
+			<ul>
+				<li><a target="_blank" href="${URLUtils.https('Account-Show')}" title="${Resource.msg('cart.trackorderlink','checkout',null)}">${Resource.msg('cart.trackorderlink','checkout',null)}</a></li>
+				<li><a href="${URLUtils.https('Account-Show')}" title="${Resource.msg('cart.gotoaccountlink','checkout',null)}">${Resource.msg('cart.gotoaccountlink','checkout',null)}</a></li>
+				<li><a href="${URLUtils.https('Account-Show')}" title="${Resource.msg('cart.editorderlink','checkout',null)}">${Resource.msg('cart.editorderlink','checkout',null)}</a></li>
+			</ul>
+		</div>
+	</div>
+		
+	<div class="checkout_generic_bottom floatright needhelpSmall">
+		<div class="inner_wrapper">
+			<h3 class="needhelp"><div class="ms_header_login">${Resource.msg('cart.needhelp','checkout',null)}</div></h3>
+		</div>
+		<div class="detail_section">
+			<h4>${Resource.msg('cart.customerservicenumber','checkout',null)}</h4>
+			<p>${Resource.msg('cart.customerservicetext','checkout',null)} 
+				<a href="${URLUtils.http('Page-HelpPageShow','secId','faq-06-02','quesId','#faq-06-02-01')}" title="${Resource.msg('cart.customerservicecontact','checkout',null)}">					
+					${Resource.msg('cart.customerservicecontact','checkout',null)}</a>${Resource.msg('global.fullstop','locale',null)}
+			</p>
+		</div>
+	</div>
+		
+	<div class="clear"></div>
+		
+</div>
+<iscomment>Javascript section has been added for QC:4016</iscomment>
+<script type="text/javascript">	
+	var trackDiv = $(".trackorder .inner_wrapper").height() + $(".trackorder .detail_section").height();	
+	var needHelp = $(".needhelpSmall .inner_wrapper").height() + $(".needhelpSmall .detail_section").height();
+	var diff = trackDiv - needHelp;
+	var needhelpInnerHeight = $(".needhelpSmall .inner_wrapper").height();
+	var newHeight = needhelpInnerHeight + diff + 9 /*tweak*/;
+	$(".needhelpSmall .detail_section").height(newHeight);
+</script>

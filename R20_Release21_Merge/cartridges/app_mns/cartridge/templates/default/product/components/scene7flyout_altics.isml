@@ -1,0 +1,55 @@
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<iscomment><!-- 
+TODO: scene7 17th may 2011 re-jig this however you like. 
+Add masterID 
+
+video assets for testing:
+Stub video product: http://www.marksandspencerextra.com/1016/T590229D.html
+Stub  3D product: http://www.marksandspencerextra.com/927/T831467.html
+--></iscomment>
+<isset name="video3Daddress" value="${pdict.Product.custom.videoURL}" scope="page"/>
+<isset name="video3Dtitle" value="see video or 3d view of this product in a popin window." scope="page"/>
+<isset name="video3Dclass" value="scene7flyoutvideotrigger" scope="page"/>
+<isset name="video3Dclassdisabled" value="scene7flyoutvideotrigger disabled" scope="page"/>
+<isscript>video3Dclass = video3Daddress !== "" ? video3Dclass : video3Dclassdisabled;</isscript>
+
+<isscript>
+			var subProductID = pdict.Product.ID;
+			var masterID = null;
+			if (pdict.Product.isMaster()) {
+				masterID = pdict.Product.ID;
+			} else {
+			 if (pdict.Product.isVariant()) {
+					masterID = pdict.Product.variationModel.getMaster().ID;
+				} else {
+					masterID = pdict.Product.ID;
+				}
+			}
+			subProductID = subProductID.replace(/[^0-9a-z_]+/ig , '_');
+			masterID = masterID.replace(/[^0-9a-z_]+/ig , '_');
+</isscript>
+
+<div class="scene7flyoutviewer_altics scene7flyoutviewer">
+	<div class="scene7flyoutimagecontainer">
+		<img alt="scene7" class="scene7mainimage" src="" 
+			id="flyzoom--${masterID}" 
+			params=""
+			/>
+	</div>
+	<div class="scene7flyoutcontrols">
+	<iscomment><!-- TODO: added image. 23rd May 2011: added 'rollover... text  --></iscomment>
+		<img alt="scene7" class="imgcntrlbg" src="${URLUtils.staticURL('themes/demandwarestore/images/s7_control_bg.png')}" />
+		<isif condition="${video3Daddress != null}">
+			<iscomment>Fix for Omniture issue in Remedy, 6272682</iscomment>
+			<div class="${video3Dclass}"><a href="${video3Daddress}" onclick="javascript:setOmnitureVariablesForVideo('${pdict.Product.custom.tNumber}',this);" title="${video3Dtitle}">${Resource.msg('altics.product.scene7.video.label','product',null)}</a></div><iscomment>INT 687: altics change in resource bundle</iscomment>
+		</isif>
+		<div class="s7_prompt">${Resource.msg('altics.product.scene7.rollover.label','product',null)}</div><iscomment>INT 687 : altics change in resource bumdle</iscomment>
+		<div class="cl"></div>
+	</div>
+	<div class="scene7flyoutthumbscontainer">
+		<a href="" class="scene7flyoutcontrol_previous" title="${Resource.msg('global.previous','locale',null)}"></a>
+		<div class="scene7flyoutcontrol_thumbs"></div>
+		<a href="" class="scene7flyoutcontrol_next" title="${Resource.msg('global.next','locale',null)}"></a>
+	</div>
+</div>
+

@@ -1,0 +1,102 @@
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<iscomment>
+	This is the footer for all pages. Be careful caching it if it contains
+	user dependent information. Cache its elements instead if necessary (do not forget
+	to change the isinclude into a pipeline include for that).
+</iscomment>
+<div id="footer">
+	<iscomment>INT-152 - Christina - add RichRelevance Recommendations</iscomment>
+	<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('rrIsEnabled')}">
+	<isinclude template="RichRelevance/r3_flush"/>
+	</isif>
+	<iscontentasset aid="footer_social_signup"/>
+	<iscontentasset aid="footer_copy_mns"/>
+</div><!-- END: footer -->
+<div id="closeTextLang" class="closeTextLang">${Resource.msg('global.close','locale',null)}</div>
+<iscomment>
+	Customer registration can happen everywhere in the page flow. As special tag in the pdict
+	is indicating it. So we have to check on every page, if we have to report this event for
+	the reporting engine.
+</iscomment>
+<isinclude template="util/reporting/ReportUserRegistration.isml"/>
+
+<script type="text/javascript">
+$('.tooltip .tooltip-body').hide();
+// $('.bt-wrapper').live('mouseover', function(){alert("hi");});
+          if (navigator.userAgent.indexOf('iPad') > -1){
+            $("div").click(function(){
+                        //$('.tooltipviewdetails').blur();
+                  })
+            $('.tooltip').each(function() {
+                $(this).bt({
+                  trigger: ['focus mouseover', 'blur mouseout'],
+                  contentSelector: "$(this).find('.tooltip-body').html()", /*get text of inner content of hidden div*/
+                   fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1
+                  }
+                })  
+          })
+          }else{
+            $('.tooltip').each(function() {
+                $(this).bt({
+                  trigger: ['focus mouseover', 'blur mouseout'],
+                  contentSelector: "$(this).find('.tooltip-body').html()", /*get text of inner content of hidden div*/
+                   fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1
+                  }
+                })
+          }
+)}
+
+$(document).ready(function(){
+	var styles3 = {'-webkit-box-shadow':'0 0 2px #20439C inset', '-moz-box-shadow':'0 0 2px #20439C inset','-o-box-shadow':'0 0 2px #20439C inset','box-shadow':'0 0 2px #20439C inset'};
+	var styles4 = {'-webkit-box-shadow':'0 0 2px #525252 inset', '-moz-box-shadow':'0 0 2px #525252 inset','-o-box-shadow':'0 0 2px #525252 inset','box-shadow':'0 0 2px #525252 inset'};
+	var signUpText = jQuery('#newsletter').val();
+	$('#newsletter').focus(function(){
+		jQuery(this).css(styles3);  
+		if(jQuery(this).val() == signUpText){
+			jQuery(this).val("");
+		}
+	});
+	$('#newsletter').blur(function(){
+		jQuery(this).css(styles4);
+		if(jQuery(this).val() == ""){
+			jQuery(this).val(signUpText);
+		}
+	});
+	var submitEmailURL = "${URLUtils.http('Page-Show','cid','Newsletter')}";
+});
+
+function newsletterRedirect(){
+	var email = $('#newsletter').val();
+		var submitEmailURL = "${URLUtils.http('Page-Show','cid','Newsletter')}";
+		submitEmailURL = app.util.appendParamToURL(submitEmailURL,'email',email);
+		setTimeout(function(){window.location.href = submitEmailURL},200);
+}
+
+</script>
+
+<span><a class="gotop" href="#top" title="${Resource.msg('back_to_top.message','common',null)}"><isprint value="${Resource.msg('back_to_top.message','common',null)}"></a></span>
+<!-- SiteCatalyst code version: H.23.3.
+Copyright 1996-2011 Adobe, Inc. All Rights Reserved
+More info available at http://www.omniture.com -->
+<iscontentasset aid="CA_MS_FOOTER_SITECATALYST_CODE"/>
+<iscomment>Commenting the site tagger code
+<script type="text/javascript"> var stHost = (("https:" == document.location.protocol) ? "https://www." : "http://www."); var stAccount = "${dw.system.Site.getCurrent().getCustomPreferenceValue("siteTaggerAccountId")}"; document.write(unescape("%3Cscript src='" + stHost + "sitetagger.co.uk/" + stAccount + "/sitetagger.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+</iscomment>
+<iscomment>Bright tag code starts</iscomment>
+<script type="text/javascript">
+  (function () {
+    var tagjs = document.createElement("script");
+    var s = document.getElementsByTagName("script")[0];
+    tagjs.text = "{'site':'C5pyM98'}";
+    tagjs.async = true;
+    tagjs.src = "//s.btstatic.com/tag.js";
+    s.parentNode.insertBefore(tagjs, s);
+  }());
+</script>
+<noscript>
+  <iframe src="//s.thebrighttag.com/iframe?c=C5pyM98" width="1" height="1" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</noscript>
+<iscomment>Bright tag code ends</iscomment>
+		
+		

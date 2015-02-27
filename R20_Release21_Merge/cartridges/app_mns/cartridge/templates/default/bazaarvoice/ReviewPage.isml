@@ -1,0 +1,94 @@
+
+<isset name="DecoratorTemplate" value="product/pt_productdetails" scope="page"/>
+
+
+<isdecorate template="${DecoratorTemplate}">
+	<iscache type="relative" minute="1440" varyby="price_promotion"/>
+	<isinclude template="util/modules"/>
+
+<!-- image section------------------------------------------------------------------------------------------------------- -->
+		<table class="carttable" border="0" width="100%">
+			<thead>
+				<tr>
+					<th colspan="3" class="product">${Resource.msg('global.product','locale',null)}</th>					
+				</tr>
+			</thead>
+
+			<tfoot>
+				<isloop items="${pdict.Basket.priceAdjustments}" var="priceAdjustment" status="cliloopstate">
+					<tr class="spOffers rowcoupons ${rowNaming.getName()}">
+						<td class="detailscolumn" colspan="4">						
+							<em>${Resource.msg('promotions.special','product',null)}</em> <span>${priceAdjustment.promotion.calloutMsg}</span>&nbsp;
+							(<a class="tooltip" href="javascript:;" id="tooltipviewdetails">${Resource.msg('global.promotionalmoredetails','locale',null)}<div class="tooltip-body" style="display:none"><div class="tooltipcontainer"><div class="tooltipcontent"><isprint value="${priceAdjustment.promotion.details}" encoding="off"/></div></div></div></a>)							
+						</td>
+						<td class="itemtotalcolumn promoApp">
+							<span class="bonusitem">${Resource.msg('summary.promoapplied','checkout',null)}&nbsp;&nbsp;&nbsp;<isprint value="${priceAdjustment.price}"/></span>						
+						</td>
+					</tr>
+				</isloop>				
+			</tfoot>			
+			<tbody>
+		
+			
+			<iscomment>LOOP TO SEPARATE DIFFERENT SHIPMENTS ex: Gift Registry Shipments Etc.</iscomment>
+			<isloop items="${pdict.CurrentForms.cart.shipments}" var="Shipment" status="loopstate">
+				<isloop items="${Shipment.items}" alias="FormLi" status="loopstate">
+					<isset name="lineItem" value="${FormLi.object}" scope="page"/>
+					<isscript>
+						var isInWishList = false;
+						if (pdict.WishList)
+						{
+							var wishListItems = pdict.WishList.items;
+							var wishListItemsSize = wishListItems.size();
+						
+							for each( var wishListItem in wishListItems ) { 
+								if (lineItem.productID == wishListItem.product.ID)
+								{
+									isInWishList = true;
+									break;
+								}
+							}
+						} 
+				
+					</isscript>
+					<tr>
+						<td colspan="5" class="spacer"></td>
+					</tr>				
+					<tr class="tablerow">
+						Write a review </br>
+			            Thank you for liking this product
+						<td class="imagecolumn">
+							<isif condition="${lineItem.product != null && lineItem.product.getImage('catlanding',0) != null}">
+								<isscript>
+								var cartproductlineitemswidth : Integer = dw.system.Site.getCurrent().preferences.custom.ImageWidthCartProductLineItems;
+								var cartproductlineitemsheight : Integer = dw.system.Site.getCurrent().preferences.custom.ImageHeightCartProductLineItems;
+								var scene7ImageUrl : String = lineItem.product.getImage('catlanding',0).URL + '?' 
+								+ dw.system.Site.getCurrent().preferences.custom.s7Preset + 'wid='+cartproductlineitemswidth+'&hei='+cartproductlineitemsheight;
+								</isscript>
+								<img src="${scene7ImageUrl}" alt="${lineItem.product.getImage('catlanding',0).alt}" title="${lineItem.product.getImage('catlanding',0).title}"/>
+							<iselse>
+								<img src="${URLUtils.staticURL('/images/noimagesmall.png')}" alt="${lineItem.productName}" title="${lineItem.productName}"/>
+							</isif>
+							<isif condition="${lineItem.bonusProductLineItem}">
+								<span class="bonusitem">${Resource.msg('global.bonus','locale',null)}</span>
+							</isif>
+						</td>
+						<td class="detailscolumn">
+							<isdisplayliproduct p_productli="${lineItem}" p_formli="${FormLi}"  p_hideprice="${true}" p_hidepromo="${false}"/>
+						</td>
+						
+				</tr>
+				</isloop>
+			</isloop>
+
+				
+			</tbody>
+		</table>	
+<!-- image section--end----------------------------------------------------------------------------------------------------- -->
+
+<!-- form section----------------------------------------------------------------------------------------------------- -->
+
+<!-- form section---end----------------------------------------------------------------------------------------------------- -->
+
+
+</isdecorate>

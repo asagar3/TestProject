@@ -1,0 +1,57 @@
+<isset name="Product" value="${pdict.Product}" scope="page"/>				
+<isscript>
+var IsBazaarVoiceEnabled:Boolean= dw.system.Site.getCurrent().getCustomPreferenceValue("IsBazaarVoiceEnabled");
+ var TopRatedVar : Number=0;
+ var  AvgRatingInPercent:Number=0;
+ var Title=0;
+	if(!empty(Product.custom.TopRated) && Product.custom.TopRated > 0)
+	{
+	    TopRatedVar=parseFloat(Product.custom.TopRated);	
+		AvgRatingInPercent=Math.round((TopRatedVar/5)*100);
+		Title=Product.custom.TopRated;
+	}	
+	var ReviewCount=0;
+	if(!empty(Product.custom.MostReviewedCount) && Product.custom.MostReviewedCount>0)
+	{
+	ReviewCount=Product.custom.MostReviewedCount;
+	}   
+	    var Displaycode:String=pdict.RRDisplayCode;
+		var BVStaging:String=dw.system.Site.getCurrent().getCustomPreferenceValue("bvStaging");
+		
+	    var writereviewURL=URLUtils.http('Bazaarvoice-SubmissionContainer','pid',Product.ID)+
+						   "&bvdisplaycode="+Displaycode+"&bvappcode=rr&bvproductid="+Product.ID+
+						   "&bvpage=http://reviews.marksandspencer.com"+BVStaging+	"/"	+Displaycode+"/"+Product.ID+
+						   "/submitreview.htm?format=embedded&campaignid=BV_RATING_SUMMARY_ZERO_REVIEWS&sessionparams=__BVSESSIONPARAMS__&return="
+						   +URLUtils.url('Product-Show','pid',Product.ID)+
+						   "&innerreturn=http://reviews.marksandspencer.com"+BVStaging+"/"	+Displaycode+"/"+Product.ID+
+						   "/reviews.djs?format=embeddedhtml&authsourcetype=__AUTHTYPE__&bvcontenttype=REVIEW_SUBMISSION&bvauthenticateuser=false";
+</isscript>
+<isif condition="${IsBazaarVoiceEnabled}">
+<div class="starRatings">
+<isif condition="${AvgRatingInPercent>0 && AvgRatingInPercent<=100}">
+	<a class="reviewCountLink starRating" title="${Title}/5" data-pid="${Product.ID}">	
+		<span class="greyStars">
+			<span class="yellowStars" style="width:${AvgRatingInPercent}%"></span>
+		</span>	
+	</a>
+<iselse>       
+		<a class="starRating" title="0/5" href="${writereviewURL}" data-pid="${Product.ID}">	
+			 <span class="greyStars floatLeft">
+				<span class="yellowStars" style="width:${0}%"></span>
+			 </span>	
+			 <span class="noReviewText">${Resource.msg('product.firstreview','product',null)}</span><span class="clear"></span>			 
+        </a>
+</isif>
+		
+<isif condition="${ReviewCount > 0}">
+    <isif condition="${ReviewCount == 1}">
+		<a class="reviewCountLink textReview" href="#containerReviews" data-pid="${Product.ID}">${ReviewCount} ${Resource.msg('product.review','product',null)}</a>
+	<iselse>
+		<a class="reviewCountLink textReview" href="#containerReviews" data-pid="${Product.ID}">${ReviewCount} ${Resource.msg('product.reviews','product',null)}</a>
+	</isif>
+</isif>
+</div>	
+<div class="cl"></div>
+</isif>
+
+	

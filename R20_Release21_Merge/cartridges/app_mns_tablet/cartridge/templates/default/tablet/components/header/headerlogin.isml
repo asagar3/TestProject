@@ -1,0 +1,77 @@
+<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+<script src="${URLUtils.staticURL('/lib/adobe/omniture/s_code.js')}" type="text/javascript"></script>
+<a title="${Resource.msg('skip_content.message','common',null)}" href="#skipnav" class="skipnav"><isprint value="${Resource.msg('skip_content.message','common',null)}"></a>
+<div id="header_checkout">
+	<iscomment>LOGO: Logo set with CSS as background image edit within CSS</iscomment>
+	<iscomment>
+	<isif condition="${session.custom.localeStr != null }">	
+    	<a href="${URLUtils.httpHome()}/${request.locale}" title="${Resource.msg('global.storename','locale',null)}" class="logo">Marks &amp; Spencer</a>   
+   <iselse>
+    	<a href="${URLUtils.httpHome()}" title="${Resource.msg('global.storename','locale',null)}" class="logo">Marks &amp; Spencer</a>
+   </isif>
+   </iscomment>
+   <isinclude template="tablet/components/header/mns_logo.isml"/>
+   
+    	<isif condition="${(pdict.checkoutPageStatus == "onShippingPage")||(pdict.checkoutPageStatus == "onBillingPage")}">
+    		<!-- CR039 | Remove Registration Link in Checkout -->
+    		<!-- isinclude url="${URLUtils.url('Home-IncludeHeaderCustomerInfo')}"/  -->
+    	</isif>
+    	<div class="progressbar">
+    		<iscomment><!-- TODO | Please enable progressbar_2 for delivery pages on the basis of condition | Asha | 08-mar-2011--></iscomment>
+
+    		<isif condition="${pdict.checkoutPageStatus == "onShippingPage" }">
+    		
+    		<div class="progressbar_2">
+    			<div class="progressbar_2_stage">
+    			    <span class="stage1">${Resource.msg('checkoutheader.welcome','checkout',null)}</span>
+    			    <span class="stage2">${Resource.msg('checkoutheader.delivery','checkout',null)}</span>
+    			</div>
+    			<div class="stage3">${Resource.msg('checkoutheader.payment','checkout',null)}</div>
+    			<label class="skipnav">You are on delivery details, step 2 of 3</label>
+    		</div>
+    		
+    		<iscomment><!-- TODO | Please enable progressbar_3 for payment pages on the basis of condition | Asha | 08-mar-2011--></iscomment>
+    		<iselseif condition="${(pdict.checkoutPageStatus == "onBillingPage") || (!empty(pdict.ReasonCode) && (pdict.ReasonCode==475)) }">
+    		<div class="progressbar_3">    			
+    			<span class="stage1">${Resource.msg('checkoutheader.welcome','checkout',null)}</span>
+    			<span class="stage2">${Resource.msg('checkoutheader.delivery','checkout',null)}</span>    			
+    			<span class="stage3">${Resource.msg('checkoutheader.payment','checkout',null)}</span>
+    			<label class="skipnav">You are on delivery details, step 3 of 3</label>    		
+    		</div>
+    		<iselse>
+    		<div class="progressbar_1">
+    			<span class="stage1">${Resource.msg('checkoutheader.welcome','checkout',null)}</span>
+    			<span class="stage2">${Resource.msg('checkoutheader.delivery','checkout',null)}</span>    			
+    			<span class="stage3">${Resource.msg('checkoutheader.payment','checkout',null)}</span>
+    			<label class="skipnav">You are on delivery details, step 1 of 3</label>
+    		</div>
+    		</isif>
+    		<div class="clear"></div>
+    		<iscomment><!-- Kept the tab module in header | Asha | 08-mar-2011 --></iscomment>
+    		<iscomment><ischeckoutprogressindicator step="1" rendershipping="${pdict.Basket.productLineItems.size() == 0 ? 'false' : 'true'}"/></iscomment>
+    		<iscomment><!-- Please replace the below <ul> to the following table | Rachna --></iscomment>
+    		<iscomment>
+    		<table cellpadding="0" cellspacing="0" class="progressbar_text">
+			    <tr>
+			        <td class="progressbar_text_stage1" scope="col">${Resource.msg('checkoutheader.welcome','checkout',null)}</td>
+			        <td class="progressbar_text_stage2" scope="col">${Resource.msg('checkoutheader.delivery','checkout',null)}</td>			        
+			        <td class="progressbar_text_stage3" scope="col">${Resource.msg('checkoutheader.payment','checkout',null)}</td>
+			    </tr>
+			</table>
+			</iscomment>
+			<iscomment><!-- remove this ul | Rachna -->
+    		<ul class="progressbar_text">
+    			<li class="welcome">${Resource.msg('checkoutheader.welcome','checkout',null)}</li>
+    			<li class="deliver">${Resource.msg('checkoutheader.delivery','checkout',null)}</li>
+    			<li>${Resource.msg('checkoutheader.payment','checkout',null)}</li>
+    		</ul></iscomment>
+    	</div>
+    	<a name="skipnav" id="skipnav" class="skipContent">&nbsp;</a>
+		<div class="clear"></div>
+</div>
+<iscomment>
+	<div class="horizontalbar"></div>
+</iscomment>
+    <!-- END: header -->
+<iscomment>Cookies and Javascript enabled check</iscomment>
+<isinclude template="components/browsertoolscheck"/>

@@ -1,0 +1,237 @@
+.upperFooter{background:#fff url(../images/upper-foot.gif) repeat-x 0 100%; padding:10px;}
+.upperFooter .cl{clear:both; height:1px;}
+.upperFooter .mnsFLogo, .upperFooter .newsLetter{float:left;}
+.upperFooter .mnsFLogo{margin:0 22px 0 0;}
+.upperFooter img{vertical-align:middle;}
+.upperFooter .socialIcons{float:right; font:bold 12px arial; padding:10px 0 0;}
+.upperFooter .socialIcons img{margin:0 0 0 5px;}
+.upperFooter .newsLetter h3{display:inline; background:none; margin:0 10px 0 0; padding:0; font:normal 17px/22px arial;}
+.upperFooter .newsLetter .inp{border:1px solid #e5e5e5!important; background:#fff; padding:2px!important; float:left; margin:0 5px 0 0; width:200px;}
+.upperFooter .newsLetter .btn{background:#000; color:#fff; margin:0; font:bold 12px arial; padding:3px 12px!important; height:auto; float:left;}
+#footer .footer_links_wrapper{margin:0 0 11px;}
+#countryShadow{background:#fff; width:100%; position:absolute; left:0; top:0; z-index:10000;}
+#countryOverlay{width:430px; background:url(../images/over-b-shadow.png) no-repeat 0 100%; padding:0 0 9px; left:50%; top:130px; position:absolute; margin-left:-200px; z-index:100000;}
+#countryOverlay .rShadow{background:#fff url(../images/over-r-shadow.png) repeat-y 100% 0; border-bottom:1px solid #e2e4e5; padding:0 7px 0 0;}
+#countryOverlay .close{width:24px; height:24px; background:url(../images/close.gif); position:absolute; right:13px; top:6px; text-indent:-999em; overflow:hidden; z-index:1001; cursor:pointer;}
+#countryOverlay h3{background:url(../images/over-heading.gif) repeat-x; font:normal 20px/63px arial; padding:0 0 0 20px; border:1px solid #e2e4e5; border-width:0 1px;}
+#countryOverlay ul{border:1px solid #e2e4e5; width:190px; padding:20px 20px 1px; margin:-6px 0 0; font:normal 18px arial; color:#5b5b5b; background:#fff;}
+#countryOverlay ul.firstFlags{border-width:1px 0 0 1px; float:left; padding-right:0;}
+#countryOverlay ul.lastFlags{border-width:1px 1px 0 0; padding-left:0; float:right; width:191px;}
+#countryOverlay ul li{padding:0 0 14px; overflow:hidden;}
+#countryOverlay ul li a.countryAT{background-position:0 -92px;}
+#countryOverlay ul li a.countryBE{background-position:0 -369px;}
+#countryOverlay ul li a.countryDE{background-position:0 -138px;}
+#countryOverlay ul li a.countryES{background-position:0 -183px;} 
+#countryOverlay ul li a.countryFR{background-position:0 1px;}
+#countryOverlay ul li a.countryIE{background-position:0 -276px;}
+#countryOverlay ul li a.countryNL{background-position:0 -229px;}
+#countryOverlay ul li a.countryLU{background-position:0 -324px;}
+#countryOverlay ul li a.countryUK{background-position:0 -45px;}
+#countryOverlay ul li.cl{width:auto; padding:0; float:none; height:1px;}
+.checkout .genericinputbox input, .editaddress .genericinputbox input, .userAddressDetails .genericinputbox input{/*width:270px;*/}
+
+.dobError{margin:0 0 0 220px;}
+.ui-dialog .editaddress .formfield{margin:0 0 12px; height:auto;}
+.editaddress .formfield .value{float:none;}
+
+.checkout .addressoptions div.label{background:none; width:180px; padding-right:20px;}
+.checkout .textbox{width:325px; height:70px;}
+.checkout .label, .ui-dialog .editaddress .label{/*width:180px; padding:0 20px 0 0; margin:0; float:left; font-weight:500;*/}
+.checkout .label span.cLimit{color:#888; font:italic 12px arial; display:block;}
+.checkout .addressoptions .fieldSet{padding:0 0 0 200px;float: left;	position: relative;}
+.addressoptions .fieldSet .formfieldtooltipAdjust{
+	float:none; 
+	left:auto; 
+	top:auto; 
+	position: absolute;
+    right: -24px;
+    top: 0;
+}
+.checkout .addressoptions div.label, .checkout .addressoptions{margin:0;}
+.checkout .paymentmethods input, .checkout .gender input{background:#000;  border:0!important; z-index:1;}
+.checkout .actions{text-align:left; margin:10px 0 0;}
+.checkout .actions span{margin:0 20px 0 0;}
+.checkout .mnsNLetter{width:280px;}
+.checkout .mnsNLetter input{float:left;}
+.checkout .mnsNLetter p{margin:0 0 0 20px; font:12px arial;}
+.checkout .mnsNLetter p a{color:#034181; text-decoration:underline;}
+span.radio label{
+	 
+	color: #000;
+	font-weight: normal;
+}
+.addressoptions .checkbox input{display: none;}
+.pt_checkout .lowerFooter .cards, .pt_checkout_wrapper .lowerFooter .cards{float:none;}
+.pt_checkout #rightcolumn{float:right;}
+#header_checkout .progressbar{float:right;}
+.checkout #addressform .collapsibleArea #shippingmethodform {margin-left:0px;}
+.checkout .collapsibleArea .giftmessage{margin:0; padding:0 0 12px;}
+.pt_storefront #content{max-width:none; float:none;}
+.pt_account #main #content{width:auto; max-width:none; float:none;}
+.pt_checkout_wrapper #footer{width:auto;}
+.footer_links_header_1{padding-left:20px;}
+ 
+ 
+
+#dialogcontainer, #confirmationcontainer{padding:1px 0 ;}
+.ui-dialog #AddressForm .button_wrapper{padding-right:0;}
+.editaddress .requiredcaption{text-align:right; margin:25px 0 12px; font:12px arial; color:#666;}
+.editaddress .requiredcaption .requiredindicator{margin:0;}
+
+.ui-dialog .editaddress div.errorclient{margin:0 0 0 189px;}
+
+#paymentmethods{padding:25px 0 0;}
+.checkout .paymentmethods{float:right; width:405px; margin:0;}
+#paymentMethodSelector li{margin:0 0 12px;}
+#paymentMethodSelector li input{margin:0;}
+#paymentMethodSelector li label{margin:0; display:inline-block; font:500 14px/23px arial; padding:0 0 0 100px; color:#333;}
+
+#paymentMethodSelector li.is-CREDIT_CARD label{background:url(../images/pay-by-cards.jpg) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-IDEAL-SSL label{background:url(../images/i-deal.gif) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-SOFORT-SSL_en_DE label{background:url(../images/sofort_en.png) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-SOFORT-SSL_de_DE label{background:url(../images/sofort_de.png) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-SOFORT-SSL_de_AT label{background:url(../images/sofort_de.png) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-SOFORT-SSL_en_AT label{background:url(../images/sofort_en.png) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-BML label{background:url(../images/klarna.png) no-repeat 10px 50%;}
+#paymentMethodSelector li.is-BML label.disabledText{opacity:.3; filter: alpha(opacity = 30);}
+#paymentMethodSelector li.is-BML .formfieldtooltip{position:absolute; margin-top:-3px;}
+#paymentMethodSelector li.is-BML .formfieldtooltip .tooltip_icon{margin-top:0;}
+
+#paymentMethodSelector li.is-CREDIT_CARD_MISTERCASH label{background:url(../images/mr-cash.jpg) no-repeat 10px 50%;}
+
+div.homepage .sectHolder{min-height:200px;}
+
+h5.grey_block_header_checkout {background:none; padding:2px 0 2px 198px; margin:0 0 18px;}
+.newPaymentPage .newGrey{border-top:1px dotted #656565;padding: 30px 20px;}
+
+.newPaymentPage .checkoutbilling{padding:0;}
+.newPaymentPage .mandatoryMsg{margin:0 0 12px; text-align:right;}
+.newPaymentPage .billingAddressFields .zip{margin:0 0 32px;}
+.checkout .selectcreditcard .selectcreditcardmessage{font-size:inherit;}
+.newPaymentPage a{color:#08427d; text-decoration: none;}
+.newPaymentPage .cAsset .value{max-width:250px; float:left;}
+.newPaymentPage .cAsset, .newPaymentPage .klarna, .newPaymentPage .klarna label{font-size:14px;}
+.newPaymentPage .klarna{padding:40px 30px 15px;border-top: 1px dotted #656565;}
+.newPaymentPage .klarna .name div.value,
+.newPaymentPage .klarna .line1,
+.newPaymentPage .klarna .line2,
+.newPaymentPage .klarna .city,
+.newPaymentPage .klarna .state,
+.newPaymentPage .klarna .zip,
+.newPaymentPage .klarna .country
+{font-weight:bold;}
+.newPaymentPage .klarna div.value{
+	
+    
+}
+.newPaymentPage .klarna div.value .line1 .state{
+	background-color: #adadad;
+	padding-left: 3px;
+	padding-right: 5px;
+}
+.newPaymentPage .klarna div.value .line1 .state + .state{
+	padding-left: 5px;
+}
+.newPaymentPage .klarna div.value .line1 .state + .state + .state{
+	padding: 0;	
+}
+.newPaymentPage .klarna div.value .line2, .newPaymentPage .klarna div.value .city, .newPaymentPage .klarna div.value .country, .newPaymentPage .klarna div.value .state, .newPaymentPage .klarna div.value .zip{
+	padding-left: 3px;
+}
+.newPaymentPage .klarna .formfield.gender .value{
+	font-style: normal;
+	font-weight: normal;
+	 
+}
+.newPaymentPage .klarna .day .genericinputbox input{width:25px;}
+.newPaymentPage .klarna .month .genericinputbox input{width:30px;}
+.newPaymentPage .klarna .year .genericinputbox input{width:40px;}
+.newPaymentPage .klarna .datedivider{float:left; font-size:14px; font-weight:normal; }
+.newPaymentPage .billingAddressFields .klarna .country{margin:0;}
+.newPaymentPage .value p{font:12px arial; margin:0 0 10px 14px;}
+.newPaymentPage .email .textinput.disabled_textfield{/*background:none; font-style:italic;*/}
+.newPaymentPage .saveCard span{font-size:14px; margin:0 10px 0 0;}
+.newPaymentPage .name .formfieldtooltip .tooltip_icon{margin-top:0;}
+.newPaymentPage .billingAddressFields select.country{margin:0;}
+.newPaymentPage .cAsset .label{text-align:right;}
+.checkout .addresslist{margin:0 0 12px 10px;}
+.klarnaCondition .head{font:14px arial;}
+.klarnaCondition .value{max-width:342px;}
+.klarnaCondition .value input{float:left; z-index:1; margin-top:0px;}
+.klarnaCondition .value div.kContDiv{clear:right;   padding:0 0 0 20px;  }
+.klarnaCondition .value div.kContDiv{clear:right; font-size:14px; padding:0 0 0 20px;}
+.theirs.klarnaCondition .value div.kContDiv p{font-size:14px;}
+.accounteditaddress .defaultselection{margin:0 0 19px;}
+.accountaddress .miniaddress{margin:0 0 21px;}
+.klarnaText{padding:0 0 0 20px;}
+
+.account_wrapper .checkorder form .label,
+.account_wrapper .checkorder form .email .label{  width:auto !important;}
+
+.orderpayment table.orderpaymentdetailstable td.orderbilling, .orderpaymentBrief table.orderpaymentdetailstable td.orderbilling{width:39%;}
+input[name=klarnagender] + .errorIcon{
+	position: relative;
+	top: 3px;
+}
+input[name=klarnagender] + .successIcon{
+	position: relative;
+	top: 8px;
+}
+.gender .value{
+	width: 175px;
+}
+#birthday_year + .errorIcon{
+	position: relative;
+	top: -5px;
+} 
+/*.checkout .shippingmethods{width:auto; float:none;}*/
+.checkout .shippingmethods legend{float:left; width:180px; text-align:right; padding:3px 20px 0 0;  }
+.checkout .shippingmethods .shippngRight{float:right; width:360px;}
+.checkout .shippingmethods .contentasset{float:right; width:360px;}
+.shippingmethods .returns_info{padding:0 0 15px 70px;}
+.cartfooter .cartOptions h3, .cartfooter .cartTotal h3{color:#000; font:normal 16px/20px arial; padding:0 0 15px; margin:0 0 20px; border-bottom:1px dotted #a0a0a0; background:none;}
+.cartfooter .cartTotal h3{font:bold 14px/20px arial; text-align:right;}
+ 
+
+/* styles specific to tablet */
+.payment_cards li{
+	margin-bottom: 20px;
+}
+#paymentMethodSelector li input[type=radio]{
+	display: none;
+}
+.payment_cards .value{
+	width: 300px;
+}
+.collapsibleArea .paymentmethodform2, .collapsibleArea .collapseContent > div.paymentmethodform2:first-of-type{
+	display: block
+}
+.newaddressform{
+	display: inline-block;
+}
+.klarna.newForm span.label{
+	width:287px;
+	/*aliddl : defect id 4575*/
+	padding: 0;
+}
+.klarna.newForm .formfield.name .value span{
+	line-height: 14px;
+}
+#billingAddressFields, #newContactDetails{
+	padding: 20px 30px;
+}
+.checkout .giftmessagetext .giftmessagecaption, .checkout .deliveryinstructiontext .deliveryinstructioncaption{
+	margin-left: 0;
+}
+.checkout .giftmessagetext .value, .checkout .deliveryinstructiontext .value{
+	margin-left: 0;
+}
+.klarnaDoB .day .tablet-selectbox{
+	width: 75px;
+}
+.klarnaDoB .month .tablet-selectbox{
+	width: 90px;
+} 
+.klarnaDoB .year .tablet-selectbox{
+	width: 80px;
+}

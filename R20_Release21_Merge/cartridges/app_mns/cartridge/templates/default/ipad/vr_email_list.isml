@@ -1,0 +1,15 @@
+<!--- TEMPLATENAME: vr_email_list.isml --->
+<ul>
+	<isloop items="${session.custom.emailMap.keySet()}" var="email" >
+		<isset name="vbObject" value="${session.custom.emailMap.get(email)}" scope="page">
+		<li>
+	
+			<p class="emailId">${email}</p><p class="time"><isprint value="${vbObject.modifiedDate}" formatter="h:mm a" /></p><p class="date"><isprint value="${vbObject.modifiedDate}" formatter="EEE dd/MM/yy" /></p><div class="emailDivider"></div>
+			<div class="hide" id="${email}">
+				${vbObject.basketId}
+			</div>
+		</li>	
+	</isloop>
+</ul>
+
+

@@ -1,0 +1,15 @@
+<iscomponent pipeline="RichRelevance-IncludeCommon">
+<script chartset="utf-8" type="text/javascript">
+/* Remove this code until we are putting recommendations in the page
+var pts = "${dw.system.Site.current.preferences.custom.rrPlacementCart}".split(',');
+for (var i = 0; i < pts.length; i++) {
+	R3_COMMON.addPlacementType(pts[i]);
+}*/
+R3_CART = new r3_cart();
+<isloop items="${pdict.Basket.allProductLineItems}" var="pli">
+	<isif condition="${pli.product != null}">
+		R3_CART.addItemId('${(pli.product.variant ? pli.product.variationModel.master.ID : pli.product.ID)}');
+	</isif>
+</isloop>
+r3();
+</script>

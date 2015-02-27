@@ -1,0 +1,14 @@
+<!--- TEMPLATENAME: imageTypeDimension.isml --->
+<isset name="ImageType" value="${Product.custom.ImageType}" scope="page"/>
+<isscript>
+var scene7ImageType : String ='default';
+</isscript>
+<isloop items="${dw.system.Site.getCurrent().preferences.custom.ImageTypesDimension}" alias="ImageTypeDimensionObj">	
+	<isif condition="${ImageType==ImageTypeDimensionObj.getValue()}">
+		<isscript>scene7ImageTypeDimension = ImageTypeDimensionObj.getDisplayValue();
+		scene7ImageType = ImageTypeDimensionObj.getValue();
+		</isscript>
+	</isif>	
+</isloop>
+<isset name="ImageTypeDimensionString" value="${scene7ImageTypeDimension}" scope="page"/>
+<isset name="scene7ImageType" value="${scene7ImageType}" scope="page"/>

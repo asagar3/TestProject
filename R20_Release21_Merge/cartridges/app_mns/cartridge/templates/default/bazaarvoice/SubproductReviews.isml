@@ -1,0 +1,7 @@
+<h1 class="cufonIt bvH3">
+	<isprint value="${Resource.msg('product.customerReview','product',null)}" encoding="off"/>&nbsp;<isprint value="${pdict.SubProduct.name}" encoding="off"/>
+</h1>
+<div id="BVRRSecondarySummaryContainer"></div>	 
+<div id="pdpReviewsTab">
+	<isinclude template="bv/display/rr/reviews"/>
+</div>

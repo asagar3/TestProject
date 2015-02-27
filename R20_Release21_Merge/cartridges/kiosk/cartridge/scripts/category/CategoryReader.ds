@@ -1,0 +1,102 @@
+/**
+*
+*  @output customObject : Object
+*
+*/
+
+importPackage( dw.system );
+//importPackage( dw.io);
+importPackage(dw.object);
+importPackage(dw.util);
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	
+	try{
+
+		var jsonString : String ="";
+		var count : Number;
+		var customObjectsItr : SeekableIterator;
+		var newString : String;
+		var categoryObject : Object;
+		var i : Number;
+		/*we are comparing Instancetype if instancetype is production den code within will execute and Image URLs
+		 will be fetched from KioskProdCategoryDetails else KioskCategoryDetails 
+		 */
+		 
+		if(System.getInstanceType()==System.PRODUCTION_SYSTEM)
+		{
+			 customObjectsItr =CustomObjectMgr.getAllCustomObjects("KioskProdCategoryDetails");
+			 count= customObjectsItr.count;
+			 for (i =1; i<=count ; i++)
+			      {
+				   var customObject =CustomObjectMgr.getCustomObject("KioskProdCategoryDetails", "categoryProdJSON"+i);
+				   newString = getResponse(customObject);
+				   jsonString =jsonString.concat(newString);
+			      }
+	    } else {
+		 	customObjectsItr =CustomObjectMgr.getAllCustomObjects("KioskCategoryDetails");
+	     	count  = customObjectsItr.count;
+		 	for (i=1; i<=count; i++)
+			{
+				var customObject =CustomObjectMgr.getCustomObject("KioskCategoryDetails", "categoryJSON"+i);
+			  	newString= getResponse(customObject);
+			  	jsonString =jsonString.concat(newString);
+			}		   
+		}
+
+	  	categoryObject= JSON.parse(jsonString);
+	  	pdict.customObject = categoryObject;
+	}
+	catch(e)
+	{
+		Logger.error("CategoryReader :: CategoryReader Script Error:::"+e.message);
+	    return PIPELET_ERROR;	
+	}
+		
+   return PIPELET_NEXT;
+}
+
+/*
+*
+getresponse funtion is called ,to make a single string by reading instance details(0,1,2....10)content strings
+*
+
+*/
+function getResponse(customObject :CustomObject): String
+{
+	var response : String ="";
+	var attributes =customObject.getCustom();
+	response =response+attributes.details1;
+	    if(attributes.details2!=null){
+		response =response.concat(attributes.details2);
+	    }
+	    if(attributes.details3!=null){
+	    response =response.concat(attributes.details3);
+	    }
+	    if(attributes.details4!=null){
+	    response =response.concat(attributes.details4);
+	    }
+	    if(attributes.details5!=null){
+		response =response.concat(attributes.details5);
+	    }
+	    if(attributes.details6!=null){
+		response =response.concat(attributes.details6);
+	    }
+	    if(attributes.details7!=null){
+		response =response.concat(attributes.details7);
+	    }
+	    if(attributes.details8!=null){
+		response =response.concat(attributes.details8);
+	    }
+	    if(attributes.details9!=null){
+		response =response.concat(attributes.details9);
+	    }
+	    if(attributes.details10!=null){
+		response =response.concat(attributes.details10);
+	     }
+		
+return response;
+	
+	
+}

@@ -1,0 +1,22 @@
+<iscache type="relative" hour="24"/>
+
+<iscomment>
+	This template renders the slot content of the bottom slot for top category landing page
+	in case the slot content is of type Category.
+	At maximum three small banners are displayed with the name of the category
+	below.
+</iscomment>
+<isif condition="${slotcontent != null}">
+		<isloop items="${slotcontent.content}" var="category" status="loopstate">
+			<isif condition="${"slotBannerImage" in category.custom && !empty(category.custom.slotBannerImage)}">
+				<a href="${URLUtils.http('Search-Show', 'cgid', category.ID)}" title="${category.displayName}">
+					<isprint value="${category.custom.slotBannerImage}" encoding="off"/>
+				</a>
+			</isif>
+			<isif condition="${loopstate.count == 3}">
+				<isbreak/>
+			</isif>
+		</isloop>
+		
+</isif>
+<div class="clear"><!-- FLOAT CLEAR --></div>

@@ -1,0 +1,45 @@
+<isset name="DecoratorTemplate" value="content/pt_customerservice_no_lhn" scope="page"/>
+
+<iscomment>Use another decorator if the context is the content search</iscomment>
+<isif condition="${!empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+	<isset name="DecoratorTemplate" value="search/pt_contentsearchresult" scope="page"/>
+</isif>
+
+<isdecorate template="${DecoratorTemplate}">
+<iscomment>
+	Use the decorator template based on the page context. If
+	the content page was requested from a search result the
+	decorator search/pt_contentsearchresult is used. The default 
+	decorator for the content page is content/content/pt_content.
+</iscomment>
+
+<iscache type="relative" hour="24" varyby="price_promotion"/>
+<iscomment>Render a "back" link and the article title based on the page context.</iscomment>
+<isif condition="${!empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+	<div class="back"><a href="${pdict.ContentSearchResult.url('Search-ShowContent')}">${Resource.msg('foldercontenthits.backtoresults','rendering',null)}</a></div>
+	<h1><isprint value="${pdict.Content.name}"/></h1>
+</isif>
+<iscomment>This content piece must deliver a valid wrapping div!</iscomment>
+<div id="" class="content_template style02 indent ie7Arrows">
+<iscomment>Praveen : Changes for making three content slots instead of one</iscomment>
+<iscomment>
+<isslot id="offerPage_ContentSlot" context="category" description="ContentSlots for offerPage" context-object="${pdict.ProductSearchResult.category}"/>
+</iscomment>
+	<isslot id="cat-landing-promotion-banner" context="category" description="Large Category Promotion Banner" context-object="${pdict.ProductSearchResult.category}"/>
+	<isslot id="cat-landing-slotbanner" context="category" description="Large Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+	<isslot id="cat-landing-slotbottom" context="category" description="Category Landing Featured Products or Promotional Content" context-object="${pdict.ProductSearchResult.category}"/>
+
+<isif condition="${pdict.createSlotForKiosk != null }">
+<iscomment>This slot is created only for content slots for Kiosk</iscomment>			
+<isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+</isif>
+</div>
+<style type="text/css">
+div.slider-nav span.right{height: 127px; top: 231px; width: 33px; z-index: 9999; right: -10px;}
+div.slider-nav span.left{width: 33px; left: 10px; top: 231px; height: 127px; z-index: 9999;}
+.orbit-wrapper .orbit-bullets{display:none;}
+</style>
+
+
+<div class="clear"></div>
+</isdecorate>

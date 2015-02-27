@@ -1,0 +1,22 @@
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<iscache type="relative" hour="24" varyby="price_promotion"/>
+<isdecorate template="content/home/pt_storefront">
+<iscomment>this is the template rendering the homepage</iscomment>
+<iscontentasset aid="tablet-desktop-files-container"/>
+<div class="homepage clearfix newHomePage"><!-- +1.888.553.9216 --><!--This phone is a requirement to support existing Gomez monitor of SiteGenesis. Demadware customers can remove this.-->
+	<div id="content_homepage_landing">
+	<isslot id="newHome-main" description="jQuery Banner on new Homepage" context="global" />
+		<div class="sectHolder clearfix">
+			<iscomment>Added by Davinder</iscomment>
+			<isslot id="newHomeModule_5" description="Home large tiles" context="global" />
+			<isslot id="newHomeModule_3" description="Home engaing content" context="global" />
+			<isslot id="newHomeModule_4" description="Home small tiles" context="global" />
+			<isslot id="newHomeModule_6" description="Home engaing content" context="global" />
+			<isslot id="newHomeModule_7" description="Home small tiles" context="global" />
+		</div>
+		<isslot id="home-infoslot" description="Third content below middle content" context="global" />
+		<isslot id="home-bottom" description="Bottom content below flash banner" context="global" />		
+	</div>	
+</div>
+
+</isdecorate>

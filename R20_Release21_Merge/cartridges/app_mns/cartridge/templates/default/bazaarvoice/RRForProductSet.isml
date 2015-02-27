@@ -1,0 +1,30 @@
+<!--- TEMPLATENAME: CLPreviewPage.isml --->
+<isscript>
+    var ReviewCount=pdict.FirstProduct.custom.MostReviewedCount;
+    var AvgRating:Number=parseFloat(pdict.FirstProduct.custom.TopRated);
+	var Title:String=String(AvgRating);	
+	var RatingInPercent=(AvgRating/5)*100;
+	var AvgRating:Number=Math.round(RatingInPercent);
+	var IsBazaarVoiceEnabled:Boolean= dw.system.Site.getCurrent().getCustomPreferenceValue("IsBazaarVoiceEnabled");								
+</isscript>
+<isif condition="${IsBazaarVoiceEnabled}">
+<div class="starRatings">
+<isif condition="${AvgRating>0 && AvgRating<=100}">
+	<a class="starRating" href="${URLUtils.url('Product-Show')}?pid=${Product.ID}#BVCustomerRatings" title="${Title}/5">	
+	<span class="greyStars">
+		<span class="yellowStars" style="width:${AvgRating}%"></span>
+	</span>	
+	</a>
+</isif>
+<div class="clear" style="height:1px;"></div>
+<isif condition="${(ReviewCount>0)}">
+	<isif condition="${ReviewCount == 1}">
+		<a  class="textReview" href="${URLUtils.url('Product-Show')}?pid=${Product.ID}#BVRRSecondarySummaryContainer">(${ReviewCount} ${Resource.msg('product.review','product',null)})</a>
+	<iselse>
+		<a class="textReview" href="${URLUtils.url('Product-Show')}?pid=${Product.ID}#BVRRSecondarySummaryContainer">(${ReviewCount} ${Resource.msg('product.reviews','product',null)})</a>
+	</isif>	
+</isif>	
+</div>
+<div class="cl"></div>
+</isif>
+

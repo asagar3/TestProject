@@ -1,0 +1,85 @@
+/**
+    --SAMPLE-- 
+    <Product>
+    <ExternalId>product ID</ExternalId>
+	<Name>product name  as per customDefaultLocale</Name>
+	<CategoryExternalId>Category id</CategoryExternalId>
+	<ProductPageUrl>product page url as per customDefaultLocale</ProductPageUrl>
+	<ImageUrl>scene 7 url</ImageUrl>
+	<ManufacturerPartNumbers><ManufacturerPartNumber>product TNumber</ManufacturerPartNumber></ManufacturerPartNumbers>
+	
+* @input Inxsw : dw.io.XMLStreamWriter
+* @input Product : dw.catalog.Product
+* @output Message : String
+* @output Outxsw : dw.io.XMLStreamWriter
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.catalog );
+
+ importScript( "int_bazaarvoice:/lib/libBazaarvoice.ds");
+ importScript( "int_bazaarvoice:/lib/CustomLibBazaarVoice.ds");
+ var bvHelper = getBazaarVoiceHelper();
+ 
+function execute( pdict : PipelineDictionary ) : Number {
+	var xsw:XMLStreamWriter=pdict.Inxsw;
+	var product:Product=pdict.Product;
+	try{
+			
+	    writeProductdefaultElements(xsw,product);
+	} catch(ex) {
+	        Logger.error("Error Message While WriteXMLProductForDefaultLocaleData Product Feed:" + ex.message);
+	        pdict.Message = "Exception caught during catalog export: "+ ex.message;        
+	        return PIPELET_ERROR;    
+	}  
+	pdict.Outxsw=xsw;
+	return PIPELET_NEXT;    
+}
+function writeProductdefaultElements(xsw : XMLStreamWriter,product:Product):XMLStreamWriter {
+	
+    var customdefaultLocale:String=Site.getCurrent().getCustomPreferenceValue("customDefaultLocale");
+    xsw.writeCharacters("\n");
+    xsw.writeStartElement("Product");//product tag start
+    
+    xsw.writeCharacters("\n");
+    writeElement(xsw, "ExternalId", bvHelper.replaceIllegalCharacters(product.ID));
+    
+    xsw.writeCharacters("\n");
+    writeElement(xsw, "Name", product.name);   
+    
+    var categoryExternalId : String="";
+    if(product.primaryCategory != null) {
+        categoryExternalId = product.primaryCategory.ID;
+    } else {
+        var allCategories : Collection = product.allCategories;
+        if(allCategories.size()>0) { 
+            categoryExternalId = allCategories.iterator().next().ID;
+        } 
+    }
+    xsw.writeCharacters("\n");
+    writeElement(xsw, "CategoryExternalId", categoryExternalId);
+    
+    xsw.writeCharacters("\n");
+   
+    writeElement(xsw, "ProductPageUrl",getProductPageURL(product,customdefaultLocale));	
+    xsw.writeCharacters("\n");
+    try{
+    writeElement(xsw, "ImageUrl",getProductImageURL(product));	
+	}catch(e){ 
+		Logger.error("BV-within write product" + product.ID);
+		Logger.error("BV-within write product" + e.message);
+		}
+    if(product.custom.tNumber != null){
+    	xsw.writeCharacters("\n");
+    	xsw.writeStartElement("ManufacturerPartNumbers");
+        writeElement(xsw, "ManufacturerPartNumber", product.custom.tNumber);
+        xsw.writeEndElement();
+    } 
+    return xsw;
+}
+
+function writeElement(xsw : XMLStreamWriter, elementName : String, chars : String) {
+    xsw.writeStartElement(elementName);
+    xsw.writeCharacters(chars);
+    xsw.writeEndElement();
+}

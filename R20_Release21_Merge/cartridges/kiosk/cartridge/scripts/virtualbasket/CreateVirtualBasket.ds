@@ -1,0 +1,57 @@
+/**
+
+*   @input  CredentialsObject: Object
+*   @output basketId  : String
+*   @output customObject  : Object
+*   @output basketObject  : Object
+*
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+function execute( args : PipelineDictionary ) : Number
+{
+
+    var response : String = null;	
+  	var httpService : HTTPClient = new HTTPClient();	
+
+  	var email : String = args.CredentialsObject.Email;
+  	var storeId : String = args.CredentialsObject.storeID;
+  	var orderChannel : String = args.CredentialsObject.orderChannel;
+  	var deviceID : String = args.CredentialsObject.deviceID;
+  	
+	try {
+		 //var vbURL : String = Site.getCurrent().getCustomPreferenceValue("VBServiceURL");
+		 var url:String = Site.getCurrent().getCustomPreferenceValue("CreateVBServiceURL") + "&storeId=" + storeId + "&email=" + email+"&device="+deviceID+"&channel="+orderChannel;
+		
+		Logger.error("CreateVBServiceURL URL is "+url);
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+	
+		
+		httpService.open('POST', url);
+		httpService.send();
+	
+		if (httpService.statusCode == 201){
+			response = httpService.text;
+		} else {
+			args.customObject = "VB_SE_003";
+			Logger.error("Server responded with code:" + httpService.statusCode);
+			 return PIPELET_ERROR;
+		
+		}
+		
+		var reqObject : Object = JSON.parse(httpService.text );
+		args.basketId  =  reqObject.BasketId  ;
+		args.basketObject = reqObject;
+		
+	} catch ( ex ) {
+		args.customObject = "VB_SE_003";
+		Logger.error("Server connection failed in CreateVirtualBasket.ds:" + ex);
+		 return PIPELET_ERROR;
+	}
+	
+	
+   return PIPELET_NEXT;
+
+}

@@ -1,0 +1,193 @@
+<iscomment>[Jira ID : INT-44]: this is a copy of the minisummary.isml along with changes for the German site.</iscomment>
+<iscomment>
+    Renders mini lineitems for order summary and mini cart.
+
+    Parameters:
+    p_showreverse     	: boolean to render the line items in reverse order
+    p_lineitemctnr     	: the line item container to render (this could be either an order or a basket as they are both line item containers)
+    p_productlineitem	: in case of mini cart this is the product lineitem just got added/changed so it should be expanded and at the top of the list
+    p_giftcertlineitem	: in case of mini cart this is the gift certificate line item just got added/changed so it should be expanded and at the top of the list
+
+</iscomment>
+
+<iscomment>Create page varibale representing the line item container</iscomment>
+<isset name="LineItemCtnr" value="${pdict.p_lineitemctnr}" scope="page"/>
+
+<isif condition="${LineItemCtnr != null}">
+	<isscript>
+		var pliList : dw.util.Collection = new dw.util.ArrayList(LineItemCtnr.productLineItems);
+		if( pdict.p_showreverse )
+		{
+			// order of items is reverse in case of mini cart display
+			pliList.reverse();
+
+			// remove the bonus item from the mini cart display
+			var tempList : dw.util.ArrayList = new dw.util.ArrayList();
+			
+			// add the recently touched/added product line item at the top of the list
+			if( pdict.p_productlineitem )
+			{
+				tempList.add( pdict.p_productlineitem );
+			}
+			
+			for( var ind in pliList )
+			{
+				var li = pliList[ind];
+				
+				// skip recently touched/added item, its already added before the loop
+				if( empty(pdict.p_productlineitem) || (pdict.p_productlineitem && li.position != pdict.p_productlineitem.position))
+				{
+					tempList.add( li );
+				}
+			}
+			pliList = tempList;
+		}
+	</isscript>
+
+	<iscomment>the item count is incremented after each display of a line item</iscomment>
+	<isset name="itemCount" value="${1}" scope="page"/>
+	
+	<!-- START: GIFT CARD CODE - NOT USED -->
+	<iscomment>render a newly added gift certificate line item at the top</iscomment>
+	<isif condition="${pdict.p_giftcertlineitem != null}">
+		<iscomment><!-- Asha changed the div structure to ul, li --></iscomment>
+		<ul class="summaryproduct">
+			<li class="image">
+				<div class="imageexpanded" style="display:none">
+					<!-- NO IMAGE VIEWABLE CONTAINER -->
+				</div>
+				<div class="imagecollapsed">
+					<img src="${URLUtils.staticURL('/images/gift_cert.gif')}" alt="<isprint value="${pdict.p_giftcertlineitem.lineItemText}"/>" />
+				</div>
+			</li><!-- END: image -->
+
+			<li class="name">
+				<isprint value="${pdict.p_giftcertlineitem.lineItemText}"/>
+			</li><!-- END: name -->
+
+			<li class="pricing">
+				<span class="quickviewqty">${Resource.msg('global.qty','locale',null)}: 1</span>
+				<span class="divider"></span>
+				<iscomment><!-- Asha | Class added totalprice --></iscomment>
+				<span class="totalprice"><isprint value="${pdict.p_giftcertlineitem.price}"/></span>
+			</li><!-- END: pricing -->
+			
+			<li class="clear"><!-- FLOAT CLEAR --></li>
+		</ul><!-- END: summaryproduct -->
+		<isset name="itemCount" value="${itemCount+1}" scope="page"/>
+	</isif> <!-- END: GIFT CARD CODE - NOT USED -->
+
+
+
+	<iscomment>product line items (only rendered if we haven't add a gift certificate to the basket)</iscomment>
+	
+	
+	<!-- TABLE LOOP STARTS HERE -->
+	<table width="100%">
+	<tr> <!-- Todo: turn this to th -->
+		<th></th>
+		<th colspan="4">${Resource.msg('global.product','locale',null)}</th>
+		<th>${Resource.msg('global.price','locale',null)}</th>
+	</tr>
+	<isloop items="${pliList}" var="productLineItem" status="counter">
+		<tr>
+				<td class="bImage">
+					<isif condition="${productLineItem.product != null && productLineItem.product.getImage('catlanding',0) != null}">
+						<isscript>
+						var miniproductwidth : Integer = dw.system.Site.getCurrent().preferences.custom.ImageWidthMiniProduct;
+						var miniproductheight : Integer = dw.system.Site.getCurrent().preferences.custom.ImageHeightMiniProduct;
+						var scene7ImageUrl : String = productLineItem.product.getImage('catlanding',0).URL + '?' + dw.system.Site.getCurrent().preferences.custom.s7Preset 
+						+ 'wid='+miniproductwidth+'&hei='+miniproductheight;
+						</isscript>
+						<img src="${scene7ImageUrl}" alt="${productLineItem.product.getImage('catlanding',0).alt}" title="${productLineItem.product.getImage('catlanding',0).title}"/>
+					<iselse/>
+						<img src="${URLUtils.staticURL('/images/noimagesmall.png')}" alt="${productLineItem.productName}"  title="${productLineItem.productName}"/>
+					</isif>
+				</td>
+				<td class="bTitle">
+				<iscomment><!-- Adam's Edit - INT-494 --></iscomment>
+				<isif condition="${productLineItem.product.custom.productBrand != null && !empty(productLineItem.product.custom.productBrand)}">
+					<isprint value="${productLineItem.product.custom.productBrand}"/>
+				</isif>
+				
+				<isprint value="${productLineItem.product.name.replace(productLineItem.product.custom.productBrand, '')}"/>
+				</td>
+				<td colspan="3" nowrap="nowrap">
+				<isdisplayvariationvalues product="${productLineItem.product}"/>
+				<p>${Resource.msg('global.qty','locale',null)}: <isprint value="${productLineItem.quantity}"/></p>
+				</td>
+				
+				<td nowrap="nowrap" class="bPrice">
+					<isif condition="${productLineItem.bonusProductLineItem}">
+					    
+				    <iselse/>
+				    	<isset name="productTotal" value="${productLineItem.adjustedPrice}" scope="page"/>
+				    	<isif condition="${productLineItem.optionProductLineItems.size() > 0}">
+							<isloop items="${productLineItem.optionProductLineItems}" var="optionLI">
+								<isset name="productTotal" value="${productTotal.add(optionLI.adjustedPrice)}" scope="page"/>
+							</isloop>
+						</isif>
+						<iscomment><!--  Matt S - added price span and text. This may need to be added across other fields --></iscomment>
+					    <isprint value="${productTotal}"/>
+				    </isif>
+				</td>
+			</tr>
+	</isloop>
+	</table>
+	<!-- TABLE LOOP ENDS HERE  -->
+	
+	
+	
+	
+	
+	
+	
+		
+		
+		
+		
+		
+		
+
+	<!-- START: GIFT CARD CODE - NOT USED -->
+	<iscomment>gift certificate line items (only rendered if we haven't add a product to the basket)</iscomment>
+		<isloop items="${LineItemCtnr.giftCertificateLineItems}" var="gcLI">
+			<iscomment>
+				Omit showing the gift certificate that was just added (in case we render the minicart).
+				This gift certificate has already been rendered at the top before the product line items.
+			</iscomment>
+			<isif condition="${!(pdict.p_giftcertlineitem != null && pdict.p_giftcertlineitem.UUID.equals(gcLI.UUID))}">
+				<ul class="summaryproduct">
+					<li class="image">
+						<div class="imageexpanded" <isif condition="${itemCount == 1}">style="display:none"</isif> >
+							<!-- NO IMAGE VIEWABLE CONTAINER -->
+						</div>
+						<div class="imagecollapsed" <isif condition="${itemCount > 1}">style="display:none"</isif> >
+							<img src="${URLUtils.staticURL('/images/gift_cert.gif')}" alt="<isprint value="${gcLI.lineItemText}"/>" />
+						</div>
+					</li><!-- END: image -->
+		
+					<li class="name">
+						<isprint value="${gcLI.lineItemText}"/>
+					</li><!-- END: name -->
+		
+					<li class="pricing">
+						<span class="quickviewqty">${Resource.msg('global.qty','locale',null)}: 1</span>
+						<span class="divider"></span>
+						<iscomment><!-- Asha | Class added totalprice --></iscomment>
+						<span class="totalprice"><isprint value="${gcLI.price}"/></span>
+					</li><!-- END: pricing -->
+					<li class="clear"><!-- FLOAT CLEAR --></li>
+				</ul><!-- END: summaryproduct -->
+				<isset name="itemCount" value="${itemCount+1}" scope="page"/>
+					<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+						<script type="text/javascript">
+							//productListForOmniture = productListForOmniture +  ";${productLineItem.product.variationModel.master.ID},";
+							//Praveen:- Changing code for replacing tNumber from ID.
+							productListForOmniture = productListForOmniture +  ";${productLineItem.product.variationModel.master.custom.tNumber},";
+						</script>
+					
+				</isif>
+		</isloop>
+		<!-- END: GIFT CARD CODE - NOT USED -->
+</isif>

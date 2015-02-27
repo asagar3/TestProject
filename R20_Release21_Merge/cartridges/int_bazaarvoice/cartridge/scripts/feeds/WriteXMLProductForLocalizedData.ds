@@ -1,0 +1,44 @@
+/**
+*
+* @input Product : dw.catalog.Product
+* @input Currentlocale : String
+* @input InmapProductByLocale:dw.util.HashMap
+* @output Message : String
+* @output OutmapProductByLocale:dw.util.HashMap
+*/
+ importPackage( dw.system );
+ importPackage( dw.util );
+ importPackage( dw.web );
+ importPackage( dw.net );
+ importPackage( dw.catalog );
+ importPackage( dw.io );
+importScript("int_bazaarvoice:/lib/libBazaarvoice.ds");
+importScript( "int_bazaarvoice:/lib/CustomLibBazaarVoice.ds");
+
+var bvHelper = getBazaarVoiceHelper();
+var mapProductByLocale:HashMap=null;
+ 
+function execute( pdict : PipelineDictionary ) : Number {
+	mapProductByLocale=pdict.InmapProductByLocale;
+	try{
+		writeInMap(pdict.Product,pdict.Currentlocale);	
+	} catch(ex) {
+        Logger.error("Error Message While WriteXMLProductForLocalizedData in BV export Product Feed:", ex.message);
+        pdict.Message = "Exception caught during localized BV product export: "+ ex.message;        
+        return PIPELET_ERROR;    
+    }  
+	pdict.OutmapProductByLocale=mapProductByLocale;
+
+	return PIPELET_NEXT;    
+}
+
+function writeInMap(product:Product,currentLocale:String){
+   var hashMap:HashMap=new HashMap();
+   var ImageURL:String=getProductImageURL(product);
+   var ProductPageURL:String=getProductPageURL(product,currentLocale);
+    
+   hashMap.put("Name",product.name);
+   hashMap.put("ProductPageUrl",ProductPageURL);
+   hashMap.put("ImageUrl",ImageURL); 
+   mapProductByLocale.put(currentLocale,hashMap);
+}

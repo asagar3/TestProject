@@ -1,0 +1,237 @@
+.divider{margin:0px 5px;background-image:url("../images/divider.gif");background-position:right center;background-repeat:no-repeat;color:white;width:1px; height:13px;}/* Sets divider margin in breadcrumbs and general navigation */
+.headercustomerinfo {margin-top:2px;/*float:right;position: relative;top:6px;right:180px;margin: 0px 5px;padding: 0;width:auto;z-index:200;*/float:right;}
+
+.headercustomerinfo .divider {margin: 0px 5px; }
+
+/***********************************************/
+/* PAGE STRUCTURE CSS                          */
+/***********************************************/
+#container {border:0px;width:75%; /*background-image:url(../images/background_mainpage.gif);background-repeat: repeat-x;*/}
+#header {height: 132px;margin:0px auto;width:960px;}
+#main {margin:auto;position:relative;top: 0px;width: 960px;}
+#footer {width:100%;height: 103px;margin:75px auto 0px;background-image:url(../images/background_mainpage_footer.gif);background-position: top left;}
+
+/***********************************************/
+/* PAGE ELEMENT STYLING CSS                    */
+/***********************************************/
+
+td.detailscolumn .price {font-family: Arial, Helvetica, Verdana, sans-serif;font-size:1em;font-style:normal;}
+
+/***** jQuery Dialog Skinning *****/
+.ui-widget.quickview, .ui-widget.ui-dialog{-moz-border-radius-bottomleft:12px;-moz-border-radius-bottomright:12px;-moz-border-radius-topleft:12px;-moz-border-radius-topright:12px;}
+.ui-dialog .ui-dialog-title{font-size: 1.3em;}
+.ui-dialog .ui-dialog-titlebar{background-image:url(../images/background_bar.gif);background-position: top left;-moz-border-radius-bottomleft:0px;-moz-border-radius-bottomright:0px;-moz-border-radius-topleft:12px;-moz-border-radius-topright:12px;}
+.ui-dialog-titlebar-close .ui-icon {background-image:url(../images/ui-icons_256x240.png);}
+
+/* HEADER/FOOTER COMPONENTS (Logo, Search, User Info, Mini Cart, Links, Category Menu)
+--------------------------------------------------------------------------------------- */
+
+/***** Header Logo *****/	
+h1.logo{padding:1px 0px 0px 0px; float:left;}
+
+#header h1.logo a {background: url(../images/logo.gif) no-repeat center right /* Company Logo */;height: 66px /* Sets overall height of header */;/*left:45px;*/top:11px;}
+	
+/***** Search Bar *****/
+.sitesearch {top:30px;/*background:transparent url(../images/background_search.png) no-repeat top right !important;*/}
+.sitesearch label {display: none;}
+.sitesearch form.simplesearch input.simplesearchinput {background-image:url("../images/input_bg.gif");border:1px solid #e5e5e5;color:#a5a5a5;height: 20px;margin:0px;padding:0px;width: 195px;}
+.sitesearch form.simplesearch input.simplesearchinput:focus {/*background-image:url("../images/go_button.gif")*/}
+.sitesearch button {background-image:url("../images/go_button.gif"); border:0;height:22px;width:38px;}
+.sitesearch button span {background:transparent none;visibility: hidden;}
+
+/***** HEADER/FOOTER Links (Store Locator, Help, Etc.) *****/
+.generalnav {top:3px;font-size:1em;color:white;}
+.generalnav ul li a {/*color:white;*/}
+.generalnav ul li a:hover {/*color:white;*/}
+
+/***** User Information (Welcome Message, Login, Register, etc.) *****/
+.headercustomerinfo {top:17px;color:#E1BA93;}
+.headercustomerinfo a {color:#E1BA93;}
+
+/* CATEGORY DEPARTMENTS MENU BAR
+--------------------------------------------------------------------------------------- */
+.categorymenu {top:82px;background-color: #000;border:0px;font-size:1.1em;font-weight:bold;height:25px;text-align:left;}
+.categorymenu a, .categorymenu a:visited {color: #fff;min-width:1px; padding:1px 40px 8px 5px;}
+.categorymenu a:hover {background:transparent url(../images/space.gif) no-repeat top left;color:#E1BA93;}
+.categorymenu ul ul {background:transparent url(../images/background_dropdown_nav.png) top left;border:0px;padding:15px 0 8px 0;top:19px;width:118px;}
+* html .categorymenu ul ul {background:transparent url(../images/background_dropdown_nav.gif) top left;}
+
+.categorymenu ul ul a, .categorymenu ul ul a:visited {color:#fff;padding:5px 5px;}
+.categorymenu ul ul a:hover {background-color: #564f47;color:#439dd1;font-style:italic;}
+
+ COPYRIGHT *****/
+.copyright {margin: 0px;}
+	
+/***** Header Slots CSSSLOTS STYLING *****/
+.headerbanner {background: transparent url(../images/background-header-banner-slot.gif) top left;height:42px;top: 20px;}
+.headerbar {color:#80171c;top: 108px;}
+
+/* HOME PAGE
+--------------------------------------------------------------------------------------- */
+.homepage {margin-top: 8px;}
+
+.pt_storefront .verticalcarouselheader {background: transparent url(../images/background_scroller_header_thisweeksdeals.gif) top left;height:31px;width:173px;margin-top: 12px;}	
+.pt_storefront .verticalcarousel {background: transparent url(../images/background_homepage_scroller_background.gif) bottom left;height:537px;width:173px;padding-bottom: 21px;}
+.pt_storefront .verticalcarousel a {font-weight: bold;font-size: 1.3em;line-height: 1em;color: #555555;}
+.pt_storefront .jcarousel-container-vertical {height: 100%;top:0px;}
+.pt_storefront .jcarousel-clip-vertical {height: 100%;}
+.pt_storefront .jcarousel-next-vertical {background: transparent url(../images/carousol_next-vertical.gif) no-repeat 0 0;bottom: 0px;height: 13px;left: 0px;width: 173px;}
+.pt_storefront .jcarousel-prev-vertical {background: transparent url(../images/carousol_prev-vertical.gif) no-repeat 0 0;height: 13px;left: 0px;width: 173px;top: 0px;}
+.pt_storefront .jcarousel-prev-disabled-vertical, .pt_storefront .jcarousel-prev-disabled-vertical:hover, .pt_storefront .jcarousel-prev-disabled-vertical:active {background-position:0px -96px;}
+.pt_storefront .jcarousel-prev-vertical:hover {background-position:0px -32px;}
+.pt_storefront .jcarousel-next-vertical:hover {background-position:0px -32px;}
+
+/* SEARCH RESULTS
+--------------------------------------------------------------------------------------- */
+/* These styles create the default look for Product display with search results, cross sells and other places where multiple products are displayed. */
+.productlisting .product .name a {color: #555555;font-size: 1.3em;}
+.producttile .image .quickviewbutton a {background-image: url(../images/quickview.gif);}
+
+
+/***** BREADCRUMB STYLES *****/
+.breadcrumb {margin: 21px 0px 16px 10px;font-size: 1.1em;}
+.refinementname {font-style: italic;}
+.refinementvalue, .refinementname {font-family:georgia,Times New Roman,Times,serif;}
+
+/* Paging */
+.pagination{padding:8px 0 8px 0}
+.pagination a, .pagination a:visited {text-decoration: none;}
+.pagination a:hover {color:#000; text-decoration: underline;}
+.pagination li:hover {color:#000;border:1px solid #000;background-color: #ccc;}
+.pagination ul li, .pagination li.currentpage {padding:2px 4px 4px 4px; border:1px solid #ccc;}
+.pagination li.currentpage {border:1px solid #000;color:#fff;background-color:#7e191d;}
+.pagination li.firstlast{padding:0px;border:0px none #000;background: transparent;}
+
+/* RESULTS REFINEMENT (Left Column Navigation)
+--------------------------------------------------------------------------------------- */
+.searchrefine {background: transparent url(../images/background-search_refine.gif) no-repeat bottom left;margin:24px 0 24px 0;padding: 0 0 16px 0;}
+.searchrefine h1 {background: transparent url(../images/background-search_refine-header.gif) no-repeat top left;color:#e7c8a9;font-weight: bold;height: 20px;line-height: 1.5em;padding:0px 0px 0px 8px;}
+.searchrefine .searchcategories {padding: 0 0 15px 4px;}
+.navgroup {padding-left: 4px;padding-right: 8px;}
+
+/* PRODUCT DETAIL PAGE
+--------------------------------------------------------------------------------------- */
+.productdetail .productimage{border: 0px;}
+.productdetail .price .standardprice {color: #000000;font-size: .7em;}
+.productdetail .addtocartbar {background-image:url(../images/background_bar.gif);background-position: top left;}
+
+/***** Product Next/Previous on Product Detail Page (productnav.isml)*****/
+.productdetail .productnavigation {width:208px;}
+.productdetail .productnavigation span {visibility: hidden; display: none;}
+.productdetail .productnavigation .productprevious {background: transparent url(../images/previous.gif) no-repeat 0 10px; border-right: 1px solid #ccc; float:left; width:103px;}
+.productdetail .productnavigation .productnext {background: transparent url(../images/next.gif) no-repeat right 10px; float:left; width:103px;}
+.productdetail .productnavigation .productprevious img{padding:0px 0px 0px 38px;}
+	
+/* MINI-CART
+--------------------------------------------------------------------------------------- */	
+.minicart {width:auto;top:0px;color:black; position:relative; right:0px; font-size:1.1em;}
+.minicart a {color:white;}
+.minicart .minicarttotal {float:none;border:1px solid #e4e4e4; border-top:none; background:transparent url(../images/mini_basket.gif) no-repeat 10px center; margin-left:17px; padding:19px 20px 20px 0px}
+.minicart .minicarttotal .cartlabel {display: none;	}
+.minicart .minicarttotal .emptycart {margin-left:0px;}
+.minicart .minicarttotal a {margin-left: 32px;}
+.mini_basket_header{font-weight:700;}
+.minicartArrow {cursor:pointer; position:relative; background: transparent url(../images/down_arrow.gif) no-repeat center 0px; text-align:center;height:8px;clear:both; width:165px;}
+
+/* ERROR MESSAGES
+--------------------------------------------------------------------------------------- */
+/***** Cookies / Javascript disabled *****/	
+.disabledcontainer {background: transparent url(../images/background_header_disabled_message.gif) repeat-x top left;}
+.disabledmessage {background: transparent url(../images/background_header_disabled_message_bigicon.gif) no-repeat top left;}
+.disabledmessage p {font-family: georgia,Times New Roman,Times,serif;}
+
+/* PRICING */
+.price {font-family: georgia,Times New Roman,Times,serif;font-size: 1.2em;font-style: italic;}
+
+/* MY ACCOUNT/CUSTOMER SERVICE
+--------------------------------------------------------------------------------------- */
+#leftcolumn .contentasset{margin-top:24px;}
+
+
+
+
+
+
+
+
+
+
+/***********************************************/
+/* M&S Specific styles OVER-RIDES                    */
+/***********************************************/
+
+
+a{color:#5b5b5b !important;text-decoration:none !important;}
+a:hover{color:#5b5b5b !important;text-decoration:underline  !important;}
+
+
+
+
+/*  Helvetic Neue standard
+font-family:"HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Arial", sans-serif !important;
+*/
+
+/*  Helvetic Neue light
+font-family:'HelveticaNeue-Light','Helvetica Neue Light','Helvetica Neue',Arial,Helvetica,sans-serif !important;
+*/
+
+/*  Helvetic Neue Ultra light
+font-family:'HelveticaNeue-UltraLight','Helvetica Neue UltraLight','Helvetica Neue',Arial,Helvetica,sans-serif !important;
+*/
+
+
+
+/* header styles forced over-rides */
+
+.ms_header_1{
+	color:#333333;
+	font-family:'HelveticaNeue-UltraLight','Helvetica Neue UltraLight','Helvetica Neue',Arial,Helvetica,sans-serif ;
+	font-size:26px ;
+	
+	font-weight:100;
+	font-variant:normal ;
+	
+}
+
+
+
+
+
+
+.ms_header_2{
+	font-family:Arial,Helvetica,sans-serif !important;
+	font-size:1.2em !important;
+	font-weight:bold !important;
+}
+
+
+
+/*   TEXT *****/
+
+/* standard text styling */
+body{font-family:Arial,Helvetica,sans-serif;color:#5b5b5b}
+.ui-widget{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:1.1em;
+}
+
+/* text forced over-rides */
+.ms_text_2{
+	font-size:1.2em !important;
+}
+
+
+/* prices */
+.ms_price_1{font-size:2em;}
+.ms_price_2{font-size:1.2em;}
+.ms_price_3{font-size:1.2em;color:#666666;text-decoration:line-through;}
+
+
+/* links */
+
+.ms_link_1{color:#808080;font-size:1em;text-decoration:underline;}
+.ms_link_1:hover{color:#808080;text-decoration:none;}
+
+
+
+

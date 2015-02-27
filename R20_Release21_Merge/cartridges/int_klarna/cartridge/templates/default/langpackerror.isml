@@ -1,0 +1,7 @@
+<!--- TEMPLATENAME: langpackerror.isml --->
+<div class="wrapper">
+<div class="klarna_box">
+<div class="klarna_box_bottom_languageInfo"/>
+<div class="error">Could not find active checkout country</div>
+</div>
+</div>

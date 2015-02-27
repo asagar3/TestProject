@@ -1,0 +1,169 @@
+<div id="PaymentMethod_KLARNA_PARTPAYMENT" class="paymentform klarna">
+	<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.klarna_partpayment.htmlName}">
+		<isreplace/>
+		<!-- KLARNA BOX -->
+		<script type="text/javascript">
+			var shipmentAddressInput_part = '${pdict.CurrentForms.klarna_partpayment.addresses.htmlName}';
+			var global_language_part = '${KlarnaLanguage}'
+		</script>
+ 		<script src="${URLUtils.staticURL('js/klarna_part.js')}" type="text/javascript"></script>
+ 		<div class="klarna_box_container">
+			<div class="klarna_box" id="klarna_box_part">
+				<script type="text/javascript">
+					$(function() {
+						// Get the pclasses for campaigns
+						jQuery.getJSON('${URLUtils.url('KlarnaPayment-RenderPclasses')}', {countryCode : '${KlarnaCountry}'}, function(data) {
+							$('${"#"+pdict.CurrentForms.klarna_partpayment.pclass.htmlName}').empty()
+							if(data.length != 0) {
+								data[0]['default'] = 1  // Currently the pclasses are sorted so that the default comes first 
+								jQuery.each(data, function(key, value) {
+									var plan = $('<li'+(value['default']?' id="click"':'')+ '><div>'+value['description']+
+											(value['monthlyCost'] > 0 ? ' - '+value['monthlyCost']+' <isprint value="${Resource.msg("klarna.per_month", "forms", null)}" encoding="off"/>' : '')+
+											(value['default']?'<img src="${URLUtils.staticURL("images/ok.gif")}" border="0" alt="Choosen" />':'')+
+											'<span style="display: none">'+value['pclassID']+'</span>')
+									plan.appendTo('${"#"+pdict.CurrentForms.klarna_partpayment.pclass.htmlName}')
+									if(value['default']) {
+										$('input[name=${pdict.CurrentForms.klarna_partpayment.pclass.htmlName}]').val(value['pclassID']);
+									}
+								})
+								doPClassesIsReady('#PaymentMethod_KLARNA_PARTPAYMENT')
+							} else {
+								jQuery("#is-KLARNA_PARTPAYMENT").attr('disabled', 'disabled');
+								jQuery("#PaymentMethod_KLARNA_PARTPAYMENT").hide();
+							}
+
+							return false;
+						});
+					})
+				</script>
+				<div class="klarna_box_top">
+					<div id="klarna_box_part_top_right">
+						<div class="klarna_box_top_flag">
+							<div class="box_active_language">
+								<img src="${URLUtils.imageURL('images/flags/'+KlarnaLanguage+'.png', null)}" alt="${KlarnaLanguage}" />
+								<img src="${URLUtils.imageURL('images/arrow_down.gif', null)}" alt="" style="float: right; padding: 6px 2px 0 0; margin: 0" />
+							</div>
+							<div class="klarna_box_top_flag_list">
+								<isscript>langs = []</isscript>
+								<isloop items="${dw.system.Site.getCurrent().allowedLocales}" var="locale">
+									<isset name="lang" value="${locale.split('_')[0]}" scope="page"/>
+									<isset name="country" value="${locale.split('_')[1]}" scope="page"/>
+									<isif condition="${langs.indexOf(lang) == -1 && klarnaLanguages.indexOf(lang) != -1}">
+										<isscript>langs.push(lang)</isscript>
+										<img src="${URLUtils.imageURL('images/flags/'+lang+'.png', null)}" alt="${locale}" />
+									</isif>
+								</isloop>
+							</div>
+						</div>
+						<div class="klarna_box_top_agreement">
+							<a href="javascript:ShowKlarnaPopup('${merchantID}', ${(pdict.PaymentAmount*100).toFixed()},'part')">
+								<isprint value="${Resource.msg('klarna.account_agreement', 'forms', null)}" encoding="off"/>
+							</a>
+						</div>
+						<div class="klarna_box_bottom_languageInfo">
+							<img src="${URLUtils.imageURL('images/notice.png', null)}" alt="${Resource.msg('klarna.language_note_'+KlarnaCountry.toLowerCase(), 'forms', null)}" />
+						</div>
+					</div>
+					<img id="klarna_logo_partPay" class="klarna_logo"
+						src="${URLUtils.imageURL('images/logo/' + KlarnaCountry.toLowerCase() + '/klarna_account.png', null)}"
+						alt="${Resource.msg('klarna.part_logo_alt', 'klarna', null)}" />
+				</div>
+				<div class="klarna_box_bottom">
+					<div class="klarna_box_bottom_contents">
+						<div class="klarna_box_bottom_left">
+							<div class="klarna_box_bottom_content">
+								<div class="klarna_box_bottom_title">${Resource.msg('klarna.partpayment', 'forms', null)}</div>
+								<ol id="${pdict.CurrentForms.klarna_partpayment.pclass.htmlName}"><!-- filled using remote JSON fetch --></ol>
+								<input type="hidden" name="${pdict.CurrentForms.klarna_partpayment.pclass.htmlName}" value="${pdict.CurrentForms.klarna_partpayment.pclass.htmlValue}" />
+								<div class="klarna_box_bottom_content_listPriceInfo">
+									<span><isprint value="${Resource.msg('klarna.prices_are_in_sek', 'forms', null)}" encoding="off"/> </span>${KlarnaCurrency}
+								</div>
+							</div>
+						</div>
+						<div class="klarna_box_bottom_right">
+							<div class="klarna_box_bottom_content">
+								<isif condition="${KlarnaCountry == 'SE' || KlarnaCountry == 'FI' || KlarnaCountry == 'DK' || KlarnaCountry == 'NO'}">
+									<isklarnainput formfield="${pdict.CurrentForms.klarna_partpayment.ssn}" type="input"
+										xhtmlclass="Klarna_pnoInputField Klarna_fullwidth" title_id="part_perOrg_title" spinner="images/loader1.gif" />
+								</isif>
+								<isif condition="${KlarnaCountry == 'DE' || KlarnaCountry == 'NL'}">
+									<isklarnainput formfield="${pdict.CurrentForms.klarna_partpayment.gender}" type="radio" />
+
+									<div class="klarna_box_bottom_title"><isprint value="${Resource.msg('klarna.birthday', 'forms', null)}" encoding="off"/></div>
+									<div class="klarna_box_bottom_input_combo" style="width: 100%">
+										<div id="left" style="width: 30%">
+											<select style="width: 98%" name="${pdict.CurrentForms.klarna_partpayment.birthday.day.htmlName}" id="selectBox_part_bday">
+												<option disabled selected="selected"><isprint value="${Resource.msg('klarna.date_day', 'forms', null)}" encoding="off"/></option>
+												<isloop items="${pdict.CurrentForms.klarna_partpayment.birthday.day.options}" var="option">
+													<option value="${option.value}">${option.label}</option>
+												</isloop>
+											</select>
+										</div>
+										<div id="left" style="width: 40%">
+											<select style="width: 98%" name="${pdict.CurrentForms.klarna_partpayment.birthday.month.htmlName}" id="selectBox_part_bmonth">
+												<option disabled selected="selected"><isprint value="${Resource.msg('klarna.date_month', 'forms', null)}" encoding="off"/></option>
+												<isloop items="${pdict.CurrentForms.klarna_partpayment.birthday.month.options}" var="option">
+													<option value="${option.value}">${Resource.msg(option.label, 'forms', null)}</option>
+												</isloop>
+											</select>
+										</div>
+										<div id="right" style="width: 30%">
+											<select style="width: 100%" name="${pdict.CurrentForms.klarna_partpayment.birthday.year.htmlName}" id="selectBox_part_year">
+												<option disabled selected="selected"><isprint value="${Resource.msg('klarna.date_year', 'forms', null)}" encoding="off"/></option>
+											</select>
+										</div>
+									</div>
+									<div class="klarna_box_bottom_input_combo" style="width: 100%">
+										<input type="checkbox"
+											name="${pdict.CurrentForms.klarna_partpayment.concent.htmlName}"
+											value="true"
+											id="${'box_'+pdict.CurrentForms.klarna_partpayment.concent.htmlName}"
+											style="float: left; margin-right: 3px"/>
+										<div class="klarna_box_bottom_title" style="width: 80%; margin-top: 3px">
+											<label for="${'box_'+pdict.CurrentForms.klarna_partpayment.concent}">${Resource.msg(pdict.CurrentForms.klarna_partpayment.concent.label, 'forms', null)} <a href="javascript:ShowKlarnaConsentPopup('${merchantID}','part')" style="font-weight: normal; font-style: italic;">${Resource.msg('klarna.show_concent', 'forms', null)}</a></label>
+										</div>
+									</div>
+								</isif>
+								<isif condition="${KlarnaCountry == 'SE'}">
+									<iscomment>Company purchases only supported in the nordic countries</iscomment>
+									<div class="refferenceDiv" style="display: none">
+										<isklarnainput formfield="${pdict.CurrentForms.klarna_partpayment.reference}" type="input"
+											xhtmlclass="Klarna_fullwidth" />
+									</div>
+								</isif>
+								<isif condition="${KlarnaCountry == 'DK' || KlarnaCountry == 'NO' || KlarnaCountry == 'FI'}">
+									<div class="klarna_box_bottom_input_combo" style="width: 100%; display: none" id="part_box_company">
+										<div id="left" style="width: 60%">
+											<isklarnainput formfield="${pdict.CurrentForms.klarna_partpayment.company_name}" type="input" attribute1="style" value1="width: 98%"/>
+										</div>
+										<div id="right" style="width: 40%">
+											<isklarnainput formfield="${pdict.CurrentForms.klarna_partpayment.reference}" type="input" attribute1="style" value1="width: 100%" />
+										</div>
+									</div>
+								</isif>
+								<isif condition="${KlarnaCountry == 'DK'}">
+									<isklarnainput formfield="${pdict.CurrentForms.klarna_partpayment.ysal}" type="input" />
+								</isif>
+								<isif condition="${KlarnaCountry == 'SE'}">
+									<br/>
+									<br/>
+									<div class="klarna_box_bottom_address" style="display: none">
+										<div class="klarna_box_bottom_address_title"><isprint value="${Resource.msg('klarna.delivery_address', 'forms', null)}" encoding="off"/></div>
+										<div class="klarna_box_bottom_address_content">
+										</div>
+									</div>
+								</isif>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+ 		</div>
+		<isif condition="${KlarnaCountry == 'SE'}">
+			<input class="is_company" type="hidden"
+				name="${pdict.CurrentForms.klarna_partpayment.is_company.htmlName}"
+				value="${pdict.CurrentForms.klarna_partpayment.is_company.htmlValue}" />
+		</isif>
+ 		<!-- END KLARNA BOX -->
+ 	</form>
+ </div>

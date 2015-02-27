@@ -1,0 +1,17 @@
+<isinclude template="util/modules"/>
+<isset name="productMap" value="${pdict.productMap}" scope="page" />
+<isset name="strategyMessageOutput" value="${pdict.strategyMessageOutput}" scope="page" />
+<isset name="msg" value="${'recommendations.'+strategyMessageOutput.trim()}" scope="page"/>
+		<h2>
+			<isif condition="${(Resource.msg(msg,'product',null)).equals(msg)}">
+				${Resource.msg('recommendations.RecentItems','product',null)}
+			<iselse/>
+				${Resource.msg(msg,'product',null)}
+			</isif>
+		</h2> 
+<isloop items="${productMap.keySet().iterator()}" var="key" status="loopstatus">	
+	<isscript>
+		dw.system.Logger.debug("in CALLING Isml Product Id!!!!!!!!!!!!!!!!!!!!!"+key); 
+	</isscript>	
+	<isinclude url="${URLUtils.url('RichRelevance-GetRemoteInclude','key',key,'rrProdUrl',productMap.get(key))}" />
+</isloop>

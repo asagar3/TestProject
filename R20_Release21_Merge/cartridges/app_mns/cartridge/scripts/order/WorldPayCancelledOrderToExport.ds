@@ -1,0 +1,52 @@
+/**
+* Demandware Script File CR 3077 this script will pick all world pay orders which were cancelled before getting exported to 
+* cyber-source. This batch job will enable them to get reexported (export second time) again with cancellationInitiated status. 
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+* @output errorOrderList : String
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage(dw.net); 
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var counter : Number = 0;
+	var ordersIt : SeekableIterator;	
+	var ordersList : List  = new ArrayList();
+	var errorOrderList : String ="";
+	try{
+	var query : String = "exportStatus =" + Order.EXPORT_STATUS_EXPORTED + " AND custom.reExportOrderCancellationFlag =true ";
+	ordersIt = OrderMgr.queryOrders(query, "orderNo" , null);
+	
+	ordersList  = ordersIt.asList();	
+		for each(var order: dw.order in ordersList) {
+			order.setExportStatus(Order.EXPORT_STATUS_READY);
+			order.custom.reExportOrderCancellationFlag = false;
+			order.custom.orderStatus="CancellationInitiated";								
+		}		
+    } catch (e){
+    	
+    	if(!ordersList.empty){
+    		for each(var order: dw.order in ordersList) {
+    			errorOrderList= order.getOrderNo() + "," +  errorOrderList;    			
+    		}
+    	}    	
+	//	Logger.error("Error while Preparing the List of Orders to be Exported: " +e.message);
+		pdict.errorOrderList=errorOrderList;
+		return PIPELET_ERROR;
+	}
+	
+		pdict.errorOrderList=null;
+		return PIPELET_NEXT;
+}

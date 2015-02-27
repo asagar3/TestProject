@@ -1,0 +1,31 @@
+<!--- TEMPLATENAME: printedBillingAddress.isml --->
+<isinclude template="util/modules"/>
+            <div class="formfield title">
+	<label for="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="label">
+		<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span>
+		<span class="requiredindicator">*</span>
+	</label>							
+	<isscript>
+		importScript('checkout/Utils.ds');
+		var titleMap : dw.util.Map = getTitleMap();					
+	</isscript>
+	<div class="value">
+	<select id="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.billing.billingAddress.addressFields.title.htmlName}" class="selectbox title required">
+		<option value="">${Resource.msg('forms.select','forms',null)}</option>
+		<isloop items="${titleMap.keySet().iterator()}" var="key">
+			<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.billing.billingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+		</isloop>
+	</select>
+	</div>
+</div><!-- END: title -->
+
+<div class="formfield firstname">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.firstName}" type="input" label="false"/>
+</div>
+<!-- END: firstname -->
+<div class="formfield lastname">
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" value="false"/>
+  <isinputfield formfield="${pdict.CurrentForms.billing.billingAddress.addressFields.lastName}" type="input" label="false"/>
+</div>
+<!-- END: lastname -->

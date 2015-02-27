@@ -1,0 +1,68 @@
+<isif condition="${!empty(pdict.Product)}">
+<isscript>
+	// get all orderable cross sell recommendations (1 = cross sell)
+	var recommendations : dw.util.Iterator = pdict.Product.getOrderableRecommendations(1).iterator();
+	var recProducts : dw.util.Collection = new dw.util.ArrayList();
+
+	// display 20 recommendations at maximum 
+	var maxRecs = 20, counter = 0;
+
+	while( recommendations.hasNext() )
+	{
+		var recommendation : dw.catalog.Recommendation = recommendations.next();
+		var recommendedProduct : dw.catalog.Product = recommendation.getRecommendedItem();
+
+		recProducts.add( recommendedProduct );
+		
+		if(++counter >= maxRecs)
+		{
+			break;
+		}
+	}
+</isscript>
+<isif condition="${recProducts.size() > 0}">
+<h2>
+<isif condition="${pdict.Product.productSet}">
+	${Resource.msg('recommendations.productsets','product',null)}
+<iselse/>
+	${Resource.msg('recommendations.products','product',null)}
+</isif>
+</h2>
+<div class="recommendations_cross-sell">
+	<ul class="carousel">
+	<iscomment>Preserve the Product instance</iscomment>
+	<isset name="mainProduct" value="${pdict.Product}" scope="pdict"/>
+	<isloop items="${recProducts}" var="rec" end="19">
+	<iscomment><li>${rec.getRecommendedItem()}</li></iscomment>
+	<isset name="Product" value="${rec}" scope="pdict"/>
+	<isset name="pName" value="${pdict.Product.name}" scope="page"/>
+		<li>
+			<div class="analytics captureproductid"><isprint value="${pdict.Product.ID}"/></div>
+			<div class="image recommendation_image">
+				<a href="${URLUtils.http('Product-Show','pid', pdict.Product.ID)}">
+					<isif condition="${!empty(pdict.Product.getImage('catlanding',0))}">
+						<isscript>
+						var horizontalrecommendationwidth : Integer = dw.system.Site.getCurrent().preferences.custom.ImageWidthHorizontalRecommendation;
+						var horizontalrecommendationheight : Integer = dw.system.Site.getCurrent().preferences.custom.ImageHeightHorizontalRecommendation;
+						var scene7ImageUrl : String = pdict.Product.getImage('catlanding',0).URL + '?' + dw.system.Site.getCurrent().preferences.custom.s7Preset + 'wid='+90+'&hei='+135;
+						</isscript>
+						<img src="${scene7ImageUrl}" alt="${pdict.Product.getImage('catlanding',0).alt}" title="${pdict.Product.getImage('catlanding',0).title}"/>
+					<iselse/>
+						<img src="${URLUtils.staticURL('/images/noimagesmall.png')}" alt="${pName}" title="${pName}"/>
+					</isif>
+				</a>
+			</div><!-- END: recommendation_image -->
+			<div class="name">
+				<a href="${URLUtils.http('Product-Show','pid', pdict.Product.ID)}" title="{pName}"><isprint value="${pName}"/></a>
+			</div><!-- END: name -->
+			<isinclude template="product/components/pricing.isml"/>
+
+		 <!-- END: recommendationdetail -->
+		</li>
+	</isloop>
+	<iscomment>Restore the Product instance</iscomment>
+	<isset name="Product" value="${pdict.mainProduct}" scope="pdict"/>
+	</ul>
+</div><!-- END: recommendations_cross-sell -->
+</isif>
+</isif>

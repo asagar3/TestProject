@@ -1,0 +1,285 @@
+/**
+ * Script representation of the account transactions webservice
+ *
+ * If a Service implementation needs to override a method, the overridden method can always be
+ * called using this._super();
+ */
+
+importPackage(dw.system);
+importPackage(dw.object);
+importPackage(dw.util);
+
+importScript("util/libInheritance.ds");
+importScript("util/WebServiceUtils.ds");
+importScript("util/WebserviceConfiguration.ds");
+
+// Hack, because vars cannot be imported in DW, only functions
+function getAbstractBaseService() {
+	return AbstractBaseService;
+}
+
+/**
+ * Base class of all web services.
+ */
+var AbstractBaseService = Class.extend(
+/** @lends AbstractBaseService.prototype */
+{
+    /**
+     * Create a new web service instance.
+     *
+     * @constructs
+     *
+     * @param serviceName {String} A unique name of the service
+     * @param object {Object} The object instance which willl be used as reponse wrapper
+     *
+     */
+	init : function(serviceName : String, object : Object){
+		/** A unique name of the service 
+		*	@type String
+		*/
+		this.serviceName = serviceName;
+        /** The object instance which willl be used as reponse wrapper 
+        * @type ServiceBase
+        */
+		this.object = object;
+        /** The status object for the service instance 
+        *	@type CallStatus
+        */
+		this.status = new CallStatus(); 
+        /** The request object for the service (available after createRequest was executed) 
+        *	@type Object
+        */
+		this.request = null;
+        /** The response object for the service (available after executeServiceCall was executed)
+        *	@type Object
+        */
+		this.response = null;
+		
+		/** the following attributes are initialized by implementing classes *
+        *	@type Object
+		*/
+		this.serviceClient = null;
+		
+        /** The WebserviceLogger instance for this service 
+        * @type WebserviceLogger
+        */
+		this.serviceClientLogger = getWebserviceLogger();
+		
+        /** The WebserviceConfiguration instance for this service 
+        *	@type WebserviceConfiguration
+        */
+		this.configuration  = new WebserviceConfiguration(this.serviceName);
+	},
+
+	
+	/**
+	 * If service is not locket, this function calls getWebServiceResponse from implementing Services,
+	 * initializes the object with the webservice response and returns the status of this call.  
+	 */
+	call : function() {
+		
+		// TARGET ENVIRONMENT IS SET TO SystemUnavailable
+		if( this.configuration.credentials.getCredentialsType() == "SYSTEM_UNAVAILABLE" ) {
+			this.status = AbstractBaseService.SYSTEM_UNAVAILABLE;
+			Logger.debug("Initialised System Unavailable");
+			
+			return this.status;
+		}
+		
+		// TARGET ENVIRONMENT IS SET TO DummyValues
+		if ( this.configuration.credentials.getCredentialsType() == "DUMMY" ) {
+			this.response = this.getDummyResponse.apply(this, arguments);
+			this.status = AbstractBaseService.OK;
+			Logger.debug("Initialised Dummy Response");
+			return this.status;
+		}
+		
+		
+		try {
+			if (this.configuration.isLocked()) {
+				this.status.code = "SERVICE_UNAVAILABLE";
+				this.status.error = 10000;
+				this.status.msg = "SERVICE_LOCKED";
+			} else if (this.configuration.isDisabled()) {
+				this.status.code = "SERVICE_UNAVAILABLE";
+				this.status.error = 10002;
+				this.status.msg = "SERVICE_DISABLED";
+			} else {
+				// create the credentials
+				this.credentials = this.configuration.getCredentials();
+				
+				// get start time
+				this.status.duration = new Date().getTime();
+				
+				// calls the getWebServiceResponse, which must be implemented by actual implementations
+				//this.response = this.getWebServiceResponse.apply(this, arguments);
+				this.request = this.createRequest.apply(this, arguments);
+				this.status.code = "CALLING";
+				
+				this.response = this.executeServiceCall();
+				
+				this.status.code = "CALL_FINISHED";
+
+				// get end time
+				this.status.duration = new Date().getTime() - this.status.duration;
+
+				// Log full communication
+				this.logCommunication();
+			
+				// now handle and return status	
+				this.initStatusFromResponse();
+				// log the status
+				this.logStatusInFile();
+				// evaluate status
+				if (this.status.code == "ERROR") {
+					this.handleServiceError();
+				} else {
+					if (this.object && 'initFromWebservice' in this.object) {
+						this.object.initFromWebservice(this.response);
+						this.validateResponseObject();
+					} else {
+						throw new Error('AbstractBaseService.ds: The service object does not implement a initFromWebService method!');
+					}
+				}	
+			}
+			
+			return this.status;
+		} catch(exception) {
+			if(this.status.code == "CALLING"){
+				this.status.code = "CALL_FAILED";
+				// get end time
+				this.status.duration = new Date().getTime() - this.status.duration;
+			}
+			this.handleException(exception);
+		}
+	},
+	
+	/**
+	 *	Handles the exceptions, that can occur and locks the service if necessary
+	 *
+	 * @param exception {Error} The exception which needs to be handled 
+	 */
+	handleException : function(exception) {
+		if (exception.causeFullName == 'java.net.UnknownHostException'){
+			this.status.code = "SERVICE_UNAVAILABLE";
+			this.status.error = exception.faultString;
+			this.configuration.markServiceUnavailable(0,this.status.requestId);
+			this.logStatusInFile();
+			
+			return this.status;
+		}
+		
+		if (exception.causeFullName == 'java.net.SocketTimeoutException'){
+			this.status.code = "SERVICE_UNAVAILABLE";
+			this.status.error = exception.faultString;
+			this.configuration.markServiceUnavailable(1,this.status.requestId);
+			this.logStatusInFile();
+			
+			return this.status;
+		}
+		
+		if (exception.causeFullName == '(500)Internal Server Error'){
+			this.status.code = "SERVICE_UNAVAILABLE";
+			this.status.error = exception.faultString;
+			this.configuration.markServiceUnavailable(2,this.status.requestId);
+			this.logStatusInFile();
+			
+			return this.status;
+		}
+		
+		// default error
+		if (exception instanceof Fault) {
+			Logger.error("AbstractBaseService.ds: Actor " + exception.faultActor + " caused fault '" + exception.faultCode + "' (" + exception.faultString + " - " + exception.faultDetail + ") in " + this.serviceName);
+			this.status.error = exception.faultString;
+			this.status.msg = exception.faultString;
+		} else {
+			var errout : String = "AbstractBaseService.ds: An error occured during service processing: service: ";
+			for (var msg in exception) {
+				errout += msg + ": " + exception[msg] + ", ";
+			}
+			errout = errout.replace(/, $/, ')');
+			
+			Logger.error(errout, exception);
+			this.status.error = exception;
+		}
+		this.status.code = 'ERROR';
+		
+		return this.status;
+	},
+	
+	/**
+	 *	Logs, if a valid response of webservice tells that an error occured. can be extended if further functionality is needed
+	 **/
+	handleServiceError : function() {
+		Logger.error('AbstractBaseService.ds: ' + this.serviceName + " | " + this.status.code + " | " + this.status.error+ " | " + this.status.msg);
+	},
+
+	/** 
+	 * This method needs to be implemented by implementing classes
+	 */
+	initServiceClient : function() {
+		throw new Error("The service "+this.serviceName+" does not implement the required method 'initStatusFromResponse()'.");
+	},
+
+	/** 
+	 * This method needs to be implemented by implementing classes
+	 */
+	initStatusFromResponse : function() {
+		throw new Error("The service "+this.serviceName+" does not implement the required method 'initStatusFromResponse()'.");
+	},
+	/**
+	 * This method needs to be implemented by implementing classes
+	 *
+	 * @returns The request object required to call the service
+	 */
+	createRequest: function() {
+		throw new Error("The service "+this.serviceName+" does not implement the required method 'createRequest()'.");
+	},
+	/**
+	 * This method needs to be implemented by implementing classes, it can access the request using this.requets
+	 *
+	 * @returns The response object returned by the service call
+	 */
+	executeServiceCall: function() {
+		throw new Error("The service "+this.serviceName+" does not implement the required method 'executeServiceCall()'.");
+	},
+	
+	/**
+	 * usually always the same, sometimes it might make sense to overload the method
+	 *
+	 * @returns A dummy response having the same format the real service would have
+	 */
+	getDummyResponse : function() {
+		this.object.dummy.apply(this.object, WebserviceUtilities.getArgumentsAsArray(arguments));
+		return AbstractBaseService.OK;
+	},
+	
+	/**
+	 * calls the validate method of the webservice objects. Should not be overwritten.
+	 * @private  
+	 */
+	validateResponseObject : function() {
+		if ('validate' in this.object && this.status.code == "OK") {
+			var validResponseObject = this.object.validate();
+			if (!validResponseObject) {
+				this.status.code = "ERROR";
+				this.status.msg = "INVALID_RESPONSE_OBJECT";
+			}
+		}
+	},
+	
+	/** logs the full communication in a file*/
+	logCommunication : function() : Object {
+		// log request and response message if feature is enabled
+		this.serviceClientLogger.logSoapXmlWithLogging(this.request, this.response, this.serviceName, this.configuration);
+	},
+	
+	/** logs the status in a file*/
+	logStatusInFile : function() : Object {
+		this.serviceClientLogger.logInFileWithLogging(this.status, this.serviceName, this.configuration.isHeaderLogEnabled());
+	}
+});
+
+AbstractBaseService.SYSTEM_UNAVAILABLE = new CallStatus("SYSTEM_UNAVAILABLE","SYSTEM_UNAVAILABLE");
+
+AbstractBaseService.OK = new CallStatus("OK");

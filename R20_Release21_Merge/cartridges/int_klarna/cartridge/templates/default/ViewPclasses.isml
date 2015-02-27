@@ -1,0 +1,36 @@
+<isdecorate template="application/MenuFrame">
+<iscontent type="text/html" charset="UTF-8">
+<isinclude template="inc/Modules">
+
+<!-- Page Navigator -->
+<isset name="TOP_URL"   value="${URLUtils.url('SiteNavigationBar-ShowMenuitemOverview', 'CurrentMenuItemId', 'orders')}" scope="PAGE">
+<isbreadcrumb name1="orders" url1="${TOP_URL}" name2="Klarna">
+<!-- EO Page Navigator -->
+<div><a href="${URLUtils.continueURL()}"><isprint value="${Resource.msg('klarna.update_pclasses', 'klarna', null)}" encoding="off"/></a></div>
+<table cellpadding="2">
+<tr>
+	<th>Pclass ID</th>
+	<th>Description</th>
+	<th>Months</th>
+	<th>Start fee</th>
+	<th>Invoice fee</th>
+	<th>Interest rate</th>
+	<th>Min. amount</th>
+	<th>Country</th>
+	<th>Type</th>	
+</tr>
+<isloop iterator = "${pdict.PClasses}" alias = "pclass">
+<tr>
+<td>${pclass['pclassID']}</td>
+<td>${pclass['description']}</td>
+<td>${pclass['months']}</td>
+<td>${pclass['startFee']}</td>
+<td>${pclass['invoiceFee']}</td>
+<td>${pclass['interest']}</td>
+<td>${pclass['minAmount']}</td>
+<td>${pclass['country']}</td>
+<td>${pclass['type']}</td>
+</tr>
+</isloop>
+</table>
+</isdecorate>

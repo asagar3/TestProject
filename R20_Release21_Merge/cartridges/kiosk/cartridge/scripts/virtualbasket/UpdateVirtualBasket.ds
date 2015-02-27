@@ -1,0 +1,74 @@
+/**
+*   @input Basket : dw.order.Basket
+*   @input basketObject  : Object
+*   @input  CredentialsObject: Object
+*-   @output ExampleOut : Number
+*
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+
+function execute( args : PipelineDictionary ) : Number
+{
+         // For New API to Update the Virtual Basket
+         var vbbody : Object = args.basketObject;
+         var dwBasket:Basket = args.Basket ;
+
+         var pliIt : dw.util.Iterator = dwBasket.getAllProductLineItems().iterator();
+         var pli : ProductLineItem = null ;
+         var product:Product = null ;
+         var orderChannel : String = args.CredentialsObject.orderChannel;
+  		var deviceID : String = args.CredentialsObject.deviceID;
+  		
+         var url : String = Site.getCurrent().getCustomPreferenceValue("VBServiceURL");
+         url = url +"?channel="+orderChannel+"&device="+deviceID ;
+         Logger.error("VBServiceURL URL is "+url);
+      while (pliIt.hasNext()){
+      	
+      	     //For new version of API
+            var productData : Object = new Object();
+            
+    	    pli  = pliIt.next(); 	
+			product = pli.product ;	
+			
+			//For new version of API
+			productData.ProductUPC = pli.product.ID;
+			productData.ProductName = pli.productName;
+			productData.Department = product.custom.deptNumber ;
+			productData.Stroke = product.custom.stroke;
+			productData.Colour = product.custom.productColor;
+			productData.Size = product.custom.size;
+			productData.Quantity = pli.quantity.value;
+			productData.Price  = pli.price.value;
+			
+			var scene7ImageUrl : String = null ;
+			if(!empty(product.getImage('catlanding',0))){
+				scene7ImageUrl = product.getImage('catlanding',0).URL.toString() ;
+			} else {					  			  		
+	  			scene7ImageUrl  = dw.web.URLUtils.httpStatic('/images/noimagemedium.png').toString();	
+			}	
+			productData.ImageUrl  = scene7ImageUrl ;			
+            vbbody.Items.push(productData);
+			
+    }
+          var response : String = null;	
+    	  var httpService : HTTPClient = new HTTPClient();	
+	try {
+		
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+		httpService.open('PUT', url);
+		httpService.send(JSON.stringify(vbbody));
+	
+		if (httpService.statusCode == 201){
+			response = httpService.text;
+		} else {
+			Logger.error("Server responded with code:" + httpService.statusCode);
+			}
+		} catch ( ex ) {
+		Logger.error("Server connection failed:" + ex);
+		}
+		
+		return PIPELET_NEXT;
+}

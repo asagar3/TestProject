@@ -1,0 +1,118 @@
+/**
+
+*   @input Order : dw.order.Order
+*   @input vbObject : Object
+*   @input currentCustomer : dw.customer.Customer
+*-   @output ExampleOut : Number
+*
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+importPackage(dw.util);
+
+function execute( args : PipelineDictionary ) : Number
+{
+   var orderedProducts : dw.util.ArrayList= new dw.util.ArrayList();
+   var unorderedItems : Array= new Array();
+   var virtualBasket : Object = args.vbObject;
+   var urlToDeleteItems : String = Site.getCurrent().getCustomPreferenceValue("VBServiceURL");
+   var urlToDeleteVirtualBasket : String = urlToDeleteItems + virtualBasket.BasketId ;
+   
+   
+   var cookie :Cookie = request.httpCookies['channnelCookie'];
+   var channnelCookieValue : String = "";
+   var deviceID : String = "";
+   var tempOrderPoint : String = "";
+   var orderChannel : String = "";
+	
+	if(!empty(cookie)) 
+	{
+		channnelCookieValue=cookie.getValue(); 
+		var cookieAttr : Array = channnelCookieValue.split("|");
+		
+		for (var i=0; i < cookieAttr.length ; i++){
+			var cookieVal :String = cookieAttr[i];
+			if (cookieVal.indexOf("deviceID=")>-1){
+				deviceID = cookieVal.substring(cookieVal.indexOf("=")+1);
+			} else if (cookieVal.indexOf("orderPoint=")>-1){
+				tempOrderPoint = cookieVal.substring(cookieVal.indexOf("=")+1);
+			} else if (cookieVal.indexOf("orderChannel=")>-1){
+				orderChannel = cookieVal.substring(cookieVal.indexOf("=")+1);
+			} 
+		}		
+		 
+	} else if(session.custom.orderChannel != null && session.custom.deviceID != null ){
+		deviceID = session.custom.deviceID ; 
+		orderChannel  = session.custom.orderChannel ;
+		
+	}
+	
+	if(empty(orderChannel)){
+		orderChannel = "non-store"; 
+	}
+	var paramsToAppend:String = "?channel="+orderChannel ; 
+	if(deviceID == null){
+		paramsToAppend = paramsToAppend+"&device="+deviceID ;
+	}
+	
+	 
+	
+   // To create a list of ordered products
+   for each(var item in args.Order.productLineItems){
+   	
+   	   orderedProducts.push(item.productID);
+   	 } 
+   
+   // To create a list of Unordered products
+   for each (var vbItem in virtualBasket.Items){
+		//if(orderedProducts.indexOf(vbItem.ProductUPC)==-1)
+		if(!(orderedProducts.contains(vbItem.ProductUPC)))
+		{
+			unorderedItems.push(vbItem);
+		}
+	} 
+	virtualBasket.Items  = unorderedItems ;
+	var response : String = null;	
+  	var httpService : HTTPClient = new HTTPClient();	
+	try {
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+		//If all the products in VB have been ordered, delete complete VB else delete the products which have been ordered.
+		if(unorderedItems.length != 0){                            //Delete Only Items Orderd
+		  deleteItems(urlToDeleteItems+paramsToAppend,virtualBasket,httpService);
+		}else{                                                      // Delete the whole Virtual basket
+			deleteBasket(urlToDeleteVirtualBasket+paramsToAppend,args.currentCustomer, httpService);
+		}
+	} catch ( ex ) {
+		Logger.error("Server connection failed:" + ex);
+	}
+
+   return PIPELET_NEXT;
+}
+
+
+function deleteItems(url : String, basketBody : Object,httpService : HTTPClient){
+		Logger.error("urlToDeleteItems URL is "+url);
+	    var response : String = null;	
+	    httpService.open('PUT', url);
+	    httpService.send(JSON.stringify(basketBody));
+      	if (httpService.statusCode == 201){
+		response = httpService.text;
+		}else {
+		Logger.error("Server responded with code:" + httpService.statusCode);
+		}
+}
+
+function deleteBasket(url : String,customer : dw.customer.Customer, httpService : HTTPClient){
+		Logger.error("urlToDeleteItems basket URL is "+url);
+	   var response : String = null;
+		httpService.open('DELETE', url);
+		httpService.send();	  
+		if (httpService.statusCode == 200){
+			customer.profile.custom.isVirtualBasket = false;
+		} else {
+			Logger.error("Error in DeleteVirtualBasket.ds,"+" httpCode :" + httpService.statusCode+", errorMsg: "+httpService.text);
+		}		 
+}
+

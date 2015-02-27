@@ -1,0 +1,150 @@
+/**
+* Demandware Script File
+* This script file will be used to remove categories which have 'exportedToDW' attribute false.
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @input updatedFileName : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.object );
+importPackage( dw.catalog );
+importPackage( dw.io );
+importPackage( dw.net );
+
+var NAME_SPACE : String = "<?xml version='1.0' encoding='UTF-8'?>";
+var CATEGORY_START : String = "<category category-id='";
+var NEXT_LINE : String = "\r\n";
+var CATEGORY_END = "</category>";
+var CATELOG_END = "</catalog>";
+var CATALOG_START : String = "<catalog xmlns='http://www.demandware.com/xml/impex/catalog/2006-10-31' catalog-id='";
+var CLOSING_TAG : String = "'>";
+var levelCategoryMap : HashMap = new HashMap();
+var nextLevel : Number = 0;
+var allCategories : Collection = null;
+function execute( args : PipelineDictionary ) : Number
+{
+	
+	//create temp folder, if does not exist
+	if(createTempFolder("DeleteCategories")){
+		var orgFilePath = File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR+"DeleteCategories"+File.SEPARATOR;
+	    var newFileName = args.updatedFileName.substring(args.updatedFileName.lastIndexOf("/")+1,args.updatedFileName.length);
+	    //var newFileName = "updated_catalog.xml";
+		
+		//Creating (XML)File Writer	
+		var fileOut : File = new File(orgFilePath + newFileName);
+		if (!fileOut.exists()){
+			fileOut.createNewFile();
+		}	
+		var fileWriter : FileWriter = new FileWriter(fileOut);	
+		var writer : XMLStreamWriter = new XMLStreamWriter(fileWriter);
+		
+		var cat : Category=null;
+		var currentLevel : Number = 0;
+		try {
+			//Start Writing the file
+			writeCatalogStartElement(writer);
+			fileOut = null;
+			var root : Category = dw.catalog.CatalogMgr.getCategory('root');
+			nextLevel = currentLevel+1;
+   			findSubCategories(writer, root);
+   			while (levelCategoryMap.size()>currentLevel) {
+    			currentLevel = currentLevel+1;
+   				nextLevel = nextLevel+1;
+   				var allCategories : Collection = levelCategoryMap.get(currentLevel);
+   				if(allCategories!=null && allCategories.getLength() > 0){
+			        var catIt : Iterator = allCategories.iterator();
+			        while(catIt.hasNext()){
+			            cat = catIt.next();
+			   			findSubCategories(writer, cat);
+			        }//end while
+   				}
+   			}
+		    
+		writeEndElement(writer);
+		writer.flush();
+		writer.close();
+		fileWriter.close();
+		}catch(e){
+		 Logger.error("Exception while reading or writing the XML file"+e);
+		 return PIPELET_ERROR;
+		}	
+		
+	   return PIPELET_NEXT;
+	}
+	else{
+		return PIPELET_ERROR;
+	}
+}
+
+function findSubCategories (writer : XMLStreamWriter, currentCategory : Category) : void {
+	allCategories = new HashSet();
+    if (!"root".equalsIgnoreCase(currentCategory.ID) && (currentCategory.custom.ExportedtoDemandware==null 
+    || "false".equalsIgnoreCase(currentCategory.custom.ExportedtoDemandware))) {
+    	writeCategoryNodes(writer,currentCategory.getID());
+    }
+	var newCategories : Collection = currentCategory.getSubCategories();
+   	if(newCategories!=null && newCategories.getLength() > 0){
+   		var existingCategories : Collection = levelCategoryMap.get(nextLevel);
+   		if(existingCategories!=null && existingCategories.getLength() > 0){
+   			allCategories.addAll(existingCategories);
+   		} 
+   		allCategories.addAll(newCategories);
+   		levelCategoryMap.put(nextLevel, allCategories);
+    }
+}	
+
+function writeCategoryNodes (writer : XMLStreamWriter, catID : String) : void {
+	try{
+		writer.writeRaw(NEXT_LINE);
+		writer.writeRaw(CATEGORY_START+catID+CLOSING_TAG);
+		writer.writeRaw(NEXT_LINE);
+        writer.writeRaw(CATEGORY_END);
+    }catch(e){
+		Logger.error("Exception"+e);	
+	}
+}	
+function writeCatalogStartElement(writer : XMLStreamWriter){
+	writer.writeRaw(NAME_SPACE);
+	writer.writeRaw(NEXT_LINE);		
+	writer.writeRaw(CATALOG_START+dw.catalog.CatalogMgr.getSiteCatalog().ID+CLOSING_TAG);		
+	writer.writeRaw(NEXT_LINE);		
+}
+function writeEndElement(writer : XMLStreamWriter){
+	writer.writeRaw(NEXT_LINE);		
+	writer.writeRaw(CATELOG_END);		
+	writer.writeRaw(NEXT_LINE);		
+}
+//Create temp folder if does not exist.
+function createTempFolder( tempFolder : String ) : boolean
+{
+	var folder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + tempFolder );
+
+	if ( folder.exists() )
+	{
+		// nothing to do
+		return true;
+	}
+
+	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Creating temp folder " + folder.fullPath );
+
+	// create folder	
+	var result : boolean = folder.mkdirs();
+	if ( !result )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error creating temp folder " + folder.fullPath );
+		return false;
+	}
+	
+	return true;
+}

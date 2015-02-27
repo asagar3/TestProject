@@ -1,0 +1,47 @@
+/**
+ * This script will be used to create/update cookie & to get the browser settings.
+ * @output LocaleID : String Locale to set 
+ * @output defaultURL : Boolean if true, display the overlay
+ * @output localeInSession : String, Locale picked from session
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript('app_mns:languageselection/CookieUtils.ds');
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var validLocalesMap : HashMap = new HashMap();
+	var displayOverLay : Boolean = false;
+	var defaultURL : Boolean = false;
+	//Retrieving the cookie from Session
+	var localeInSession : String = "";
+	
+	if (!empty(session)) {
+		localeInSession = session.custom.localeStr;
+	}	
+	 	
+	pdict.LocaleID = localeInSession;
+	//This is required to create customized Home URL when customer enters the url in following format
+	//"http://www.marksandspencer.eu/on/demandware.store/Sites-EUSite-Site/de_DE/" or "http://www.marksandspencer.eu/on/demandware.store/Sites-EUSite-Site/"
+	if (!empty(request.httpQueryString)) {
+		pdict.LocaleID = updateURL(request.httpPath,localeInSession,request.locale);
+		pdict.LocaleID = pdict.LocaleID + "?" + request.httpQueryString;
+	} else if (request.httpPath.indexOf("demandware.store") > -1) {
+		if (request.httpHost.indexOf("demandware") > -1) {
+			pdict.LocaleID = updateURL(request.httpPath,localeInSession,request.locale);
+			defaultURL = true;		
+		} else if (!session.custom.displayOverlay){
+			pdict.LocaleID = request.httpProtocol + "://" + request.httpHost + "/" + localeInSession ;
+		}
+	}
+	
+	pdict.defaultURL = defaultURL;
+	pdict.localeInSession = localeInSession;
+	/*if (!empty(request.httpQueryString)) {
+		pdict.LocaleID = pdict.LocaleID + "?" + request.httpQueryString;
+	}*/
+	
+    return PIPELET_NEXT;
+}
+

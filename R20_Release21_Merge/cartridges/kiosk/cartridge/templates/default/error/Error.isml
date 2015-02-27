@@ -1,0 +1,12 @@
+<!--- TEMPLATENAME: Error.isml --->
+
+
+
+{"errorCode":"${pdict.errorCode}"} 
+<isscript>
+/*Chetan - Commenting code to prevent printing card information in logs
+dw.system.Logger.error("Request::::" + pdict.CurrentHttpParameterMap.requestJSONObject.stringValue);
+*/
+dw.system.Logger.error("error in service :error code :::" +pdict.errorCode);
+
+</isscript>

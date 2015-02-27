@@ -1,0 +1,67 @@
+/**
+ * @input UserAgent : String User Agent
+ * @input enableVirtualBasketRetrieval : String
+ */
+
+importPackage( dw.system );
+
+//User Agent Constants; in lowercase
+var UA_IPAD = "ipad";
+var UA_TABLET= "tablet"; 
+var UA_MOBILE = "mobile";
+var UA_WEB = "website";
+
+function execute( pdict : PipelineDictionary ) : Number {
+	
+	if(pdict.UserAgent == null){
+		session.custom.channel = UA_WEB;
+		return PIPELET_NEXT;
+	}
+	
+	var userAgent : String = pdict.UserAgent.toLowerCase(); //User agent is changed to lowercase
+	var channel : String = null;
+	var mobileEnabled : Boolean = dw.system.Site.getCurrent().getCustomPreferenceValue("mobileEnabled");
+	var enableVirtualBasketRetrieval:String = pdict.enableVirtualBasketRetrieval ;
+	
+	if (mobileEnabled) {
+		if (userAgent.indexOf(UA_MOBILE) >= 0 && userAgent.indexOf(UA_IPAD) < 0) {
+			channel = UA_MOBILE;
+			session.custom.orderChannel = "MOBILE_WEB" ;
+		}
+	}
+	
+	if (channel == null) {
+		var excludedUserAgents : Array = dw.system.Site.getCurrent().getCustomPreferenceValue("ExcludedUserAgents");
+		for (var i=0; i < excludedUserAgents.length; i++) {
+			var userAgentBM : String = excludedUserAgents[i].getDisplayValue().toLowerCase();
+			if (userAgent.indexOf(userAgentBM) >= 0){
+				channel = UA_WEB;
+				break;
+			}
+		}
+	}
+	
+	//if (channel == null && enableVirtualBasketRetrieval != "true") {
+	if (channel == null) {
+		/*if (dw.system.Site.current.preferences.custom.showOnlyTabletPages){
+			channel = UA_TABLET;
+		}*/
+		var allowedUserAgents : Array = dw.system.Site.getCurrent().getCustomPreferenceValue("AllowedUserAgents");		
+		for (var i=0; i < allowedUserAgents.length; i++) {
+			var userAgentBM : String = allowedUserAgents[i].getDisplayValue().toLowerCase();
+			if (userAgent.indexOf(userAgentBM) >= 0){
+				channel = UA_TABLET;
+				session.custom.orderChannel = "TABLET_WEB" ;
+				break;
+			}
+		}
+	}
+	
+	if (channel == null){
+		channel = UA_WEB;
+	}
+
+	session.custom.channel = channel;
+	
+	return PIPELET_NEXT;
+}

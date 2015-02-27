@@ -1,0 +1,48 @@
+<isinclude template="util/modules"/>
+
+<iscomment>Fetches refinement options for easier handling in the template</iscomment>
+<isset name="Refinements" value="${pdict.ProductSearchResult.refinements}" scope="page"/>
+
+<iscomment>
+</iscomment>
+<script type="text/javascript"><!--
+	// init the search result object
+	app.search.result = new app.search.SearchResult(<isif condition="${!empty(pdict.ProductSearchResult.searchPhrase)}">true<iselse/>false</isif>, <isif condition="${!empty(pdict.ProductSearchResult.categoryID)}">"${pdict.ProductSearchResult.categoryID}"<iselse>null</isif>);
+//--></script>
+<script src="${URLUtils.staticURL('/js/hover_script.js')}" type="text/javascript"></script>
+<script type="text/javascript">
+	$(document).ready(function(){	
+		app.hover.init();
+	});
+</script>
+
+<iscomment>Process refinement options based on configured refinement definitions</iscomment>
+<isif condition="${Refinements != null && Refinements.refinementDefinitions.size() > 0}">	
+		<iscomment>If we have a category context, we build a path from the root to the category</iscomment>
+		<isscript>
+			var cat = pdict.ProductSearchResult.category;
+			var path = new dw.util.ArrayList();
+			while( cat != null && cat.parent != null )
+			{
+				if( !cat.online )
+				{
+					cat = cat.parent;
+					continue;
+				}
+				path.addAt( 0, cat );
+				cat = cat.parent;
+			}
+		</isscript>
+		<iscomment>Navigation header based on browsing</iscomment>
+			
+			<h2><isprint value="${path.get(path.size()-1).displayName}"/></h2>
+			
+			<isloop items="${Refinements.getAllRefinementDefinitions()}" var="RefinementDefinition" status="refinementsLoopState">
+				<iscomment>CATEGORY REFINEMENTS</iscomment>
+				<isif condition="${RefinementDefinition.isCategoryRefinement()}">				
+					<islandingcategoryrefinementvalues searchmodel="${pdict.ProductSearchResult}" category="${path.get(path.size()-1)}" categorypath="${path}" categorylevel="1"/>
+				</isif>			
+			</isloop>
+	
+		<iscomment>NOTE: None breaking space to fix IE 7 background image issue</iscomment>		
+</isif>

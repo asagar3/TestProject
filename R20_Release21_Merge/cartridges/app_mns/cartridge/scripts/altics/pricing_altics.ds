@@ -1,0 +1,46 @@
+/**
+* Demandware Script File
+* Script for pricing_altics : INT-615
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.value );
+importPackage( dw.catalog );
+
+function splitPrice(SalesPrice) : Number
+{
+	var formattedMainPrice : Number;
+	formattedMainPrice = Math.floor(SalesPrice); 
+	return formattedMainPrice;
+}
+function getDecimalPrice(SalesPrice) : Number
+{
+	var mainPrice : Number;
+	var secondPrice : Number;
+	mainPrice = Math.floor(SalesPrice);
+	var formattedSalPrice = mainPrice.toPrecision(2);
+	secondPrice = SalesPrice - mainPrice;
+	var secPrice : Number;
+	secPrice = secondPrice * 100;
+	var formattedSecondPrice = secPrice.toPrecision(2);
+	if (formattedSecondPrice == 0){
+		formattedSecondPrice = "00";
+	}
+	return formattedSecondPrice;
+}
+function getStandardPrice(StandardPrice) : Number
+{
+	var FormattedStandardPrice : Number = Math.floor(StandardPrice);
+	return FormattedStandardPrice;
+}
+function calculateDiscount(minListPrice , SalesPrice) : Number{
+	var discountPercentage : Number = 0;
+	var costPrice : Number = minListPrice;
+	var salePrice : Number= SalesPrice;
+	discountPercentage = ((costPrice - salePrice)/(costPrice))*100;
+	var discountRounded : Number;
+	discountRounded = Math.floor(discountPercentage); 
+	var discFormatted=discountRounded.toPrecision(2);
+	return discFormatted;
+}

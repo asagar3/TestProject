@@ -1,0 +1,51 @@
+/**
+*  @input Basket : dw.order.Basket
+*  @input  customObject : Object
+*  @output customObject : Object
+* 
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.campaign );
+importPackage( dw.util);
+importPackage( dw.catalog);
+importPackage( dw.value); 
+
+function execute( pdict : PipelineDictionary ) : Number
+ { 
+	try { 
+		
+		var basketDefaultJsonObject  = pdict.customObject;
+		basketDefaultJsonObject.defaultNames  = new Array();
+		var dwBasket:Basket = pdict.Basket ;		
+		var tsopBasket = new Object();
+		tsopBasket.productLineItems = new Array();
+		 
+		var pliIt : dw.util.Iterator = dwBasket.productLineItems.iterator();
+		
+		var pli : ProductLineItem = null ;
+		var basketProduct :Object = null ;
+		var promos:Collection = null ;
+		var product:Product = null ;
+		while (pliIt.hasNext()) {  
+			
+			pli  = pliIt.next(); 	
+			product = pli.product ;	
+		
+			
+			basketProduct = new Object();		
+			basketProduct.productId = pli.productID ;
+			basketProduct.productName = pli.product.name ;
+			tsopBasket.productLineItems.push(basketProduct);
+			 
+		}
+		basketDefaultJsonObject.defaultNames.push(tsopBasket);  
+		pdict.customObject = basketDefaultJsonObject ;
+		
+	}catch(e){
+		Logger.error("ManageBasket: CreateBasketDefaultJSON Script Error:::"+e.message) ;
+		 return PIPELET_ERROR ;	
+	}
+   return PIPELET_NEXT; 
+}
+

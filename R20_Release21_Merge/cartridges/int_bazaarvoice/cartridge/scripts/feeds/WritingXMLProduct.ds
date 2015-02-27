@@ -1,0 +1,83 @@
+/**
+*
+  --SAMPLE-- 
+	        <Name>
+				<Name locale="en_FR">product name in en</Name>
+				<Name locale="fr_FR">product name in fr</Name>
+			</Names>
+			<ProductPageUrls>
+				<ProductPageUrl locale="en_FR">Product page url using locale en_FR</ProductPageUrl>
+				<ProductPageUrl locale="fr_FR">Product page url using locale fr_FR</ProductPageUrl>
+			</ProductPageUrls>
+			<ImageUrls>
+				<ImageUrl locale="en_FR">scene7URL</ImageUrl>
+				<ImageUrl locale="fr_FR">scene7URL</ImageUrl>
+			</ImageUrls>
+	</Product>
+* @input Inxsw : dw.io.XMLStreamWriter
+* @input InmapProductByLocale:dw.util.HashMap
+* @output Message : String
+* @output Outxsw : dw.io.XMLStreamWriter
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.catalog );
+importPackage( dw.util );
+
+ var mapProductByLocale:HashMap=null;
+ 
+function execute( pdict : PipelineDictionary ) : Number {
+	mapProductByLocale=pdict.InmapProductByLocale;//localized data of single product
+	var xsw : XMLStreamWriter = pdict.Inxsw;
+	try{
+		writeProductLocalizedElements(xsw,"Names","Name");
+		writeProductLocalizedElements(xsw,"ProductPageUrls","ProductPageUrl");
+		writeProductLocalizedElements(xsw,"ImageUrls","ImageUrl");
+		xsw.writeCharacters("\n");
+		xsw.writeEndElement();//product tag closed
+	} catch(ex) {
+        Logger.error("Error Message While exporting Product Feed:", ex.message);
+        pdict.Message = "Exception caught during localized catalog export: "+ ex.message;        
+        return PIPELET_ERROR;    
+    }  
+	pdict.Outxsw=xsw; 
+	return PIPELET_NEXT;   
+}
+
+
+function writeProductLocalizedElements(xsw : XMLStreamWriter,StartElementName:String,elementName:String) {	
+		
+		var openTag : Boolean = false;
+		var dataMap:HashMap=new HashMap();
+		var locale:String="";
+		var localeIterator:Iterator=null;
+		localeIterator=mapProductByLocale.keySet().iterator();	
+		while(localeIterator.hasNext())
+		    {
+		        locale=localeIterator.next();
+		    	dataMap=mapProductByLocale.get(locale);
+				if(!openTag){
+					xsw.writeCharacters("\n");
+					xsw.writeStartElement(StartElementName);
+					openTag = true;
+				}				
+				writeLocalizedElement(xsw, elementName, locale, dataMap.get(elementName));
+			}
+	    //closing StartElementName Tag	    		
+		if(openTag){
+			xsw.writeCharacters("\n");
+			xsw.writeEndElement();
+		}	
+}
+
+function writeLocalizedElement(xsw : XMLStreamWriter, elementName : String, locale : String, chars : String) {
+	xsw.writeCharacters("\n");
+	
+    xsw.writeStartElement(elementName);
+	xsw.writeAttribute("locale", locale);
+	if(!empty(chars)){
+	xsw.writeCharacters(chars);
+	}
+	xsw.writeEndElement();
+
+}

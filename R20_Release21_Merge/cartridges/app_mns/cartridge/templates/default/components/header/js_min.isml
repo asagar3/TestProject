@@ -1,0 +1,37 @@
+<!--- BEGIN JS files to merge.(source_path=cartridge/static/default;targetfile=js/global_generated.js) --->
+<!--- Commented the call to jQuery1.3.2.fixed.js --->
+<iscomment><script src="${URLUtils.staticURL('/lib/jquery/js/jquery/jquery-1.3.2.fixed.js')}" type="text/javascript"></script></iscomment>
+<!--- loading the latest stable jQuery release, version 1.8.3 with alias jQ --->
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/jquery-1.3.2.min.fixed.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/scroll/jquery.mousewheel.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/scroll/jquery.jscrollpane.min.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.core.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.dialog.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.resizable.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.draggable.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/ui.tabs.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/effects.core.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery/effects.slide.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jcarousel/jquery.jcarousel.fixed.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jcarousel/jcarousellite.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery-tooltip/jquery.tooltip.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/jquery-validate/jquery.validate.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/bgiframe_2.1.1/jquery.bgiframe.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/superfish-1.4.8/js/hoverIntent.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/superfish-1.4.8/js/superfish.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/app.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/product.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/searchsuggest.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/themes/demandwarestore/js/marksandspencer.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/themes/demandwarestore/js/cufon-yui.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/themes/demandwarestore/js/Helvetica_Neue_LT_Std_250.font.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/Whitney_500.font.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/Chronicle_Display_Semi_italic_375.font.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/Didot_LT_Pro_Roman_400.font.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/themes/demandwarestore/js/cufon_replace.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/themes/demandwarestore/js/jquery.orbit-1.2.3.min.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/lib/jquery/js/custom-tooltip/jquery.bt.min.js')}" type="text/javascript" charset="utf-8"></script>
+<script src="${URLUtils.staticURL('/js/jquery.foundation.orbit.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/32Ecb5XtGML.js')}" type="text/javascript"></script>
+<script src="${URLUtils.staticURL('/js/easing.js')}" type="text/javascript"></script>
+<!--- END JS files to merge --->

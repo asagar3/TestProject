@@ -1,0 +1,19 @@
+<iscomponent pipeline="RichRelevance-IncludeCommon">
+<script chartset="utf-8" type="text/javascript">
+
+	var pts = "${dw.system.Site.current.preferences.custom.rrPlacementSearch}".split(',');
+	for (var i = 0; i < pts.length; i++) {
+		R3_COMMON.addPlacementType(pts[i]);
+	}	
+	
+<isif condition="${pdict.ProductSearchResult.products!= null&&!empty(pdict.ProductSearchResult.products)}">
+	R3_SEARCH = new r3_search();
+	R3_SEARCH.setTerms('${pdict.CurrentHttpParameterMap.q.value}');
+	<isloop items="${pdict.ProductSearchResult.products}" var="LoopProductHit" end="14" begin="0">
+		R3_SEARCH.addItemId('${(LoopProductHit.variant ? LoopProductHit.variationModel.master.ID : LoopProductHit.ID)}');
+	</isloop>
+</isif>
+r3();
+</script>
+
+

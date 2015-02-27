@@ -1,0 +1,707 @@
+/**
+ * Connect to a WebDAV or SFTP server, check for matching files and download the file (just one
+ * file) that comes alphabetically first. To retieve the next matching file the pipelet needs to be
+ * called again. If there are no more matching files the pipelet uses the ERROR exit.
+ *
+ * The pipelet also uses the ERROR exit if a technical error occured. Check output value
+ * TechnicalError to distinguish the error causes.
+ *
+ * If TempFolder does not exist, it is created.
+ *
+ * @input RemoteFolderURL : String  mandatory, URL to WebDAV or SFTP folder, e.g. "https://www.myserver.com/folder/", "sftp://sftp.myserver.com:22/folder/"
+ * @input RemoteLogin : String  optional, login for WebDAV Basic Authentication or Digest Autentication or SFTP
+ * @input RemotePassword : String  optional, password for WebDAV Basic Authentication or Digest Autentication or SFTP
+ * @input RemoteFilePattern : String  mandatory, a regular expression, e.g. "Catalog_.*\.xml", matching files are imported in alphabetrical order
+ * @input TempFolder : String  mandatory, e.g. "catalog", folder is underneath Impex share, src folder
+ * @input TaskID : String  mandatory, e.g. attribute "ID" of task element in custom object
+ * @input TaskType : String  mandatory, e.g. element "task-type" of custom object task
+ * @input TaskMasterCatalog : Object
+ * If pipelet finishes with PIPELET_NEXT:
+ * @output RemoteFile : String  Name of the remote file inside RemoteFolderURL that has been downloaded
+ * @output File : String  Name of the local file relative to the Impex share, src folder
+ *
+ * If pipelet finishes with PIPELET_ERROR:
+ * @output TechnicalError : String  "TRUE" technical error occured, "FALSE" there are no more matching files
+ * @output sitePrefResult : String 
+ * @output timeStampValue : String
+ * @output oldFileName : String
+ * @output aray : Array
+ * @output StatusMessage : String
+ */
+
+importPackage( dw.io );
+importPackage( dw.net );
+importPackage( dw.system );
+importPackage( dw.util );
+importScript('feeds/CheckFeedRunTimeStamps.ds');
+var fileSizeDiffer : String = "TRUE"; 
+var remoteFile : String = null;
+var noFeedFound : Boolean = false;
+var statusmessage:String="";
+function execute( args : PipelineDictionary ) : Number
+{
+	var downloadFeedStartDate : Date = new Date(); 
+	// indicate technical error as default, in case we error during processing
+	
+	//chetan - changing- args.TechnicalError = "TRUE";
+
+	// read parameters
+	var remoteFolderURL : String = args.RemoteFolderURL;
+ 	var remoteLogin : String = args.RemoteLogin;
+ 	var remotePassword : String = args.RemotePassword;
+    var remoteFilePattern : String = args.RemoteFilePattern;
+    var taskID : String = args.TaskID;
+    var taskType : String = args.TaskType;
+    var tempFolder : String = args.TempFolder;
+    var masterCatalogTask : Object = args.TaskMasterCatalog;
+	var sitePrefDate : String = null;
+	var isCurrentTask : Boolean = true;
+	args.sitePrefResult = null;
+	//var sitePrefID : String = "";
+    // check parameters
+    if ( empty( remoteFolderURL ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemoteFolderURL empty" );
+    	args.TechnicalError = "TRUE";
+    	args.StatusMessage="ErrorMessage:DownloadFeed: Parameter RemoteFolderURL empty";
+    	return PIPELET_ERROR;
+    	
+    }
+
+    if ( empty( remoteFilePattern ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemoteFilePattern empty" );
+    	args.TechnicalError = "TRUE";
+    	args.StatusMessage="ErrorMessage:DownloadFeed: Parameter RemoteFilePattern empty";
+    	return PIPELET_ERROR;
+    	
+    }
+
+    if ( empty( taskID ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter TaskID empty" );
+    	args.StatusMessage="ErrorMessage:DownloadFeed: Parameter TaskID empty";
+    	return PIPELET_ERROR;
+    }
+
+    if ( empty( taskType ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter TaskType empty" );
+    	args.StatusMessage="ErrorMessage:DownloadFeed: Parameter TaskType empty";
+    	return PIPELET_ERROR;
+    }
+
+    if ( empty( tempFolder ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter TempFolder empty" );
+    	args.StatusMessage="ErrorMessage:DownloadFeed: Parameter TempFolder empty";
+    	args.TechnicalError = "TRUE";
+    	return PIPELET_ERROR;
+    	
+    }
+
+    Logger.getLogger("DownloadFeed").error( "DownloadFeed: " +
+    	"RemoteFolderURL: " + remoteFolderURL + ", " +
+    	"RemoteLogin: " + ( !empty( remoteLogin ) ? remoteLogin : "(empty)" ) + ", " +
+    	"RemotePassword: " + ( !empty( remotePassword ) ? "(provided)" : "(empty)" ) + ", " +
+    	"RemoteFilePattern: " + remoteFilePattern + ", " +
+    	"TempFolder: " + tempFolder );
+
+	//if other catalog is there in custom object but master catalog task missing
+	if (null == masterCatalogTask && taskType.equalsIgnoreCase("Catalog"))
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: masterCatalogTask is not defined, configuration error");
+		args.StatusMessage="ErrorMessage:DownloadFeed:DownloadFeed: masterCatalogTask is not defined, configuration error";
+		args.TechnicalError = "TRUE";
+		return PIPELET_ERROR;
+	}
+	
+	//processing the master catalog feed first before any other type of catalog feed file and current task is not the master catalog
+	if (taskType.equalsIgnoreCase("Catalog") && !taskID.equalsIgnoreCase("MasterCatalog")) {
+		isCurrentTask = false;
+		var masterCatalogExists : Number = isMasterCatalogFeed(masterCatalogTask);
+		if (masterCatalogExists == 1) {
+			//master catalog feed exists
+			//populate the task attributes for master catalog download
+			remoteFolderURL = masterCatalogTask['remote-folder-url'];
+		 	remoteLogin = masterCatalogTask['remote-login'];
+		 	remotePassword = masterCatalogTask['remote-password'];
+		    remoteFilePattern = masterCatalogTask['remote-file-pattern'];
+		    taskID = masterCatalogTask.id;
+		    tempFolder = masterCatalogTask['temp-folder'];
+		} else if (masterCatalogExists == -1) {
+			//technical error exists while looking for master catalog feed file at sftp location
+			args.TechnicalError = "TRUE";
+			args.StatusMessage=statusmessage;
+			return PIPELET_ERROR;
+		} else {
+			//no master catalog feed file found at SFTP as usual processing of current site specific catalog task.  
+			isCurrentTask = true;
+		}
+	}
+	 
+	if (isCurrentTask) {
+	    // get list of all files in folder
+		var remoteFiles : Collection = listRemoteFiles( remoteFolderURL, remoteLogin, remotePassword );
+		if ( remoteFiles == null )
+		{
+			//Site.getCurrent().setCustomPreferenceValue("SODFeed_Status", "NotInitiated");		
+			// there was a technical problem
+			args.StatusMessage=statusmessage;
+			return PIPELET_ERROR;
+		}
+		
+		// filter list
+		remoteFiles = filterRemoteFiles( remoteFiles, remoteFilePattern );
+		
+		// sort list
+		remoteFiles = new SortedSet( remoteFiles );
+		
+		if ( remoteFiles.empty )
+		{
+			//Site.getCurrent().setCustomPreferenceValue("SODFeed_Status", "NotInitiated");		
+			// no more files to process
+			//args.TechnicalError = "FALSE";
+			args.StatusMessage=statusmessage;
+			return PIPELET_ERROR;
+		}
+	
+		// pick the first file from the collection
+		remoteFile = remoteFiles[0];
+	}
+
+	var aray : Array = compareFileAndSitePrefTimeStamp(taskType, taskID, remoteFilePattern, remoteFile ,remoteFolderURL , remoteFile, remoteLogin, remotePassword);
+	sitePrefDate = aray[0];
+	//sitePrefID = aray[1];
+	args.aray = aray;
+	args.oldFileName = remoteFile.substring(0, 2)+"_OLDFILE"+remoteFile.substring(2, remoteFile.length);
+	args.sitePrefResult = sitePrefDate;
+	args.timeStampValue = sitePrefDate;
+	args.File = remoteFile;
+	if(sitePrefDate == null ){
+	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Downloading " + remoteFile );
+
+	if ( !createTempFolder( tempFolder ) )
+	{
+		// couldn't create folder
+		args.StatusMessage=statusmessage;
+		return PIPELET_ERROR;
+	}
+
+	var file : String = tempFolder + File.SEPARATOR + remoteFile;
+	
+	if ( !downloadFile( remoteFolderURL, remoteLogin, remotePassword, remoteFile, file ) )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFile: Error downloading file " );
+		args.TechnicalError = fileSizeDiffer;
+		//Site.getCurrent().setCustomPreferenceValue("SODFeed_Status", "NotInitiated");
+		//dw.system.Site.getCurrent().preferences.custom.SODFeed_Status = "NotInitiated";
+		// error downloading file
+		args.StatusMessage=statusmessage;
+		return PIPELET_ERROR;
+	}
+
+	args.RemoteFile = remoteFile;
+	args.File = file;
+	
+	// download was successful
+	args.TechnicalError = "FALSE";
+	var downloadFeedEndDate : Date = new Date(); 
+	var timeTaken : Number = downloadFeedEndDate.getTime()-downloadFeedStartDate.getTime();
+	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Time taken " +	timeTaken);	
+
+    return PIPELET_NEXT;
+	}
+	else{
+		args.TechnicalError = "TRUE";
+		args.StatusMessage=statusmessage;
+		return PIPELET_ERROR;
+	}
+}
+
+function isMasterCatalogFeed(masterCatalogTask : Object) : Number 
+{
+	var remoteFolderURL : String = masterCatalogTask['remote-folder-url'];
+ 	var remoteLogin : String = masterCatalogTask['remote-login'];
+ 	var remotePassword : String = masterCatalogTask['remote-password'];
+    var remoteFilePattern : String = masterCatalogTask['remote-file-pattern'];
+    var taskID : String = masterCatalogTask.id;
+    var tempFolder : String = masterCatalogTask['temp-folder'];
+	    // get list of all files in folder
+		var remoteFiles : Collection = listRemoteFiles( remoteFolderURL, remoteLogin, remotePassword );
+		if ( remoteFiles == null && noFeedFound == true)
+		{
+			return 0;
+		} else if ( remoteFiles == null )
+		{
+			return -1;
+		}
+		
+		// filter list
+		remoteFiles = filterRemoteFiles( remoteFiles, remoteFilePattern );
+		
+		// sort list
+		remoteFiles = new SortedSet( remoteFiles );
+		
+		if ( remoteFiles.empty )
+		{
+			// no more files to process
+			return 0;
+		}
+	
+		// pick the first file from the collection
+		remoteFile = remoteFiles[0];
+	return 1;	
+}
+
+function listRemoteFiles( remoteFolderURL : String, remoteLogin : String, remotePassword : String ) : Collection
+{
+	
+	if ( remoteFolderURL.indexOf( "sftp://" ) == 0 )
+	{
+		return listRemoteFilesSFTP( remoteFolderURL, remoteLogin, remotePassword );
+	}
+	else
+	{
+		return listRemoteFilesWebDAV( remoteFolderURL, remoteLogin, remotePassword );
+	}
+}
+
+function listRemoteFilesWebDAV( remoteFolderURL : String, remoteLogin : String, remotePassword : String ) : Collection
+{
+	var webDAVClient : WebDAVClient;
+	
+	if ( !empty( remoteLogin ) && !empty( remotePassword ) )
+	{
+		// use authentication
+		webDAVClient = new WebDAVClient( remoteFolderURL, remoteLogin, remotePassword );
+	}
+	else
+	{
+		// no authentication
+		webDAVClient = new WebDAVClient( remoteFolderURL );
+	}
+
+	var files : Array;
+	
+	try
+	{
+		// remoteFolderURL already contains full reference to folder, no path to append, we pass ""
+		// The default depth of 1 makes propfind return the current folder AND files in that folder.
+		files = webDAVClient.propfind( "" );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while listing " + remoteFolderURL + ": " + ex.message );
+		statusmessage="ErrorMessage:DownloadFeed: Error while listing " + remoteFolderURL + ": " + ex.message;		
+		return null;
+	}
+	
+	if ( !webDAVClient.succeeded() )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while listing " + remoteFolderURL + ": " +
+			webDAVClient.statusCode + " " + webDAVClient.statusText );	
+		statusmessage="ErrorMessage:DownloadFeed: Error while listing " + remoteFolderURL + ": " + webDAVClient.statusCode + " " + webDAVClient.statusText;
+		return null;
+	}
+
+	webDAVClient.close();
+
+	var remoteFiles : Collection = new ArrayList();
+	
+	for each ( var file : WebDAVFileInfo in files )
+	{
+		// filter out directories; this will automatically remove the current folder from the list
+		if ( !file.directory )
+		{
+			Logger.getLogger("DownloadFeed").error( "DownloadFeed: Listing file: " + file.name );
+			remoteFiles.add( file.name );
+		}		
+	}
+	
+	return remoteFiles;
+}
+
+function listRemoteFilesSFTP( remoteFolderURL : String, remoteLogin : String, remotePassword : String ) : Collection
+{
+	// connect to server
+	var sftpClient : SFTPClient = connectSFTP( remoteFolderURL, remoteLogin, remotePassword );
+	
+	if ( sftpClient == null )
+	{
+		return null;
+	}
+
+    // parse URL, e.g. "sftp://sftp.myserver.com:22/folder/"
+	var params : Array = /^sftp:\/\/([^\/:]+)(?::(\d+))?(\/(?:.*\/)?)$/.exec( remoteFolderURL );
+
+	if ( params == null || params.length != 4 )
+	{
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL );
+    	statusmessage="ErrorMessage:DownloadFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL;
+    	return null;
+	}
+
+	var path : String = params[3];
+	//var path : String = remoteLogin + params[3];
+	// list files
+	var files : Array;
+	
+	try
+	{
+		files = sftpClient.list( path );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while listing " + path + ": " + ex.message );
+		statusmessage="ErrorMessage:DownloadFeed: Error while listing " + path + ": " + ex.message;	
+		return null;
+	}
+	
+	if ( files == null )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: No Feed file found at @" + path );
+		statusmessage="ErrorMessage:DownloadFeed: No Feed file found at @" + path;	
+		noFeedFound = true;	
+		return null;
+	}
+
+	sftpClient.disconnect();
+
+	var remoteFiles : Collection = new ArrayList();
+	
+	for each ( var file : SFTPFileInfo in files )
+	{
+		// filter out directories
+		if ( !file.directory )
+		{
+			Logger.getLogger("DownloadFeed").error( "DownloadFeed: Listing file: " + file.name );
+			remoteFiles.add( file.name );
+		}		
+	}
+	
+	return remoteFiles;
+}
+
+function filterRemoteFiles( remoteFiles : Collection, remoteFilePattern : String ) : Collection
+{
+	var regExp : RegExp = new RegExp( remoteFilePattern );
+
+	var filteredRemoteFiles : Collection = new ArrayList();
+	
+	for each ( var remoteFile : String in remoteFiles )
+	{
+		if ( regExp.test( remoteFile ) && !(remoteFile.indexOf("_OLDFILE") >= 0) )
+		{
+			Logger.getLogger("DownloadFeed").error( "DownloadFeed: Matching file: " + remoteFile );
+			filteredRemoteFiles.add( remoteFile );
+		}
+	}
+	
+	return filteredRemoteFiles;
+}
+
+function createTempFolder( tempFolder : String ) : boolean
+{
+	var folder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + tempFolder );
+
+	if ( folder.exists() )
+	{
+		// nothing to do
+		return true;
+	}
+
+	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Creating temp folder " + folder.fullPath );
+
+	// create folder	
+	var result : boolean = folder.mkdirs();
+	if ( !result )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error creating temp folder " + folder.fullPath );
+		statusmessage="Error Message:DownloadFeed: Error creating temp folder " + folder.fullPath;
+		return false;
+	}
+	
+	return true;
+}
+
+function downloadFile( remoteFolderURL : String, remoteLogin : String, remotePassword : String, remoteFile : String, file : String ) : boolean
+{
+	Logger.getLogger("DownloadFeed").error( "DownloadFile: Start " );
+	if ( remoteFolderURL.indexOf( "sftp://" ) == 0 )
+	{
+		return downloadFileSFTP( remoteFolderURL, remoteLogin, remotePassword, remoteFile, file );
+	}
+	else
+	{
+		return downloadFileWebDAV( remoteFolderURL, remoteLogin, remotePassword, remoteFile, file );
+	}
+	Logger.getLogger("DownloadFeed").error( "DownloadFile: End " );
+}
+
+function downloadFileWebDAV( remoteFolderURL : String, remoteLogin : String, remotePassword : String, remoteFile : String, file : String ) : boolean
+{
+	var webDAVClient : WebDAVClient;
+	
+	if ( !empty( remoteLogin ) && !empty( remotePassword ) )
+	{
+		// use authentication
+		webDAVClient = new WebDAVClient( remoteFolderURL, remoteLogin, remotePassword );
+	}
+	else
+	{
+		// no authentication
+		webDAVClient = new WebDAVClient( remoteFolderURL );
+	}
+
+	var files : Array;
+	
+	// figure size of remote file
+	try
+	{
+		files = webDAVClient.propfind( remoteFile );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while listing " + remoteFolderURL + remoteFile + ": " + ex.message );
+		statusmessage="Error Message:DownloadFeed: Error while listing " + remoteFolderURL + remoteFile + ": " + ex.message;		
+		return false;
+	}
+
+	if ( !webDAVClient.succeeded() )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while listing " + remoteFolderURL + remoteFile + ": " +
+			webDAVClient.statusCode + " " + webDAVClient.statusText );	
+			statusmessage="Error Message:DownloadFeed: Error while listing " + remoteFolderURL + remoteFile + ": " + webDAVClient.statusCode + " " + webDAVClient.statusText;	
+		return false;
+	}
+
+	if ( files.length != 1 )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Unexpected number of elements when listing " + remoteFolderURL + remoteFile + ": " + files.length );		
+		statusmessage="Error Message:DownloadFeed: Unexpected number of elements when listing " + remoteFolderURL + remoteFile + ": " + files.length;
+		webDAVClient.close();
+		return false;
+	}
+
+	var fileSize : Number = files[0].size;
+
+	// file too large?	
+	if ( fileSize > WebDAVClient.MAX_GET_FILE_SIZE )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: File " + remoteFolderURL + remoteFile + " too large to download: " +
+			"file size: " + fileSize + ", MAX_GET_FILE_SIZE: " + WebDAVClient.MAX_GET_FILE_SIZE );
+		statusmessage="Error Message:DownloadFeed: File " + remoteFolderURL + remoteFile + " too large to download: " + "file size: " + fileSize + ", MAX_GET_FILE_SIZE: " + WebDAVClient.MAX_GET_FILE_SIZE;		
+		webDAVClient.close();
+		return false;
+	}
+
+	Logger.getLogger("DownloadFeed").error( "DownloadFeed: File size: " + fileSize );
+
+	// download file
+	var localFile : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + file );
+
+	try
+	{
+		webDAVClient.getBinary( remoteFile, localFile, WebDAVClient.MAX_GET_FILE_SIZE );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while downloading " + remoteFolderURL + remoteFile + " to " + localFile.fullPath + ": " + ex.message );		
+		statusmessage="Error Message:DownloadFeed: Error while downloading " + remoteFolderURL + remoteFile + " to " + localFile.fullPath + ": " + ex.message;
+		return false;
+	}
+	
+	if ( !webDAVClient.succeeded() )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while downloading " + remoteFolderURL + remoteFile + " to " + localFile.fullPath + ": " +
+			webDAVClient.statusCode + " " + webDAVClient.statusText );
+		statusmessage="Error Message:DownloadFeed: Error while downloading " + remoteFolderURL + remoteFile + " to " + localFile.fullPath + ": " + webDAVClient.statusCode + " " + webDAVClient.statusText;	
+		return false;
+	}
+
+	webDAVClient.close();
+
+	// compare file sizes
+	var localFileSize : Number = localFile.length();
+	
+	if ( fileSize != localFileSize )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Remote and local file sizes differ after download: " +
+			"remote: " + fileSize + ", local: " + localFileSize );	
+		statusmessage="Error Message:DownloadFeed: Remote and local file sizes differ after download: " + "remote: " + fileSize + ", local: " + localFileSize;	
+		return false;
+	}
+
+	// downloaded successfully
+	return true;
+}
+
+function downloadFileSFTP( remoteFolderURL : String, remoteLogin : String, remotePassword : String, remoteFile : String, file : String ) : boolean
+{
+	// connect to server
+	var sftpClient : SFTPClient = connectSFTP( remoteFolderURL, remoteLogin, remotePassword );
+	
+	if ( sftpClient == null )
+	{
+		return false;
+	}
+
+    // parse URL, e.g. "sftp://sftp.myserver.com:22/folder/"
+	var params : Array = /^sftp:\/\/([^\/:]+)(?::(\d+))?(\/(?:.*\/)?)$/.exec( remoteFolderURL );
+
+	if ( params == null || params.length != 4 )
+	{
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL );
+    	statusmessage="Error Message:DownloadFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL;
+    	return false;
+	}
+
+	var path : String = params[3];
+	//var path : String = remoteLogin + params[3];
+
+	// figure size of remote file
+	var fileInfo : SFTPFileInfo;
+	
+	try
+	{
+		fileInfo = sftpClient.getFileInfo( path + remoteFile );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while retrieving file info " + path + remoteFile + ": " + ex.message );
+		statusmessage="Error Message:DownloadFeed: Error while retrieving file info " + path + remoteFile + ": " + ex.message;		
+		return false;
+	}
+
+	if ( fileInfo == null )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while retrieving file info  " + path + remoteFile + ": " +
+			sftpClient.errorMessage );
+			statusmessage="Error Message:DownloadFeed: Error while retrieving file info  " + path + remoteFile + ": " + sftpClient.errorMessage;		
+		return false;
+	}
+
+	var fileSize : Number = fileInfo.size;
+
+	// file too large?	
+	if ( fileSize > SFTPClient.MAX_GET_FILE_SIZE )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: File " + path + remoteFile + " too large to download: " +
+			"file size: " + fileSize + ", MAX_GET_FILE_SIZE: " + SFTPClient.MAX_GET_FILE_SIZE );
+			statusmessage="Error Message:DownloadFeed: File " + path + remoteFile + " too large to download: " + "file size: " + fileSize + ", MAX_GET_FILE_SIZE: " + SFTPClient.MAX_GET_FILE_SIZE; 		
+		sftpClient.disconnect();
+		return false;
+	}
+
+	Logger.getLogger("DownloadFeed").error( "DownloadFeed: File size: " + fileSize );
+
+	// download file
+	var localFile : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + file );
+	var result : boolean;
+
+	try
+	{
+		result = sftpClient.getBinary( path + remoteFile, localFile );
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while downloading " + path + remoteFile + " to " + localFile.fullPath + ": " + ex.message );		
+		statusmessage="Error Message:DownloadFeed: Error while downloading " + path + remoteFile + " to " + localFile.fullPath + ": " + ex.message; 
+		return false;
+	}
+	
+	if ( !result )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while downloading " + path + remoteFile + " to " + localFile.fullPath + ": " +
+			sftpClient.errorMessage );	
+			statusmessage="Error Message:DownloadFeed: Error while downloading " + path + remoteFile + " to " + localFile.fullPath + ": " + sftpClient.errorMessage;
+		return false;
+	}
+
+	sftpClient.disconnect();
+
+	// compare file sizes
+	var localFileSize : Number = localFile.length();
+	
+	if ( fileSize != localFileSize )
+	{
+		fileSizeDiffer = "FALSE";
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Remote and local file sizes differ after download: " +
+			"remote: " + fileSize + ", local: " + localFileSize );
+			statusmessage="Error Message:DownloadFeed: Remote and local file sizes differ after download: " + "remote: " + fileSize + ", local: " + localFileSize;		
+		return false;
+	}
+
+	// downloaded successfully
+	return true;
+}
+
+function connectSFTP( remoteFolderURL : String, remoteLogin : String, remotePassword : String ) : SFTPClient
+{
+    // for SFTP remoteLogin and remotePassword are required
+    if ( empty( remoteLogin ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemoteLogin empty (required for SFTP)" );
+    	statusmessage="Error Message:DownloadFeed: Parameter RemoteLogin empty (required for SFTP)" ;
+    	return null;
+    }
+
+    if ( empty( remotePassword ) )
+    {
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemotePassword empty (required for SFTP)" );
+    	statusmessage="Error Message:DownloadFeed: Parameter RemotePassword empty (required for SFTP)";
+    	return null;
+    }
+
+    // parse URL, e.g. "sftp://sftp.myserver.com:22/folder/"
+	var params : Array = /^sftp:\/\/([^\/:]+)(?::(\d+))?(\/(?:.*\/)?)$/.exec( remoteFolderURL );
+
+	if ( params == null || params.length != 4 )
+	{
+    	Logger.getLogger("DownloadFeed").error( "DownloadFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL );
+    	statusmessage="Error Message:DownloadFeed: Parameter RemoteFolderURL not recognized, RemoteFolderURL: " + remoteFolderURL ;
+    	return null;
+	}
+
+	var host : String = params[1];
+	var port : Number = null;
+	// params[2] is undefined if there was no port provided
+	if ( params[2] != undefined )
+	{
+		port = new Number( params[2] );
+	}
+	
+	var sftpClient : SFTPClient = new SFTPClient();
+	var result : boolean;
+	
+	try
+	{
+		if ( port != null )
+		{
+			result = sftpClient.connect( host, port, remoteLogin, remotePassword );
+		}
+		else
+		{
+			// use default port
+			result = sftpClient.connect( host, remoteLogin, remotePassword );
+		}
+	}
+	catch ( ex )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while connecting to " +
+			host + ( ( port != null ) ? ( ":" + port ) : "" ) + ": " + ex.message );
+			statusmessage="Error Message:DownloadFeed: Error while connecting to " + host + ( ( port != null ) ? ( ":" + port ) : "" ) + ": " + ex.message;		
+		return null;
+	}
+
+	if ( !result )
+	{
+		Logger.getLogger("DownloadFeed").error( "DownloadFeed: Error while connecting to " +
+			host + ( ( port != null ) ? ( ":" + port ) : "" ) + ": " + sftpClient.errorMessage );	
+			statusmessage="Error Message:DownloadFeed: Error while connecting to " + host + ( ( port != null ) ? ( ":" + port ) : "" ) + ": " + sftpClient.errorMessage;
+		return null;
+	}
+
+	return sftpClient;
+}

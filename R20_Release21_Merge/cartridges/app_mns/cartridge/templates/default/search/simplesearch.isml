@@ -1,0 +1,38 @@
+<script type="text/javascript"><!--
+var searchSuggestURL = "${URLUtils.url('Search-GetSuggestions')}";
+
+jQuery(document).ready(function() {
+	app.searchsuggest.init("SimpleSearchForm", "searchinput", "${Resource.msg('simplesearch.searchtext','search',null)}", "suggestions", searchSuggestURL);
+	
+	var styles = {'-webkit-box-shadow':'0 0 2px #20439C', '-moz-box-shadow':'0 0 2px #20439C','-o-box-shadow':'0 0 2px #20439C','box-shadow':'0 0 2px #20439C'};
+	var styles2 = {'-webkit-box-shadow':'0 0 5px #DDD inset', '-moz-box-shadow':'0 0 5px #DDD inset','-o-box-shadow':'0 0 5px #DDD inset','box-shadow':'0 0 5px #DDD inset'};
+	
+	$('#searchinput').focus(function(){
+		jQuery(this).css(styles);
+		jQuery(this).val("");
+	});
+	$('#searchinput').blur(function(){
+		jQuery(this).css(styles2);
+	});
+});
+//-->
+//QC defect - 613 | default Search text should be removed when control is in the search text box
+
+</script>
+
+<div class="sitesearch">
+	<form action="${URLUtils.http('Search-Show')}" method="get" id="SimpleSearchForm" class="simplesearch"> <!-- onsubmit="javascript: setOmnitureVariablesForSearch();"  -->
+		<fieldset>
+			<legend>Personalia:</legend>
+			<label for="searchinput"></label>
+			<input type="text" name="q"  value="${Resource.msg('simplesearch.searchtext','search',null)}" class="simplesearchinput" id="searchinput"/>
+			<iscomment>hidden field created to fix the QC defect - 613</iscomment>
+			<label for="hiddenSearchinput" id="hiddenlabel">${Resource.msg('simplesearch.searchlabel','search',null)}</label><input type="hidden" name="hiddenQ" value="${Resource.msg('simplesearch.searchtext','search',null)}" id="hiddenSearchinput"/>
+			<iscomment>
+			    Please do not use a image based button here, because it will prevent caching due to its dynamic
+			    image click coordinates in the url. It is possible but might hurt the performance.
+			</iscomment>
+			<button type="submit" value="${Resource.msg('global.go','locale',null)}" name="simplesearch" title="${Resource.msg('global.go','locale',null)}"><span>${Resource.msg('global.go','locale',null)}</span></button>
+		</fieldset>
+	</form>
+</div><!-- END: sitesearch -->

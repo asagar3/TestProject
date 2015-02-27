@@ -1,0 +1,40 @@
+/**
+* @output fileName : String
+* @output xsw:dw.io.XMLStreamWriter
+* @output Message : String
+*
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+importScript("int_bazaarvoice:/lib/libBazaarvoice.ds");
+importScript("int_bazaarvoice:/lib/libConstants.ds");
+var bvHelper = getBazaarVoiceHelper();
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	  var date : Date = new Date();
+      var fileName : String = Site.getCurrent().ID + "-Export-PurchaseFeed-" + date.getFullYear() + bvHelper.insertLeadingZero(date.getMonth()+1) + bvHelper.insertLeadingZero(date.getDate()+1) + bvHelper.insertLeadingZero(date.getHours()+1) + bvHelper.insertLeadingZero(date.getMinutes()+1) + bvHelper.insertLeadingZero(date.getMilliseconds()) + ".xml"; 
+      var file : File = new File(File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + fileName);     
+      var xsw : XMLStreamWriter;	
+	try{
+		 var fw : FileWriter = new FileWriter(file, "UTF-8");
+             xsw  = new XMLStreamWriter(fw);    
+             xsw.writeStartDocument( "UTF-8", "1.0" );
+             xsw.writeCharacters("\n");
+	         xsw.writeStartElement( "Feed" );
+	         xsw.writeDefaultNamespace("http://www.bazaarvoice.com/xs/PRR/PostPurchaseFeed/5.6");	
+	         xsw.writeCharacters("\n");
+             //xsw.close();
+	}catch(ex){
+		Logger.error("Error Message While Creating XML For BV pie feed :", ex.message);
+		pdict.Message="Error Message While Creating XML For BV pie feed :"+ ex.message;	             
+		xsw.flush();
+		xsw.close();	            
+        return PIPELET_ERROR;	
+	}
+pdict.fileName = fileName;            
+pdict.xsw=xsw;
+return PIPELET_NEXT;
+}
+

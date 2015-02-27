@@ -1,0 +1,32 @@
+<isif condition="${empty(pdict.Order)}">
+	<isset name="KlarnaCountry" value="${pdict.Basket.shipments[0].shippingAddress.countryCode.value}" scope="page"></isset>
+	<isloop var="paymentInstrument" items="${pdict.Basket.paymentInstruments}">
+		<isif condition="${paymentInstrument.paymentMethod == "KLARNA_PARTPAYMENT"}">
+		<isset name="KlarnaCustom" value="${paymentInstrument.custom}" scope="page"></isset>
+		<div>
+			<img id="klarna_logo" class="klarna_logo"
+				src="${URLUtils.imageURL('images/logo/' + KlarnaCountry.toLowerCase() + '/klarna_account.png', null)}"
+				alt="${Resource.msg('klarna.part_logo_alt', 'klarna', null)}" />
+		</div>
+		<strong><isprint value="${Resource.msg("klarna.payment_method", "klarna", null)}" encoding="off"/>:</strong> ${KlarnaCustom["KlarnaPaymentDescription"]}
+		<isif condition="${KlarnaCustom['KlarnaMonthlyCost'] != null}">
+			<br />
+			<strong><isprint value="${Resource.msg('klarna.monthly_cost', 'klarna', null)}" encoding="off"/>:</strong> <isprint value="${KlarnaCustom['KlarnaMonthlyCost']}" encoding="off"/>
+		</isif>
+		</isif>
+	</isloop>
+
+<iselse/>
+	<isset name="KlarnaCustom" value="${paymentInstr.custom}" scope="page"></isset>
+	<isset name="KlarnaCountry" value="${pdict.Order.shipments[0].shippingAddress.countryCode.value}" scope="page"></isset>
+	
+	<isset name="KlarnaCustom" value="${paymentInstr.custom}" scope="page"></isset>
+	<div>
+		<img src="${URLUtils.imageURL("logotypes/klarna_account_" + KlarnaCountry.toLowerCase() + ".png", null)}" />
+	</div>
+	<strong><isprint value="${Resource.msg("klarna.payment_method", "klarna", null)}" encoding="off"/>:</strong> ${KlarnaCustom["KlarnaPaymentDescription"]}
+	<isif condition="${KlarnaCustom['KlarnaMonthlyCost'] != null}">
+		<br />
+		<strong><isprint value="${Resource.msg("klarna.monthly_cost", "klarna", null)}" encoding="off"/>:</strong> <isprint value="${KlarnaCustom["KlarnaMonthlyCost"]}" encoding="off"/>
+	</isif>
+</isif>

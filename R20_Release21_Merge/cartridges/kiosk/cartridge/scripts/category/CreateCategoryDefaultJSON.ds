@@ -1,0 +1,136 @@
+/**
+*  @input customObject : Object
+*  @output customObject : Object
+*  @input specificLocale : String
+*
+*/
+importPackage( dw.system ); 
+importPackage( dw.catalog );
+importPackage( dw.util);
+importPackage( dw.object);
+importPackage( dw.content);
+
+function execute( pdict : PipelineDictionary ) : Object
+{
+	 try{		
+		//Logger.error(new Date().getHours().toString()+"  "+);
+		var categoryObject  = pdict.customObject; /* The master categoryObject */
+		
+		/*Praveen: Changes done for GetCategory service:-
+		* localizedValues array will have the elements of Object type
+		* Each object type will have a string value representing the specific-locale and one Object(having the category data)
+		*/
+		
+		var locale : String = pdict.specificLocale;
+		
+		if(categoryObject.localizedValues == null){
+			categoryObject.localizedValues = new Array();
+		}
+		
+		var catObject : Object = new Object();
+		if("default".equalsIgnoreCase(locale)){
+			catObject.localeName  = "omniture";	
+		}else{
+			catObject.localeName = locale;
+		}
+		catObject.localeValues = new Array(); 
+		var siteCatalog = CatalogMgr.getSiteCatalog();
+		var root = null;
+		if(siteCatalog!=null) {root = siteCatalog.getRoot();}	
+		var topCategories = root.getOnlineSubCategories() ;/*Collection of Topmost categories */
+		var categoryGroupMap:Map = null ;
+		var categoryType:String  = null ;
+		
+		for each(var topCat:Category in topCategories){/*Top level categories loop*/		
+			categoryType = null ;		
+			if(topCat.custom.showInMenu == true){
+				
+				
+				var topCategory = new Object();/*Top most category JSON String*/
+				topCategory.categoryID = topCat.getID() ;
+				topCategory.categoryDisplayName = topCat.getDisplayName();		
+				categoryGroupMap= new HashMap();	
+				//categoryObject.defaultNames.push(topCategory);
+				//catObject.localValues = topCategory;
+				catObject.localeValues.push(topCategory);					
+				var subCategories = topCat.getOnlineSubCategories();/*First level sub-categories */
+				var subCategoryList : ArrayList = new ArrayList();			
+				for each(var subCat:Category in subCategories){
+					/*Only add those in the JSON which are displayed on the web site as well*/
+					if(subCat.custom.showInMenu){
+						subCategoryList.add(subCat);					
+					}
+				}			
+			
+				var  propCompare : dw.util.PropertyComparator = new dw.util.PropertyComparator("custom.categoryType");
+				subCategoryList.sort(propCompare);			
+				var map : HashMap = new HashMap();/*Map to hold the refrence of categoryObject*/
+				
+				addSubCategories(subCategoryList,topCategory,categoryType,map,categoryGroupMap);
+			}
+		}	
+			categoryObject.localizedValues.push(catObject);
+			pdict.customObject = categoryObject ; /*Assigning categoryObject back to customObject as to display it in ISML*/
+		//Nadeem: code to store category response in multiple attributes of custom object
+		/*
+		var limit:Number =Site.current.preferences.custom.categoryObjLimit;//Maximum chars stored in one attribute
+		var start:Number =0;
+		var categoryResponse : String = JSON.stringify(categoryObject) ;
+		var count:Number =(categoryResponse.length)/limit;
+		var numOfObject:Number =count/10;
+		numOfObject=numOfObject + 1;
+		for(var i=1;i<=numOfObject;i++){
+			categoryCustomObject = dw.object.CustomObjectMgr.createCustomObject("KioskCategoryDetails", "categoryJSON"+i);		
+		   	storeResponse(categoryCustomObject,categoryResponse,start,limit);	
+		   	start=start+limit*(10);
+		}*/
+		
+	}catch(e){
+		Logger.error("GetCategory :: CreateCategoryJSON Script Error:::"+e.message) ;
+			return PIPELET_ERROR;	
+	}
+    return PIPELET_NEXT;
+}
+
+function addSubCategories(subCategoryList:ArrayList,topCategory:Object,
+		categoryType:String,map:Map,categoryGroupMap:Map) : Number{
+			/*Map to hold the reference of topCategory as addSubCategories is being called recursively for each category */
+			if(!map.containsKey(topCategory.categoryID)){
+				map.put(topCategory.categoryID,topCategory); 
+			}
+						
+			topCategory.subCategories = new Array() ;/*Creates a new subCategories property for a category */
+			var subCategory = null ;
+			for each(var subCat:Category in subCategoryList){ /*Loop to add SubCategories*/
+				/*Getting the topCategory json object from the map so as to get the refrence of the parent Category*/
+				topCategory = map.get(subCat.getParent().getID()) ;	
+				subCategory = new Object();				
+				
+				/*Setting the properties of subCategory */											
+				subCategory.categoryID = subCat.getID() ;
+				subCategory.categoryDisplayName = subCat.getDisplayName() ;
+				topCategory.subCategories.push(subCategory) ;
+			
+				/*If the subCategory has further categories, then call addSubCategories again with new values */
+				if(subCat.getOnlineSubCategories().size() > 0 ){
+					subCategoryList = subCat.getOnlineSubCategories() ;	
+					topCategory = subCategory ;
+					categoryType = null ;										
+					addSubCategories(subCategoryList,topCategory,categoryType,map,categoryGroupMap)	;
+				}	 
+			}	
+}				
+
+function storeResponse(categoryCustomObject:CustomObject,categoryResponse:String,start:Number,limit:Number):boolean{
+	            categoryCustomObject.custom.details1 = categoryResponse.substr(start, limit);
+				categoryCustomObject.custom.details2 = categoryResponse.substr(start+limit, limit);
+				categoryCustomObject.custom.details3 = categoryResponse.substr( start+(2)*limit,limit);
+				categoryCustomObject.custom.details4 = categoryResponse.substr(start+(3)*limit,limit);
+				categoryCustomObject.custom.details5 = categoryResponse.substr(start+(4)*limit,limit);
+				categoryCustomObject.custom.details6 = categoryResponse.substr(start+(5)*limit,limit);
+				categoryCustomObject.custom.details7 = categoryResponse.substr(start+(6)*limit,limit);
+				categoryCustomObject.custom.details8 = categoryResponse.substr(start+(7)*limit,limit);
+				categoryCustomObject.custom.details9 = categoryResponse.substr(start+(8)*limit,limit);
+				categoryCustomObject.custom.details10 = categoryResponse.substr(start+(9)*limit,limit);
+	return true;
+}

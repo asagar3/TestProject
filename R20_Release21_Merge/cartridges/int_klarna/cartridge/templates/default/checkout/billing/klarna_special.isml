@@ -1,0 +1,21 @@
+<isscript>
+	var urlToLogo : String = dw.system.Site.getCurrent().getCustomPreferenceValue("KLARNA_SPECIAL_LOGO")
+</isscript>
+
+<isif condition="${empty(pdict.Order)}">
+	<isloop var="paymentInstrument" items="${pdict.Basket.paymentInstruments}">
+		<isif condition="${paymentInstrument.paymentMethod == "KLARNA_SPECIAL"}">
+			<isset name="KlarnaCustom" value="${pdict.Basket.paymentInstrument.custom}" scope="page"></isset>
+			<img src="${urlToLogo}" style="width: 150px;" />
+			
+			<div style="font-weight: bold; font-size: 11px;">${KlarnaCustom["KlarnaPaymentDescription"]}</div>
+		</isif>
+	</isloop>
+
+<iselse/>
+	<isif condition="${paymentInstr.paymentMethod == "KLARNA_SPECIAL"}">
+		<isset name="KlarnaCustom" value="${paymentInstr.custom}" scope="page"></isset>
+		<img src="${urlToLogo}" style="width: 150px;" />
+		<div style="font-weight: bold; font-size: 11px;">${KlarnaCustom["KlarnaPaymentDescription"]}</div>
+	</isif>
+</isif>

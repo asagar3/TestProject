@@ -1,0 +1,1032 @@
+/* Home Page */
+.pt_storefront .categorymenu2 li{padding-bottom:7px;}
+
+div.homepage {width:960px !important; max-width:960px;background:none repeat scroll 0 0 #E9E9E9} /*907442*//* This overrides default.css style*/
+#large_home_landing_banner{
+	width:960px; 
+	height:380px; /*slide 1*//* MattS - TODO - Comment -  Was 382px - but this leaves a 1 p[x margin in IE 8. Reduced by 1px to remove gap */
+	margin:0;
+	position:relative;
+	 overflow:hidden; 
+}
+
+.home_banner_text{/* QC 949 */
+    color: #4b4b4b;
+    font-family: Georgia,Arial,Helvetica,sans-serif;
+    font-size: 1.5em;
+    font-style: italic;
+    padding: 15px 0 9px;
+    width: 400px;
+}
+.whiteText .home_banner_text, .whiteText .category_banner_text{ /* QC 949 */
+    color: #fff;
+}
+
+.home_banner_copy,.home_banner_copy_whiteTextHeading{ /* QC 949 */
+	position:absolute;
+	width:430px;
+	top:36px;
+	left:29px;	
+}
+
+.home_banner_item {
+    background-color: #FFFFFF;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+}
+
+
+
+
+.home_banner_copy h1{	
+	}
+
+.home_banner_copy a:hover,.home_banner_copy_whiteText a:hover {text-decoration:underline !important;}
+#home_banner_links{ 
+	position:absolute;
+	display:block;
+	left:416px; /* CR 117 Feedback*/
+	top:353px; /*slide 1*/
+	width:744px;
+	z-index:51;
+	zoom:1;
+	}
+
+#home_banner_links ul{display:block;}
+#home_banner_links li{
+	display:inline-block;
+	float:left;
+	zoom:1;
+	overflow:hidden;
+	margin:0 5px 0 0;/* CR 117 Feedback*/
+	border-collapse:collapse;
+	width:22px;
+	height:22px;
+	background:transparent url(../images/carousel_button_off.png) no-repeat left top;
+}
+#home_banner_links li a{
+	display:block;
+	font-size:12px;
+	padding:18px 8px 19px 8px;
+	text-align:center;
+	background:transparent url(../images/carousel_button_off.png) no-repeat right top ;
+	zoom:1;
+	text-indent:-3000em;
+	}
+
+#home_banner_links li a:hover,#home_banner_links li.active a{
+	background-image:url(../images/carousel_button_on.png);
+	text-decoration:underline !important; /*804243*/
+	}
+
+.dropshadow{background:url("../images/background_homecarousel_dropshadow.png") repeat; width:100%; height:8px; margin:0 0 10px 0;}
+.sHmCarousel{ display:inline-block; margin:0 12px 0 10px; float:left;}
+/*Home Page Font Change*/
+div.homepage .small_content_module .module_content{height:86px;position:relative; padding-top:10px;}/* CR 117 */
+div.homepage .small_content_module .module_content div{height:56px;overflow:hidden}/* CR 117 */
+div.homepage .small_content_module h3{font-size:2.4em;background-color:transparent; color: #4b4b4b; padding:0px 0px 0px 7px;font-weight:normal; /*background:url("../images/arrow-hm-green-link-right.png") right center no-repeat; */margin-right:6px; width:94%;}/* CR 117 */
+div.homepage .small_content_module h3 a, div.homepage .small_content_module h3 a:active{background:url("../images/arrow-hm-green-link-right.png") right center no-repeat;display:block; padding:0px 22px 0px 0px} /* slide 4 */
+.small_content_module a:hover{text-decoration:none !important;}
+
+
+
+/** small carousel area **/
+
+
+#homeSmallCarousel{width:372px; height:551px; overflow:hidden}/* CR 117 */
+#homeSmallCarousel, .homeSmallCarousel{width:372px; height:551px; overflow:hidden}/* CR 117 */
+#homeSmallCarousel ul li {width:372px; position:relative;}
+div.homepage .jcarousel-container{border:0; }
+#homeSmallCarousel ul li div{width:372px; }
+#homeSmallCarousel ul li div .content{position: relative;}
+#homeSmallCarousel ul li div .content div{position: absolute; z-index:999; left:0; top: 407px;height:140px; width: 342px; margin: 0pt 2px; background:url("../images/white-trans-bg.png"); padding:5px 13px 0 13px;}/* CR 117 */
+
+#homeSmallCarousel button{position:absolute; width:24px; padding:0; height:48px; z-index:99; top:200px; border:none; text-indent:-999em; overflow:hidden;}
+#homeSmallCarousel button.prev{background:url(../images/carousel_hm_arrow_left.png); left:0; width:22px;}
+#homeSmallCarousel button.next{background:url(../images/carousel_hm_arrow_right.png); right:0;} 
+#homeSmallCarousel button:hover{background-position:0 -48px;}
+
+div.homepage .jcarousel-list{width:372px;}
+div.homepage .jcarousel-container-horizontal{padding:0;}
+div.homepage .jcarousel-clip-horizontal {width:372px; height:551px;/* CR 117 */}
+div.homepage .jcarousel-prev{ 
+	height:48px;
+	background: url("../images/carousel_hm_arrow_left.png") no-repeat scroll 0 0 transparent;
+    top:182px;/* CR 117 */
+    left:0;
+    width:22px;
+
+   }
+   
+div.homepage .jcarousel-prev:hover{ 
+  	background: url("../images/carousel_hm_arrow_left.png") no-repeat scroll 0 -48px transparent;/* CR 117 */
+}
+   
+div.homepage .jcarousel-next{
+	top:182px;/* CR 117 */
+	right:0;
+	height:48px;
+	width:24px;
+	background: url("../images/carousel_hm_arrow_right.png") no-repeat scroll 0 0 transparent;
+}
+
+div.homepage .jcarousel-next:hover{
+	background: url("../images/carousel_hm_arrow_right.png") no-repeat scroll 0 -48px transparent;/* CR 117 */
+	
+}
+
+div.homepage .jcarousel-prev-disabled-horizontal,div.homepage .jcarousel-prev-disabled-horizontal:hover, div.homepage .jcarousel-prev-disabled-horizontal:active{
+	background:none;
+}
+
+div.homepage  .jcarousel-next-disabled-horizontal, div.homepage .jcarousel-next-disabled-horizontal:hover, div.homepage  .jcarousel-next-disabled-horizontal:active{
+	background:none;
+}
+
+
+#homeSmallCarousel h3, .homeSmallCarousel h3{color:#4b4b4b;background:none;}/*926*/
+/*926*/
+#homeSmallCarousel .content a.ms_call_to_action_1, .homeSmallCarousel .content a.ms_call_to_action_1  {
+    display: block;    
+    margin-left: 6px;
+    margin-top: 10px; /* CR 117 */
+    padding: 0 0 0 20px;
+    text-align: left;
+}
+
+
+div.homepage  .sectHolder{margin-bottom:21px;}
+
+	
+div.homepage .small_content_module a.cta{background:url("../images/background_secondary_cat_banner_arrow.png") right 50% no-repeat; padding: 0 20px 0 0; margin: 11px 0 0 10px; font-size:1.2em; display:inline-block; position:absolute; bottom:8px; font-weight:bold;color:#4b4b4b;}/* CR 117 */
+div.homepage .small_content_module a.cta:hover{text-decoration: underline !important;}/* CR 117 */
+
+div.homepage  .small_content_module {
+	background:url('../images/bkgd_hm_content_module.png') 0 bottom no-repeat;
+	float:left;
+	width:274px;
+	height:271px; /* CR 117 */
+	margin-bottom:12px
+
+		/*border:1px solid #dddddd;slide 4 */
+		/*-moz-box-shadow: 1px 2px 2px 1px #d6d6d6;
+		-webkit-box-shadow: 1px 2px 2px 1px #d6d6d6;
+		box-shadow: 1px 2px 2px 1px #d6d6d6;
+		-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=150, Color='#d6d6d6')";
+		filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=150, Color='#d6d6d6');*/
+
+}
+/*
+div.homepage  .small_content_module {
+	background:url('../images/bkgd_hm_content_module.jpg') 0 0 repeat-x;
+	float:left;
+	width:271px;
+	height:234px; slide 4 */
+	
+		/*border:1px solid #dddddd; slide 4 */
+		/*-moz-box-shadow: 1px 0px 1px 1px #c7c7c7; slide 4 */
+		/*-webkit-box-shadow: 0px 1px 1px 1px #c7c7c7; slide 4 */
+		/*box-shadow: 1px 0px 1px 1px #c7c7c7;slide 4 */
+		/*-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=120, Color='#c3c3c3')";  slide 4 */
+		/*filter: progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=120, Color='#c3c3c3');slide 4 */
+}
+
+div.homepage .scm_tl, div.homepage .scm_tr{margin-bottom:10px;}
+div.homepage .scm_tr{}
+div.homepage .scm_tl, div.homepage .scm_bl{margin-right:12px;} /* slide 4 */
+div.homepage .scm_br{}
+
+
+div.homepage .hm_options{
+	background:url("../images/bkgd_grad_hm_options.jpg") repeat-x;
+	clear:both;	
+}
+
+
+
+div.homepage .hm_options ul li{
+    display: inline;
+    float: left;
+    margin: 7px 0 0 0px;
+    width: 311px;
+}
+
+div.homepage .hm_options ul li.op1{margin-left:7px;}
+div.homepage .hm_options ul li.op3{width:320px; }
+
+div.homepage .hm_options ul li h3{
+	background-color: transparent;
+    color: #666666;
+    font-size: 1.9em;
+    font-weight: normal;
+    margin-left: 50px;
+    min-height: 46px;
+    width: auto; 
+}
+
+div.homepage .hm_options ul li div div{padding: 10px 5px 10px 0;  margin: 0px 0 10px 20px; border-top:1px dotted #ddd;}
+div.homepage div.opt_shadow{background:url("../images/background_home_links_dropshadow.png"); height:7px; width:960px; clear:both;} 
+	
+	
+div.homepage .hm_options ul li.op1 >div{background-position:-641px 12px;} 	
+div.homepage .hm_options ul li.op2 >div{background-position:-969px 9px;} 	
+div.homepage .hm_options ul li.op3 >div{padding-right: 10px; background-position:-310px 9px;}
+
+div.homepage .hm_options ul {background-position:100% -1808px;}
+div.homepage .hm_options ul li p{font-size:1.2em; font-weight:normal; line-height:1.4em; height:52px}
+div.homepage .hm_options ul li a{
+	background-position:0 -1484px; 
+	display: inline-block;
+    font-size: 1.3em;
+    margin: 10px 0 0;
+    padding: 0 0 0 19px;
+    font-weight:bold;
+}
+
+div.homepage .newsSeg img{margin-top:10px; margin-left:40px; display:inline; float:left;}
+div.homepage .newsSeg p{
+	display: inline;
+	float:left;
+    font-size: 20px;
+    line-height: 52px;
+    margin-left: 14px;
+    vertical-align: bottom;
+}
+
+div.homepage .hm-sgnup{   
+	float: right;
+    margin-right: 40px;
+}
+
+div.secondary_cat{padding-bottom:19px;}
+div.secondary_cat .banner_head{
+	background: none repeat scroll 0 0 #FFFFFF;
+    border: 1px solid #c8c6c6;/*slide 15*/
+   /* box-shadow: 1px 2px 2px 1px #AAAAAA; */
+    margin: 10px 8px 0 10px;
+    width: 97%;
+    padding:15px 0 15px 0;
+    position:relative;
+} /*929712*/
+
+div.secondary_cat .banner_head_shadow{
+	background:url("../images/productcat-head-shadow.png") 0 center no-repeat;
+	height:20px;
+	margin: 0 8px 0 10px;
+    padding: 0;
+    position: relative;
+    width: 97%;
+} /*slide 15*/
+
+div.secondary_cat .banner_head h2{
+    color: #4B4B4B;
+    /*font-family: 'HelveticaNeue-UltraLight','Helvetica Neue UltraLight','Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 32px;*/
+    font-variant: normal;
+    font-weight: 100;
+    margin: 0px 30px 0 20px;
+}
+
+div.secondary_cat .banner_head:after{
+	background:url("../images/background_category_header_dropshadow.png") 0 0 no-repeat;
+	content:"";
+	width:748px;
+	height:12px;
+	position:absolute;
+	bottom:-12px;
+	left:0;
+}
+
+div.secondary_cat .banner_head p{
+	font-size: 25px; /* CR 117 */
+	margin: 0 30px 0 20px;
+}
+
+
+	
+div.secondary_cat .promo_ad{
+	background:url("../images/background_gradient_cat_landing_banner.png") 0 0 repeat-x;
+  	padding: 11px 0 6px 20px;
+	margin:0 10px 0 10px; /* slide 15 */
+	width:747px;	
+	position:relative;
+	cursor:pointer;
+}
+
+div.secondary_cat .promo_ad:after{
+	background:url("../images/background_category_promo_dropshadow.png") no-repeat;
+	content:"";
+	width:748px;
+	height:12px;
+	position:absolute;
+	bottom:-12px;
+	left:0;
+}
+
+div.secondary_cat .promo_ad p{
+	font-size:25px;
+	color:#ffffff;
+	display:inline;
+	height:27px;
+}
+
+div.secondary_cat span.promo_link{
+	float:right;
+	font-size:1.1em;
+	font-weight:bold;
+	line-height:34px;
+	vertical-align:middle;
+	background:url("../images/background_secondary_cat_banner_arrow.png") 90% 50% no-repeat;
+	margin-right:6px;
+	width:140px;
+	text-align:right;
+}
+
+div.secondary_cat span.promo_link a{
+	color:#ffffff;
+	padding-right:31px;
+	letter-spacing: 0.5px;
+}
+
+
+/**** Secondary Cat Landing Page | Style 2 | 29 August *****/
+	
+div.secondary_cat div.secondary_cat_style2{color:#333;}	
+div.secondary_cat div.secondary_cat_style2 .promo_ad{
+	background:url("../images/background_gradient_cat_landing_banner2.png") 0 0 repeat-x;
+  	padding: 14px 0 3px 20px;
+	margin:0 10px 0 10px; /* slide 15 */
+	width:747px;	
+	position:relative;
+	cursor:pointer;
+}
+
+div.secondary_cat div.secondary_cat_style2 .promo_ad:after{
+	background:url("../images/background_category_promo_dropshadow.png") no-repeat;
+	content:"";
+	width:748px;
+	height:12px;
+	position:absolute;
+	bottom:-12px;
+	left:0;
+}
+
+div.secondary_cat div.secondary_cat_style2 .promo_ad p{
+	color:#333333 !important;
+	font-size:24px;
+	display:inline;
+
+}
+
+div.secondary_cat div.secondary_cat_style2 span.promo_link{
+	float:right;
+	font-size:1.1em;
+	font-weight:bold;
+	line-height:34px;
+	vertical-align:middle;
+	background:url("../images/background_secondary_cat_banner_arrow2.png") 90% 50% no-repeat;
+	margin-right:6px;
+	width:140px;
+	text-align:right;
+}
+
+div.secondary_cat div.secondary_cat_style2 span.promo_link a{
+	color:#333333;
+	padding-right:31px;
+	letter-spacing: 0.5px;
+}
+
+
+
+
+div.product_area{
+}
+
+
+div.product_area .product_category{ /* CR 117 */
+	float:left;
+	width: 189px; /* MattS - Should be 185px in line with PSD */	
+	height:351px;
+	margin:0 4px 15px 0;
+	background:url("../images/productbox-bg.png") no-repeat;
+	/*-moz-box-shadow: 0px 0px 2px 1px #aaa;
+		-webkit-box-shadow: 0px 0px 2px 1px #aaa;
+		-moz-box-shadow: 0px 0px 2px 1px #aaa;
+		-webkit-box-shadow: 0px 0px 2px 1px #aaa;
+		box-shadow: 1px 2px 2px 1px #aaa;
+		
+		-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=180, Color='#aaaaaa')";
+		filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=360, Color='#aaaaaa');
+		
+		-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=360, Color='#aaaaaa')";
+		filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=360, Color='#aaaaaa');	
+		
+		
+		
+		-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=1, Direction=180, Color='#aaaaaa')";
+		filter: progid:DXImageTransform.Microsoft.Shadow(Strength=1, Direction=225, Color='#aaaaaa');
+		
+		-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=360, Color='#aaaaaa')";
+		filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=360, Color='#aaaaaa');
+		*/
+		
+		
+	
+}	
+
+div.product_area div.product_category h3{
+	font-size:1.1em;
+	font-family:georgia;
+	font-style:italic;	
+	padding: 0;
+	background:transparent;
+	color:#4b4b4b;
+	width:170px;
+}
+div.product_area div.product_category .product_box_heading{ /* CR 117 */
+	padding: 2px 10px 2px 10px;
+	height:28px;
+	position:relative;
+}
+
+div.product_area div.product_category img{
+	padding: 3px 0 2px 8px;
+	width: 164px;
+}
+
+div.product_area div.product_category p{
+	 /*font-size:20px;*/
+	 margin: 0 10px;
+	 width:164px;
+	 height:52px; /*821*/
+}
+
+
+div.product_area div.product_category div.seeAllLInk{
+}
+	
+div.product_area div.product_category div.mainlink{
+}
+
+.secCatHeaderArea {
+	margin-bottom:7px;
+}
+
+
+/* Used to vertically align links middle across all browsers */ 
+
+.holder {
+    display: table;
+    height: 27px;
+    width: 184px;
+    background: url("../images/background_secondary_cat_link_arrow.png") no-repeat scroll 93% 50% #F4F4F4;
+    }
+
+.content {
+    position: relative;
+    display: table-cell;
+    vertical-align: middle;
+    width: 97%; /*req. for IE*/
+    }
+
+
+div.content div.inner p{color:#4b4b4b;font-size:1.2em; font-weight:bold; width: 135px;}
+
+
+
+div.product_area div.firstCol{
+	margin-left:12px;	
+}
+
+div.product_area  div.lastCol{
+	margin-left:0px;
+}	
+
+
+div.flTitleHolder{height:128px; position:relative;}/* CR 117 Feedback*/
+div.flTitleHolder .cta{
+	position:absolute;
+	background: url("../images/productlist_cta_bg.gif") repeat-x bottom;
+	width:161px; height:34px;
+	bottom:0;
+	left:1px;
+	padding: 0 12px;
+}/* CR 117 */
+div.flTitleHolder .cta a{
+	background: url("../images/background_secondary_cat_link_arrow.png") no-repeat scroll right 50% transparent;
+    line-height:34px;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 0 20px 0 0;
+    display:block
+}/* CR 117 */
+
+/** MattS : TODO - check if clearfix class been implemented? if so - use that one instead...  **/
+
+ .clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    }
+
+
+
+/* TODO - MattS Setting Width of main content area - this needs to be unified across the whole site 
+Content Template Pages */
+
+/* #content {float:left; width:759px;}*/
+
+div.content_template{float:left; border-top:1px solid #ECECEC} /*Top Border for all Content pages*/
+.content_template h1{
+	font-size:26px;
+	width:450px;
+	line-height:26px;
+	height:26px;
+	margin:20px 0 20px 6px;
+}
+
+.content_template h2{
+	font-size:1.6em;
+	margin: 19px 0 21px;
+	width: 359px;
+}
+
+.content_template h3{
+	font-size:12px;
+	background-color:transparent;
+	padding: 7px 0;
+}
+
+.content_template p{
+	margin:0 0 17px;
+	font-size:1.2em;
+	line-height:1.6em;
+}
+
+.content_template img.cta{
+	float:right;
+	margin:0px 0 20px 50px;
+}
+
+
+div.content_template .newsSeg {
+	clear:both;
+    background: url("../images/background_hm_ftsect.jpg") repeat-x scroll 0 0 transparent;
+    height: 55px;
+    margin: 24px 0 0;
+}
+
+
+div.style01{width:759px;}
+.indent{margin:0 12px 0 12px !important; }
+div.style02 {width:95%;}
+div.style02 h1{margin:20px 0 20px 0;}
+div.style02 h2{width:auto;  margin: 34px 0 21px; }
+div.style02 .cta{float:left; margin: 20px 51px 40px 20px;}
+
+.newsSeg {background-position:0 -1732px; background-repeat:repeat-x; height:55px; margin:0;}	
+.newsSeg img{margin-top:10px; margin-left:40px; display:inline; float:left;}
+.newsSeg p{
+	display: inline;
+	float:left;
+    font-size: 20px;
+    line-height: 52px;
+    margin-left: 14px;
+    vertical-align: bottom;
+}
+
+div.content_template{margin-top:20px}
+
+/* Size Guide */
+.sizecharttable {width:100%;border-right:none;border-bottom:none;}
+#sizeChartDialog h2 {font-weight:normal;font-size:1.5em;margin-bottom:20px;}
+#sizeChartDialog .ui-widget-content {width:620px;padding:20px !important;z-index:99999 !important;height:auto;min-height: 280px;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav {background: transparent none;border-width:0; height:30px !important;}
+#sizeChartDialog .ui-tabs .ui-tabs-panel {border:1px solid #dddddd;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav li {position: relative;margin:0 0.2em -1px 0;}
+#sizeChartDialog .ui-state-active, #sizeChartDialog .ui-widget-content .ui-state-active{background:#ffffff none;border-top:1px solid #dddddd!important;border-right:1px solid #dddddd !important;border-left:1px solid #dddddd !important;border-bottom:0;}
+#sizeChartDialog .ui-state-default, #sizeChartDialog .ui-widget-content .ui-state-default, #sizeChartDialog .ui-state-hover {border:0;background:url(../images/sizeguide_tab_default.png) repeat-x left top;width:auto;height:auto;}
+#sizeChartDialog .ui-state-default a, #sizeChartDialog .ui-state-hover a:hover, #sizeChartDialog .ui-state-default a:link, #sizeChartDialog .ui-state-default a:visited {color:#666666;text-decoration:none;}
+#sizeChartDialog .ui-state-hover {padding:0 !important;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav li.ui-tabs-selected{border-bottom:0 !important;background:none;background-color:#ffffff !important;height:26px;margin-top: 0px;padding-top: 3px;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav li.ui-tabs-selected a {border-bottom:0 !important;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav li.ui-tabs-selected.ui-state-hover {border-bottom:0 !important;background:none;background-color:#ffffff !important;height:30px;margin-top: 0px;padding-top: 3px; padding-bottom:0px;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav li.ui-tabs-selected.ui-state-hover a {padding-top:9px;}
+#sizeChartDialog table th {background-color:#b7b7b7;border-right: none; border-bottom: none; color: #ffffff;font-size:1.2em;font-weight:bold;padding: 8px 15px;text-align:center;white-space: normal !important; /* Content creation by Vinit */}
+#sizeChartDialog table th.nowrap {white-space: nowrap !important; /* Content creation by Vinit */}
+#sizeChartDialog table.nowrap td, #sizeChartDialog table.nowrap th{white-space: nowrap !important; /* Content creation by Vinit */}
+#sizeChartDialog table td {background-color:#ffffff;border-bottom:1px solid #d8d8d8;border-right:1px solid #d8d8d8; color: #333333;font-size:1.2em;font-weight:normal;padding: 10px 15px;text-align:center;white-space: normal !important; /* Content creation by Vinit */}
+#sizeChartDialog table td.last, #sizeChartDialog table th.last {border-right:none;}
+#sizeChartDialog table td.heading {color:#666666;background:#efefef;border-right:none;font-weight:bold;}
+#sizeChartDialog table td.heading.border {border-right:1px solid #d8d8d8;}
+#sizeChartDialog .sizetable {width:100%;overflow:auto;overflow-y: hidden;-ms-overflow-y: hidden;margin-bottom:20px;border:1px solid #dadada;}
+.sizechartdescription img {border:1px solid #e1e1e1;margin-left:10px;float:right;}
+.sizechartdescription h2 {font-weight:normal;font-size:1.9em !important;margin-bottom:15px;}
+.sizechartdescription span{font-size:1.2em;color:#666666;}
+.sizechart span{font-size:1.2em;color:#666666;}/* Size Guide Content Updation */
+.sizechart p{font-size:1.2em;color:#666666; margin-bottom:6px;}/* Size Guide Content Updation */
+.sizechart strong{font-weight:bold;}/* Size Guide Content Updation */
+.sizechart h3{ font-size:1.4em; font-weight:700; background:#fff;}/* Size Guide Content Updation */
+#sizeChartDialog table tr.subheader td{color:#666666;background:#efefef;font-weight:bold;}
+.sizechart  ol{padding:10px 0px 15px 20px; }/* Size Guide Content Updation */
+.sizechart  li{font-size:1.2em;color:#666666; list-style-type: decimal; margin-bottom: 10px;}/* Size Guide Content Updation */
+.sizechart ol.alpha  li{list-style-type: lower-alpha;}/* Size Guide Content Updation */
+#sizeChartDialog .sizetable th, #sizeChartDialog .sizetable td{padding:8px 10px}
+#sizeChartDialog h6{font-size:1em;font-weight:normal;color:#666666; margin-bottom:6px;}/* Size Guide Content Updation - Remedy ID: INC000005959261 */
+/************** Error Page Not Found ************/
+.errorWrapper{width:100%; border-top:1px solid #eee;}
+.errorNotFound{width:607px; margin:48px auto; text-align:center;}
+.errorNotFound p{font-size:1.3em;  text-align: center;}
+.errorWrapper .btn-green-flat{margin:20px 30%;}
+
+
+/* Help pages duplicate styles from all other pages - but have kept them separate so changes can be made elsewhere 
+	could be optimised if required. MattS 20th June 2011
+*/
+
+#content .helpmainContentWrapper{  
+	min-height: 530px;
+    padding-bottom: 50px;
+}
+
+
+/**************** Help Pages |  Left Navigation********************************/
+.helpsection #leftcolumn{margin-right:23px; width:156px; border:1px solid #eee; border-top:none; border-bottom: none; display:block;}
+.helpsection #leftcolumn .navgroup{border-bottom:3px double #ccc; margin-bottom:0px; padding: 10px 0; /*font-size:1.2em*/} /*27-apr*/
+.helpsection #leftcolumn .navgroup h3{font-size:1.2em; background-image:none; margin:0; padding:0 20px; border:none;}
+
+.helpsection #leftcolumn .navgroup h3.open{background-position:6px -4500px;}/*8-jul*/
+.helpsection #leftcolumn .navgroup h3.closed{background-position:9px -2612px;}/*8-jul*/
+
+
+
+.helpsection #leftcolumn .navgroup ul{padding:0px; margin:10px 0 0 0; width:100%;} 
+.helpsection #leftcolumn .navgroup ul li{   margin: 0;  padding: 5px 0;}
+.helpsection #leftcolumn .navgroup ul li.selected{font-weight:700; background-position:0 -1596px; background-repeat:repeat-x; background-color:#b1c63a;border:none;outline:none} /*Content changes | Aug 29 | Asha*/ 
+.helpsection #leftcolumn .navgroup ul li a{color:#666; padding-left:20px; display:block; text-decoration:none;border:none;outline:none}
+.helpsection #leftcolumn .navgroup ul li a:hover{color:#000;background:url("../images/background_dropdown_nav_list_arrow.png") no-repeat scroll 4px 50% transparent; padding-left:20px;border:none;outline:none}
+.helpsection #leftcolumn .navgroup ul li a.selected, /* .helpsection #leftcolumn .navgroup .selected */{color:#000; background:url("../images/bkgd_lhn_header.jpg") 0 0 repeat-y; padding-left:20px; font-weight:700;border:none;outline:none}
+ 
+.navgroup a{border:none;outline:none} 
+.navgroup a:hover{border:none;outline:none} 
+.navgroup a.selected{border:none;outline:none} 
+ 
+ /* Help Page Section Header */ 
+
+.helpsection .helpmainContentWrapper{width:558px; position:relative;}
+.helpsection .dashBorder{ border:1px solid #e6e6e6;padding:0; width: 558px}
+
+
+.helpsection h3.faqHead{
+	color:#333;
+	font-variant:normal ;
+	line-height:20px;
+	line-spacing:0;
+	height:23px;
+	margin: 0 0 0 42px;
+	padding-top:0;
+	margin-top:0;
+	background: none;
+	font-weight: normal;
+	font-size:20px;
+}
+
+
+
+.helpsection div.sifrRenderHighlight{
+	
+	float:left;
+	margin:13px 16px 16px;
+	position: relative;
+	width: 255px;
+	text-align: left;
+	height: 69px;
+	line-height: 23px;
+	padding:10px 5px 0px 10px;
+	color:#666;
+
+	}
+
+
+.helpsection div.sifrRenderHighlight  div.holder{width:100%; background:transparent; height:63px;}
+.helpsection div.sifrRenderHighlight div .content{ background:none; width:100%;}
+
+.helpsection div.sifrRenderHighlight div .inner{width:100%;}
+
+
+
+
+
+div.helpTitleHolder{display:inline-block; width:273px; /* height: 73px; */ float:left; padding:0 0 0 20px; }
+div.iconBkgd{background:url("../images/help-title-icons.png") 0 50% no-repeat transparent;}
+div.icon1{background-position:0px 20px;}
+div.icon2{background-position:0px -130px;}
+div.icon3{background-position:0px -280px;}
+div.icon4{background-position:0px -430px;}
+div.icon5{background-position:0px -581px;}
+div.icon6{background-position:0px -731px;}
+div.icon7{background-position:0px -880px;}
+div.icon8{background-position:0px -1030px;}
+div.icon9{background-position:0px -1180px;}
+
+
+.helpsection .headerHighlight {
+	float:right;
+	margin:13px 16px 16px;
+	position: relative;
+	width: 205px;
+	height: 69px;
+	text-align: left;
+	line-height: 13px;
+	background-color: #fff;	
+	/*-webkit-box-shadow: 2px 2px 4px #888;*/
+	padding:2px 5px 2px 10px;
+	color:#666;
+}
+
+
+.helpsection .headerHighlight h4{
+	font-size:1.6em;
+	border-bottom: 1px dotted #c2c2c2;
+    display: inline-block;
+    margin: 0 0 7px 0;
+    padding: 0 10px 10px 0;
+    background:none;
+    color:#000000;
+    font-weight:normal;
+}/*27-apr*/
+
+
+.helpsection .headerHighlight
+{
+	background:url("../images/bubb_arrow_left.png") 0 0px no-repeat;
+}
+.helpsection .highlightcontent{
+	background: #fff;
+	padding: 3px 10px;
+	}
+
+.helpsection .headerHighlightbtm
+{
+	background:url("../images/shadow-small-text-bubble.png") center bottom no-repeat;
+	padding-bottom: 10px;
+}
+
+
+.helpsection .headerHighlight .holder {width:100%; background:transparent; height:63px;}
+
+
+
+/* header used in help pages  */
+.helpmainContentWrapper {margin-top:18px; float:left;}
+.helpmainContentWrapper .dashboardHeader{background:url("../images/bkgd_dashboard_grad.png") repeat-x; margin:1px; height:105px;}
+
+
+
+/* styling help landing page */
+.faqlanding {}
+
+
+
+
+.faqlanding .dashNav {
+  /*  background: url("../images/dashboard_gradient.png") repeat-x scroll 0 0 transparent;*/
+    min-height: 397px;
+    margin-left: 4px;
+    padding: 17px 0 0 0px;
+    position: relative;
+   /* width: 731px;*/
+}
+
+.faqlanding .dashNav:after{ 
+	content: '';
+	position: absolute;
+	width: 560px;
+	height: 9px;
+	left: 0px;
+	/*bottom: -9px;*/
+	padding:0;
+	margin:0;
+	background:url("../images/shadow_help.png") 0 0px no-repeat; 
+}
+
+
+.faqlanding .dashNav ul.dashTabs{
+	border:1px solid #e3e3e3;
+	padding:1px;
+	} 
+
+.faqlanding ul.dashTabs li.tb01 div {
+    background-image: url("../images/dashboard_tabicon_1.png");
+}
+
+.faqlanding ul.dashTabs li{/* height:64px; */ width:550px;  position:relative; /* margin-bottom:10px; */}
+/*.faqlanding ul.dashTabs li:before{/* background: url("../images/dashboard_tabicon_1.png") no-repeat scroll -3px 10px transparent; position:absolute; content:" "; width:500px; height:64px; border:1px solid orange; z-index:-1;} */ 
+  
+/* .faqlanding ul.dashTabs li.on:after{height:60px; width:496px;  content:" "; position:absolute; z-index:0; left:1px; top:1px; border:1px solid #ffffff; }  */
+
+.faqlanding ul.dashTabs li > div {
+    background: url("../images/dashboard_tabicon_1.png") no-repeat scroll -3px 10px transparent;
+    width:438px;
+    height: 64px;
+    left:0; top:0;
+    position:relative;
+    z-index:20;
+    	margin-left: -10px;
+    padding-left: 69px;
+ 
+}
+
+.faqlanding ul.dashTabs li > div.ic-1{background-image:url("../images/dashboard_tabicon_1.png");}
+.faqlanding ul.dashTabs li > div.ic-2{background-image:url("../images/dashboard_tabicon_2.png");}
+.faqlanding ul.dashTabs li > div.ic-3{background-image:url("../images/dashboard_tabicon_3.png");}
+.faqlanding ul.dashTabs li > div.ic-4{background-image:url("../images/dashboard_tabicon_4.png");}
+.faqlanding ul.dashTabs li > div.ic-5{background-image:url("../images/dashboard_tabicon_5.png");}
+.faqlanding ul.dashTabs li > div.ic-6{background-image:url("../images/dashboard_tabicon_6.png");}
+.faqlanding ul.dashTabs li > div.ic-7{background-image:url("../images/dashboard_tabicon_7.png");}
+.faqlanding ul.dashTabs li > div.ic-8{background-image:url("../images/dashboard_tabicon_8.png");}
+.faqlanding ul.dashTabs li > div.ic-9{background-image:url("../images/dashboard_tabicon_9.png");}
+
+.faqlanding ul.dashTabs li h4{background:transparent; margin:0; padding:0; color:#000000; font-size:1.4em; line-height:64px;}
+
+
+
+/*
+.faqlanding ul.dashTabs li span{
+	 display:block;
+	 width:50px;
+	 height:50px;
+	 position:absolute;
+	 left:0;
+	 top:0; 
+	 border:1px solid green;
+}
+*/
+
+.faqlanding ul.dashTabs li.on{border:1px solid:#ffffff; background-color: #EFEFEF;}
+/*.faqlanding ul.dashTabs li.off{ width:498px;}*/
+
+
+
+
+
+
+
+
+
+
+
+
+.helpmainContentWrapper div.content div.inner p{font-size:1.2em; width: 90%; line-height:1.3em; font-weight:normal}
+
+
+.helpmainContentWrapper .accordion{border:1px solid #e5e5e5;padding:1px; margin:10px 0 10px 0;overflow:hidden; }
+.helpmainContentWrapper .accordion:after{ 
+
+	content: '';
+	position: absolute;
+	width: 560px;
+	height: 9px;
+	left: 0px;
+	/*bottom: -9px;*/
+	padding:0;
+	margin:0;
+	background:url("../images/shadow_help.png") 0 2px no-repeat; 
+}
+
+.helpmainContentWrapper .accordion h3{background:#efefef; padding: 10px 13px 10px 13px; color:#333333; clear:both;}/*12 sep*/
+.helpmainContentWrapper .accordion p{padding:0px 0px 10px 0px; /*font-size:1.2em;*/} /*Content changes for Help Page*/
+.helpmainContentWrapper .accordion h3 span{/* display:inline-block; */ width:20px; height:20px; float:right; text-indent:-3000em;}
+.helpmainContentWrapper .accordion h3 span.plus{background-position:1px -4471px;}
+.helpmainContentWrapper .accordion h3 span.minus{background-position:-18px -4471px;}
+.helpmainContentWrapper .accordion h3 span a{display:block; width:20px; height:20px;}
+
+.helpmainContentWrapper .accordion div {display:none;vertical-align:middle;}
+.helpmainContentWrapper .accordion div.content {padding:14px 19px; font-size:1.2em; width:93%;position:static; clear:both}/* FAQs | Sep 21 | Vinit*/
+#leftcolumn .content{display:block; position:static; vertical-align:middle;}
+div.rightcol{width:185px;margin:18px 0 0 22px; float:left;}
+.helpmainContentWrapper .accordion div.content a, .helpmainContentWrapper .accordion div.content a:hover, .helpmainContentWrapper .accordion div.content a:active, .helpmainContentWrapper .accordion div.content a:visited{color:#034181}/*content change for link look n feel*/
+
+
+.helpsection .rightcol div.sideFaqs,.helpsection .rightcol div.sideNeedHelp{font-size:1.2em; border: 1px solid #E3E3E3; padding:1px; margin-bottom: 18px;}
+.helpsection .rightcol h3{padding: 7px 0 10px;font-weight:normal;color:#333333;}
+.helpsection .rightcol h3.sideFaqs {background-color:#efefef; background-position:10px -4338px; padding: 5px 0 7px 45px;}
+.helpsection .rightcol .ms_header_5 {padding-right:10px;}
+.helpsection .rightcol .sideNeedHelp h3{ background-color:#efefef; background-position:15px -3108px;padding-left:45px; font-size:1.6em;}
+.helpsection .rightcol .sideNeedHelp p a{background:none;, display:inline; padding:0; color:#034181;}
+
+.helpsection .rightcol ul{padding:15px 5px 3px 0px;}
+.helpsection .rightcol ul li{padding:0px 0px 9px 0px; }
+.helpsection .rightcol .sideFaqs a{padding-left: 20px; display:block; background-position:-21px -4244px;} /* 29 sep | help page change */
+.helpsection .rightcol ul li a:hover{color:#000; padding-left:20px}
+.helpsection .rightcol p{margin:16px;}
+.accordion .accordionToggle{/*padding-right:28px*/}/*Content changes | Aug 29 | Asha*/
+.accordionToggle.ieFl{padding-right:28px; display:block}/*Content changes | Aug 29 | Asha*/
+
+.faqsection .accordion ul {padding:0;margin:0;}
+.faqsection .accordion ul li{list-style-type:disc;margin:5px 0px 10px 15px;padding-left:0;/*font-size:1.2em;*/}/*Content changes | Aug 29 | Asha*/ 
+/*821*/
+div.product_area div.product_category .title a{font-size:1.4em; background:url("../images/arrow-hm-green-link-right.png") right center no-repeat;display:block; padding:0px 10px 0px 0px}
+
+.contentArea h1{
+	font-size:26px;
+	width:850px; /*Content creation Aug 29, 2011 */
+	line-height:26px;
+	height:26px;
+	margin:0 0 20px 0;/* Content creation Aug 29, 2011 */
+}
+.contentArea strong{
+	font-weight: bold;
+}
+.contentArea .grayBox{
+	background: #EFEFEF;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+.contentArea h2{
+	font-size:1.7em;
+	margin: 19px 0 10px !important;
+	width: auto !important;
+	color:#333;
+}
+.contentArea ol, .contentArea ul{
+	padding:10px 20px;
+}
+.contentArea li{
+	font-size:1.2em;
+	line-height:1.6em;
+	list-style-type: disc;
+}
+.contentArea ol li{
+	font-size:1.2em;
+	line-height:1.6em;
+	list-style-type: decimal;
+}
+.contentArea ol.alpha li{/* Content creation Aug 31, 2011 */
+	font-size:1.2em;
+	line-height:1.6em;
+	list-style-type: lower-alpha;
+	margin-left: 20px;
+}
+
+.contentArea h3{
+	font-size:12px;
+	background-color:transparent;
+	padding: 7px 0;
+}
+
+.contentArea p{
+	margin:0 0 17px;
+	font-size:1.2em;
+	line-height:1.6em;
+}
+.headerHolder{
+position: relative; /* Category Landing - Image Banner Sep 5, 2011 */
+width: 788px;
+overflow: hidden;
+ background:url("../images/landingpage-shadow.png") left bottom no-repeat;
+ padding-bottom:2px;
+}
+.headerHolder div.caption, .headerHolder div.captionwhite{  /* Category Landing - Image Banner Text Sep 5, 2011 */
+position: absolute;
+left:38px;
+top:20px; /* QC 949 */
+}
+
+.helpAccordion h3{ /* FAQ icons fix */
+	position: relative;
+	}
+.accordionToggle .pmButton{/* FAQ icons fix */
+	position: absolute;
+	right:10px;
+	top:10px;
+	}
+
+/************* SEO-Copy | Start ******************/
+.editorialPagelet{margin:0px 12px; font-size:1.2em;clear:both;}
+.editorialPagelet p{margin:0px 0px 2px 0px}
+/************* SEO-Copy | End******************/
+
+.padding8{
+padding: 8px;
+}
+.marTop10{
+margin-top: 10px;
+}
+.content .inner{
+width: 100%;
+}
+.cartfooter_generic_bottom .firstcolumn {
+width: 260px !important;
+}
+.cartfooter_generic_bottom .secondcolumn{
+width: 119px !important;
+}
+.cartfooter_generic_bottom .thirdcolumn{
+width: 440px !important;
+}

@@ -1,0 +1,45 @@
+<isset name="CategorgyRenderTemplate" value="landing" scope="page" />
+<isset name="DecoratorTemplate"
+	value="tablet/search/pt_productsearchresult_categorylanding"
+	scope="page" />
+<isif
+	condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+<isset name="DecoratorTemplate" value="util/pt_empty" scope="page" /> </isif>
+<isdecorate template="${DecoratorTemplate}"> <iscache
+	type="relative" minute="30" varyby="price_promotion" /> <isinclude
+	template="util/modules" /> <iscomment> Configured as
+rendering template for the general category landing page. Displays two
+category specific slots containing static html with promotional banner
+in the first slot and either up to four featured products or promotional
+content in the second slot. </iscomment>
+
+<div class="newTier2 htmlAlign tabletCSS">
+	<isslot id="conviction_slot1_A" description="Conviction Slot 1 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot2_C" description="Conviction Slot 2 C" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot3_A" description="Conviction Slot 3 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot3_C" description="Conviction Slot 3 C" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot3_E" description="Conviction Slot 3 E" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot4_A" description="Conviction Slot 4 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot4_B" description="Conviction Slot 4 B" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot5_A" description="Conviction Slot 5 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot6_A" description="Conviction Slot 6 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot6_B" description="Conviction Slot 6 B" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot6_C" description="Conviction Slot 6 C" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot7_A" description="Conviction Slot 7 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot8_A" description="Conviction Slot 8 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot9_A" description="Conviction Slot 9 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot9_C" description="Conviction Slot 9 C" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot10_A" description="Conviction Slot 10 A" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot10_B" description="Conviction Slot 10 B" context="category" context-object="${pdict.ProductSearchResult.category}" />
+	<isslot id="conviction_slot1_C" description="Conviction Slot 1 C" context="category" context-object="${pdict.ProductSearchResult.category}" />
+
+	<isif condition="${pdict.createSlotForKiosk != null }"> <iscomment>This	slot is created only for content slots for Kiosk</iscomment> 
+		<isslot id="cat-landing-banner-kiosk" context="category" description="Kiosk Category Landing Banner" context-object="${pdict.ProductSearchResult.category}" />
+		<isslot id="cat-listing-banner-kiosk" context="category" description="Kiosk Category Listing Banner" context-object="${pdict.ProductSearchResult.category}" />
+	</isif>
+	<div class="clear"></div>
+	
+</div>
+
+
+</isdecorate>

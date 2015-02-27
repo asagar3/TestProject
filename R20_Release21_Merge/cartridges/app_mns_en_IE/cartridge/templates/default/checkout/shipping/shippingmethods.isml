@@ -1,0 +1,124 @@
+<isinclude template="util/modules"/>
+<isset name="isStoreDelActive" value="${pdict.CurrentSession.custom.isStoreCollActive}" scope="page"/>
+<iscomment>
+	This template renders the shipping methods that a customer may choose from.
+	It renders a form for the shipping method selection.  This template is 
+	dynamically loaded using AJAX and may get reloaded as the customer enters
+	shipping address information depending on the configured shipping method
+	address exclusions.
+</iscomment>
+
+<isscript>
+	var shipment : dw.order.Shipment = pdict.Basket.defaultShipment;
+	var shippingModel : dw.order.ShipmentShippingModel = dw.order.ShippingMgr.getShipmentShippingModel( shipment );
+</isscript>
+<iscomment> Praveen: QC Defect fixing 984</iscomment>
+<isset name="defaultShippingMthd" value="${dw.order.ShippingMgr.getDefaultShippingMethod()}" scope="page">
+
+<iscomment>this will show when sIFR flash font replacement is done</iscomment>
+<iscomment>render list of applicable shipping methods</iscomment>
+<isif condition="${pdict.ApplicableShippingMethods.size() > 0}">
+<div class="margintop">
+<label class="label floatleft"><span class="labeltext">${Resource.msg('singleshipping.shippingmethod','checkout',null)}</span></label>
+	<div class="shippingmethods">
+		<isloop items="${pdict.ApplicableShippingMethods}" var="shippingMethod" status="shippingMethodStatus">
+		
+		<isif condition="${!('STORE_COLLECTION'.equalsIgnoreCase(shippingMethod.ID))}">
+			<isset name="shippingCost" value="${pdict.ShippingCosts.get(shippingMethod.ID)}" scope="page"/>
+				
+				<div class="shippingmethod shipping-method-00${shippingMethodStatus.count}">
+	    			<div class="value radio"><input type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}" id="shipping-method-${shippingMethod.ID}" value="${shippingMethod.ID}" <isif condition="${(empty(pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.value) && shippingMethod.defaultMethod) || (pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.value == shippingMethod.ID)}">checked="checked"</isif> /> 
+	    			<label for="shipping-method-${shippingMethod.ID}">
+	    			
+		    		<isprint value="${shippingMethod.displayName}"/>
+		    		 
+	    			<isprint value="${shippingMethod.description}"/>
+	    			
+					<iscomment>
+						The format for rendering shipping values is to render the base shipping cost. If there are shipping 
+						price adjustments, the adjustments are also rendered. Finally, if there is a surcharge associated with 
+						the shipping, the surcharge value is rendered.
+				 	</iscomment>
+	
+					<isif condition="${shippingCost.shippingPriceAdjustmentsTotal != 0}">
+						<span class="standardshipping"><isprint value="${shippingCost.baseShipping}"/></span> <span class="discountshipping"><isprint value="${shippingCost.baseShippingAdjusted}"/></span>
+					<iselse>
+						<span><isprint value="${shippingCost.baseShipping}"></span>
+					</isif>
+					
+					<isif condition="${shippingCost.surchargeAdjusted > 0}"><span class="shippingsurcharge"> + <isprint value="${shippingCost.surchargeAdjusted}"/> ${Resource.msg('singleshipping.surcharge','checkout',null)}</span></isif>
+					<br/><span class="shippingmethodSubLabel"><isprint value="${shippingMethod.custom.additionalDesc}"/></span>
+	    				</label>
+		    			<iscomment> CR023-START | Additional Description | Naveen Kumar </iscomment>
+	    					
+						<iscomment> CR023-END | Additional Description | Naveen Kumar </iscomment>
+		    			<iscomment><!-- TODO: 9/03/2011 removed these but include them if BRD/Wireframe requires them
+		    			<isif condition="${!empty(shippingMethod.description)}">
+		    				<div class="shippingdescription">(<isprint value="${shippingMethod.description}"/>)</div>
+		    			</isif>				    			
+	    			
+		    			<ul class="shippingpromos"> 
+			    			<isloop items="${dw.campaign.PromotionMgr.getActiveCustomerPromotions().getShippingPromotions(shippingMethod)}" var="shippingPA">
+								<isif condition="${shippingPA.calloutMsg != null}">
+									<li><isprint value="${shippingPA.calloutMsg}"/></li>
+								</isif>
+			    			</isloop>					    			
+		    			</ul>--></iscomment>
+	    			</div>	
+	    			<isif condition="${shippingCost.productShippingCosts.length > 0}">
+	    				<div class="formfieldtooltip"><div class="tooltip1"><img src="${URLUtils.staticURL('themes/demandwarestore/images/info_icon.png')}" alt="${Resource.msg('singleshipping.details','checkout',null)}" class="tooltip_icon">
+	    				
+		    				<div class="tooltip-body" style="display:none">
+		    				<div class="tooltipcontainer1">
+		    				<div class="tooltipcontent1">
+		    				
+			    		<iscomment> Praveen: QC Defect fixing 984</iscomment>
+			    		<div class="contentasset">
+			    		
+								<isif condition="${shippingMethod != defaultShippingMthd}">
+									<iscontentasset aid="tooltip-express_del"/>
+								<iselse>
+									<iscontentasset aid="tooltip-standard_del"/>
+								</isif>		 
+						   			
+			    		</div>
+			    			
+			    			
+			    		</div></div></div>
+			    		</div></div>
+		    			</isif>		    			
+	    			<div class="clear"><!-- FLOAT CLEAR --></div>
+	    		</div><!-- END: shippingmethod -->
+    		</isif>
+	</isloop>
+	
+	<div class="clear"></div>
+		<!-- TODO: 14/03/2011 integrate this item -->
+		<iscomment>Nadeem:created a new content asset to make delivery and returns info BM configurable</iscomment>
+		<iscontentasset aid="deliveryandreturns-info"/>
+		   		
+    		</div><!-- END: shippingmethods -->
+    		</div>
+    		<div class="clear"></div>
+		
+<iselse>
+	<div class="noshippingmethods">${Resource.msg('singleshipping.noshippingmethods','checkout',null)}</div><!-- END: noshippingmethods -->
+</isif>
+
+<script type="text/javascript"><!--
+
+jQuery(document).ready(function() {
+
+	var shipMethod = "${pdict.Basket.defaultShipment.shippingMethodID}";
+	var storeCollectionMethod = "${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}";
+	$("input#shipping-method-"+shipMethod).attr("checked","checked");
+	
+	if(shipMethod != storeCollectionMethod){
+		$("#shipping-method-"+storeCollectionMethod).parent().parent(".shippingmethod").hide();
+	}else{
+		$("#shipping-method-"+storeCollectionMethod).parent().parent(".shippingmethod").show();
+	}
+	
+});
+
+//--></script>

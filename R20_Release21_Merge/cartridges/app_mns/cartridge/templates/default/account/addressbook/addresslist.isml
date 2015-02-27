@@ -1,0 +1,69 @@
+<isdecorate template="account/pt_account_landing">
+<isinclude template="util/modules.isml"/>
+<div class="accountoverview surround">
+		<isslot id="account-banner" description="Banner for My Account pages" context="global" />
+</div>
+<div class="accounteditaddress">	
+	<iscomment><h4>${Resource.msg('addresslist.header','account',null)}</h4></iscomment>	
+	<iscomment><a class="createaddress" title="${Resource.msg('addresslist.create','account',null)}">${Resource.msg('addresslist.create','account',null)}</a></iscomment>
+	<isif condition="${!empty(pdict.CurrentCustomer.profile.addressBook.addresses)}">
+		<div id="address_list" class="address_list">
+			<isinclude template="account/addressbook/addressinclude"/>
+		</div>
+	<iselse/>
+		<div>&nbsp;</div>
+		<div class="">${Resource.msg('addresslist.noaddressmsg','account',null)}</div>
+		<div>&nbsp;</div>
+	</isif>		
+</div>
+<div class="clear"></div>
+<iscomment><!-- Moved down as per comp | Asha | 15-apr --></iscomment>
+<div class="addCard roundedBtn"><a class="expandable-btn grey addcreditcard createaddress" href="javascript:;" id="AddCreditCard" title="${Resource.msg('addresslist.create','account',null)}"><span>${Resource.msg('addresslist.createbutton','account',null)}</span></a></div>
+<iscomment><!-- Addes static HTML Snippet to match with VD | Its common for most of the Account Pages --></iscomment>
+	<div class="button_wrapper">
+			<div class="floatleft btn-grey-flat padding0">
+						<button value="Back" name="BACK_ACTION_TODO" type="submit" class="" onclick="javascript: window.location.href='${URLUtils.https('Account-Show')}';">
+							<span class="back-icon">${Resource.msg('global.back','locale',null)}</span>
+						</button>
+				<div class="clear"></div>
+			</div>
+			<div class="floatright btn-grey-dark padding0">
+						<button value="${Resource.msg('global.returnmyaccount','locale',null)}" name="BACK_ACTION_TODO" type="submit" class="" onclick="javascript: window.location.href='${URLUtils.https('Account-Show')}';">
+							<span class="back-icon">${Resource.msg('global.returnmyaccount','locale',null)}</span>
+						</button>
+				<div class="clear"></div>
+			</div>
+			<div class="clear"></div>	
+		</div>
+<iscontentasset aid="account-footer"/>
+<script type="text/javascript"><!--
+$(document).ajaxComplete(function() {
+	$(".tooltip").bt({
+		trigger: ['focus mouseover', 'blur mouseout'],
+		contentSelector: "jQuery(this).find('.tooltip-body').html()", 
+		fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1}
+	});//.attr('tabindex', '0');
+	
+	$(".zip input").focus(function () {
+	    jQuery(this).parents(".zip").find(".tooltip").trigger("mouseover");            
+	});
+	$(".zip input").blur(function () {
+		jQuery(this).parents(".zip").find(".tooltip").trigger("mouseout"); 
+	});
+});
+
+	jQuery(document.body).bind('dialogClosed', function(event){
+	      window.location.href = "${URLUtils.url('Address-List')}";	
+    });
+    
+    jQuery(document).ready(function() {
+		jQuery(".createaddress").click(function() {	
+			app.dialog.open("${URLUtils.url('Address-Add')}","${Resource.msg('addresslist.create','account',null)}");
+		});	
+		
+		
+		
+	});
+
+//--></script>
+</isdecorate>

@@ -1,0 +1,50 @@
+<iscomment>
+	Creates a div rendering a product and product line item information.
+	p_productli : the product line item to render
+	p_formli 	: the form line item
+	p_editable  : boolean indicating if the pli is editable or not
+	p_hideprice : boolean to hide price
+	p_hidepromo : boolean to hide promotional message(s)
+</iscomment>
+
+<iscomment>Create page variable representing the product line item</iscomment>
+<isset name="p_productli" value="${pdict.p_productli}" scope="page"/>
+<iscomment>Create page variable representing the form line item</iscomment>
+<isset name="p_formli" value="${pdict.p_formli}" scope="page"/>
+<td align="left" valign="top" style="padding-top:10px;padding-bottom:15px;padding-left:10px; font-family:Arial, Helvetica, sans-serif; font-size:14px;color:#666666;">
+
+<p style="color:#333; text-transform:uppercase; font-family:Helvetica,Arial,sans-serif; font-size: 0.6em; font-weight:bold;">
+			<isprint value="${productLineItem.product.custom.productBrand}"/>
+		</p>
+
+	<isif condition="${p_productli.product == null || (p_productli.product != null && (!p_productli.product.assignedToSiteCatalog || !p_productli.product.online))}">
+		
+		<p style="font-family:Arial, Helvetica, sans-serif; font-size:14px;color:#666666;"><isprint value="${p_productli.product.name.replace(p_productli.product.custom.productBrand, '')}"/></p>
+	<iselse/>
+		<isif condition="${p_productli.categoryID != null}">
+			<a style="font-family:Arial, Helvetica, sans-serif; font-size:14px;color:#666666;" href="${URLUtils.http('Product-Show','pid', p_productli.productID, 'cgid', p_productli.categoryID)}" title="${p_productli.product.name.replace(p_productli.product.custom.productBrand, '')}"><isprint value="${p_productli.product.name}"/></a>
+		<iselse/>
+			<a style="font-family:Arial, Helvetica, sans-serif; font-size:14px;color:#666666;" href="${URLUtils.http('Product-Show','pid', p_productli.productID)}" title="${p_productli.product.name}"><isprint value="${p_productli.product.name.replace(p_productli.product.custom.productBrand, '')}"/></a>
+		</isif>
+	</isif>
+	<isif condition="${empty(pdict.p_hidepromo) || !pdict.p_hidepromo}">
+		<iscomment>promotional messaging</iscomment>
+		<isloop items="${p_productli.priceAdjustments}" var="pli">
+		<iscomment><isif condition="${!(pli.promotionID.equals(Resource.msg('order.apportionmentpromoid','order',null)))}"></iscomment>
+		<isif condition="${pli.promotionID.indexOf('OL_') != 0}">
+		- <isprint value="${pli.lineItemText}"/>
+		</isif>
+		</isloop>
+	</isif>
+
+	<iscomment>product attributes</iscomment>
+		<p style="margin-top:5px;margin-bottom:0;font-family:Arial, Helvetica, sans-serif; font-size:11px; color:#666666;">
+		${Resource.msg('global.itemno','locale',null)} <span style="color:#000000;">
+			<isif condition="${p_productli.product.custom.tNumber != null}">
+				<isprint value="${p_productli.product.custom.tNumber}"/>
+			</isif>
+		</span></p>
+		<iscomment>variations</iscomment>
+		<isdisplayvariationvaluesemail product="${p_productli.product}"/>
+</td>
+

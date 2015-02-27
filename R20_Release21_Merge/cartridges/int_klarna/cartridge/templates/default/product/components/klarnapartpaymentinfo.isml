@@ -1,0 +1,117 @@
+<isset name="merchantID" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('KLARNA_MERCHANT_ID')}" scope="page"/>
+<isset name="KlarnaCurrency" value="${SalesPrice.currencyCode}" scope="page"/>
+<isif condition="${typeof KlarnaCountry == 'undefined'}">
+	<iscomment>guessing country from the default locale is fragile, but it's better than nothing</iscomment>
+	<isset name="KlarnaCountry" value="${dw.util.Locale.getLocale(dw.system.Site.getCurrent().defaultLocale).country}" scope="page"/>
+</isif>
+
+<isinclude template="klarna_enable"/>
+
+<isif condition="${countryCurrencyMatches == true}">
+<isif condition="${active == true}">
+<iscomment>For Dutch customers we only allow to checkout with Klarna is payment amount is below 250 euro</iscomment>
+<isif condition="${!(pdict.PaymentAmount > 250 && KlarnaCountry == "NL")}">
+<link rel="stylesheet" type="text/css" href="${URLUtils.staticURL('productprice/style.css')}" />
+<script type="text/javascript" src="${URLUtils.staticURL('js/klarna_pp.js')}"></script>
+<script type="text/javascript" src="https://static.klarna.com:444/external/js/klarnapart.js"></script>
+<script>
+    addKlarnaPartPaymentEvent(function() { InitKlarnaPartPaymentElements('klarna_partpayment', '${merchantID}', '${KlarnaCountry.toLowerCase()}'); });
+	updatePartpaymentInfo = function(price) {
+		
+		if(typeof this.price == 'undefined' || this.price != price) {
+			this.price = price;
+		} else {
+			return;
+		}
+		jQuery('.klarna_PPBox_inner').hide()
+		jQuery.getJSON('${URLUtils.url('KlarnaPayment-RenderPclasses')}', {countryCode : '${KlarnaCountry}', amount : price}, function(data) {
+			jQuery('.klarna_PPBox tbody').empty()
+			if(data.length != 0) {
+				data[0]['default'] = 1  // Currently the pclasses are sorted so that the default comes first 
+				jQuery.each(data, function(key, value) {
+					// Only show campaign and account (TODO, would make more sense to have this check in RenderPclasses)
+					if(value['type'] != 1 && value['type'] != 0)
+						return
+
+					var plan = jQuery('<tr><td style="text-align: left">'+value['months']+'</td><td class="klarna_PPBox_pricetag">'+value['monthlyCost']+'</td></tr>')
+					plan.appendTo('.klarna_PPBox tbody')
+
+					if(value['default']) {
+						jQuery('.klarna_PPBox_topMid label').text(value['monthlyCost'])
+					}
+				})
+			}
+			jQuery('.klarna_PPBox_inner').fadeIn()
+
+			return false;
+		});
+	}
+	// With multiple variants of the product change part payment info when the price changes
+	jQuery("#pdpATCDivpdpMain .pricing .price:first").live('DOMNodeInserted', function() { 
+		var regexp = /[^0-9,.]*([0-9,.]*)[^0-9,.]*/;
+		var priceHtml = jQuery("#pdpATCDivpdpMain .pricing .price .salesprice").html();
+		
+		if (priceHtml == null) return;
+
+		var price = regexp.exec(priceHtml);
+
+		if (price[1].indexOf(".") > price[1].indexOf(","))
+		{
+			price[1] = price[1].replace(/,/g,"");
+		} else 
+			price[1] = price[1].replace(/\,/g,".");
+
+		updatePartpaymentInfo(price[1]); 
+		})
+	// With a static product get the part payment info right away
+	jQuery(function() { updatePartpaymentInfo(${SalesPrice.value}) })
+</script>
+<div id="klarna_partpayment" style="display: none"></div>
+<div class="klarna_PPBox">
+	<div class="klarna_PPBox_inner" style="display: none">
+		<div class="klarna_PPBox_top">
+			<div class="klarna_PPBox_topRight"></div>
+			<div class="klarna_PPBox_topMid">
+				<p><isprint value="${Resource.msg('klarna.partpayment_from', 'klarna', null)}" encoding="off"/><label></label><isprint value="${Resource.msg('klarna.partpayment_month', 'klarna', null)}" encoding="off"/></p>
+			</div>
+			<div class="klarna_PPBox_topLeft"></div>
+		</div>
+		<div class="klarna_PPBox_bottom">
+			<div class="klarna_PPBox_bottomMid">
+				<table cellpadding="0" cellspacing="0" width="100%" border="0">
+					<thead>
+						<tr>
+							<isif condition="${KlarnaCurrency == "SEK" || KlarnaCurrency == "NOK"}">
+								<isset name="paymentPerMonth" value="${Resource.msg('klarna.partpayment_th_sum_sek', 'klarna', null)}" scope="page"/>
+							<iselseif condition="${KlarnaCurrency == "EUR"}">
+								<isset name="paymentPerMonth" value="${Resource.msg('klarna.partpayment_th_sum_eur', 'klarna', null)}" scope="page"/>
+							<iselseif condition="${KlarnaCurrency == "DKK"}">
+								<isset name="paymentPerMonth" value="${Resource.msg('klarna.partpayment_th_sum_dkk', 'klarna', null)}" scope="page"/>
+							</isif>
+							
+							<th style="text-align: left"><isprint value="${Resource.msg('klarna.partpayment_th_month', 'klarna', null)}" encoding="off"/></th>
+							<th style="text-align: right"><isprint value="${paymentPerMonth}" encoding="off"/></th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+				<div class="klarna_PPBox_bottomMid_readMore">
+					<a href="javascript:ShowKlarnaPartPaymentPopup();"><isprint value="${Resource.msg('klarna.partpayment_readmore', 'klarna', null)}" encoding="off"/></a>
+				</div>
+				<div class="klarna_PPBox_pull" id="klarna_PPBox_pullUp">
+					<img src="${URLUtils.staticURL('productprice/pullUp.png')}" alt="More info" />
+				</div>
+			</div>
+		</div>
+		<div class="klarna_PPBox_pull" id="klarna_PPBox_pullDown">
+			<img src="${URLUtils.staticURL('productprice/pullDown.png')}" alt="More info" />
+		</div>
+	</div>
+	<isif condition="${KlarnaCountry == 'NL'}">
+		<div class="nlBanner"><br /><br /><img src="${URLUtils.staticURL('notice_nl.jpg')}" /></div>
+	</isif>
+</div>
+</isif>
+</isif>
+</isif>

@@ -1,0 +1,61 @@
+<isset name="DecoratorTemplate" value="product/pt_productdetails" scope="page"/>
+<isif condition="${pdict.CurrentHttpParameterMap.source.stringValue == 'search'}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+</isif>
+
+<isdecorate template="${DecoratorTemplate}">
+	
+<isinclude url="${pdict.Location + "&pwr=true"}"/>
+
+<iscomment>
+	This template implements the write product recommendation page (simmilar to the productdetails page). It includes
+	the basic product information template (product/product-*), and
+	shows less additional product information, such as attributes, accessories,
+	bundled products, but a product recommendation form.
+</iscomment>
+
+<isinclude template="util/modules"/>
+
+<div id="pwrwritediv">
+	<isset name="image" value="${pdict.Product.getImage('catlanding',0)}" scope="page"/>
+	<isif condition="${!empty(image)}">
+		<isset name="imageUrl" value="${image.URL}" scope="page"/>
+		<isset name="imageAlt" value="${image.alt}" scope="page"/>
+	<iselse/>
+		<isset name="imageUrl" value="${URLUtils.staticURL('/images/noimagemedium.png')}" scope="page"/>
+		<isset name="imageAlt" value="${pdict.Product.name}" scope="page"/>
+	</isif>
+	<isscript>
+	var writereviewwidth : Integer = dw.system.Site.getCurrent().preferences.custom.ImageWidthWriteReview;
+	var writereviewheight : Integer = dw.system.Site.getCurrent().preferences.custom.ImageHeightWriteReview;
+	var scene7ImageUrl : String = imageUrl + '?' + dw.system.Site.getCurrent().preferences.custom.s7Preset + 'wid='+writereviewwidth+'&hei='+writereviewheight;
+	</isscript>
+	<img src="${scene7ImageUrl}" alt="${imageAlt}" />
+	
+	<h1 class="productname"><!-- Product Name Display --><isprint value="${pdict.Product.name}"/></h1>
+	
+	
+	<div class="clear"><!-- W3C float clearing recommendation --></div>
+	<isscript>
+		var source = "web";
+		if (pdict.CurrentHttpParameterMap.source.stringValue == "email") {
+			source = "email";
+		}
+	</isscript>
+	<iscomment><iframe src="http://services.powerreviews.com/SubmitReview.do?pageId=${pdict.Product.ID}&merchantId=6690&source=${source}&merchantUserEmail=user@yoursite.com&promoCode=coupon}&pr_locale=" frameborder="0" height="2000" width="590px" scrolling="no"/></iframe></iscomment>
+</div>
+	<script type="text/javascript"><!--
+		jQuery(document).ready(function(){			
+			if (!jQuery('#pwrwritediv').dialog('isOpen')) {
+			app.createDialog({id: 'pwrwritediv', options: {
+				autoOpen: true,
+		    	height: 750,
+		    	width: 650,
+		    	dialogClass: 'writereview',
+		    	title: 'Product Review',
+		    	resizable: false
+			}});
+		}
+		});
+	//--></script>		
+</isdecorate>

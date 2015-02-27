@@ -1,0 +1,82 @@
+/**
+ * Checks the status of the given Order object with klarna
+ *
+ * @input Order : dw.order.Order The order to check the status of at klarna
+ * @output OrderStatus : Number
+ * @output KlarnaError	: String	
+ * @output rejectedOrder : dw.order.Order
+ * @input KlarnaError : String 
+ * @output StatusMessage : String
+ */
+importPackage( dw.system );
+importPackage( dw.order );
+importScript("int_klarna:libKlarnaAPI.ds")
+
+function execute( args : PipelineDictionary ) : Number
+{
+	// FIXME, the invoiceNumber on Order seems to be incorrect
+	var order : Order = args.Order;
+	
+	var id : String = order.getOrderNo();
+	try {
+		// Query Klarna for order status
+		//CR 3079 : select merchant_id on the basis of Country and shipping method
+		//var k = new Klarna();			
+		var shipmentLineItems : Collection =  order.getShipments();
+		var shipmentlineItem : Shipment =  shipmentLineItems[0];
+		var shippingAddress : OrderAddress =  shipmentlineItem.getShippingAddress();
+		var KlarnaCountry : String = shippingAddress.getCountryCode().value;
+		var shipping_Method : String = shipmentlineItem.getShippingMethod().ID;
+		var klarna = new Klarna(KlarnaCountry,shipping_Method);
+					
+		var orderStatus = klarna.check_order_status(id, 1);
+		
+		// Update status on Order object
+		var status = {'1' : 'ACCEPTED', '2' : 'PENDING', '3' : 'DENIED'};
+		var payments : SeekableIterator = order.getPaymentInstruments();
+		for each (var pInstrument : PaymentInstrument in payments){
+			if (pInstrument.paymentMethod.equals(dw.order.PaymentInstrument.METHOD_BML)){
+				//Praveen: Changing the code to set the order status based on the API call.
+				//pInstrument.custom.KlarnaStatus = status[String(orderStatus)];
+				var newStatus : String = status[String(orderStatus)];
+				if("ACCEPTED".equalsIgnoreCase(newStatus)){
+					order.custom.orderStatus = "APPROVED";
+					order.setExportStatus(Order.EXPORT_STATUS_READY);
+					setPaymentInstStatus(order , newStatus);
+					Logger.error("Klarna Conversion Report, Order Number: "+order.getOrderNo()+" status converted to: APPROVED");
+				}
+				else if("DENIED".equalsIgnoreCase(newStatus)){
+					order.custom.orderStatus = "CANCELLED";
+					order.setExportStatus(Order.EXPORT_STATUS_NOTEXPORTED);
+					args.rejectedOrder = order;
+					setPaymentInstStatus(order , newStatus);
+					Logger.error("ConversionDetailReport, Order Number: "+order.getOrderNo()+" status converted to: CANCELLED");	
+				}
+			}
+		} 
+		
+		args.OrderStatus = orderStatus;
+		
+	} catch(e) {
+		var ex : Error = e;
+		var errorString = args.KlarnaError;
+		if(empty(errorString)){
+			errorString  = order.orderNo;
+		}else{
+			errorString  = errorString  + " , "+order.orderNo;	
+		} 
+		args.KlarnaError = errorString;
+		Logger.error("Error in CheckOrderStatus.ds, Order Number: "+order.orderNo+",  details : "+ex);
+		args.StatusMessage="Error in CheckOrderStatus.ds, Order Number: "+order.orderNo+", Details : "+ex+"<br> User Details:CustomerName="+order.customerName+", EmailId= "+order.customerEmail;
+		return PIPELET_NEXT;
+    }
+
+    return PIPELET_NEXT;
+}
+
+function setPaymentInstStatus(order , status){
+	var payments : SeekableIterator = order.getPaymentInstruments();
+	for each (var pInstrument : PaymentInstrument in payments){
+		pInstrument.custom.KlarnaStatus = status;	
+	}
+}

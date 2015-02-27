@@ -1,0 +1,60 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+* @output invalidPostCode : Boolean 
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var postcode : String = pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip.htmlValue;	
+	var countryCode : String = pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlValue;
+	var invalidPostCode = false;
+	invalidPostCode = !isValidPostcode(postcode,countryCode);
+	pdict.invalidPostCode = invalidPostCode;
+	if (invalidPostCode) {
+		return PIPELET_ERROR;
+	}
+	return PIPELET_NEXT;
+}
+
+function isValidPostcode (postcodeStr : String,countryCode : String) : Boolean {
+	var postcode: Number = parseInt(postcodeStr);	
+	//35000 – 35999 (Canary Isles)	38000 – 38999 (Canary Isles)	51000 – 51999 (Ceuta)	52000 – 52999 (Melilla)
+	var postCodeExclusion : String = "PostCodeExclusionValues_" + countryCode;	
+	var ExculdedPostCodes: Array = dw.system.Site.getCurrent().getCustomPreferenceValue(postCodeExclusion);
+	//INT 811: Added validation for FR. Now accepts postcode of length = 5 only.
+	if(countryCode=='FR' || countryCode=='MC')
+	{
+		if(postcodeStr.length<5)
+		{
+			return false;
+		}
+	}	
+	if(empty(ExculdedPostCodes))
+	{
+		return true;
+	}	
+	for(var i=0 ; i<ExculdedPostCodes.length ;i++) {
+			var postcodeRange : String = ExculdedPostCodes[i];
+			
+			var postcodes : Array = postcodeRange.split("-");
+			var postCode1 : Number = parseInt(StringUtils.trim(postcodes[0]));
+			var postCode2 : Number = parseInt(StringUtils.trim(postcodes[1]));
+			if (postcode >= postCode1 && postcode <= postCode2){
+				return false;
+			}	
+		}
+	return true;
+}

@@ -1,0 +1,71 @@
+<iscomment>
+	This is the footer for Checkout Sign In page, the Delivery(shipping) page and the Billing page. 
+	Be careful caching it if it contains user dependent information. Cache its elements instead 
+	if necessary (do not forget to change the isinclude into a pipeline include for that).
+</iscomment>
+
+<!-- To Do | Static HTML Snippet for Checkout Pages Footer | Asha -->
+<div id="footer">
+	<iscontentasset aid="checkout_footer_copy_mns"/>
+</div>
+<div id="closeTextLang" class="closeTextLang">${Resource.msg('global.close','locale',null)}</div>
+<iscomment>
+	Customer registration can happen everywhere in the page flow. As special tag in the pdict
+	is indicating it. So we have to check on every page, if we have to report this event for
+	the reporting engine.
+</iscomment>
+<isinclude template="util/reporting/ReportUserRegistration.isml"/>
+
+<script type="text/javascript">
+$('.tooltip .tooltip-body').hide();
+// $('.bt-wrapper').live('mouseover', function(){alert("hi");});
+          if (navigator.userAgent.indexOf('iPad') > -1){
+            $("div").click(function(){
+                        //$('.tooltipviewdetails').blur();
+                  })
+            $('.tooltip').each(function() {
+                $(this).bt({
+                  trigger: ['focus mouseover', 'blur mouseout'],
+                  contentSelector: "$(this).find('.tooltip-body').html()", /*get text of inner content of hidden div*/
+                   fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1
+                  }
+                })  
+          })
+          }else{
+            $('.tooltip').each(function() {
+                $(this).bt({
+                  trigger: ['focus mouseover', 'blur mouseout'],
+                  contentSelector: "$(this).find('.tooltip-body').html()", /*get text of inner content of hidden div*/
+                   fill: '#FFF', positions: ['right','left','top', 'bottom'], cornerRadius: 1, strokeWidth: 1, shadow: true, shadowOffsetX: 2, shadowOffsetY: 2, shadowBlur: 5, shadowColor: 'rgba(0,0,0,.4)', shadowOverlap: false, noShadowOpts: {strokeStyle: '#ccc', strokeWidth: 1
+                  }
+                })
+          }
+)}
+</script>
+<span><a class="gotop" href="#top" title="${Resource.msg('back_to_top.message','common',null)}"><isprint value="${Resource.msg('back_to_top.message','common',null)}"></a></span>
+<script type="text/javascript"><!--
+/************* DO NOT ALTER ANYTHING BELOW THIS LINE ! **************/
+var s_code=s.t();if(s_code)document.write(s_code)//--></script>
+<script type="text/javascript"><!--
+if(navigator.appVersion.indexOf('MSIE')>=0)document.write(unescape('%3C')+'\!-'+'-')
+//--></script><!--/DO NOT REMOVE/-->
+<iscomment>Commenting the site tagger code
+<script type="text/javascript"> var stHost = (("https:" == document.location.protocol) ? "https://www." : "http://www."); var stAccount = "${dw.system.Site.getCurrent().getCustomPreferenceValue("siteTaggerAccountId")}"; document.write(unescape("%3Cscript src='" + stHost + "sitetagger.co.uk/" + stAccount + "/sitetagger.js' type='text/javascript'%3E%3C/script%3E")); </script>
+</iscomment>
+
+
+<iscomment>Bright tag code starts</iscomment>
+<script type="text/javascript">
+  (function () {
+    var tagjs = document.createElement("script");
+    var s = document.getElementsByTagName("script")[0];
+    tagjs.text = "{'site':'C5pyM98'}";
+    tagjs.async = true;
+    tagjs.src = "//s.btstatic.com/tag.js";
+    s.parentNode.insertBefore(tagjs, s);
+  }());
+</script>
+<noscript>
+  <iframe src="//s.thebrighttag.com/iframe?c=C5pyM98" width="1" height="1" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</noscript>
+<iscomment>Bright tag code ends</iscomment>

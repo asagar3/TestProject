@@ -1,0 +1,662 @@
+/**
+*
+*  @input  Product : dw.catalog.Product
+*  @input  ProductVariationModels : dw.util.Map
+*  @input  CurrentVariationModel : dw.catalog.ProductVariationModel
+*  @output customObject : Object
+*
+*/
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.value );
+importPackage( dw.campaign );
+importPackage( dw.order);
+importPackage( dw.content);
+importScript("app_mns:/product/ProductDetailsBulletPoints.ds");
+ 
+function execute( pdict : PipelineDictionary ) : Number
+{ 
+	try{
+		var productJsonObject = new Object();	
+		var product:Product = pdict.Product ;
+		var currentVariationModel:ProductVariationModel = pdict.CurrentVariationModel ;
+		var productVariationModels:Map =  pdict.ProductVariationModels ;
+				
+		if(product.productSet){
+					
+			productJsonObject.productType = "productset" ;				
+			productJsonObject.products = getProductSetProductDetails(product,currentVariationModel,productVariationModels);
+			productJsonObject.productSetTitle =  product.name ; 
+			productJsonObject.productCount = productJsonObject.products.length ;
+				
+		} else {
+			
+			productJsonObject.productType = "product" ; 
+			productJsonObject.productCount = 1 ;
+			productJsonObject.products = new Array() ;
+			var productDetails = getProductDetails(product,currentVariationModel,productVariationModels,product);
+			productJsonObject.products.push(productDetails);
+			
+		}
+		
+		pdict.customObject = productJsonObject ;
+	}catch(e){
+		Logger.error("GetProductDetails: CreateProductDetailsJSON script error:::"+e.message) ;
+		return PIPELET_ERROR ;		
+	}
+	
+
+    return PIPELET_NEXT;
+}
+
+function getProductSetProductDetails(product:Product,
+	currentVariationModel:ProductVariationModel,productVariationModels:Map):Object{	
+	var products = new Array();
+	var productSetProducts: Collection = product.getProductSetProducts();
+	var productDetails:Object = null ;
+	var subProduct:Product = null ;
+	for each(subProduct in productSetProducts){
+		if(subProduct.online){/*Process only for online products in the product set*/			
+			productDetails = getProductDetails(subProduct,currentVariationModel,productVariationModels,product);			
+			products.push(productDetails);
+		}
+	}	
+	return products ;								
+}
+
+function getProductDetails(product:Product,
+	currentVariationModel:ProductVariationModel,productVariationModels:Map,productSetProduct:Product):Object{
+	
+	var productDetails = new Object();
+	try {
+		productDetails.productId = product.ID ;
+		productDetails.productName = product.name ;
+		if(product.longDescription != null ){
+			productDetails.productDescription = product.longDescription.markup ;
+		}
+		productDetails.articleNumber = product.custom.tNumber ;
+		productDetails.videoURL = product.custom.videoURL ;
+		if(!product.productSet && product.orderableRecommendations != null && product.orderableRecommendations.size() > 0){//Add receommendation only if the there are orderableRecommendations
+			productDetails.recommendations = getProductRecommendations(product);
+		}	
+		productDetails.sizeChartContentId = getSizeChartContentID(product) ;
+		productDetails.pricing = getProductPricingDetails(product);	
+		
+		//var promos:Collection = PromotionMgr.activeCustomerPromotions.getProductPromotions(product);
+		//if(!empty(promos)){
+			productDetails.promotions = getProductPromotions(product);
+		//}
+		
+		productDetails.variations = getProductVariations(product,currentVariationModel, productVariationModels);		
+		
+		productDetails.shippingInformation = getProductShippingDetails(product);
+		productDetails.additionalProductDetails = getAddtionalDetails(product) ;
+		var cat:Category = null ; 
+		if(productSetProduct.productSet){
+			cat = productSetProduct.getPrimaryCategory() ;
+		}else {
+			cat = product.getPrimaryCategory() ;
+		}		
+		 
+		 if(cat != null){
+			productDetails.categoryName = cat.displayName ; 	
+		 }else {
+		 	var catAssignments:List = product.allCategories ;		 	
+		 	productDetails.categoryName = product.allCategories[0].displayName ;
+		 	
+		 }
+		
+		//productDetails.deliveryDetailsAdditionalInfo = dw.content.ContentMgr.getContent("CA_MS_REGULAR_AND_EXPRESS_SHIPPING").custom.body.markup ;
+	}catch(e){
+		throw new Error(e.message);	
+	}
+	return productDetails ;
+}
+/*Pricing function*/
+function getProductPricingDetails(product:Product): Object {			
+	var pricing = new Object();	
+	try{
+		var varProduct:Product = null ;
+		
+		pricing.priceMin = null ;
+		pricing.priceMax = null ;
+		pricing.standardPrice = null ;
+		pricing.salesPrice = null ;
+		var priceModel:ProductPriceModel = null ;
+		
+		if(product.master && product.priceModel.isPriceRange()){// For displaying the master product details with a price range	
+			
+			priceModel = product.getPriceModel() ;
+			pricing.priceMin = StringUtils.formatMoney(priceModel.getMinPrice()) ;
+			
+			pricing.priceMax = StringUtils.formatMoney(priceModel.getMaxPrice()) ;
+			
+		}else{// Variants prices
+					
+			if(product.master && !product.priceModel.isPriceRange() && product.variationModel.variants.size() > 0){// For master products with no price range
+				product = product.variationModel.variants[0] ; //Get the first variant
+			}
+			
+			priceModel = product.getPriceModel() ;				
+			
+			var salesPrice:Money = priceModel.getPrice();/*getPrice will always give the laterst price availiable*/
+			var standardPrice:Money = new Money(0.0, Site.getCurrent().getCurrencyCode());
+			if(!priceModel.getPrice().available){			
+				standardPrice = Money.NOT_AVAILABLE ;
+			}else if(!empty(dw.system.Site.current.preferences.custom.listPriceDefault)){
+				standardPrice = priceModel.getPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault) ;			
+			}else {
+				standardPrice = priceModel.getPriceBookPrice("list-prices");
+			}		
+			
+			/*Promotion price logic*/
+			var promos:Collection = dw.campaign.PromotionMgr.activeCustomerPromotions.getProductPromotions(product);		
+			var promotionalPrice:Money = Money.NOT_AVAILABLE ;		
+			if(!empty(promos)){			
+				var promo:Promotion = null ;
+				for each(promo in promos){
+					if (promo.getPromotionClass() != null &&  Promotion.PROMOTION_CLASS_PRODUCT.equals(promo.getPromotionClass())){
+						promotionalPrice =  promo.getPromotionalPrice(product) ;
+					}			
+				break ;//Logic in site need to check wny only topmost promotion is displayed
+				}
+							
+				if (promotionalPrice.available && salesPrice.compareTo(promotionalPrice) != 0){
+					standardPrice = salesPrice ;
+					salesPrice = promotionalPrice ;
+				}			
+			}
+		
+			if(standardPrice.available  && salesPrice.available && standardPrice.compareTo(salesPrice) != 0){
+				pricing.standardPrice = StringUtils.formatMoney(standardPrice) ;	
+				pricing.salesPrice = StringUtils.formatMoney(salesPrice) ;
+			} else{					
+				pricing.standardPrice = StringUtils.formatMoney(salesPrice) ;	
+			}
+		
+		}
+	}catch(e){
+		throw new Error("Error while getting pricing details in CreateProductDetailsJSON.getProductPricingDetails "+e.message);	
+	}		
+	return pricing;		
+}
+
+/*Recommendations function*/
+function getProductRecommendations(product:Product): Array{
+	
+	
+	var recommendations = new Array() ;
+	try {
+		var recommendationsIter : Iterator = product.getOrderableRecommendations(1).iterator();
+		var recProducts : Collection = new dw.util.ArrayList();
+		var recommendation : Recommendation = null ;
+		var recommendedProduct : Product = null ;
+		//todo - 20 should be site prefs driven
+		var maxRecs = 20, counter = 0;// 20 max recs as the same functionalty on site as well
+		while( recommendationsIter.hasNext()){
+			recommendation = recommendationsIter.next();
+			recommendedProduct = recommendation.getRecommendedItem();
+			recProducts.add( recommendedProduct );		
+			if(++counter >= maxRecs)
+			{
+				break;
+			}
+		}
+		
+		var recProd:Object = null ;
+		var recProduct:Product = null ;
+		for each(recProduct in recProducts){
+			recProd = new Object();
+			recProd.recommendedProductID = recProduct.ID ;
+			recProd.recommendedProductname = recProduct.name;
+			if(recProduct.shortDescription != null){
+				recProd.recommendedProductDescription = recProduct.shortDescription.markup ;
+			}
+			var scene7ImageUrl : String = null ;
+			if(!empty(recProduct.getImage('catlanding',0))){
+				scene7ImageUrl = recProduct.getImage('catlanding',0).URL.toString() ;
+			} else {					  			  		
+	  			scene7ImageUrl  = dw.web.URLUtils.httpStatic('/images/noimagesmall.png').toString();	  			
+				
+			}
+			recProd.imageType = recProduct.custom.ImageType ; 
+			recProd.imageAssetId = scene7ImageUrl;
+			recProd.pricing = getProductPricingDetails(recProduct);
+			recommendations.push(recProd) ;
+		}
+	}catch(e){
+		Logger.error("GetProductDetails: getProductRecommendations script error:::"+e.message) ;			
+	}
+			
+	return recommendations ;
+}	
+
+function getProductPromotions(product:Product): Array{
+	
+	var promotions = new Array() ;
+	try {
+		var promos:Collection = PromotionMgr.activeCustomerPromotions.getProductPromotions(product);		
+		if(!empty(promos)){
+			var promo:Promotion = null ;
+			var promotion :Object = null ;
+			for each(promo in promos){
+				promotion = new Object();			
+				if(promo.calloutMsg != null){
+					promotion.callOutMsg = promo.calloutMsg.markup ;
+				}
+				
+				if(promo.details != null && !empty(promo.details)){
+					promotion.details = promo.details.markup ;
+				}
+				promotions.push(promotion);
+				break ;
+			}
+		}
+	}catch(e){
+		Logger.error("GetProductDetails: getProductPromotions script error:::"+e.message) ;			
+	}
+	
+	return promotions ;
+}	
+function getImageDetails(variant:Product):Object{
+	
+	var imageDetails = new Object();
+				var variantSwatchImage:MediaFile =  variant.getImage('swatch') ;
+				if(variantSwatchImage != null){	
+					imageDetails.swatchImage = variantSwatchImage.absURL.toString();
+				}
+				
+				var variantHeroImage:MediaFile =  variant.getImage('hero') ;
+				if(variantHeroImage != null){
+					imageDetails.heroImage = variantHeroImage.absURL.toString();
+					imageDetails.heroImageAssetId = getAssetId(variantHeroImage.absURL) ;					
+					imageDetails.imageType = variant.custom.ImageType ;
+				}
+			return imageDetails ;  		
+	
+}
+/*Function for getting variations*/
+function getProductVariations(product:Product,CurrentVariationModel:ProductVariationModel,
+			productVariationModels:Map): Array{
+	var variations = new Array() ;
+	var vProduct:Object = null ;
+	try{		
+		if(product.isVariant() || product.isMaster()){
+			var pvm:ProductVariationModel = null ;			
+			if(CurrentVariationModel != null){
+				pvm = CurrentVariationModel ;
+			}else {
+				pvm = product.variationModel ;
+			}
+			
+			var cleanPVM:ProductVariationModel = product.variant ? product.variationModel.master.variationModel: product.variationModel ;
+			
+			
+			var variants : dw.util.Collection = product.getVariationModel().getMaster().getVariants();		 
+			var productVariationAttributes:Collection = pvm.productVariationAttributes ;
+			var needToLoop:Boolean = false ;
+			
+			var isOnlySize:Boolean = false ;
+			var isOnlyColor:Boolean = false ;
+			var isBothSizeAndColor:Boolean = false ;
+			var va_color:ProductVariationAttribute = null ;
+			var va_size:ProductVariationAttribute = null ;
+			
+			if (productVariationAttributes.length == 1){
+				for each( var va:ProductVariationAttribute in productVariationAttributes ){
+					var vaId:String = va.getAttributeID() ;
+					if (vaId == 'color'){
+						isOnlyColor = true ;
+						va_color = va ;
+					}else if (vaId == 'size'){
+						isOnlySize = true ;
+						va_size = va ;
+					}				
+				}				 				
+			}else if (productVariationAttributes.length == 2){
+				isBothSizeAndColor = true ;
+				for each( var va:ProductVariationAttribute in productVariationAttributes ){
+					var vaId:String = va.getAttributeID() ;
+					if (vaId == 'color'){
+						va_color = va ;
+					}else if (vaId == 'size'){
+						va_size = va ;
+					}				
+				}
+			}
+			
+			if(isBothSizeAndColor){			
+				var vavals_color = null ;	
+				if (!empty(pvm.getAllValues(va_color)) && (null != pvm.getAllValues(va_color))){
+					 vavals_color = pvm.getAllValues(va_color) ;
+				}			
+				var vaId_color:String = va_color.getAttributeID() ;
+				for each(var vv_color in vavals_color){											
+					if(cleanPVM.hasOrderableVariants(va_color, vv_color)){
+						var variantsItr : Iterator = variants.iterator();	
+						var variantsWithGivenValue : Collection = new ArrayList();	
+
+						while(variantsItr.hasNext()){
+							var variant : Product = variantsItr.next();
+							if(variant.custom.color == vv_color.value){									
+								variantsWithGivenValue.add(variant);
+							}   
+						}
+							
+						var vavals_size = null ;
+						var vaId_size:String = va_size.getAttributeID() ;
+						if (!empty(pvm.getAllValues(va_size)) && (null != pvm.getAllValues(va_size))){
+						 	vavals_size = pvm.getAllValues(va_size) ;
+						}	
+					 	
+						for each( var vv_size in vavals_size){		
+							if (cleanPVM.hasOrderableVariants(va_size, vv_size)){						
+								for each(var variant:Product in variantsWithGivenValue ){							
+									if(vv_size.value == variant.custom.size || vv_size.displayValue == variant.custom.size){																				
+										vProduct = getProductVariationAttributes(variant,vaId_color,vaId_size,vv_color,vv_size,true);
+										variations.push(vProduct);
+									}								
+								}
+							}
+						}								
+					}				
+				}
+			}else if(isOnlySize){				
+				var vavals_size = null ;	
+				if (!empty(pvm.getAllValues(va_size)) && (null != pvm.getAllValues(va_size))){
+					 vavals_size = pvm.getAllValues(va_size) ;
+				}					
+				var vaId_size:String = va_size.getAttributeID() ;					
+				for each(var vv_size in vavals_size){	
+					if(cleanPVM.hasOrderableVariants(va_size, vv_size)){
+						var variantsItr : Iterator = variants.iterator();	
+						var variantsWithGivenValue : Collection = new ArrayList();	
+
+						while(variantsItr.hasNext()){
+							var variant : Product = variantsItr.next();
+							if(variant.custom.size == vv_size.value){									
+								variantsWithGivenValue.add(variant);
+								break ;
+							}   
+						}
+						
+						for each(var variant:Product in variantsWithGivenValue ){							
+							if(vv_size.value == variant.custom.size || vv_size.displayValue == variant.custom.size){																				
+								vProduct = getProductVariationAttributes(variant,vaId_size,null,vv_size,null,false);																													
+								variations.push(vProduct);
+							}								
+						}						
+						
+					}						
+				}
+			}else if(isOnlyColor){				
+				var vavals_color = null ;	
+				if (!empty(pvm.getAllValues(va_color)) && (null != pvm.getAllValues(va_color))){
+					 vavals_color = pvm.getAllValues(va_color) ;
+				}					
+				var vaId_color:String = va_color.getAttributeID() ;					
+				for each(var vv_color in vavals_color){	
+					if(cleanPVM.hasOrderableVariants(va_color, vv_color)){
+						var variantsItr : Iterator = variants.iterator();	
+						var variantsWithGivenValue : Collection = new ArrayList();	
+
+						while(variantsItr.hasNext()){
+							var variant : Product = variantsItr.next();
+							if(variant.custom.color == vv_color.value){									
+								variantsWithGivenValue.add(variant);
+								break ;
+							}   
+						}
+						
+						for each(var variant:Product in variantsWithGivenValue ){							
+							if(vv_color.value == variant.custom.color || vv_color.displayValue == variant.custom.color){																				
+									vProduct = getProductVariationAttributes(variant,vaId_color,null,vv_color,null,false);																
+									variations.push(vProduct);
+							}								
+						}	
+					}					
+				}				
+			}			
+						
+		/*
+	
+			var variationAttribute:Object = null ;
+			var productVariationAttributes:Collection = null ;
+			var variantValue = null ; 
+			var imageDetails:Object = null ;
+			var vavals:Collection = null ;
+			var pvv:ProductVariationAttributeValue = null ;
+			var swatchImage :String = null ;
+			var heroImage : String = null ;
+			var variant:Product = null ;
+			
+			for each (variant in pvm.variants){			
+				vProduct = new Object();
+				
+				vProduct.variationProductID = variant.ID ;
+				vProduct.variationProductName= variant.name ;
+				if(variant.longDescription != null){
+					vProduct.variationProductDescription = variant.longDescription.markup ;
+				}
+				vProduct.articleNumber = variant.custom.tNumber;			
+				vProduct.stockStatus  = getStockStatus(variant) ;
+				vProduct.pricing = getProductPricingDetails(variant);				
+				
+				vProduct.imageDetails = getImageDetails(variant);			
+						
+				
+				productVariationAttributes = variant.variationModel.productVariationAttributes ;				
+				vProduct.variationAttributes = new Array() ;
+				
+				for each(var pva:ProductVariationAttribute in productVariationAttributes ){
+					variationAttribute = new Object() ;  
+					
+					variationAttribute.attributeId = pva.attributeID ;
+					var displayValue:String = pvm.getVariationValue(variant, pva).displayValue ;
+					variationAttribute.attributeName = displayValue ;				
+					//var vavals:Collection = pvm.getAllValues(pva) ;
+					variantValue = pvm.getVariationValue(variant, pva).value;					
+					variationAttribute.attributeValue = displayValue ;
+					/*
+					if(pva.ID == "color"){
+						imageDetails = new Object() ;
+						vavals = pvm.getAllValues(pva) ;
+						for each (pvv in vavals){
+							if(pvv != null ){						
+								if(variantValue == pvv.value){	
+									if(pvv.getImage('swatch') != null){						
+										swatchImage = pvv.getImage('swatch').absURL.toString();
+										imageDetails.swatchImage = swatchImage ;
+									}
+									if(pvv.getImage('hero') != null){
+										heroImage = pvv.getImage('hero').absURL.toString() ;
+										imageDetails.heroImage = heroImage ;
+										imageDetails.heroImageAssetId = getAssetId(pvv.getImage('hero').absURL) ;
+									}
+									imageDetails.imageType = variant.custom.ImageType ; 	
+								}
+							}						
+						}					
+						variationAttribute.imageDetails = imageDetails ;					
+					}*/
+				/*	vProduct.variationAttributes.push(variationAttribute);				
+				}		
+				variations.push(vProduct);
+			} */
+			
+		}else {
+				vProduct = new Object();
+				vProduct.stockStatus  = getStockStatus(product)	;
+				vProduct.imageDetails = getImageDetails(product);				
+				variations.push(vProduct);
+		}
+
+	}catch(e){
+		throw new Error("Error while product variation details in CreateProductDetailsJSON.getProductVariations "+e.message);	
+	}
+	return variations ;
+}
+
+function getProductVariationAttributes(variant:Product,vaId:String,
+		vaId1:String,vv:Object,vv1:Object,includeTwoVariationAttributes:Boolean):Object{
+	
+	var vProduct = new Object();				
+	vProduct.variationProductID = variant.ID ;
+	vProduct.variationProductName= variant.name ;
+	if(variant.longDescription != null){
+		vProduct.variationProductDescription = variant.longDescription.markup ;
+	}
+	vProduct.articleNumber = variant.custom.tNumber;			
+	vProduct.stockStatus  = getStockStatus(variant) ;
+	vProduct.pricing = getProductPricingDetails(variant);
+	vProduct.imageDetails = getImageDetails(variant);	
+		
+	var variationAttributes = new Array() ;											
+	
+	var variationAttribute1 = new Object() ;
+	variationAttribute1.attributeId = vaId ;													
+	variationAttribute1.attributeName = vv.displayValue ;
+	variationAttribute1.attributeValue = vv.displayValue ;
+	variationAttributes.push(variationAttribute1);
+	
+	if(includeTwoVariationAttributes){									
+		var variationAttribute2 = new Object() ;  					
+		variationAttribute2.attributeId = vaId1 ;													
+		variationAttribute2.attributeName = vv1.displayValue ;
+		variationAttribute2.attributeValue = vv1.displayValue ;
+		variationAttributes.push(variationAttribute2);	
+	}	
+	
+	vProduct.variationAttributes = variationAttributes ;													
+	return 	vProduct ;													
+}
+/*Function for getting shipping details*/
+function getProductShippingDetails(product:Product): Array{
+	
+	var shippingInformation  = new Array() ;
+	try {
+		var prodShipModel : ProductShippingModel = ShippingMgr.getProductShippingModel(product);
+		var shippingMethods : ArrayList = prodShipModel.applicableShippingMethods;
+		var shipping : Object = null ;	
+		var shippingMethod:ShippingMethod = null ;
+		
+		for each(shippingMethod in shippingMethods){   
+			shipping = new Object() ;
+			shipping.ID = shippingMethod.ID ;
+			if(shippingMethod.defaultMethod){		 	
+			 	shipping.shippingMethod = shippingMethod.displayName ;  // "regularShipping";	 
+			}else {
+				shipping.shippingMethod = shippingMethod.displayName;//"expressShipping"; // Needs to be from resouce manager
+							
+		     }
+			
+		     shipping.leadTime = shippingMethod.custom.deliveryLeadTime.displayValue ;
+		     shippingInformation.push(shipping) ;
+		}
+	}catch(e){
+		throw new Error("Error while getting pricing details in CreateProductDetailsJSON.getProductShippingDetails "+e.message);	
+	}
+		
+	return shippingInformation ;
+}	
+
+function getAddtionalDetails(product:Product): Array{
+	var additionalProductDetails = new Array() ;	
+	try{
+		var details = new Object();
+		details.highlights = null ;
+		details.composition = null  ;
+		details.careInstructions = null ;
+		
+		/*INT-493 - PIM change bullet points*/
+		/*
+		var bulletDetails:Collection = product.custom.bullet1 ;		
+		if(bulletDetails.length > 0){
+			var str:String = new String() ;
+			var bullet = null ;
+			for each(bullet in bulletDetails){
+				str = str.concat(bullet).concat("|") ;		
+					 
+			} 
+			details.highlights = str;	
+		}*/
+		
+		/*New Product details*/
+		var bulletDetails:String = product.custom.productDetailsBulletPoints;
+		if(bulletDetails.length > 0){
+			var str:String = new String() ;
+			str = getBulletPointsForKiosks(product);
+		}
+		details.highlights = str;	
+		
+		
+		var comStr:String = new String() ;
+		var compositionList:Set = product.custom.composition ;
+		if(compositionList.length > 0) {
+			var composition = null ;
+			for each(composition in compositionList){
+				comStr = comStr.concat(composition).concat(" ") ;		
+				 
+			}
+			details.composition = comStr ;
+		} 
+		
+		if(product.custom.careInstructions != null && !empty(product.custom.careInstructions.markup)){	
+			details.careInstructions = product.custom.careInstructions.markup ;
+		}
+		additionalProductDetails.push(details);
+	}catch(e){
+		throw new Error("Error while getting pricing details in CreateProductDetailsJSON.getAddtionalDetails "+e.message);	
+	}	
+	return additionalProductDetails ;
+}
+
+/* function to get asset id from image url */
+function getAssetId(imageUrl:dw.web.URL):String{
+   var assetID :String = null ;
+   if (null != imageUrl) {
+			var imageURLSplit : Array = imageUrl.toString().split("/");
+			assetID = imageURLSplit[(imageURLSplit.length)-1];
+		 }
+   return assetID;
+}
+
+
+/*Function for getting stock status*/
+function getStockStatus(variant:Product):Object{
+	var stockStatus = new Object() ;
+	try{
+		var avm:ProductAvailabilityModel = variant.availabilityModel ;
+		stockStatus.avStatus = avm.availabilityStatus ;
+		stockStatus.inStock = avm.inStock ;	
+		if(avm.inventoryRecord != null ){
+			stockStatus.ats = avm.inventoryRecord.ATS.value ;
+		}
+	}catch(e){
+		throw new Error("Error while getting pricing details in CreateProductDetailsJSON.getStockStatus "+e.message);
+	}
+	
+	return stockStatus ;	
+}
+
+function getSizeChartContentID(product:Product):String{
+	
+	var sizeChartContentId:String = null ;			
+	var category :Category = product.primaryCategory;
+	// get category from product master if not set at variant
+	if( category == null && product.variant ){
+		category = product.variationModel.master.primaryCategory ;
+	}
+	
+	while (category != null && sizeChartContentId == null) {
+		if (('sizeChartID' in category.custom) && !empty(category.custom.sizeChartID)) {
+			sizeChartContentId = category.custom.sizeChartID ;
+		}else {
+			category = category.parent;
+		}
+	}	
+			
+	return sizeChartContentId ;						
+		
+}

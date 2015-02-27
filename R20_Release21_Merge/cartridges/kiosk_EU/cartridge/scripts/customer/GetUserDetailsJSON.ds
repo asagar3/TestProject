@@ -1,0 +1,99 @@
+/**
+* 
+*
+*   @input PaymentInstruments : dw.util.Collection
+*   @input CurrentCustomer : dw.customer.Customer
+*   @output customObject : Object
+*
+*/
+importPackage( dw.system );
+importPackage(dw.util);
+importPackage(dw.customer);
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var currentCustomer = args.CurrentCustomer ;
+	var paymentInstruments : dw.util.Collection = args.PaymentInstruments ;
+	var customerDetails  = new Object();
+	customerDetails.personalDetails =null;
+	var personalDetails = new Object();
+	var cal : Calendar = new Calendar();
+	cal.setTime(currentCustomer.profile.birthday);
+	customerDetails.addressDetails = new Array();
+	customerDetails.cardDetails = new Array();
+	personalDetails.title =currentCustomer.profile.title;
+	personalDetails.firstName =currentCustomer.profile.firstName;
+	personalDetails.surName =currentCustomer.profile.lastName;
+	if(currentCustomer.profile.birthday !=null){
+	personalDetails.birthday =StringUtils.formatCalendar(cal);
+	}
+	personalDetails.email =currentCustomer.profile.email;
+	
+	if(empty(currentCustomer.profile.custom.isVirtualBasket)){
+		personalDetails.isVirtualBasket = "false";//As a part of eBoutique requirement ID VB01
+	}else{  
+		personalDetails.isVirtualBasket = currentCustomer.profile.custom.isVirtualBasket.toString();
+	}
+	
+	customerDetails.personalDetails = personalDetails;
+	
+
+	var addressObj;
+	for each(var address in currentCustomer.profile.addressBook.addresses){	
+		    addressObj =new Object();//
+			
+			//addressObj.addressID=address.ID;
+			addressObj.title=address.title;
+			addressObj.firstName=address.firstName;
+			addressObj.lastName=address.lastName;
+			
+			addressObj.address1=address.address1;
+			//addressObj.streetName=address.custom.streetName;
+			addressObj.address2=address.address2;
+			addressObj.address3=address.custom.address3;
+			addressObj.city=address.city;
+			addressObj.county= address.stateCode;
+			addressObj.postalCode=address.postalCode;
+			addressObj.countryCode=address.countryCode.value;
+			addressObj.phone=address.phone;
+			addressObj.alternateContactNumber=address.custom.alternateContactNumber;
+			
+			//addressObj.residence=address.custom.residence;
+			//addressObj.postBox=address.postBox;
+			//addressObj.postalCode=address.postalCode;
+			
+				
+			
+			if(currentCustomer.profile.addressBook.preferredAddress.ID == address.ID){
+				addressObj.isPreferredAddress = "true";
+			}else{
+				addressObj.isPreferredAddress = "false";
+			}
+			customerDetails.addressDetails.push(addressObj);
+	}
+		 var paymentCardObj;
+		//if(paymentDetails.size() > 0){
+	for each(var paymentCard in paymentInstruments){
+			 paymentCardObj = new Object();
+		 	paymentCardObj.paymentCardID=paymentCard.UUID;
+		 	paymentCardObj.creditCardType=paymentCard.creditCardType;
+			paymentCardObj.creditCardExpirationMonth=paymentCard.creditCardExpirationMonth;
+			paymentCardObj.creditCardExpirationYear=paymentCard.creditCardExpirationYear;
+			if(paymentCard.creditCardType.equalsIgnoreCase('amex')){
+			paymentCardObj.creditCardValidFromMonth=paymentCard.creditCardValidFromMonth;
+			paymentCardObj.creditCardValidFromYear=paymentCard.creditCardValidFromYear;
+			}
+			paymentCardObj.creditCardHolder=paymentCard.creditCardHolder;
+			paymentCardObj.creditCardIssueNumber=paymentCard.creditCardIssueNumber;
+			paymentCardObj.creditCardNumber=paymentCard.creditCardNumber;
+			
+			paymentCardObj.maskedCreditCardNumber=paymentCard.maskedCreditCardNumber;
+			paymentCardObj.paymentMethod=paymentCard.paymentMethod;
+			
+		
+		customerDetails.cardDetails.push(paymentCardObj);
+	}
+	 args.customObject = customerDetails ;
+   return PIPELET_NEXT;
+}
+ 

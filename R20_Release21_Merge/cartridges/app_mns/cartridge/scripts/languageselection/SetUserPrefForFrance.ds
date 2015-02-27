@@ -1,0 +1,138 @@
+/**
+ * This script will be used to create/update cookie & to get the browser settings.
+ *
+ * 
+ * @input localeStr : String
+ * @input queryString : String
+ * @output redirectURL : String
+ * @output LocaleID : String Locale to set 
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.web );
+importScript('languageselection/CookieUtils.ds');
+
+//Map, which contains all the valid locales and corresponding flag to display/non-display the overlay  
+var validLocalesMap : HashMap = new HashMap();
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var localeStr : String = pdict.localeStr;
+	var defaultFRLocale : String = getDefaultLocaleForFR();
+	
+	var previewRequest : boolean = false ;
+	var requestPath:String = null ;
+	var pipelineName:String = null ;
+	if(session != null && session.clickStream.last != null){
+		requestPath = session.clickStream.last.path ;	
+		pipelineName = session.clickStream.last.pipelineName ;
+		if (requestPath.indexOf("default/Page-Show") > -1 || requestPath.indexOf("default/Search-Show")>-1 || requestPath.indexOf("default/Product-Show") > -1 )
+		{
+			previewRequest = true ;
+		} 
+	}
+	//If Request has locale available
+	if(!empty(localeStr)){
+		//Retrieving the cookie from Request
+		var localeCookie : Cookie = request.httpCookies['LocaleCookie_FR'];		
+		
+		//If cookie does not exist, fall back to get the browser settings
+		if( empty(localeCookie) ) {
+						
+			//createOrUpdateCookie(defaultFRLocale);
+			//setSessionVar(defaultFRLocale);
+			
+			
+			pdict.redirectURL = defaultFRLocale;
+			//This is required to create customized Home URL when customer enters the url in following format
+			//"http://www.marksandspencer.eu/on/demandware.store/Sites-EUSite-Site/de_DE/" or "http://www.marksandspencer.eu/on/demandware.store/Sites-EUSite-Site/"
+					
+			if (request.httpHost.indexOf("store.mns.demandware") < 0 ){
+				
+				if(!empty(pdict.queryString)){ 
+					var localeToReplace : String = "/" + defaultFRLocale + "/";
+					var localeReplaceBy : String = "/" + localeStr + "/";
+					pdict.redirectURL = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy)+"/Default-Start?"+pdict.queryString;
+				}else {
+				
+					pdict.redirectURL = defaultFRLocale;
+				}
+				//pdict.redirectURL = defaultFRLocale;
+				
+			} else if(previewRequest ){
+				var localeToReplace : String = "/" + defaultFRLocale + "/";
+				var localeReplaceBy : String = "/" + localeStr + "/";				
+				var url : String = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy)+"/"+pipelineName+"?"+pdict.queryString;
+				pdict.redirectURL  = url ; 	
+			}else {				
+				var localeToReplace : String = "/" + defaultFRLocale + "/";
+				var localeReplaceBy : String = "/" + localeStr + "/";
+				var url:String = null ; 
+				if(!empty(pdict.queryString)){					
+					url = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy)+"/Default-Start?"+pdict.queryString;
+				}else{
+					url = updateURLWithENLocale(request.httpPath,localeToReplace,localeReplaceBy);
+				}
+				
+				pdict.redirectURL  = url ; 			
+			}			
+		
+		//else read the cookie, set the session attribute & redirect to the specified page
+		} else{
+			var localeInCookie : String = localeCookie.value;
+			//set attribute in cookie
+			//setSessionVar(localeInCookie);
+			//update URL
+			if (request.httpPath.indexOf(localeStr) < 0){
+				if (request.httpHost.indexOf("demandware") > -1) {					
+					var localeToReplace : String = "/" + localeInCookie + "/";
+					var localeReplaceBy : String = "/" + localeStr + "/";
+					pdict.redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy);			
+				} else {
+					pdict.redirectURL = localeInCookie;
+				}
+			} else if(previewRequest ){
+				var localeToReplace : String = "/" + localeInCookie + "/";
+				var localeReplaceBy : String = "/" + localeStr + "/";				
+				url =
+				pdict.redirectURL  = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+"/"+pipelineName+"?"+pdict.queryString; 	 
+			
+			} else {
+				if (request.httpHost.indexOf("demandware") < 0) {
+					
+					if(!empty(pdict.queryString)){ 
+						var localeToReplace : String = "/" + localeInCookie + "/";
+						var localeReplaceBy : String = "/" + localeStr + "/";
+						pdict.redirectURL = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+"/Default-Start?"+pdict.queryString;
+					}else {				
+						pdict.redirectURL = localeInCookie;
+					}
+				
+					//pdict.redirectURL = localeInCookie;
+				} else {
+					var localeToReplace : String = "/" + localeInCookie + "/";
+					var localeReplaceBy : String = "/" + localeStr + "/";
+					
+					var url:String = null ; 
+					if(!empty(pdict.queryString)){
+						url = updateURL(request.httpPath,localeToReplace,localeReplaceBy)+"/Default-Start?"+pdict.queryString;
+					}else{	
+						url = updateURL(request.httpPath,localeToReplace,localeReplaceBy);
+					}					
+					pdict.redirectURL = url ;				
+								
+				}
+			}					
+		}
+	}
+	if (pdict.redirectURL.indexOf("Util-URLWithLocale") > -1){
+		pdict.redirectURL = pdict.redirectURL.replace("/Util-URLWithLocale", "");
+	}	
+	/*if (request.httpQueryString != null) {
+		pdict.redirectURL = pdict.redirectURL + "?" + request.httpQueryString;
+	}*/
+
+	//pdict.DisplayOverlay = displayOverLay;	
+	pdict.LocaleID = defaultFRLocale;
+    return PIPELET_NEXT;
+}

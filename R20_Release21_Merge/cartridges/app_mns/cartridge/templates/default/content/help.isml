@@ -1,0 +1,238 @@
+<isdecorate template="content/pt_helppage">
+<isinclude template="util/modules"/>
+<div class="helpmainContentWrapper" id="hp-maincolumn">
+
+</div>
+<div class="rightcol" id="hp-rightcolumn">
+	<iscontentasset aid="global-help-rightsection"/>
+</div>
+<script>
+function loadMainColumn(sectionId,questionId,loadonready) {
+	var lhnfaqId = "@"+sectionId;
+	if(sectionId != null && sectionId != "") {
+		var submitURL = "${URLUtils.url('Page-Include')}";
+		jQuery.ajax({
+		  	type: "POST",
+		   	url: submitURL,
+		   	data: {"cid": sectionId},
+		   	dataType: 'html',
+		  	success: function(data){	
+	   		   	jQuery("#hp-maincolumn").empty().html(data);	
+	   		   	jQuery(".faqsection").attr("id",sectionId);  
+	   		   	jQuery(".faqsection div.helpAccordion").each(function(index, element){
+						var divIDString = sectionId + "-" + oThis.doubleDigit(index+1);
+						$(this).attr("id", divIDString );
+						$(this).attr("name", divIDString );
+				});
+	   		   if(questionId != null && questionId != ""){		   		   
+	   		   		showAnswer(questionId);
+	   		   }
+	   		   if(loadonready) {
+		   		   if(questionId != null && questionId != "") {
+	   		   		selectLeftHandNavigation(questionId);
+		   		   }else {
+		   			selectLeftHandNavigation(lhnfaqId);
+		   		   }
+		   		   
+	   		   }
+		   	},
+		   	failure: function(data) {
+		   		alert("${Resource.msg('global.serverconnection','locale',null)}");		
+		   	}
+		});
+	}
+}
+function showAnswer(questionId) {
+	 $(questionId + " div").slideDown();
+	 $(questionId).find("span").removeClass("plus").addClass("minus").html("minus");
+	 $(questionId).addClass("showContent");
+	 window.location.href=questionId;	
+}
+function selectLeftHandNavigation(faqId){
+	if (typeof faqId == "string" ){						
+
+		// need to target the left hand nav specifically
+		var lhnId = faqId.replace("faq", "lhn");
+		
+		// left hand nav ids have a maximum character length of 10
+		
+		lhnId = lhnId.replace("@" , "#");
+		
+		var sectionIDArray = lhnId.split("-");
+		var splitcategoryId = sectionIDArray[0];
+		splitcategoryId = splitcategoryId + "-" +  sectionIDArray[1];
+		var splitsubCategoryId = sectionIDArray[2];
+		var splitfaqId = sectionIDArray[3];
+		
+		_this = splitcategoryId;
+	
+	} else if (typeof faqId == "object" ){			
+		_this = faqId.currentTarget;			
+	}
+		
+	if ($(_this).parent().hasClass("active")){
+		$(_this).parent().removeClass("active");
+		$(_this).parent().siblings().removeClass("active");	
+		
+		// clear on list element
+		$(_this).removeClass("open").addClass("closed");
+		$(_this).next(".content").slideUp();
+		$(_this).next().find("li").removeClass("selected");
+		
+	}else {
+	
+	// sort out open and close methods across all panels	
+	// reset all other panels	
+		$(_this).parent().siblings().each(function(){		
+			if ($(this).hasClass("active") && $(this).attr("id") != "div-00"){
+				$(this).find(".content").slideUp();
+				$(this).find("li").removeClass("selected");
+				$(this).removeClass("active");
+				$(this).find("h3").removeClass("open").addClass("closed");
+			}
+		});
+		if(faqId != "@faq-00-00") {
+			$(_this).parent().addClass("active");	
+			$(_this).next(".content").slideDown();
+			$(_this).addClass("open").removeClass("closed");	
+		}	
+	};
+		
+	
+	
+	// panel has now been opened now open links if applicable
+	
+	var lhnLinkID = splitcategoryId + "-" + splitsubCategoryId;
+	var actualFaqID = splitcategoryId + "-" + splitsubCategoryId  + "-" + splitfaqId;
+
+
+	if (lhnLinkID.length == 7){		
+		// option for cat only
+	}
+	
+	if (lhnLinkID.length == 10){
+		// option for cat and sub cat only	
+		$(lhnLinkID).parent().addClass("selected");
+	}
+	
+	if (lhnLinkID.length == 13){
+		// option for cat, sub cat and link			
+	}
+	
+};
+
+
+jQuery(document).ready(function() {
+	var sectionId = "faq-00-00";
+	if(null != "${pdict.CurrentHttpParameterMap.secId}" && "${pdict.CurrentHttpParameterMap.secId}" != "" && "${pdict.CurrentHttpParameterMap.secId}" != "null"){
+		sectionId = "${pdict.CurrentHttpParameterMap.secId}";
+	} else if (null != "${pdict.sectionID}" && "${pdict.sectionID}" != "" && "${pdict.sectionID}" != "null"){
+		sectionId = "${pdict.sectionID}";
+	}
+	var questionId = "${pdict.CurrentHttpParameterMap.quesId}";
+	loadMainColumn(sectionId,questionId,true);
+	
+	$(".navgroup li a").click(function(){
+		var attrHref = $(this).attr("href");
+		var attrCid = attrHref.substring(1, attrHref.length);
+		loadMainColumn(attrCid,null,false);
+	});
+
+	$("#homepage").click(function(){
+		var attrHref = $(this).attr("href");
+		var attrCid = attrHref.substring(1, attrHref.length);
+		loadMainColumn(attrCid,null,true);
+	});
+	
+	$(".dashNav a").live("click",function(){
+		var attrHref = $(this).attr("href");
+		var hashindex = attrHref.lastIndexOf('#');
+		loadMainColumn(attrHref.substring(hashindex+1),null,false);
+		selectLeftHandNavigation(attrHref);
+	});
+	
+	$(".sideFaqs li a").click(function(){
+		var attrHref = $(this).attr("href");
+		var attrCid = attrHref.substring(1, attrHref.length-3);		
+		var questionId = attrHref.substring(1, attrHref.length);
+		loadMainColumn(attrCid,attrHref,false);		 
+	});
+
+	$(".sizelink").live("click",function(e){
+		// add size chart dialog container div if its not added yet
+		// only added once
+		if (jQuery("#sizeChartDialog").length == 0) {
+			jQuery("<div/>").attr("id", "sizeChartDialog").appendTo(document.body);
+		}
+		var sizeChartTitle = "${StringUtils.format(Resource.msg('product.sizecharttitle','product',null))}";
+		app.createDialog({id: 'sizeChartDialog', options: {
+	    	height: 530,
+	    	width: 660,
+	    	zIndex: 100005, /*QC 327 */
+	    	title: sizeChartTitle
+		}});
+		
+		jQuery('#sizeChartDialog').dialog('open');
+		jQuery('.ui-dialog-content .contentasset').html(""); // Refresh the earlier content
+		// make the server call to load the size chart html
+		jQuery("#sizeChartDialog").load(this.href);
+		
+		return false;
+	});
+
+	$(".contactusLink").live("click",function(e){
+		// add contactus dialog container div if its not added yet
+		// only added once
+		if (jQuery("#contactUsDialog").length == 0) {
+			jQuery("<div/>").attr("id", "contactUsDialog").appendTo(document.body);
+		}else {
+			jQuery("#contactUsDialog").empty();
+		}
+		var contactUsTitle = "${StringUtils.format(Resource.msg('global.contactus','locale',null))}";
+		app.createDialog({id: 'contactUsDialog', options: {
+	    	height: 610,
+	    	width: 560,
+	    	zIndex: 100005, 
+	    	title: contactUsTitle
+		}});
+		jQuery("#contactUsDialog").load(this.href); 
+		jQuery('#contactUsDialog').dialog('option', 'title', contactUsTitle);	
+		jQuery('#contactUsDialog').dialog('open');
+		//jQuery('.ui-dialog-content .contentasset').html(""); // Refresh the earlier content
+		// make the server call to load the contactus form
+		jQuery("#contactUsDialog").load(this.href);
+		
+		return false;
+	});
+
+	//CR 3072	
+		if(${pdict.taxClass}){
+		$('.contactusLink').bind('click', function() {
+			if (jQuery("#contactUsDialog").length == 0) {
+				jQuery("<div/>").attr("id", "contactUsDialog").appendTo(document.body);
+			}else {
+				jQuery("#contactUsDialog").empty();
+			}
+			var contactUsTitle = "${StringUtils.format(Resource.msg('global.contactus','locale',null))}";
+			app.createDialog({id: 'contactUsDialog', options: {
+		    	height: 610,
+		    	width: 540,
+		    	zIndex: 100005, 
+		    	title: contactUsTitle
+			}});
+			jQuery("#contactUsDialog").load(this.href); 
+			jQuery('#contactUsDialog').dialog('option', 'title', contactUsTitle);	
+			jQuery('#contactUsDialog').dialog('open');
+			//jQuery('.ui-dialog-content .contentasset').html(""); // Refresh the earlier content
+			// make the server call to load the contactus form
+			jQuery("#contactUsDialog").load(this.href);
+			
+			return false;
+	    });
+		$('.contactusLink').trigger('click');
+	}
+	
+	
+});
+</script>
+</isdecorate>

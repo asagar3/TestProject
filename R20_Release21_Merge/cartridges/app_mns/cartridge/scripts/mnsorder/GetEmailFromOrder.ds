@@ -1,0 +1,176 @@
+/**
+* Demandware Script File
+* To Generate unique emails from orders in BM depending on the date and time provided :
+* @author-Chetan Sood
+
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* @output errorMessage : String   
+*
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.io );
+importScript('int_cybersource:cybersource/Date&TimeUtility.ds');
+
+//initialize variables of start and enddate
+var startDateAndTime : Date = null;
+var endDateAndTime : Date = null;
+
+//Get start date and time from Custom Preferences
+ function getStartDateAndTime() : Date 
+ {
+ 	var BM_Variable1 : String = Site.getCurrent().getCustomPreferenceValue("orderEmailStartTime"); 	
+ 	if (BM_Variable1 !=null && !empty(BM_Variable1)){ //get Start Date and Time from BM Variable
+ 		startDateAndTime = new Date (BM_Variable1);
+ 		return startDateAndTime;
+ 	} else{		
+ 		 //if start date is not available in BM variable	
+ 		Logger.error("Start date not available");
+ 		
+ 	}
+ }
+ 
+//Get end date and time from Custom Preferences
+ function getEndDateAndTime() : Date 
+ {
+ 	var BM_Variable2 : String = Site.getCurrent().getCustomPreferenceValue("orderEmailEndTime");
+ 	if (BM_Variable2 !=null && !empty(BM_Variable2)){ //get Start Date and Time from BM Variable
+ 		endDateAndTime = new Date (BM_Variable2);
+ 		return endDateAndTime;
+ 	} else{		
+ 		 //if start date is not available in BM variable	
+ 		Logger.error("End date not available");
+ 	}	
+ }
+
+
+
+//Get emails by executing query 
+function getEmailsInSet(startDateAndTime : Date , endDateAndTime : Date) : HashSet
+{
+	
+		if((startDateAndTime!=null)&&(endDateAndTime!=null))
+		{
+			var newQuery : String = "creationDate >= {0} AND creationDate <= {1}";
+			var orderIterator : Iterator = OrderMgr.queryOrders(newQuery,null,startDateAndTime,endDateAndTime);
+		}
+		else if((startDateAndTime==null)&&(endDateAndTime!=null))
+		{
+			var newQuery : String = "creationDate <= {0}";
+			var orderIterator : Iterator = OrderMgr.queryOrders(newQuery,null,endDateAndTime);
+		}
+		else if((startDateAndTime!=null)&&(endDateAndTime==null))
+		{
+			var newQuery : String = "creationDate >= {0}";
+			var orderIterator : Iterator = OrderMgr.queryOrders(newQuery,null,startDateAndTime);
+			
+		}
+		else
+		{
+			var newQuery : String = "customerEmail LIKE {0}";
+			var orderIterator : Iterator = OrderMgr.queryOrders(newQuery,null,"*@*");
+		}
+
+		//create hashset to add unique email IDs 
+		var emailSet: HashSet=new HashSet();
+		while(orderIterator.hasNext())
+		{
+			//add emails to hashset
+			var order: Order=orderIterator.next();
+			emailSet.add(order.customerEmail);
+		}
+		return emailSet;
+}
+
+function createFolder( folder : String ) : boolean
+{
+	var localFolder : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + folder );
+	if ( localFolder.exists() )
+	{
+		// nothing to do
+		return true;
+	}
+	// create folder	
+	var result : boolean = localFolder.mkdirs();
+	if ( !result )
+	{
+		Logger.getLogger("GetEmailFromOrder").error( "GetEmailFromOrder::: Error creating folder " + localFolder.fullPath );
+		return false;
+	}
+	return true;
+}
+
+
+//write the emails to file at impex location
+function writeToFile(emailSet : HashSet)
+{
+		//get current time to add timestamp on the file name 
+		
+		var currentDateAndTime : Date = new Date(); 
+		var startCalender : dw.util.Calendar = new Calendar(currentDateAndTime);
+		var timestamp_date : String = getDate(startCalender);
+		var timestamp_time : String = getTime(startCalender);
+		var folderString : String = "CustEmailAddress";
+		//var s : RegExp= new RegExp("/[:]/g");
+		timestamp_time=timestamp_time.replace(/[:]/g,"");
+	 	if ( !createFolder(folderString))
+		{
+		Logger.error("GetEmailFromOrder::Error creating folder");
+		}
+	 	
+	 	var orgFilePath = File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR+"CustEmailAddress"+File.SEPARATOR;
+	 	
+	 	
+	 	var newFileName =  "emailOrder_"+timestamp_date+"_"+timestamp_time+"_"+Site.getCurrent().name+".txt";
+	 	
+	 	var fileOut : File = new File(orgFilePath + newFileName);
+		if (!fileOut.exists()){
+			fileOut.createNewFile();
+		}
+		
+		var writer : FileWriter = new FileWriter(fileOut);	
+			
+		writer.writeLine("Start Date and Time::");
+		writer.writeLine(startDateAndTime);
+		writer.writeLine("\r\n");
+		writer.writeLine("End Date and Time::");
+		writer.writeLine(endDateAndTime);
+		writer.writeLine("\r\n");
+		
+		var orderIteratorEmail : Iterator = emailSet.iterator();
+		while(orderIteratorEmail.hasNext())
+		{
+			// write to file
+			var check : String=orderIteratorEmail.next();
+			writer.writeLine(check);
+			writer.writeLine("\r\n");
+		}
+		writer.close();	
+}
+
+
+
+function execute( args : PipelineDictionary ) : Number
+{
+ 	Logger.error("GetEmailFromOrder::Start");
+	try
+	 {
+		var emailSet: HashSet=new HashSet();
+	 	
+		startDateAndTime=getStartDateAndTime();
+		endDateAndTime=getEndDateAndTime();
+
+		emailSet=getEmailsInSet(startDateAndTime, endDateAndTime);
+		writeToFile(emailSet);
+		
+		Logger.error("GetEmailFromOrder::End");
+	 }
+	 catch(e){
+	 		args.errorMessage =String(e);
+	 	 	Logger.error("GetEmailFromOrder::Fail:"+args.errorMessage);
+	 	 	return PIPELET_ERROR;
+	 }
+ 	return PIPELET_NEXT
+}

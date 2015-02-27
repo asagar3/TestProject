@@ -1,0 +1,10 @@
+<iscomment>Loop through the payment instruments and check for Klarna invoice</iscomment>
+<isset name="isKlarnaInvoice" value="${false}" scope="page" />
+<isloop items="${LineItemCtnr.paymentInstruments}" var="paymentInstr" status="loopstate">
+<isif condition="${'KLARNA'.equals(paymentInstr.paymentMethod)}">
+	<isset name="isKlarnaInvoice" value="${true}" scope="page" />
+	<isset name="KlarnaInvoiceFee" value="${paymentInstr.custom["KlarnaInvoiceFee"]}" scope="page" />
+	<isset name="KlarnaInvoiceFeeTax" value="${paymentInstr.custom["KlarnaInvoiceFeeTaxAmount"]}" scope="page" />
+	<isset name="KlarnaCurrencyCode" value="${LineItemCtnr.currencyCode}" scope="page" />
+</isif>		
+</isloop>

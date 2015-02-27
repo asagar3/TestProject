@@ -1,0 +1,82 @@
+/**
+* This script communicates with Klarna and fetches all available Pclasses
+* for the merchant.
+*
+*
+*	@output KlarnaError : String An error message
+*
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+importPackage( dw.util );
+importScript ( "int_klarna:libKlarnaAPI.ds" );
+importScript ( "int_klarna:libKlarnaCalc.ds" );
+
+//var Logger : Log = dw.system.Logger.getLogger("klarna", "fetchpclasses");
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var klarna = new Klarna();
+	
+	try {
+
+		// Before we try to update the pclasses
+		// we have to remove the old ones
+		removeOldPclasses();
+		// Get the country specific settings
+		// for each country
+		var countrySettings : Map = getAllCountryDetails();
+		// Loop through the settings and fetch the Pclasses
+		// for each country and store them as custom objects
+		for each( var countryData : List in countrySettings ) {
+			storePclasses(klarna.fetch_pclasses(countryData[0], countryData[1], countryData[2]));
+		}
+	} catch(e) {
+		var error : Error = e;
+		args.KlarnaError = error.message;
+		Logger.error(error.message);
+		
+		return PIPELET_ERROR;
+	}
+	
+   return PIPELET_NEXT;
+}
+
+function storePclasses(pclasses : Array) {
+	var pclassData : Map = new HashMap();
+	
+	try {
+		for each (var pclass : List in pclasses ) {
+			var c : CustomObject = CustomObjectMgr.createCustomObject("Pclasses", Number(pclass[0]));
+			var ca : CustomAttributes = c.getCustom();
+			ca["description"] = pclass[1];
+			ca["months"] = Number(pclass[2]);
+			ca["startFee"] = Number(pclass[3]/100);
+			ca["invoiceFee"] = Number(pclass[4]/100);
+			ca["interest"] = Number(pclass[5]/100);
+			ca["minAmount"] = Number(pclass[6]/100);
+			ca["country"] = Number(pclass[7]);
+			ca["type"] = Number(pclass[8]);
+		}
+
+	} catch(e) {
+		Logger.error("Error:" + e);
+		throw e;
+	}
+	pclassData.clear();
+}
+
+// Remove all the current pclasses for this site
+function removeOldPclasses() {
+	try
+	{
+		var pclasses : SeekableIterator = CustomObjectMgr.getAllCustomObjects("Pclasses");
+		
+		while(pclasses.hasNext()) {
+			CustomObjectMgr.remove(pclasses.next());
+		}
+	} catch(e) {
+		trace("Error");
+		Logger.error("Error:" + e);
+	}
+}

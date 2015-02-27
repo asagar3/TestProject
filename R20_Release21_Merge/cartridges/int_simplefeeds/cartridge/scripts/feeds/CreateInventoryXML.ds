@@ -1,0 +1,171 @@
+/**
+<inventory xmlns="http://www.demandware.com/xml/impex/inventory/2007-05-31">
+<inventory-list>
+<header list-id="inventory">
+<default-instock>false</default-instock>
+</header>
+<records>
+<record product-id="000000022079741002">
+<allocation>0.0</allocation>
+</record>
+</records>
+</inventory-list>
+</inventory>
+
+
+ * @input ProductsCSV : String
+ * @input inventoryXML : String
+ 
+ */
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	// read parameters
+	//var productsCsv : String = args.CategoriesCSV;
+	var productsCsv : String = args.ProductsCSV;
+	var inventoryXml : String = args.inventoryXML;
+	var prodCount :Number = 0;
+	// check parameters
+	if ( empty( productsCsv ))
+	{
+		Logger.error("Parameter productsCsv empty");
+		return PIPELET_ERROR;
+	}
+
+	if ( empty( inventoryXml ))
+	{
+		Logger.error("inventoryXml");
+		return PIPELET_ERROR;
+	}
+
+	// open catalog file
+	var inventoryFile : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + inventoryXml );
+	
+	Logger.debug( "Writing inventory file {0}", inventoryFile.fullPath );
+	
+	var inventoryWriter : XMLStreamWriter = new XMLIndentingStreamWriter( new FileWriter( inventoryFile, "UTF-8" ) );
+	
+	var productSetIDList : Set = new HashSet();
+	try{
+		
+		// write XML document and root element
+		inventoryWriter.writeStartDocument( "UTF-8", "1.0" );
+		inventoryWriter.writeStartElement( "inventory" );
+		inventoryWriter.writeDefaultNamespace("http://www.demandware.com/xml/impex/inventory/2007-05-31");
+			inventoryWriter.writeStartElement( "inventory-list" );
+		
+				inventoryWriter.writeStartElement( "header" );
+				inventoryWriter.writeAttribute("list-id","inventory");
+					inventoryWriter.writeStartElement( "default-instock" );
+					inventoryWriter.writeCharacters("false");
+					inventoryWriter.writeEndElement();
+				inventoryWriter.writeEndElement();
+				inventoryWriter.writeStartElement( "records" );
+		
+	var writeInventory : Boolean = false;	
+	// process products CSV file
+	var productIDList  : HashSet = getProducts(productsCsv);
+		if ( !empty( productIDList ) )
+		{
+			
+			for each ( var productID : String in productIDList ){
+						//Logger.error(productID);
+						inventoryWriter.writeStartElement( "record" );
+						inventoryWriter.writeAttribute("product-id",productID);
+						inventoryWriter.writeAttribute("mode","delete");
+						inventoryWriter.writeStartElement( "allocation" );
+						inventoryWriter.writeCharacters("2.0");
+						inventoryWriter.writeEndElement();
+						inventoryWriter.writeEndElement();
+						prodCount++;
+			}
+			
+			
+		}
+		
+	
+		// close root element and document
+		inventoryWriter.writeEndElement();
+		inventoryWriter.writeEndElement();
+		inventoryWriter.writeEndElement();
+		inventoryWriter.writeEndDocument();
+		
+		
+	}
+	finally
+	{
+		inventoryWriter.close();
+		
+	}
+	
+	Logger.debug( "Done .....Product Count:"+prodCount );
+
+    return PIPELET_NEXT;
+}
+
+
+function getProducts( productCsv : String ) : Set
+{
+	var file : File = new File( File.IMPEX + File.SEPARATOR + "src" + File.SEPARATOR + productCsv );
+
+	if ( !file.exists() || !file.isFile() )
+	{
+		Logger.error( "Categories file {0} does not exist", file.fullPath );
+		return false;
+	}
+	
+	var reader : CSVStreamReader = new CSVStreamReader( new FileReader( file ), "\t" );
+	var processedLines : Number = 0;
+	var skippedLines : Number = 0;
+	var productHashSet : dw.util.Set = new HashSet();
+	
+	try
+	{
+	// there must be a fieldname ID
+		
+		var fieldValues : Array;
+
+		// process CSV line by line		
+		while ( ( fieldValues = readCsvLine( reader ) ) != null )
+		{
+			if(fieldValues[ 0 ].indexOf("_")==-1){
+			productHashSet.add(fieldValues[ 0 ].replace( /"/g, "\"\"" ));
+			}
+			
+		}
+		
+		
+	}catch(e){
+		Logger.error(e.message);
+	}
+	finally
+	{
+		
+		reader.close();
+	}
+
+	//Logger.debug( "Wrote {0} categories, skipped {1} lines", processedLines, skippedLines );
+	
+	return productHashSet;
+}
+
+function readCsvLine( reader : CSVStreamReader ) : Array
+{
+	var line : Array = reader.readNext();
+	
+	if ( line != null )
+	{
+		for ( var i : Number = 0; i < line.length; i++ )
+		{
+			if ( line[ i ].search( /^"\d+"$/ ) == 0 )
+			{
+				line[ i ] = line[ i ].substr( 1, line[ i ].length-2 );
+			}
+		}
+	}
+	
+	return line;
+}

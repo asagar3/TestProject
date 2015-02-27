@@ -1,0 +1,27 @@
+<!-- Template Name    : pt_cc_login -->
+<!--- Force no caching for CallCenter pages --->
+<iscache type="relative" hour="0" />
+
+<iscontent type="text/html" charset="UTF-8" compact="true" />
+
+<isinclude template="callcenter/util/modules" />
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>${Resource.msg('callcenter.title','callcenter',null)}</title>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<link href="${URLUtils.staticURL('callcenter/css/login.css')}" type="text/css" rel="stylesheet" />	
+
+	<!--- FAVICON icon (website icon, a page icon or an urlicon) 16x16 pixel image icon for website --->
+	<link rel="shortcut icon" href="${URLUtils.staticURL('/images/favicon.ico')}" />
+</head>
+
+<body>	
+	<isreplace/>
+</body>
+
+</html>

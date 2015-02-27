@@ -1,0 +1,104 @@
+<iscomment>This template renders the breadcrumb navigation for product search results</iscomment>
+
+<iscomment>get the current paging model for convenient reuse</iscomment>
+<isset name="pagingModel" value="${pdict.ProductPagingModel}" scope="page"/>
+
+<isobject object="${pdict.ProductSearchResult}" view="none">
+<iscomment><!--  Added dot to make dividers work in IE7 | Asha | 08-mar-2011 --></iscomment>
+<isif condition="${null == pdict.comingFromNoHits || !pdict.comingFromNoHits}">
+	<div class="breadcrumb">
+<iselse>
+	<div class="breadcrumb noMargin">
+</isif>
+<isif condition="${dw.system.Site.current.ID == "FranceSite" || dw.system.Site.current.ID == "EUSite" }">
+	<a href="${URLUtils.httpHome()}/${request.locale}" class="home" title="${Resource.msg('global.home','locale',null)}">${Resource.msg('global.home','locale',null)}</a>
+<iselse/>
+	<a href="${URLUtils.httpHome()}" class="home" title="${Resource.msg('global.home','locale',null)}">${Resource.msg('global.home','locale',null)}</a>	
+</isif>
+
+	<isif condition="${!empty(pdict.ProductSearchResult) && !empty(pdict.ProductSearchResult.searchPhrase)}">
+		<span class="divider">.</span>
+		<span class="resultstext"><isprint value="${pdict.ProductSearchResult.searchPhrase}" /></span>
+		<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+			<script type="text/javascript">
+				s.channel = "${pdict.channel}" ;
+				s.prop1 = "${pdict.prop1}" ;
+				s.prop18 = "${pdict.prop18}" ;
+				//Praveen:- INC000006038571,Fixing the KPI3 Issues
+				s.eVar10 = "No refinement" ;
+				s.eVar11 = "No refinement" ;
+				s.eVar12 = "No refinement" ;
+				s.eVar13 = "No refinement" ;					
+			</script>
+	</isif>
+
+	<isif condition="${!empty(pdict.ProductSearchResult) && pdict.ProductSearchResult.category != null}">
+		<isactivedatacontext category="${pdict.ProductSearchResult.category}">
+	
+		<isscript>
+			var path = new dw.util.ArrayList();
+			var cat = pdict.ProductSearchResult.category;
+			while( cat.parent != null )
+			{
+				if( cat.online ) path.addAt( 0, cat );
+				cat = cat.parent;
+			}
+		</isscript>
+
+		<iscomment> Variables added for Omniture Tagging | Naveen Kumar | in case the PDP comes as Search Result, we need to set the category name of that product</iscomment>
+		<isset name="omCurrentCategoryName" value="${new String()}" scope="page"/>
+		<isset name="omniCatRefinement" value="${new String()}" scope="page"/>
+		<isloop items="${path}" var="cat" status="loopstate">
+			<isif condition="${loopstate.first && !pdict.ProductSearchResult.categorySearch}">
+				<span class="resultstext">${Resource.msg('searchbreadcrumbs.in','search',null)}</span>				
+			<iselse>
+				<span class="divider">.</span>
+			</isif>
+			<isif condition="${pdict.ProductSearchResult.categorySearch}">
+				<isset name="catLinkUrl" value="${dw.catalog.ProductSearchModel.urlForCategory('Search-Show', cat.ID)}" scope="page"/>
+			<iselse>                        
+				<isset name="catLinkUrl" value="${dw.catalog.ProductSearchModel.urlForCategory(URLUtils.url('Search-Show','q', pdict.ProductSearchResult.searchPhrase), cat.ID)}" scope="page"/>
+			</isif>
+			<isif condition="${loopstate.last}">
+				<span class="resultstext"><isprint value="${cat.displayName}" /></span>
+			<iselse>
+				<a href="${catLinkUrl}" title="${cat.displayName}">${cat.displayName}</a>
+			</isif>
+			<iscomment> Variables added for Omniture Tagging | Naveen Kumar | in case the PDP comes as Search Result, we need to set the category name of that product</iscomment>
+			<isset name="omCurrentCategoryName" value="${omCurrentCategoryName.concat(':' + cat.displayName)}" scope="page"/>
+			<isif condition="${loopstate.last}">			
+				<isset name="omniCatRefinement" value="${omniCatRefinement.concat(cat.displayName)}" scope="page"/>
+			<iselse>
+				<isset name="omniCatRefinement" value="${omniCatRefinement.concat(cat.displayName + ',')}" scope="page"/>
+			</isif>			
+		</isloop>		
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+		<script type="text/javascript">
+			s.channel = "${pdict.channel}" ;
+			s.prop1 = "${pdict.prop1}" ;
+			s.eVar25 = "${pdict.evar25}" ;
+			s.prop18 = "${pdict.prop18}";
+			//Praveen:- INC000006038571,Fixing the KPI3 Issues
+			s.eVar10 = "No refinement" ;
+			s.eVar11 = "No refinement" ;
+			s.eVar12 = "No refinement" ;
+			s.eVar13 = "No refinement" ;		
+		</script>	
+	</isif>
+	<iscomment><!--  TODO | As per VD, current page should not have link. It should be static text. Please use this style to show current page in breadcrumb. NA for Search Page. | By Asha --></iscomment>
+	<iscomment><span class="divider">.</span><span class="currentpage">Current page</span></iscomment>
+
+		<isif condition="${!empty(pdict.ProductSearchResult) && pdict.ProductSearchResult.category != null && (!pdict.ProductSearchResult.categorySearch || pdict.ProductSearchResult.refinedByPrice || pdict.ProductSearchResult.refinedByAttribute) }">
+	
+		<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+			<script type="text/javascript">
+				s.eVar10 = refinementTypes + "Category";
+				s.eVar11 = refinementsWithValues+ "Category|" + "${omniCatRefinement}";
+				s.eVar12 = "Category";
+				s.eVar13 = "Category|" + "${pdict.ProductSearchResult.category.displayName}";
+				evar10 = s.eVar10;
+				evar11 = s.eVar11;
+			</script>	
+		</isif>	
+	
+</div><!-- END: breadcrumb -->

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<isinclude template="util/modules"/>
+<head>
+	<iscomment>
+		Include all important information globally , e.g. meta-data, link information, and
+		javascript.
+	</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+	<isinclude template="util/pixelTrackingAffiliateJSON">
+	
+	<iscomment>Add page type specific header information here.</iscomment>
+	<link href="${URLUtils.staticURL('/css/print.css')}" type="text/css" rel="stylesheet" media="print" />
+</head>
+<body>
+<img src="https://app.salecycle.com/Import/PixelCapture.aspx?c=16965&e=${pdict.Order.customerEmail}&sfs=ordernum^${pdict.Order.orderNo}" style="display:none"/>
+<isset name="paymentMethodType" value="" scope="page"/>
+		<isif condition="${pdict.Order.paymentInstruments[0].paymentTransaction.paymentProcessor.ID == 'WORLDPAY'}">
+			<isif condition="${!empty(pdict.Order.getPaymentInstruments(dw.order.PaymentInstrument.METHOD_BANK_TRANSFER)[0])}">
+				<isset name="paymentMethodType" value="${pdict.Order.getPaymentInstruments(dw.order.PaymentInstrument.METHOD_BANK_TRANSFER)[0].custom.paymentType}" scope="page"/>
+			<iselse/>
+				<isset name="paymentMethodType" value="${pdict.Order.getPaymentInstruments('CREDIT_CARD_MISTERCASH')[0].custom.paymentType}" scope="page"/>
+			</isif>	
+		<iselseif condition="${pdict.Order.paymentInstruments[0].paymentTransaction.paymentProcessor.ID =='KLARNA'}">
+			<isset name="paymentMethodType" value="${pdict.Order.paymentInstruments[0].paymentTransaction.paymentProcessor.ID}" scope="page"/>		
+		<iselseif condition="${pdict.Order.paymentInstruments[0].paymentTransaction.paymentProcessor.ID =='CYBERSOURCE_PAYPAL'}">
+			<isset name="paymentMethodType" value="${pdict.Order.getPaymentInstruments('PayPal')[0].paymentMethod}" scope="page"/>
+		<iselse/>
+			<isset name="paymentMethodType" value="${pdict.Order.getPaymentInstruments(dw.order.PaymentInstrument.METHOD_CREDIT_CARD)[0].creditCardType}" scope="page"/>
+		</isif>  
+		
+
+<div id="container" class="pt_orderconfirmation">
+	<isinclude template="components/header/header"/>
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+	<script>		
+		s.server = "${dw.system.System.getInstanceHostname()}" ;
+		var omniPageName = "${dw.web.Resource.msg('omniture.checkout.confirmationpagetitle','omniture',null)}" + " : " + "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.pt_cart.registeredcheckout','omniture',null) : dw.web.Resource.msg('omniture.pt_cart.guestcheckout','omniture',null)}";
+		s.pageName = omniPageName; 
+		//s.pageName = "${pdict.omniPageName}" ;
+		//evar22 added for CR154 (only for checkout pages:Shipping,Billing,OrderConfirmation)| KPI | Ability to distinguish between guest checkout & sign in checkout
+		s.eVar22 = "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.evar22.registered','omniture',null) : dw.web.Resource.msg('omniture.evar22.guest','omniture',null)}";			
+		s.prop24 = "${Resource.msg('omniture.prop24.checkout','omniture',null)}" ;
+		s.channel = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+		s.prop1 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+		s.prop18 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+		s.eVar50 = "${Resource.msg('omniture.eVar50.orderconfirmation','omniture',null)}";
+		/*null check to make sure that no NULL pointer exception is thrown.*/ 
+		if (null != "${pdict.Order}"){
+			s.purchaseID = "${pdict.Order.orderNo}";
+			s.zip = "${pdict.Order.billingAddress.postalCode}"; 
+			s.state = "${pdict.Order.billingAddress.city}";
+		s.eVar4="${paymentMethodType}";		
+		}
+		s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}";
+	</script>
+	<div id="main">
+		<div id="content1">
+			<isreplace/>
+		</div><!-- END: content -->
+
+		<iscomment>Provide a create account form for unregistered customers</iscomment>
+		<iscomment><!--  Right column is not required as per VD A| Asha | 10-mar-2011--></iscomment>
+		<iscomment>
+		<isif condition="${!pdict.CurrentCustomer.authenticated}">
+			<div id="rightcolumn">
+				<h3>${Resource.msg('pt_orderconfirmation.createheader','checkout',null)}</h3>
+				<div class="createaccount">
+					<form action="${URLUtils.httpsContinue()}" method="post">
+						<fieldset>
+							<p>${Resource.msg('pt_orderconfirmation.accountmessage','checkout',null)}</p>
+							<div class="formfields">
+								<div class="formfield firstname">
+									<isinputfield formfield="${pdict.CurrentForms.profile.customer.firstname}" type="input"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div><!-- END: firstname -->
+								<div class="formfield lastname">
+									<isinputfield formfield="${pdict.CurrentForms.profile.customer.lastname}" type="input"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="formfield">
+									<isinputfield formfield="${pdict.CurrentForms.profile.customer.email}" type="input"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="formfield">
+									<isinputfield formfield="${pdict.CurrentForms.profile.customer.emailconfirm}" type="input"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="formfield">
+									<isinputfield formfield="${pdict.CurrentForms.profile.login.password}" type="password"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="formfield">
+									<isinputfield formfield="${pdict.CurrentForms.profile.login.passwordconfirm}" type="password"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="formfield">
+									<isinputfield formfield="${pdict.CurrentForms.profile.login.question}" type="select"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="formfield">
+									<isinputfield formfield="${pdict.CurrentForms.profile.login.answer}" type="input"/>
+									<div class="clear"><!-- FOAT CLEAR --></div>
+								</div>
+								<div class="actions">
+									<button type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.profile.confirm.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span></button>
+								</div>
+								<input type="hidden" name="${pdict.CurrentForms.profile.secureKeyHtmlName}" value="${pdict.CurrentForms.profile.secureKeyValue}"/>	
+							</div><!-- END: formfields -->
+						</fieldset>
+					</form>
+				</div>
+			</div><!-- END: rightcolumn -->
+		</isif>
+		</iscomment>
+		<iscomment>INT-152 - Christina - add RichRelevance Recommendations </iscomment>
+		<isif condition="${dw.system.Site.getCurrent().getCustomPreferenceValue('rrIsEnabled')}">
+			<isinclude template="RichRelevance/r3_checkout"></isinclude> 
+		</isif>
+		<isinclude template="components/footer/footer"/>
+	</div><!-- END: main -->
+</div> <!-- END: container -->
+</body>
+</html>

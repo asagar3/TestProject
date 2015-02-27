@@ -1,0 +1,47 @@
+/**
+*  @input CouponStatus : dw.system.Status
+*  @output errorCode : String
+*/
+importPackage( dw.system );
+importPackage( dw.object );
+importPackage(dw.campaign);
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var status:Status = pdict.CouponStatus ;
+	var errorCode : String = null;
+		if(!empty(status))
+		{ 
+			// invalid
+			if( CouponStatusCodes.COUPON_CODE_UNKNOWN.equals(status.code)
+			||  CouponStatusCodes.COUPON_DISABLED.equals(status.code)
+			||  CouponStatusCodes.NO_ACTIVE_PROMOTION.equals(status.code)
+			||  CouponStatusCodes.NO_APPLICABLE_PROMOTION.equals(status.code))
+			{
+				//errorMsg = Resource.msg("billingcoupon.couponinvalid", "forms", null);
+				errorCode = "MBT_BE_002" ;
+			}
+						// coupon code already in basket
+			else if( CouponStatusCodes.COUPON_CODE_ALREADY_IN_BASKET.equals(status.code))
+			{
+				//errorMsg = Resource.msg("billingcoupon.couponused", "forms", null);
+				errorCode = "MBT_BE_003" ;
+			}		
+			else if( CouponStatusCodes.COUPON_ALREADY_IN_BASKET.equals(status.code))
+			{
+				//errorMsg = Resource.msg("billingcoupon.couponalreadyapplied", "forms", null);
+				errorCode = "MBT_BE_004" ;
+			}
+			else if( CouponStatusCodes.COUPON_CODE_ALREADY_REDEEMED.equals(status.code)
+			||  CouponStatusCodes.REDEMPTION_LIMIT_EXCEEDED.equals(status.code)
+			||  CouponStatusCodes.CUSTOMER_REDEMPTION_LIMIT_EXCEEDED.equals(status.code)
+			||  CouponStatusCodes.TIMEFRAME_REDEMPTION_LIMIT_EXCEEDED.equals(status.code))
+			{
+				//errorMsg = Resource.msg("billingcoupon.couponexpired", "forms", null);
+				errorCode = "MBT_BE_005" ;
+			}
+		}
+	pdict.errorCode = errorCode ;
+
+   return PIPELET_NEXT;
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+	<field formid="paymentType" label="worldpay.method" type="string" mandatory="true"
+			missing-error="worldpay.error"/>
+		 
+	
+	<field formid="bank" label="ideal.bank" type="string" mandatory="false"
+			missing-error="bank.error"/>
+	
+	<field formid="bankCountry" label="ideal.bankcountry" type="string" mandatory="false"
+			missing-error="bankcountry.error"/>
+	
+	<action formid="confirm" valid-form="true"/>
+</form>

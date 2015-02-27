@@ -1,0 +1,164 @@
+<!--- TEMPLATENAME: retrieve_email.isml --->
+<iscomment> ** Enter Email and Email List Section ** </iscomment>
+<div id="retrieveVREmailListSection">
+	<div class="emailSection">
+		<p class="emailText">${Resource.msg('getbasket.label.email','virtualbasket',null)}</p>
+		<div>
+			<input type="email" name="txtEmail" class="inputEmaiRetrievelVR deletable"/>
+			<div class="emailErrorSection">
+				<p class="emailAlert">${Resource.msg('getbasket.email.notfound','virtualbasket',null)}</p>
+				<p class="emailError">${Resource.msg('getbasket.email.notvalid','virtualbasket',null)}</p>
+			</div>
+		</div>
+	</div>
+	
+	<div class="emailListSection">
+		<div class="refreshEmailList">
+			<p class="floatLeft">${Resource.msg('getbasket.label.refresh','virtualbasket',null)}</p>
+			<p class="floatRight refresh">${Resource.msg('getbasket.action.refresh','virtualbasket',null)}</p>
+		</div>
+		<div class="clearFloat"></div>
+		<div class="emailListDivider"></div>
+		<iscomment> ** Include Email List ** </iscomment>
+		<div class="emailList">
+			<isinclude template="ipad/vr_email_list"/>		
+		</div>
+		
+		<div class="emailListDivider"></div>
+		<div class="retrieveButton">
+			<a class="button hilightedNext retrieveButton"><span>${Resource.msg('getbasket.action.get','virtualbasket',null)}</span></a>
+		</div>
+	</div>
+	<div class="bottomCurve">
+		<div class="bottomCurveCenter"></div>
+		<div class="bottomCurveRight" ></div>
+	</div>
+</div>
+
+<iscomment> ** Virtual Basket Section ** </iscomment>
+<div id="virtualRailItems">
+</div>
+
+<iscomment> ** Confirm Deletion Section ** </iscomment>
+<div id="confirmDeletion" >
+	<div class="confirmDeletionSection" align=center>
+		<div class="alertIcon"></div>
+		<p class="deleteMessage">${Resource.msg('getbasket.delete.msg','virtualbasket',null)}</p>
+	</div>
+	<div class="confirmButtons">
+		<a class="button" id="btn_cancel"><span>${Resource.msg('getbasket.action.cancel','virtualbasket',null)}</span></a>
+		<a class="button hilighted" id="btn_remove"><span>${Resource.msg('getbasket.action.remove','virtualbasket',null)}</span></a>
+	</div>
+	<div class="bottomCurve">
+		<div class="bottomCurveCenter"></div>
+		<div class="bottomCurveRight" ></div>
+	</div>	
+</div>
+
+<script type="text/javascript">
+	/* get the virtual basket */
+	$(".emailListSection .retrieveButton a").click(function(){
+		
+		var selectedEmailID = jQuery("input[name=txtEmail]").val();
+		//Praveen: Extract the basket-ID based on the email for Omniture.
+		
+		var basketID = document.getElementById(selectedEmailID).innerHTML;
+
+		var url = "${URLUtils.url('VRMgr-DisplayVRBasket')}" ;
+		url = app.util.appendParamToURL(url, "orderPoint","${pdict.orderPoint}");
+		url = app.util.appendParamToURL(url, "deviceID","${pdict.deviceID}");
+		url = app.util.appendParamToURL(url, "orderChannel","${pdict.orderChannel}");
+		url = app.util.appendParamToURL(url, "emailAddress",selectedEmailID);
+		
+		
+		if(/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/.test(selectedEmailID)){
+			jQuery.ajax({
+				dataType: "html",				
+				url		: url,
+				cache	: true,
+				success	: function(response) {
+					var failureindex = response.indexOf("failure");
+					if (failureindex < 0 || (failureindex -1) == response.indexOf("\"failure\"")){
+						jQuery("#virtualRailItems").html(response);
+						$("#retrieveVREmailListSection").hide();
+						$("#virtualRailItems").show();
+					} else {
+						$(".emailErrorSection").show();
+						$(".emailErrorSection p").hide();
+						$(".emailErrorSection .emailAlert").show();
+					}
+				}
+			});
+			//Praveen :- Setting the Omniture variables only in case of success. 
+			var obj = $(this);
+			s.eVar62 = jQuery.trim(basketID);
+			s.events = "${Resource.msg('omniture.basketHeader.listBasket.event','omniture',null)}";	
+			s.linkTrackVars = "${Resource.msg('omniture.basketHeader.listBasket.linkTrackVars','omniture',null)}";
+			s.linkTrackEvents = "${Resource.msg('omniture.basketHeader.listBasket.linkTrackEvents','omniture',null)}";
+			s.tl(obj,'o', "value");	
+			//Omniture end
+		}
+		else{
+			$(".emailErrorSection").show();$(".emailErrorSection p").hide();
+			$(".emailErrorSection .emailError").show();
+		}
+		
+		return false;
+	});	
+	
+	/* Refresh the email list */
+	$('.refreshEmailList').click(function() {
+		var obj = $(this);
+		//Praveen :- Setting the Omniture variables
+		s.linkTrackVars = "${Resource.msg('omniture.basketList.refresh.linkTrackVars','omniture',null)}";
+		s.linkTrackEvents = "${Resource.msg('omniture.basketList.refresh.linkTrackEvents','omniture',null)}";
+		s.events = "${Resource.msg('omniture.basketList.refresh.event','omniture',null)}";
+		
+		var url = "${URLUtils.url('VRMgr-RefreshEmails')}" ;
+		url = app.util.appendParamToURL(url, "orderPoint","${pdict.orderPoint}");
+		url = app.util.appendParamToURL(url, "deviceID","${pdict.deviceID}");
+		url = app.util.appendParamToURL(url, "orderChannel","${pdict.orderChannel}");
+		
+		s.tl(obj,'o', "value");	
+		//Omniture end
+		jQuery.ajax({
+			dataType: "html",
+			url		: url,
+			cache	: true,
+			success	: function(response) {
+				jQuery(".emailList").html(response);
+				$(".emailErrorSection").hide();$(".emailErrorSection p").hide();
+				jQuery("input[name=txtEmail]").val("");
+			}
+		});
+		
+	});
+	
+	/* Highlight the selected row */
+	$(".emailListSection .emailList li").live("click",function(){
+		$(".emailListSection .emailList li").removeClass("selectedEmail");
+		$(this).addClass("selectedEmail");
+		var email = $(this).find(".emailId").html();
+		$("input[name=txtEmail]").val(email);
+		
+	});
+	$(document).ready(function() {
+        $('#retrieveVREmailListSection input.deletable').wrap('<span class="deleteicon" />').after($('<span/>').click(function() {
+            $(this).prev('input').val('').focus();
+            $("#retrieveVREmailListSection span.deleteicon span").hide();
+        }));
+        
+        $('input.deletable').bind("keyup focus",function(event){
+        	if($(this).val() != ""){
+        		$("#retrieveVREmailListSection span.deleteicon span").show();
+        	}
+        	else{
+        		$("#retrieveVREmailListSection span.deleteicon span").hide();
+        	}
+        	if(event.keyCode == 13){
+        		$(this).blur();
+        		$(".emailListSection .retrieveButton a").trigger("click");
+        	}
+        });
+    });
+</script>

@@ -1,0 +1,28 @@
+<!--- CR 810 : TEMPLATENAME: addressdetailsnouk.isml --->
+
+<isinclude template="tablet/util/modules"/>
+	<div class="formfield address1">
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.address1}" type="input" value="false"/>
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.address1}" type="input" label="false"/>
+  		<div class="clear"><!-- FLOAT CLEAR --></div>			
+	</div><!-- END: address1 -->
+	<div class="formfield address2">
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.address2}" type="input" value="false"/>
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.address2}" type="input" label="false"/>
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+	</div><!-- END: address2 -->
+	<div class="formfield postbox">
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.postBox}" type="input" value="false"/>
+   		<isinputfield formfield="${pdict.CurrentForms.profile.address.postBox}" type="input" label="false"/>
+    	<div class="clear"><!-- FLOAT CLEAR --></div>			
+    </div>  		
+	<div class="formfield city">	
+		<isinputfield formfield="${pdict.CurrentForms.profile.address.city}" type="input" value="false"/>
+		<isinputfield formfield="${pdict.CurrentForms.profile.address.city}" type="input" label="false"/>
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+    </div><!-- END: city -->
+	<div class="formfield state">
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.states.state}" type="select" value="false"/>
+    	<isinputfield formfield="${pdict.CurrentForms.profile.address.states.state}" type="select" label="false"/>
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+	</div><!-- END: state -->

@@ -1,0 +1,113 @@
+<!--- TEMPLATENAME: vr_basket.isml --->
+<isset name="emailId" value="${pdict.CurrentHttpParameterMap.emailAddress.stringValue}" scope="page" />
+
+<div class="virtualRailTitle">
+	<p class="titleFirst"><span class="noOfItems">${pdict.productList.length}</span> ${Resource.msg('getbasket.label.iteminfo','virtualbasket',null)} <span class="userEmail">${emailId}</span></p>
+	<p class="titleSecond">${Resource.msg('getbasket.label.edit','virtualbasket',null)}</p>
+</div>
+<div class="virtualRailItemsSection">
+	<div class="virtualRailDivider"></div>
+	<div class="listOfItems">
+		<isloop items="${pdict.productList}" var="pid">
+			<isinclude url="${URLUtils.url('VRMgr-DisplayProduct').append('pid', pid)}"/>			
+		</isloop>
+	</div>
+	<div class="virtualRailDivider"></div>
+	<div class="virtualRailNavigationButtons">
+		<a class="button" id="btn_back" style="float:left"><span>${Resource.msg('getbasket.action.back','virtualbasket',null)}</span></a>
+		<a class="button hilightedNext" onclick="addToCartOmnitureVar(this);" id="btn_addToCart" style="float:right" href="${URLUtils.url('VRMgr-AddVBToDWBasket').append('emailAddress', emailId).append('deviceID',pdict.deviceID).append('orderChannel',pdict.orderChannel)}"><span>${Resource.msg('getbasket.action.addtobasket','virtualbasket',null)}</span></a>
+	</div>
+</div>
+<div class="bottomCurve">
+	<div class="bottomCurveCenter"></div>
+	<div class="bottomCurveRight" ></div>
+</div>
+
+<script type="text/javascript">
+	
+	var email="";		
+	var pid="";
+	
+	function showDeleteDialog(){
+		$(".retrieveVR_dialog .ui-dialog-titlebar .ui-dialog-title").html("${Resource.msg('getbasket.delete.title','virtualbasket',null)}");
+		$("#confirmDeletion").show();
+	}
+	
+	function hideDeleteDialog(){
+		$("#confirmDeletion").hide();
+	}
+	
+	function showVirtualRailItems(){
+		$(".retrieveVR_dialog .ui-dialog-titlebar .ui-dialog-title").html("${Resource.msg('getbasket.email.title','virtualbasket',null)}");
+		$("#virtualRailItems").show();
+	}
+	
+	function hideVirtualRailItems(){
+		$("#virtualRailItems").hide();
+	}
+	
+	/* Delete Product Confirmation */
+	$(".virtualRailItemsSection .listOfItems .item .deleteItem").click(function(){
+		email = "${emailId}";		
+		pid = $(this).parent().attr('id');
+		hideVirtualRailItems();
+		showDeleteDialog();
+		return false;
+	});
+	
+	$("#btn_cancel").click(function(){
+		$("#confirmDeletion").hide();
+		showVirtualRailItems();
+		return false;
+	});
+	
+	/* Back Button */
+	$("#btn_back").click(function(){
+		$("#retrieveVREmailListSection").show();
+		$("#virtualRailItems").hide();
+		return false;
+	});
+	
+	/* Confirmed Delete Product */
+	$("#btn_remove").click(function(){
+		var obj = $(this);
+		var deleteProductURL = app.util.appendParamToURL("${URLUtils.url('VRMgr-DeleteProduct')}", "email", email);
+		deleteProductURL = app.util.appendParamToURL(deleteProductURL, "pid", pid);
+		jQuery.ajax({
+			dataType: "html",
+			url		: deleteProductURL,
+			cache	: true,
+			success	: function(response) {
+				if (response.indexOf("failure") < 0){					
+					$("#" + pid).remove();
+					showVirtualRailItems();
+					hideDeleteDialog();					
+					var noOfItems = $(".noOfItems").html();
+					$(".noOfItems").html(noOfItems -1);k					
+				} else {
+					alert ("Some Error Occured");
+				}
+			}
+		});
+		
+		//Praveen : Omniture tags for deliting a product
+		s.linkTrackVars = "${Resource.msg('omniture.basketHeader.delete.linkTrackVars','omniture',null)}";
+		s.linkTrackEvents = "${Resource.msg('omniture.basketHeader.delete.linkTrackEvents','omniture',null)}";
+		s.events = "${Resource.msg('omniture.basketHeader.delete.event','omniture',null)}";			
+		s.tl(obj,'o', "value");	
+		//Omniture end
+		
+		return false;
+	});
+	
+	function addToCartOmnitureVar(obj){
+		
+		//Praveen :- Setting the Omniture variables when user adds the VB-products to DW-Basket.  
+		s.linkTrackVars = "${Resource.msg('omniture.basketHeader.addToCart.linkTrackVars','omniture',null)}";
+		s.linkTrackEvents = "${Resource.msg('omniture.basketHeader.addToCart.linkTrackEvents','omniture',null)}";
+		s.events = "${Resource.msg('omniture.basketHeader.addToCart.event','omniture',null)}";			
+		s.tl(obj,'o', "value");	
+		//Omniture end
+	}
+
+</script>

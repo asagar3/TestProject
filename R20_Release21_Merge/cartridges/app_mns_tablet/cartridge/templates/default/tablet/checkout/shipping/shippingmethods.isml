@@ -1,0 +1,151 @@
+<isinclude template="tablet/util/modules"/>
+<isset name="isStoreDelActive" value="${pdict.CurrentSession.custom.isStoreCollActive}" scope="page"/>
+<iscomment>
+	This template renders the shipping methods that a customer may choose from.
+	It renders a form for the shipping method selection.  This template is 
+	dynamically loaded using AJAX and may get reloaded as the customer enters
+	shipping address information depending on the configured shipping method
+	address exclusions.
+</iscomment>
+
+<isscript>
+	var shipment : dw.order.Shipment = pdict.Basket.defaultShipment;
+	var shippingModel : dw.order.ShipmentShippingModel = dw.order.ShippingMgr.getShipmentShippingModel( shipment );
+</isscript>
+<iscomment> Praveen: QC Defect fixing 984</iscomment>
+<isset name="defaultShippingMthd" value="${dw.order.ShippingMgr.getDefaultShippingMethod()}" scope="page">
+
+<iscomment>this will show when sIFR flash font replacement is done</iscomment>
+<!-- <h5 class="grey_block_header"><span><strong class="content_grey_header">${Resource.msg('singleshipping.shippingmethodheader','checkout',null)}</strong></span></h5> -->
+<!-- <img class="under_shadow_dark" alt="" src="${URLUtils.staticURL('themes/demandwarestore/images/under_shadow_dark.png')}" /> -->
+<iscomment>render list of applicable shipping methods</iscomment>
+<isif condition="${pdict.ApplicableShippingMethods.size() > 0}">
+<script type="text/javascript">
+jQ(function(){
+	
+});
+</script>
+<div class="margintop">
+	<label class="label floatleft lesstopmargin bold">${Resource.msg('singleshipping.shippingmethod','checkout',null)}</label>
+		<div class="shippingmethods" id="shippingmethods">
+			<isloop items="${pdict.ApplicableShippingMethods}" var="shippingMethod">
+				<isif condition="${!('STORE_COLLECTION'.equalsIgnoreCase(shippingMethod.ID))}">
+					<isset name="shippingCost" value="${pdict.ShippingCosts.get(shippingMethod.ID)}" scope="page"/>
+					<isif condition="${shippingMethod.defaultMethod}">
+						<div class="shippingmethod shipping-method-001">
+					<iselse>
+						<div class="shippingmethod shipping-method-002">
+					</isif>	
+							<div class="radioButton" >
+								<div class="sprite radioSwitch "></div>
+							</div>
+	    					<div class="value radio" style="width:auto;">
+	    						<input type="radio" class="hidden" name="${pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.htmlName}" id="shipping-method-${shippingMethod.ID}" value="${shippingMethod.ID}" <isif condition="${(empty(pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.value) && shippingMethod.defaultMethod) || (pdict.CurrentForms.singleshipping.shippingAddress.shippingMethodID.value == shippingMethod.ID)}">checked="checked"</isif> />
+			    				<isif condition="${shippingMethod.defaultMethod}">
+									<span class="sprite truckGreen"></span> 
+								<iselse>
+									<span class="sprite express"></span>
+								</isif>	
+	    						<label for="shipping-method-${shippingMethod.ID}" style="width:auto;" class="shipping-method-${shippingMethod.ID}">
+	    							<isprint value="${shippingMethod.displayName}"/>
+		    		 				<span><isprint value="${shippingMethod.description}"/></span>
+		    		 			
+	    							<iscomment>
+										The format for rendering shipping values is to render the base shipping cost. If there are shipping 
+										price adjustments, the adjustments are also rendered. Finally, if there is a surcharge associated with 
+										the shipping, the surcharge value is rendered.
+								 	</iscomment>
+									<iscomment>
+									<isif condition="${shippingCost.shippingPriceAdjustmentsTotal != 0}">
+										<span class="standardshipping"><isprint value="${shippingCost.baseShipping}"/></span> <span class="discountshipping"><isprint value="${shippingCost.baseShippingAdjusted}"/></span>
+									<iselse>
+										<span><isprint value="${shippingCost.baseShipping}"></span>
+									</isif>
+									
+									<isif condition="${shippingCost.surchargeAdjusted > 0}"><span class="shippingsurcharge"> + <isprint value="${shippingCost.surchargeAdjusted}"/> ${Resource.msg('singleshipping.surcharge','checkout',null)}</span></isif>
+									
+									<br/>
+										
+									<span class="shippingmethodSubLabel"><isprint value="${shippingMethod.custom.additionalDesc}"/></span>
+									</iscomment>
+    							</label>
+		    					<iscomment> CR023-START | Additional Description | Naveen Kumar </iscomment>
+	    					
+								<iscomment> CR023-END | Additional Description | Naveen Kumar </iscomment>
+		    					<iscomment>
+		    					<!-- TODO: 9/03/2011 removed these but include them if BRD/Wireframe requires them
+	    						<isif condition="${!empty(shippingMethod.description)}">
+				    				<div class="shippingdescription">(<isprint value="${shippingMethod.description}"/>)</div>
+				    			</isif>				    			
+			    			
+				    			<ul class="shippingpromos"> 
+					    			<isloop items="${dw.campaign.PromotionMgr.getActiveCustomerPromotions().getShippingPromotions(shippingMethod)}" var="shippingPA">
+										<isif condition="${shippingPA.calloutMsg != null}">
+											<li><isprint value="${shippingPA.calloutMsg}"/></li>
+										</isif>
+					    			</isloop>					    			
+				    			</ul>-->
+				    			</iscomment>
+	    					</div>
+	    					<isif condition="${shippingCost.productShippingCosts.length > 0}">
+	    						<iscomment>
+	    						<div class="formfieldtooltip">
+			    					<div class="tooltip1">
+			    						<img src="${URLUtils.staticURL('themes/demandwarestore/images/info_icon.png')}" alt="${Resource.msg('singleshipping.details','checkout',null)}" class="tooltip_icon" />
+			    				
+				    					<div class="tooltip-body" style="display:none">
+						    				<div class="tooltipcontainer1">
+						    					<div class="tooltipcontent1">
+					    							 <!--  Praveen: QC Defect fixing 984-->
+										    		<div class="contentasset">
+															<isif condition="${shippingMethod != defaultShippingMthd}">
+																<iscontentasset aid="tooltip-express_del"/>
+															<iselse>
+																<iscontentasset aid="tooltip-standard_del"/>
+															</isif>
+										    		</div>
+					    						</div>
+					    					</div>
+					    				</div>
+					    			</div>
+		    					</div>
+		    					</iscomment>
+	    					</isif>		
+	    					<div class="clear"><!-- FLOAT CLEAR --></div>
+	    				</div><!-- END: shippingmethod -->
+    			</isif>
+			</isloop>
+	
+	<div class="clear"></div>
+		<!-- TODO: 14/03/2011 integrate this item -->
+		<iscomment>
+		Nadeem:created a new content asset to make delivery and returns info BM configurable
+		<iscontentasset aid="deliveryandreturns-info"/>
+		</iscomment>
+		<iscomment>aliddle: content now shows in a tooltip</iscomment>
+		<div>
+			<label class="newDeliveryLabel">${Resource.msg('singleshipping.deliveryandreturn','checkout',null)}</label>
+	   		<div class="formfieldtooltip">
+				<div class="tooltip1">
+					<img src="${URLUtils.staticURL('images/tablet/info_icon.png')}" alt="${Resource.msg('singleshipping.details','checkout',null)}" class="tooltip_icon" />
+	 					<div class="tooltip-body" style="display:none">
+	    					<div class="tooltipcontainer1">
+	    						<div class="tooltipcontent1">
+					    			<div class="contentasset">
+										<iscontentasset aid="tooltip-deliveryandreturns-info"/>
+					    			</div>
+	   							</div>
+	   						</div>
+	   					</div>
+				</div>
+	   		</div>
+		</div>
+		
+	</div><!-- END: shippingmethods -->
+</div>
+    		<div class="clear"></div>
+		
+<iselse/>
+	<div class="noshippingmethods">${Resource.msg('singleshipping.noshippingmethods','checkout',null)}</div><!-- END: noshippingmethods -->
+</isif>
+

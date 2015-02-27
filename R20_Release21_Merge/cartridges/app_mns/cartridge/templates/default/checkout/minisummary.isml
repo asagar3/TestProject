@@ -1,0 +1,69 @@
+<isinclude template="util/modules"/>
+<iscomment>
+	This template renders the summary of the current basket at the right hand side
+	of all checkout pages. It includes an order summary including order totals,
+	a list of all included shipments as well as the payment methods used to pay
+	the basket.
+</iscomment>
+<isset name="displayInCheckout" value="${true}" scope="pdict"/>
+<isif condition="${!empty(pdict.checkoutstep)}">
+	<isset name="checkoutstep" value="${pdict.checkoutstep}" scope="page"/>
+</isif>
+
+<isif condition="${!empty(checkoutstep) && (checkoutstep >= 2)}">
+	<div class="checkoutminisummary">
+		<iscomment>TODO: MattS - Please check this opening DIV - Not sure it's needed</iscomment>
+	<div class="summarySurroundTop">	
+		
+		<iscomment><!--  Matt S - removed phone number as per psd --> <!--  <iscontentasset aid="cs-contact-number"/>  --></iscomment>
+		<isif condition="${checkoutstep < 5}">
+		<div class="checkoutsummaryheader">
+			<iscomment>
+				The edit link depends on the basket content: if there is just one gift 
+				certificate in the basket the edit link leads to the gift certificate purchase page
+				offering to edit the gift certificate settings.
+			</iscomment>
+			<isset name="editUrl" value="${URLUtils.url('Cart-Show')}" scope="page"/>
+			<isif condition="${!empty(pdict.Basket)}">
+				<isif condition="${pdict.Basket.productLineItems.size() == 0 && pdict.Basket.giftCertificateLineItems.size() == 1}">
+					<isset name="editUrl" value="${URLUtils.url('GiftCert-Edit','GiftCertificateLineItemID', pdict.Basket.giftCertificateLineItems[0].UUID)}" scope="page"/>
+				</isif>
+			</isif>
+			<iscomment><!-- Matt S - Added / changed to edit basket variable --></iscomment>
+			<a href="${editUrl}" class="orderedit">${Resource.msg('global.editbasket','locale',null)}</a>
+			
+			<h5><span class="content_checkout_header">${Resource.msg('summary.ordersummary','checkout',null)} </span></h5><div class="clear"></div>
+		</div><!-- END: checkoutsummaryheader -->
+		<div class="checkoutminicart">
+			<isminilineitems p_lineitemctnr="${pdict.Basket}"/>
+		</div><!-- END: check_minicart -->
+	</isif>
+
+	<iscomment>render the order totals</iscomment>
+	<div class="checkoutordertotals">
+		<isif condition="${pdict.Basket.shipments[0].shippingMethodID != 'STANDARD'}">
+			<isordertotals p_lineitemctnr="${pdict.Basket}" p_showshipmentinfo="${true}" p_shipmenteditable="${true}" p_totallabel="${Resource.msg('cart.ordertotal','checkout',null)}"/>
+		<iselse>
+			<isordertotals p_lineitemctnr="${pdict.Basket}" p_showshipmentinfo="${false}" p_shipmenteditable="${false}" p_totallabel="${Resource.msg('cart.estimatedtotal','checkout',null)}"/>
+		</isif>
+	</div><!-- END: checkoutordertotals -->
+</div>	<!-- END : summarySurroundTop  -->	
+		<iscomment><!-- TODO: MattS Implement this image into a css background style  --></iscomment>
+		<div class="under_shadow"></div>
+
+	<iscomment>render single shipment boxes</iscomment>
+	
+	<script type="text/javascript"></script>
+	<isif condition="${!empty(checkoutstep) && (checkoutstep > 3)}">
+		<isinclude template="checkout/shipping/minishipments"/>
+	</isif>
+
+	<iscomment>render billing information: billing address and payment instruments</iscomment>
+	<isif condition="${!empty(checkoutstep) && (checkoutstep > 4)}">
+		<isinclude template="checkout/billing/minibillinginfo"/>
+	</isif>
+	<iscomment>nadeem : moved the content asset and changed the content as per VD </iscomment>
+	 <iscontentasset aid="cs-contact-number"/>
+</div><!-- END: checkoutminisummary -->
+<isset name="displayInCheckout" value="${false}" scope="pdict"/>
+</isif>

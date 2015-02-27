@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<isinclude template="util/modules"/>
+
+<head>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+</head>
+<body>
+<div id="container" class="pt_customerservice">
+	<isinclude template="components/header/header"/>
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+	<script type="text/javascript">
+		s.pageName = "${pdict.omniPageName}"; 		
+		s.server = "${dw.system.System.getInstanceHostname()}";
+		s.prop24 = "${Resource.msg('omniture.prop24.content','omniture',null)}";
+		s.channel = "${Resource.msg('omniture.channel.content','omniture',null)}";
+		s.prop1 = "${Resource.msg('omniture.channel.content','omniture',null)}";	
+		s.prop18 = "${Resource.msg('omniture.channel.content','omniture',null)}";
+		s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"	
+	</script>	
+	<div id="main">
+	<iscomment>
+		<div id="leftcolumn">
+			<isinclude url="${URLUtils.url('CustomerService-LeftNav')}"/>
+			<div class="accountnavtext"><iscontentasset aid="account-nav-text"/></div><!-- END: accountnavtext -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: leftcolumn -->
+	</iscomment>
+		<div id="content">
+			<isif condition="${pdict.comingFromSiteMap}">
+				<isbreadcrumbs bcurl1="${URLUtils.https('SiteMap-Start')}" bctext1="${Resource.msg('sitemap.name','components',null)}"/>
+			<iselse>
+				<isinclude template="components/contentbreadcrumbs"/>
+			</isif>			
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: content -->
+		<isreplace/>
+		<iscontentasset aid="contentpage_bottom_banner">
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<isinclude template="components/footer/footer"/>
+	</div><!-- END: main -->
+</div><!-- END: container -->
+</body>
+</html>

@@ -1,0 +1,20 @@
+<isinclude template="util/modules"/>
+<isset name="productMap" value="${pdict.productMap}" scope="page" />
+<isset name="strategyMessageOutput" value="${pdict.strategyMessageOutput}" scope="page" />
+<isset name="msg" value="${'recommendations.'+strategyMessageOutput.trim()}" scope="page"/>
+<isset name="placementOutput" value="${pdict.placementOutput}" scope="page" />
+<isset name="maxRecommendedPrds" value="${dw.system.Site.getCurrent().getCustomPreferenceValue('maxRecommendedPrds_Horizontal')}" scope="page"/>
+<h2>
+	<isif condition="${(Resource.msg(msg,'product',null)).equals(msg)}">
+		${Resource.msg('recommendations.RecentItems','product',null)}
+	<iselse/>
+		${Resource.msg(msg,'product',null)}
+	</isif>
+</h2> 
+<div class="prevhoz">&nbsp;</div>
+	<div class="recommendations_cross-sell">		
+		<ul class="horizontalrecommendations">
+		</ul>
+	</div>
+<div class="nexthoz">&nbsp;</div>
+<isinclude template="recommendations/rr_horizontalcarousel" />

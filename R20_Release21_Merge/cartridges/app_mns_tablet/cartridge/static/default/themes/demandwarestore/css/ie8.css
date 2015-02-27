@@ -1,0 +1,27 @@
+.account_wrapper .registration .email, .account_wrapper .registration .password {
+    margin-top: 25px;
+}
+.account_wrapper .registration .emailsignupcheckbox{margin:22px 4px 0 170px}
+.account_wrapper .registration .button_curve{margin:12px 0px 0px 15.8em}
+.ui-dialog .ui-dialog-titlebar {height:61px;}
+.ui-dialog .formfields{margin-top:43px;margin-bottom:34px;}
+.orderpaymentBrief table.orderpaymentdetailstable .ordertotalfinal td{height:28px;}
+#sizeChartDialog .ui-tabs .ui-tabs-nav li.ui-tabs-selected.ui-state-hover {height:30px;}
+.account_wrapper .createaccount{padding-bottom:25px}
+
+.creditcardform .formfield .month.caption, .creditcardform .formfield .year.caption{clear:both;}/*QC 672*/
+.paymentform .formfield .month.caption, .paymentform .formfield .year.caption{clear:both;}/*QC 672*/
+
+/***** SHADOW EFFECT *****/
+.category_banner_3{	border-left:1px solid #dddddd; /* slide 13 */}
+
+.category_banner_2{	border-left:1px solid #dddddd; /* slide 12 */}
+
+.productactions iframe{height:22px !important} /*1017*/
+
+td.action button.textbutton{width:72px;font-weight:700 !important; font-size:1.1em !important}/*1016*/
+.radio input{background: none;  border:none; border-left:0px solid #bdbdbd !important;}
+.genericinputbox input {padding:5px 3px 5px 0px !important;}
+.creditcardpayment .checkbox input{height:auto; padding:0px !important} /*Ireland Feedback comments incorporated | Juliet*/
+#main {position:static;} /*changes done from position: relative to position:static*/
+.requiredindicator{margin-left:-1px;}

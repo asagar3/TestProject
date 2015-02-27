@@ -1,0 +1,152 @@
+<!--- TEMPLATENAME: deliveryaddress.isml --->
+<iscomment><!--  TODO:8/02/2011 these new fields need Validation rules added. see the trunk/requirements/BRDs/validation file--></iscomment>
+				
+<!--  BEGIN: NEW FORM FIELDS -->
+
+
+		<div class="formfield  required requiredmessagewrapper">
+			<label class="label">
+				<span class="labeltext bold">${Resource.msg('global.yourdetails','locale',null)}</span>
+			</label>
+			<div class="value textValInput wrapWidth">
+				<span class="requiredmessage">${Resource.msg('global.requiredfield','locale',null)}</span>
+				<span class="requiredindicator">*</span>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div>
+				
+			<div class="formfield storeId" style="display: none">
+			   	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.deliveryStoreID}" type="input" label="false"/>
+			   	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storeCollectionDate}" type="input" label="false"/>
+			   	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.storePickupTime}" type="input" label="false"/>
+			   	<div class="clear"><!-- FLOAT CLEAR --></div>
+		    </div><!-- END: lastname -->
+			<div class="formfield title">
+				<label for="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}" class="label">
+					<span class="labeltext">${Resource.msg('profile.title','forms',null)}</span>
+					<span class="requiredindicator">*</span>
+				</label>							
+				<isscript>
+					importScript('app_mns:checkout/Utils.ds');
+					var titleMap : dw.util.Map = getTitleMap();					
+				</isscript>
+				<div class="value">
+				 <span class="tablet-selectbox"> 
+				<select id="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}" name="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.htmlName}" class="selectbox title required">					
+					<option value="">${Resource.msg('forms.select','forms',null)}</option>
+					<isloop items="${titleMap.keySet().iterator()}" var="key">
+						<option value="${key}" label="${key}" <isif condition="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.title.value==key}">selected</isif>>${titleMap.get(key)}</option>						
+					</isloop>
+				</select>
+				</span>
+				</div>
+			</div><!-- END: title -->
+		    <div class="formfield firstname">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.firstName}" type="input" label="false"/>
+		    </div><!-- END: firstname -->
+		   <div class="formfield lastname">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.lastName}" type="input" label="false"/>
+		    </div><!-- END: lastname -->
+		   <div class="formfield address1">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address1}" type="input" label="false"/>			
+		    </div><!-- END: address1 -->
+		
+		    <iscomment><!--
+		      <!--TODO:08/03/2011 replace Street name HTML with functioning field
+		    <div class="formfield streetname">
+			<label for="TODO_1" class="label">
+					<span class="labeltext">Street Name:</span>
+					<span class="requiredindicator">*</span>
+			</label><!-- END: label 
+			<div class="value">
+				 <input type="text" maxlength="35" value="" name="TODO_1" id="TODO_1" class="textinput required" />
+			</div>
+		    	<div class="clear"></div>
+		    </div> -->
+		   </iscomment>
+		    
+		    <div class="formfield address2 norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.address2}" type="input" label="false"/>
+		    </div><!-- END: address2 -->
+		    <div class="formfield address3 norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.postBox}" type="input" label="false"/>
+		    </div><!-- END: address3 -->
+		    <div class="formfield city">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.city}" type="input" label="false"/>
+		    </div><!-- END: city -->
+		    <div class="formfield state">
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state}" type="input" value="false"/>
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.states.state}" type="select" label="false"/>
+			</div><!-- END: state -->
+			   <iscomment>  
+			 <div class="formfield postcode_fr">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip}" type="input" value="false"/>
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.zip}" type="input" label="false"/>
+		     <div class="formfieldtooltip">
+			    <istooltip content_id="help-shippingPostCode"/>
+			 </div>
+		   </div><!-- END: zip -->
+		    <div class="formfield residence">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.residence}" type="input" label="false"/>	
+		    </div>
+		   	<div class="formfield streetname">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.streetName}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.streetName}" type="input" label="false"/>	
+		    </div>
+		    </iscomment>
+		   <!--TODO:08/03/2011 replace postcode HTML with functioning field -->
+		    
+		    
+		    
+		 
+		     
+		     <!-- TODO: 9/03/2011 integrate the Country variable. -->
+		     <!--  NEW Country field. Was a select. now is a disabled="disabled" text field -->
+		     <iscomment><!-- commented as per form.xlsx --></iscomment>
+		      
+		    <isscript>
+		    	var countryCodes: dw.util.HashMap = dw.system.Site.getCurrent().getCustomPreferenceValue("EUCountryCodes");
+		    </isscript>
+		    <div class="formfield country">
+		    	<label for="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}" class="label">
+					<span class="labeltext">${Resource.msg('forms.country','forms',null)}</span>
+					<span class="requiredindicator">*</span>
+				</label><!-- END: label -->
+				<div class="value">
+					<label class="countryName" id="countryName" name="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}">
+						${Resource.msg('country.name','forms',null)}
+					</label>
+					<iscomment>
+					<input type="text" maxlength="35" value="${Resource.msg('country.name','forms',null)}" name="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}" id="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country.htmlName}" class="textinput disabled_textfield">${Resource.msg('country.name','forms',null)}</input>
+					</iscomment>
+		    		
+				</div>
+		    </div><!-- END: country -->
+		   <iscomment> 
+		    <!-- 
+		    <div class="formfield country">
+			    	<!--  <isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country}" type="text" disabled="disabled" value="false"/>
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country}" type="text"  disabled="disabled" label="false"/>
+			    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.country}" type="input" disabled="disabled" class="textinput disabled_textfield"/>
+					<div class="clear"><!-- FLOAT CLEAR </div>
+			 </div><!-- END: country --></iscomment>
+			   
+		    
+		    <div class="formfield phone">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.phone}" type="input" label="false" xhtmlclass="phone"/>
+		    	<div class="formfieldtooltip">
+		    	<istooltip content_id="help-telephone"/>
+		    	</div> 			
+		    </div><!-- END: phone -->
+		    <div class="formfield alternatecontactnumber norequire">
+		    	<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber}" type="input" value="false"/>
+	    		<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.addressFields.alternateContactNumber}" type="input" label="false" xhtmlclass="phone"/>
+		    </div>

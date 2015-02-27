@@ -1,0 +1,42 @@
+/**
+ 
+* @input XmlStreamWriter : dw.io.XMLStreamWriter
+* @input Product : dw.catalog.Product
+* @output Message : String
+*/
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.catalog );
+
+ importScript( "int_richrelevance:RichRelevance/MNSExtractCatalog.ds");
+ 
+ 	var PRODUCT = "PRODUCT";
+	var PRODUCTNAME = "PRODUCTNAME";
+
+	var ID = "ID";
+	var NAME="NAME";
+
+ 
+function execute( pdict : PipelineDictionary ) : Number {
+	var xsw:XMLStreamWriter=pdict.XmlStreamWriter;
+	var product:Product=pdict.Product;
+	try{
+	    writeProductdefaultElements(xsw,product);
+	} catch(ex) {
+	        Logger.error("RichRelevance WriteXMLProduct.ds: Error while writing products to product feed:" + ex.message);
+	        pdict.Message = "RichRelevance WriteXMLProduct.ds: Error while writing products to product feed: "+ ex.message;        
+	        return PIPELET_ERROR;    
+	}  
+	return PIPELET_NEXT;    
+}
+function writeProductdefaultElements(xsw : XMLStreamWriter,product:Product):XMLStreamWriter {
+	
+	xsw.writeStartElement(PRODUCT);
+	xsw.writeAttribute(ID, product.ID);
+	exportProduct(product, xsw); //writes the product child nodes.	
+	xsw.writeEndElement();
+    
+    return xsw;
+}
+
+

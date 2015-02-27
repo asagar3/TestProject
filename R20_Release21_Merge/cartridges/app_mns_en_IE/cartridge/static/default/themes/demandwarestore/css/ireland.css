@@ -1,0 +1,359 @@
+a.logo{background:url(../images/home-bottoms-sprite.png) no-repeat 0 0;}
+#logo{float:left; padding:10px 0 10px 0px;}
+a.logo{padding:0px 0px 0px 0px; float:left;}
+#header a.logo{background-position:-1759px -11px; height: 83px /* Sets overall height of header */;/*left:45px;*/top:10px; width:132px; text-indent:-10000px;border:0 !important;}
+#header a.logo:focus{border:1px dotted silver !important;}
+.city input {
+    width: 214px;
+}
+.lastname input, .firstname input{
+    width: 143px;
+}
+.address1 input, .address2 input, .postcode_fr input, .zip input {
+    width: 214px;
+}
+.streetname input, .postbox input, .residence input, .phone input, .alternatecontactnumber input, .doorCode input, .email input, .confirmEmail input, .altphone input, .change_email_section input.passwordvalidation {
+    width: 214px;
+}
+.account_wrapper .registration .title {
+    margin-bottom: 12px;
+    margin-top: 20px;
+}
+
+.account_wrapper .lastname input, .account_wrapper .firstname input {
+    width: 143px;
+}
+.account_wrapper .email input, .account_wrapper .password input, .account_wrapper .email input, .account_wrapper .confirmpassword input, .account_wrapper .confirmemail input, .account_wrapper .createanaccount .password input {
+    width: 214px;
+}
+.btn-grey-flat .link_button .no-icon {
+    margin: 0 0 0 -8px;
+    padding: 0 25px 0 25px;
+}
+.addressoptions div.label{
+background: none;
+}
+.shippingmethods .shippingmethod{
+	position: relative;
+	}
+#shippingmethodform .formfieldtooltip .tooltip_icon{margin:2px 0 0;}
+.checkout #shippingmethodform .formfieldtooltip{float:left;}
+.checkout #shippingmethodform label{line-height:20px; max-width:250px; width:auto; /*padding:0 0 0 0;  float:left; clear:none;*/}
+.shippingmethods input[type="radio"]{float:left; margin:5px 0 0 !important;}
+
+.checkout #addressform .collapsibleArea #shippingmethodform {margin-left:0px;}
+
+.MasterCardSecure{
+margin-right: 10px;
+ display: inline;
+ float: left;
+}
+.MasterCardSecure .formfieldtooltip{
+display: block;
+float: left;
+}
+.MasterCardSecure .formfieldtooltip .tooltip_icon {
+    margin: 2px 0 0 2px;
+}
+.text-label{
+font-size: 14px;
+color: #a9a9a9;
+}
+.account_wrapper .lastname input, .account_wrapper .firstname input, .lastname input, .firstname input {width: 143px !important;}
+.account_wrapper .email input, .account_wrapper .password input, .account_wrapper .email input, .account_wrapper .confirmpassword input, .account_wrapper .confirmemail input, .account_wrapper .createanaccount .password input {width: 214px;}
+.account_wrapper .checkorder input.emailnum{width:196px !important}
+.title select{width:auto; color:#666;}
+.account_wrapper .registration .title {margin-bottom: 12px;}
+.state select.selectbox{font-size: 1.1em;width: auto;color:#666;}
+.city input, .edit_address_form .contactNum input, .edit_address_form .alternatecontactnumber input, .streetname input, .postbox input, .residence input, .phone input, .alternatecontactnumber input, .doorCode input, .email input, .confirmEmail input, .altphone input, .change_email_section input.passwordvalidation {width: 214px !important;}
+/*.ui-dialog .formfield {height: auto; margin: 0 0px 6px 0px}*/
+/*.checkout .formfield, .accountoverview .formfield {margin: 0 0 6px;}*/
+.account_wrapper .username input, .account_wrapper .password input {width: 214px;}
+
+.addressform .requiredmessagewrapper {
+    margin: 10px 0 16px;
+}
+.delivery_instructions .textbox {
+    width: 220px;
+    height: 70px;
+}
+.homeDelivery .delivery_instructions{padding:0 20px;}
+.secure3d .formactions{
+margin-top: 20px;
+}
+.secure3d h2{
+font-size: 17px !important;
+color: #595959  !important;
+line-height: 46px  !important;
+}
+.faqBox{border: 1px solid #E4E4E4; }
+.faqBox .faqheader{background:#efefef; padding: 10px; margin: 1px;}
+.faqBox h5{font-size: 17px; line-height: 17px; color:#595959 !important; background:url("../images/icon_toggle_plus_minus_v.png") right 0 no-repeat; cursor:pointer; padding-right: 35px;}
+.faqBox h5.open{background:url("../images/icon_toggle_plus_minus_v.png") right -32px no-repeat;} 
+.faqBox .faqBoxContent{margin:1px; display:none; }
+.faqBox p{font-weight:normal; font-size:13px;color:#666666;padding:15px 20px;}
+.shadowRight{background:url("../images/rightBox-shadow.jpg") 0 0 repeat-x; width: 319px; height: 11px;}
+.payerauth{
+background:url("../images/sh_border_bg.gif") repeat-y left;
+}
+.payerauth .top{
+background:url("../images/sh_border_top.gif") no-repeat left top;
+}
+.payerauth .btm{
+background:url("../images/sh_border_btm.gif") no-repeat left bottom;
+padding: 60px 0 5px 100px;
+}
+
+.norequire .labeltext{
+	margin-right: 10px;
+	}
+.addressoptions .checkbox input{
+	display: none;
+	}
+
+.activeBtn span.grey, .activeBtn a.grey,.activeBtn span.grey, .activeBtn a.grey,{background-position:left -70px; text-decoration:none !important;/* font-weight:bold;  *//*text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5); */}
+.activeBtn span.grey input, .activeBtn a.grey span, .activeBtn a.grey span{background-position:right -101px; color:#ffffff;/*font-weight:bold;*/ text-decoration:none !important;   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);}
+
+.activeBtn a.expandable-btn{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:left -70px !important;
+text-decoration:none;
+}
+.smallBtn:hover a.expandable-btn{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:left -70px;
+text-decoration:none;
+}
+.smallBtn:hover a.expandable-btn span{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:right -101px; text-decoration:none;
+color:#fff;
+}
+.activeBtn a.expandable-btn span{
+background-image: url("../images/ui-icons_button_states_new.png");
+background-position:right -101px; text-decoration:none;
+color:#fff;
+}
+.addressoptions .actions {
+    margin: 5px 70px 15px 0;
+}
+.addressoptions .floatLeft {
+	float:left;
+}
+.title .errorIcon, .state .errorIcon {
+    padding: 4px 10px 6px 18px;
+}
+.successIcon{padding-top:4px;}
+.title .successIcon, .state .successIcon {padding-top:8px;}
+
+.registrationform .firstname.formfield{
+	padding-bottom: 5px;
+	}
+.createanaccount .firstname.formfield{
+	padding-bottom: 0;
+	}
+	
+.payment_cards .contentasset{
+    display: inline;
+}
+.payment_cards img{
+    vertical-align: middle;
+}
+.editaddress select, .creditcardform select { color:#666; font-size:1.1em}
+
+
+
+.account_wrapper .checkorder form .label {
+    color: #333333;
+    font-size: 1.3em;
+    text-align: left;
+    width: auto !important;
+    padding:2px 2px 2px 0px;
+}
+
+.account_wrapper .checkorder form .email .label {
+    width: auto !important;
+    padding-left: 0px;
+}
+.checkorder div.errorclient {
+    width: auto !important
+}
+.account_wrapper .logingeneral .checkorder {
+    margin: 3px 0 0;
+    padding: 15px 18px 14px 15px;
+}
+.formfield.orderno{
+width:260px;
+}
+.formfield.orderemail{
+width:343px;
+}
+.emailsignup .tnc-header{
+font-size: 1.2em;
+}
+ select {
+    font-size: 1.1em  !important;
+    height: 24px  !important;
+    line-height: 24px  !important;
+    padding: 2px !important;
+   
+}
+@media screen and (-webkit-min-device-pixel-ratio:0){
+select {
+    font-size: 1.1em  !important;
+    height: 19px  !important;
+    line-height: 19px  !important;
+    padding: 0px  !important;
+  
+}}
+
+.payment_cards .contentasset {
+    display: inline;
+}
+
+.payment_cards .floatleft {
+    width: 280px;
+    display: inline;
+}
+.payment_cards .floatleft .contentasset {
+    display: inline;
+    float: right;
+    text-align: right;
+}
+
+
+.MasterCardSecure .tooltiplink {
+    text-decoration: none !important;
+  }
+  
+.hiddenradio{
+	visibility: hidden; /* add address field title issue */
+	}
+.sendtofriend input.textinput {
+    width: 222px !important; /* add address field title issue - RS-1323672 */
+}
+.account_wrapper select {
+    color: #666 !important;
+    font-size: 1.1em !important;
+}
+.accountoverview .dwContent .payment_cards .contentasset {
+    float: none;
+}
+
+.mainerror-wrapperIr{float:left; color:#FF0000; font:14px arial; margin:0 0 20px;}
+.mainerror-wrapperIr .middle{background:none; border:2px solid #e11f27; border-width:0 2px; padding:12px 40px 1px;}
+.mainerror-wrapperIr .middle .errorcontent{background:url(../images/error_main_icon.jpg) no-repeat 0 4px; padding:0 0 10px 35px; display:block;}
+.mainerror-wrapperIr div.mwtop{display:block; height:5px; background:url(../images/flexi-m-tl.gif) no-repeat 0 0;}
+.mainerror-wrapperIr div.mwtop div{background:url(../images/flexi-m-tr.gif) no-repeat right 0; padding:0 5px;}
+.mainerror-wrapperIr div.mwtop div div{background:url(../images/flexi-m-hori.gif) repeat-x 0 0; padding:0; width:599px;}
+.mainerror-wrapperIr div.mwtop div, .mainerror-wrapperIr div.mwbot div{display:block; height:5px;}
+.mainerror-wrapperIr div.mwbot{display:block; height:5px; background:url(../images/flexi-m-bl.gif) no-repeat 0 bottom;}
+.mainerror-wrapperIr div.mwbot div{background:url(../images/flexi-m-br.gif) no-repeat right 0; padding:0 5px;}
+.mainerror-wrapperIr div.mwbot div div{background:url(../images/flexi-m-hori.gif) repeat-x 0 bottom; padding:0; width:599px;}
+.delivery_link_store_collection{font:1.2em arial; padding:0 10px 0 50px; display:block; margin:0 0 10px; color:#333; background:url(../images/store-collection.gif) no-repeat 11px 0;}
+.cartfooter .cartOptions h3, .cartfooter .cartTotal h3{color:#000; font:normal 16px/20px arial; padding:0 0 15px; margin:0 0 20px; border-bottom:1px dotted #a0a0a0; background:none;}
+.cartfooter .top_section{color:#333; margin:0 0 15px;}
+/*.cartfooter .top_section li{padding:0; margin:0 0 10px;}
+.cartfooter .top_section li.standard{background:none;}
+.cartfooter .top_section li.standard span{background:url(../images/standard_cart_icon.png) no-repeat 10px 0; padding:0 0 0 55px;}
+.cartfooter .top_section li.store_collection span{background:url(../images/store-collection.gif) no-repeat 10px 1px; padding:0 0 0 55px;}*/
+.cartfooter .contentasset{font:12px arial;}
+.formfieldtooltip .tooltip small{color:#034181; font:12px arial;}
+.formfieldtooltip .tooltip small:hover{text-decoration:underline;}
+.cartfooter .cartTotal h3{font:bold 14px/20px arial; text-align:right;}
+.cartfooter .rightsection{float:none; margin:0; width:auto;}
+.cartfooter .ordershippingdiscount{color:#000 !important;}
+.cartfooter .ordertotals td{padding:0 0 5px;}
+.cartfooter .ordertotals td.last{width:59px;}
+.collapse{background: none repeat scroll 0 0 #EFEFEF;
+    border: 1px solid #B9B9B9;
+    color: #666666;
+    min-height: 60px;
+    padding: 0;
+    z-index: 1;}
+.collapse .iRadio{float:left; margin:20px 0 0 10px; padding:5px 40px 5px 0;}
+.collapse .storeCol{background:url(../images/store-collection.gif) no-repeat right center;}
+.collapse .homeDel{background:url(../images/standard_cart_icon.png) no-repeat right center;}
+#homeDelivery, #storeCollection{background:none; border:0!important; z-index:1;}
+.collapse h5{background:none; border:0;} 
+.collapse h5.grey_block_header span{border:0; padding-top:17px;}
+.collapsibleArea .under_shadow_dark{position:static;}
+.collapseContent{background:url(../images/under_shadow_dark.png) no-repeat 0 bottom; padding:0 0 9px;}
+.collapsibleArea .storeListDiv, .collapsibleArea .homeDelivery{display:none;}
+.collapsibleArea .storeListDiv, .collapsibleArea .homeDelivery{padding:20px 30px; font:12px arial; border:1px solid #B9B9B9; border-width:0 1px 1px;}
+
+.collapsibleArea .noBorder{border-bottom:0;}
+
+.collapsibleArea .storeContent{}
+.collapsibleArea p{margin:0 0 15px;}
+
+.collapsibleArea .storeMap{margin:10px 0 25px;}
+.collapsibleArea .sAddress{width:100%; float:left; margin-bottom:50px;}
+
+.checkout .collapsibleArea label, .collapsibleArea .addressoptions div.label, .checkout .collapsibleArea .label{width:180px; padding-right:20px; margin:0;}
+.checkout .collapsibleArea label .labeltext{margin-right:0;}
+.checkout .collapsibleArea .requiredindicator{margin:0 -11px 0 0;}
+.checkout .staticmsg{padding-left:192px;}
+.collapsibleArea .shippingmethods{float:left; width:350px;}
+.collapsibleArea .shippingmethods .shipping-method-001 .value, .collapsibleArea .shippingmethods .shipping-method-002 .value{width:auto;}
+.collapsibleArea .shippingmethods .tooltip1{right:0; left:auto;}
+.collapsibleArea h2{font:bold 13px arial; margin:0 0 5px;}
+.collapsibleArea h4{margin:0 0 5px; padding:0; font:bold 12px arial; color:#333; background:none;}
+.collapsibleArea .storeAddress{margin:0 0 15px 10px; width:220px; float:left;}
+
+.collapsibleArea .sTiming{float:right; width:300px; margin:0 10px 0 0;}
+.collapsibleArea .sTiming ul{margin:0 0 10px;}
+.collapsibleArea .slectedStoreDetails{margin:0 0 12px;}
+
+.checkout .collapsibleArea .giftmessagetext .giftmessagecaption,
+.checkout .collapsibleArea .giftmessagetext .value{margin:0;}
+.checkout .collapsibleArea .giftmessagetext{padding:0 0 0 180px !important; margin:0 0 12px;}
+.checkout .collapsibleArea .storeListDiv .giftmessagetext{padding:0 !important;} 
+.checkout .collapsibleArea .giftmessage{margin:0; padding:0 0 12px;}
+.checkout .collapsibleArea .giftmessagetext textarea{width:220px; padding:1px; height:70px;}
+.checkout .collapsibleArea .mMessage{padding:0 0 0 190px; font-size:1.2em;}
+
+.checkout #addressform .collapsibleArea .label{flost:left; width:160px;}
+/*.checkout #addressform .collapsibleArea .label span{display:block; text-align:right;}*/
+.checkout #addressform .collapsibleArea .giftmessage .label{width:160px !important;}
+.checkout #addressform .collapsibleArea .giftmessagetext{float:left; padding:0;}
+.checkout #addressform .collapsibleArea .giftmessagetext textarea{width:330px;}
+.checkout #addressform .collapsibleArea .formfieldtooltip{float:left;}
+	
+.orderconfirmation .thankyoumessage{width:auto;}
+.thankyoumessage .print{margin:0px 0 0;}
+.orderconfirmation .thankyoumessage p{margin:0 75px 0 0;}
+.orderconfirmation .thankyoumessage h2{margin:0 0 20px;}
+
+
+.ie8Issue{position:absolute; right:30px; bottom:30px;}
+.ie8IssueG{padding-bottom:60px !important; position:relative;}
+.addressoptions .floatNone{float:none !important;}
+#header_checkout a.logo{width:172px; margin:0 10px 0 0; height:69px;}
+
+
+.newPaymentPage .newGrey{background:#f3f3f3; padding:10px;}
+h5.grey_block_header_checkout {background:none; padding:2px 0 2px 198px; margin:0 0 18px;}
+#paymentmethods{padding:25px 0 0;}
+.checkout .paymentmethods{float:right; width:405px; margin:0;}
+.checkout .paymentmethods ul li{margin:0 0 12px;}
+.checkout .paymentmethods ul li input{margin:0;}
+.checkout .paymentmethods ul li label{margin:0; display:inline-block; font:500 14px/23px arial; padding:0 0 0 100px; color:#333;}
+.checkout .paymentmethods ul li.is-CREDIT_CARD label{background:url(../images/pay-by-cards.jpg) no-repeat 10px 50%;}
+.checkout .paymentmethods ul li.is-PayPal label{background:url(../images/paypal.jpg) no-repeat 10px 50%;}
+.newPaymentPage .newGrey{background:#f3f3f3; padding:10px;}
+.newPaymentPage .checkoutbilling{padding:0;}
+.newPaymentPage .mandatoryMsg{margin:0 0 12px; text-align:right;}
+.newPaymentPage .billingAddressFields .zip{margin:0 0 32px;}
+.newPaymentPage .emailsignup .label{width:190px;}
+.checkout .selectcreditcard .selectcreditcardmessage{font-size:inherit;}
+.newPaymentPage .value p{font:14px arial; margin:0 0 10px;}
+.newPaymentPage .email .textinput.disabled_textfield{background:none; font-style:italic;}
+.newPaymentPage .saveCard span{font-size:14px; margin:0 10px 0 0;}
+.newPaymentPage .name .formfieldtooltip .tooltip_icon{margin-top:0;}
+.newPaymentPage .billingAddressFields select.country{margin:0;}
+.checkout .paypal label{height:23px; float:left}
+.checkout .paypalLogo{background:url(../images/paypal.jpg) no-repeat; float:right; width:38px; height:25px;}
+.checkout .paypalmessage{width:260px; display:inline-block; color:#333333; font-size:14px;}
+.newGrey .formfield{margin: 0 0 12px 0; height:24px}
+.chkContent a{text-decoration:underline;}

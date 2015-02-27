@@ -1,0 +1,20 @@
+<isscript>
+var MostReviewedVar=0;
+	if(!empty(Product.custom.MostReviewedCount) && Product.custom.MostReviewedCount>0)
+	{
+		MostReviewedVar=Product.custom.MostReviewedCount;
+	}
+	var IsBazaarVoiceEnabled:Boolean= dw.system.Site.getCurrent().getCustomPreferenceValue("IsBazaarVoiceEnabled");
+</isscript>
+<isif condition="${IsBazaarVoiceEnabled}">
+<div class="starRatings">
+<isif condition="${MostReviewedVar > 0}">
+	<isif condition="${MostReviewedVar > 1}">
+		<a class="textReview" href="${URLUtils.url('Product-Show')}?pid=${Product.ID}#containerReviews" >(${MostReviewedVar} ${Resource.msg('product.reviews','product',null)})</a>
+	<iselse>
+		<a class="textReview" href="${URLUtils.url('Product-Show')}?pid=${Product.ID}#containerReviews" > (${MostReviewedVar} ${Resource.msg('product.review','product',null)})</a>
+	</isif>	
+</isif>	
+</div>
+<div class="cl"></div>
+</isif>

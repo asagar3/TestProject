@@ -1,0 +1,23 @@
+<!--- TEMPLATENAME: banktransferemail.isml --->
+<!--- TEMPLATENAME: banktransfer.isml --->
+<!-- ${Resource.msg('orderdetails.paymentmethod.banktransfer','components',null)}
+	
+		<span>${Resource.msg('global.paymenttype','locale',null)}:</span> -->
+		<span class="value"><isprint value="${paymentInstr.custom.paymentType}"/></span>
+<!--	&nbsp;
+	<isif condition="${paymentInstr.paymentTransaction.custom.paymentType=='IDEAL-SSL'}">
+	
+		<span>${Resource.msg('global.bank','locale',null)}:</span>
+		<span><isprint value="${paymentInstr.custom.bankName}"/></span>
+		&nbsp;
+	</isif>
+	<isif condition="${paymentInstr.paymentTransaction.custom.paymentType=='SOFORT-SSL'}">
+	
+		<span>${Resource.msg('global.bankcountry','locale',null)}:</span>
+		<span><isprint value="${paymentInstr.paymentTransaction.custom.shoppersBank}"/></span>
+		&nbsp;
+	</isif>
+	
+		<span class="label">${Resource.msg('global.amount','locale',null)}:</span>
+		<span class="value"><isprint value="${paymentInstr.paymentTransaction.amount}"/></span>
+	-->

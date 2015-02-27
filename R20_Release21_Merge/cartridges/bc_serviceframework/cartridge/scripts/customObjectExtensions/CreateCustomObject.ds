@@ -1,0 +1,51 @@
+/**
+*
+* @input CurrentHttpParameterMap : dw.web.HttpParameterMap
+* @input Config : dw.object.CustomObject
+* @input Type : String
+* @output CustomObject : dw.object.CustomObject
+*
+* @namespace
+* @author svo
+*/
+var CreateCustomObject = {};
+importPackage( dw.system );
+
+/** 
+* 
+* @name CreateCustomObject.execute
+*/ 
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var typeGroups =  dw.object.CustomObjectMgr.describe(pdict.Type).getAttributeGroups();
+	var key : String = new String();
+	var keyValue : String = '';
+	for each (var group in typeGroups) {
+		for each (var property in group.getAttributeDefinitions()) {
+			if (property.isKey()) {
+				key = property.ID;
+			}
+		} 
+	}
+	
+	var autoGenerate : dw.util.ArrayList = new dw.util.ArrayList(); 
+	for each (var id in pdict.Config.custom.autoGenerateProperties) {
+		if (id == key) {
+			keyValue = dw.util.UUIDUtils.createUUID();	
+		} else {
+			autoGenerate.add(id);
+		}
+	}
+	Logger.debug(keyValue + ":" + empty(keyValue));
+	if (empty(keyValue)) {
+		keyValue = pdict.CurrentHttpParameterMap[key].value;
+	}  
+	var customObject = dw.object.CustomObjectMgr.createCustomObject(pdict.Type, keyValue);
+	
+	for each (var autoproperty in autoGenerate) {
+		customObject.custom[autoproperty] = dw.util.UUIDUtils.createUUID();	
+	}
+	
+	pdict.CustomObject = customObject;
+    return PIPELET_NEXT;
+}

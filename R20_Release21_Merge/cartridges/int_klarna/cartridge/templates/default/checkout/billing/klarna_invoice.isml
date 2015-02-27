@@ -1,0 +1,43 @@
+<isif condition="${empty(pdict.Order)}">
+
+	<isset name="KlarnaCountry" value="${pdict.Basket.shipments[0].shippingAddress.countryCode.value}" scope="page"></isset>
+	
+	<isloop var="paymentInstrument" items="${pdict.Basket.paymentInstruments}">
+	
+		<isif condition="${paymentInstrument.paymentMethod == "KLARNA"}">
+			<isset name="KlarnaCustom" value="${paymentInstrument.custom}" scope="page"></isset>
+			<div>
+				<img id="klarna_logo" class="klarna_logo"
+					src="${URLUtils.imageURL('images/logo/' + KlarnaCountry.toLowerCase() + '/klarna_invoice.png', null)}"
+					alt="${Resource.msg('klarna.invoice_logo_alt', 'klarna', null)}" />
+			</div>
+			<strong>${Resource.msg("klarna.payment_method", "klarna", null)}:</strong> ${KlarnaCustom["KlarnaPaymentDescription"]}
+			<br />
+			<strong>${Resource.msg("klarna.invoice_fee", "klarna", null)}:</strong><isprint value="${new dw.value.Money(KlarnaCustom["KlarnaInvoiceFee"], pdict.Basket.currencyCode)}"/>
+			<br />
+			<br />
+			<isif condition="${!empty(KlarnaCustom["KlarnaReferencePerson"])}">
+			<strong>${Resource.msg("klarna.reference_person", "klarna", null)}:</strong><br />
+			${KlarnaCustom["KlarnaReferencePerson"]}
+		</isif>
+		</isif>
+	</isloop>
+
+<iselse/>
+
+	<isset name="KlarnaCustom" value="${paymentInstr.custom}" scope="page"></isset>
+	<isset name="KlarnaCountry" value="${pdict.Order.shipments[0].shippingAddress.countryCode.value}" scope="page"></isset>
+	<div>
+	<img src="${URLUtils.imageURL("logotypes/klarna_invoice_" + KlarnaCountry.toLowerCase() + ".png", null)}" />
+	</div>
+	<strong>${Resource.msg("klarna.payment_method", "klarna", null)}:</strong> ${KlarnaCustom["KlarnaPaymentDescription"]}
+	<br />
+	<strong>${Resource.msg("klarna.invoice_fee", "klarna", null)}:</strong> ${KlarnaCustom["KlarnaInvoiceFee"] + pdict.Order.currencyCode}
+	<br />
+	<br />
+	<isif condition="${!empty(KlarnaCustom["KlarnaReferencePerson"])}">
+		<strong>${Resource.msg("klarna.reference_person", "klarna", null)}:</strong><br />
+		${KlarnaCustom["KlarnaReferencePerson"]}
+	</isif>
+
+</isif>

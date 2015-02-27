@@ -1,0 +1,46 @@
+/**
+* Demandware Script File
+* To define input and output parameters, create entries of the form:
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*-   @input ExampleIn : String This is a sample comment.
+*    @output customersIterator : dw.util.SeekableIterator
+*
+*/
+importPackage( dw.system );
+importPackage( dw.catalog );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.object );
+importPackage( dw.customer );
+
+function execute( args : PipelineDictionary ) : Number
+{
+
+    var date : Date = new Date();
+    var calendar : Calendar = new Calendar(date);
+	Logger.error("Original calendar is : " + calendar.time);
+	
+	calendar.add(Calendar.DAY_OF_YEAR, -2);
+	Logger.error("now the date according to the calendar is : " + calendar.time);
+	var dateToCompare : Date = new Date(calendar.time);
+	Logger.error("dateToCompare object value is : " + dateToCompare);
+	
+	var customerIterator : SeekableIterator = CustomerMgr.queryProfiles("lastModified>{0} OR creationDate>{0}",null,dateToCompare);
+	
+	Logger.error("total customers fetched are : "+customerIterator.count);
+	
+	args.customersIterator = customerIterator;
+	
+    return PIPELET_NEXT;
+}

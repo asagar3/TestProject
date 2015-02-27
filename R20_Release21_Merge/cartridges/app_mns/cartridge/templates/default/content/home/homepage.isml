@@ -1,0 +1,18 @@
+<iscache type="relative" hour="24" varyby="price_promotion"/>
+<isdecorate template="content/home/pt_storefront">
+<iscomment>this is the template rendering the homepage</iscomment>
+<div class="homepage clearfix"><!-- +1.888.553.9216 --><!--This phone is a requirement to support existing Gomez monitor of SiteGenesis. Demadware customers can remove this.-->
+	<div id="content_homepage_landing">
+		<isslot id="home-main" description="Flash Banner in homepage" context="global" />
+		<div class="sectHolder clearfix">
+			<isslot id="home-sectHolder" description="Middle content below flash banner" context="global" />
+			<isslot id="small_content_module_one" description="Middle small content one" context="global" />
+			<isslot id="small_content_module_two" description="Middle small content two" context="global" />
+			<isslot id="small_content_module_three" description="Middle small content three" context="global" />
+			<isslot id="small_content_module_four" description="Middle small content four" context="global" />
+		</div>
+		<isslot id="home-infoslot" description="Third content below middle content" context="global" />
+		<isslot id="home-bottom" description="Bottom content below flash banner" context="global" />		
+	</div>	
+</div>
+</isdecorate>

@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<iscomment><!-- TODO | Fixed Web Acc. | Please make sure "fr" should appear from properties file |Asha | 10-mar-2011--></iscomment>
+
+<iscomment>This includes global utilities into the pages</iscomment>
+<isinclude template="util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+
+<head>
+	<iscomment>
+		Include all important information globally , e.g. meta-data, link information, and
+		javascript.
+	</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+
+	<iscomment>Add page specific header information here.</iscomment>	
+</head>
+
+<body>
+
+<isinclude template="components/header/headerlogin"/>
+<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+<script>
+	var resonCode ="${pdict.ReasonCode}";
+	s.server = "${dw.system.System.getInstanceHostname()}" ;
+	s.prop24 = "${Resource.msg('omniture.prop24.checkout','omniture',null)}" ;
+	s.channel = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+	s.prop1 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+	s.prop18 = "${Resource.msg('omniture.channel.checkout','omniture',null)}" ;
+	if ("${pdict.checkoutPageStatus}" == "onShippingPage"){
+		s.pageName = "${dw.web.Resource.msg('omniture.checkout.shippingdetailspagetitle','omniture',null)}" + " : " + "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.pt_cart.registeredcheckout','omniture',null) : dw.web.Resource.msg('omniture.pt_cart.guestcheckout','omniture',null)}";
+		s.events = "${Resource.msg('omniture.events.checkout','omniture',null)}" ;
+		//evar22 added for CR154 (only for checkout pages:Shipping,Billing,OrderConfirmation)| KPI | Ability to distinguish between guest checkout & sign in checkout
+		s.eVar22 = "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.evar22.registered','omniture',null) : dw.web.Resource.msg('omniture.evar22.guest','omniture',null)}";		
+	} else if ("${pdict.checkoutPageStatus}" == "onBillingPage"){		
+		s.pageName = "${dw.web.Resource.msg('omniture.checkout.paymentdetailspagetitle','omniture',null)}" + " : " + "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.pt_cart.registeredcheckout','omniture',null) : dw.web.Resource.msg('omniture.pt_cart.guestcheckout','omniture',null)}";
+		if ("${pdict.OmnitureMessage}" == "paypalerror") {
+			s.events = "${Resource.msg('omniture.events.paypalerror','omniture',null)}" ;
+			if ("${pdict.Decision}" == "REJECT"){
+				s.eVar64 = "${Resource.msg('omniture.eVar64.paypalreject','omniture',null)}" ;
+				s.prop64 = "${Resource.msg('omniture.eVar64.paypalreject','omniture',null)}" ;
+			}
+			else {
+				s.eVar64 = "${Resource.msg('omniture.eVar64.paypalerror','omniture',null)}" ;
+				s.prop64 = "${Resource.msg('omniture.eVar64.paypalerror','omniture',null)}" ;
+			}
+			
+		}		
+		else {
+			var queryString = "${pdict.CurrentRequest.getHttpQueryString()}";			
+			if (queryString.indexOf("token") != -1 && queryString.indexOf("EC-") != -1) {
+				s.events = "${Resource.msg('omniture.events.paypalcancellation','omniture',null)}" ;	
+			}
+			else {
+				s.events = "${Resource.msg('omniture.events.payment','omniture',null)}" ;
+			}
+		}
+		//evar22 added for CR154 (only for checkout pages:Shipping,Billing,OrderConfirmation)| KPI | Ability to distinguish between guest checkout & sign in checkout
+		s.eVar22 = "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.evar22.registered','omniture',null) : dw.web.Resource.msg('omniture.evar22.guest','omniture',null)}";	
+	}
+	if (resonCode == "475" && resonCode != "null") {
+		s.pageName = "${dw.web.Resource.msg('omniture.checkout.3dsecure','omniture',null)}" + " : " + "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.pt_cart.registeredcheckout','omniture',null) : dw.web.Resource.msg('omniture.pt_cart.guestcheckout','omniture',null)}";
+		//evar22 added for CR154 (only for checkout pages:Shipping,Billing,OrderConfirmation)| KPI | Ability to distinguish between guest checkout & sign in checkout
+		s.eVar22 = "${pdict.CurrentCustomer.authenticated ? dw.web.Resource.msg('omniture.evar22.registered','omniture',null) : dw.web.Resource.msg('omniture.evar22.guest','omniture',null)}";		
+	}
+	s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"
+</script>
+
+<div id="container" class="pt_checkout">
+<iscomment><!-- Web acc fix |  asha | 10-mar-2011 --></iscomment>
+<a class="accessible" href="#main">.</a>
+	<div id="main">
+		<div id="content">
+			<isbreadcrumbs bcurl1="${URLUtils.url('Cart-Show')}" bctext1="${Resource.msg('pt_checkout.breadcrumb','checkout',null)}"/>
+			<isreplace/>
+		</div><!-- END: content -->
+		<div id="rightcolumn">
+			<isif condition="${!empty(pdict.ReasonCode) && (pdict.ReasonCode==475)}">
+			<iscontentasset aid="3dsecure-righthand-content"/>
+			<iselse/>
+			<isinclude template="checkout/minisummary"/>
+			</isif>
+		</div><!-- END: rightcolumn -->
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<isinclude template="components/footer/footer_checkout"/>
+	</div> <!-- END: main -->
+	
+</div><!-- END: container -->
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+/**
+* This script, valid only for swedish customers, uses the SSN to retrieve stored addresses.
+*
+*	@output CustomerAddresses : Array An array holding all the current customers addresses
+*	@output KlarnaError	: String	An array holding the error code and message
+*/
+importPackage( dw.system );
+importScript("int_klarna:libKlarnaAPI.ds")
+
+function execute( args : PipelineDictionary ) : Number
+{
+	// Get the birthdate + four last digits for 
+	// swedish customers.
+
+	var ssn : String = request.httpParameters["ssn"][0];
+
+	// Get (or create if missing) addresses cache
+	var addresses = session.custom.klarna_addresses;
+	if(typeof addresses == "undefined" || addresses == null) {
+		addresses = {};
+		session.custom.klarna_addresses = addresses;
+	}
+
+	// Get address from cache or Klarna
+	if(typeof addresses[ssn] == "undefined" || addresses[ssn] == 'null') {
+	    try {
+			k = new Klarna();
+			var tmp = k.get_addresses(ssn);
+			addresses[ssn] = tmp;
+			args.CustomerAddresses = tmp;
+	    } catch(e) {
+			var ex : Error = e;
+			args.KlarnaError = ex.message;
+			return PIPELET_ERROR;
+	    }
+	} else {
+		args.CustomerAddresses = addresses[ssn];
+	}
+
+    return PIPELET_NEXT;
+}

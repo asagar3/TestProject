@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${Resource.msg('global.language','locale',null)}">
+<isinclude template="tablet/util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+
+<head>
+	<iscomment>
+		Include all important information globally , e.g. meta-data, link information, and
+		javascript.
+	</iscomment>
+	<isinclude template="tablet/components/header/htmlhead"/>
+
+	<iscomment>Add page specific header information here.</iscomment>
+
+</head>
+<body>
+<div id="container" class="pt_cart">
+	<isinclude template="tablet/components/header/header"/>
+	<iscomment> Variables added for Omniture Tagging | Naveen Kumar</iscomment>
+	
+	<isif condition="${!empty(pdict.vbBasketId)}">
+	    <script type="text/javascript">
+			s.eVar62 = "${pdict.vbBasketId}" ;
+		</script>
+	</isif>
+	
+	<script type="text/javascript">
+		s.pageName = "${pdict.omniPageName}" ;
+		s.server = "${dw.system.System.getInstanceHostname()}" ;
+		s.eVar44 = "${dw.util.Locale.getLocale(pdict.CurrentRequest.locale).country}"
+	</script>
+	<div id="main">
+		<div id="content">
+			<isbreadcrumbs bctext1="${Resource.msg('pt_cart.breadcrumb','checkout',null)}"/>
+			<isreplace/>
+		</div><!-- END: content -->
+		<div id="rightcolumn">
+			<isinclude template="checkout/cart/rightcolumn"/>
+		</div><!-- END: rightcolumn -->		
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+		<isinclude template="tablet/components/footer/footer"/>				
+	</div><!-- END: main -->
+	<iscomment><!--  Asha | Footer Template moved from here --></iscomment>	
+</div>
+<!-- END: container -->
+
+</body>
+</html>

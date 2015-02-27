@@ -1,0 +1,108 @@
+/**
+ * Christina D. 
+ * INT-493 - PIM - This script is to parse the new format of product details bullet points.
+ */
+importPackage( dw.system );
+importPackage( dw.util );
+
+var separatorInlineReferences="*****";
+var separatorTitleBullets="#";
+var separatorBulletTokens=";;;";
+var separatorBulletAttributeNameValue=":";
+var separatorBulletAttributeMultiValues="|||";
+var noTitlePrefix = "xxxxx";
+
+/**
+ * for PDP - desktop and tablet
+ */
+function getBulletPoints(product:Product,language:String):LinkedHashMap{
+	var bulletMap:Map=new LinkedHashMap();
+	var bulletString = product.custom.productDetailsBulletPoints;
+	var inlineReferencesTokens = bulletString.split(separatorInlineReferences);
+
+	var i = 0;
+	for each (inlineRef in inlineReferencesTokens){
+		if (language.equals("nl") || inlineRef.indexOf("Meer details")<0){
+			var bullets:List=new ArrayList();
+			var bulletsWithoutTitle = "";
+			var titleText = "";
+			
+			if(inlineRef.indexOf(separatorTitleBullets) >=0){
+				var bulletParentTokens = inlineRef.split(separatorTitleBullets);
+				titleText = bulletParentTokens[0];	
+				bulletsWithoutTitle = bulletParentTokens[1];
+			} else {
+				titleText = noTitlePrefix + i;
+				bulletsWithoutTitle = inlineRef;
+			}
+			
+			var bulletPointsTokens = bulletsWithoutTitle.split(separatorBulletTokens);
+			for each (bullet in bulletPointsTokens){
+				//if(bullet.indexOf(separatorBulletAttributeMultiValues) >=0){
+					while(bullet.indexOf(separatorBulletAttributeMultiValues) >=0){
+						bullet = bullet.replace(separatorBulletAttributeMultiValues, ", "); 
+					}
+				//  }
+				/*			  
+				var hasAttributeName = false;
+				if(bullet.indexOf(separatorBulletAttributeNameValue) >=0) {
+					var bulletValues = bullet.split(separatorBulletAttributeNameValue);
+					hasAttributeName = true;
+				}*/
+				
+				if(bullet.length>0)	
+					bullets.add(bullet);
+			}
+
+			if(bullets.size() > 0)
+				bulletMap.put(titleText, bullets);
+			i++;
+		}
+	}
+	return bulletMap;
+}
+
+/**
+ * for kiosks - used by JSON creation scripts
+ */
+function getBulletPointsForKiosks(product:Product):String{
+	
+	var bullets:String="";
+	var bulletString = product.custom.productDetailsBulletPoints;
+	var inlineReferencesTokens = bulletString.split(separatorInlineReferences);
+
+	for each (inlineRef in inlineReferencesTokens){
+		var bulletsWithoutTitle = "";
+		
+		if(inlineRef.indexOf(separatorTitleBullets) >=0){
+			var bulletParentTokens = inlineRef.split(separatorTitleBullets);	
+			bulletsWithoutTitle = bulletParentTokens[1];
+		} else {
+			bulletsWithoutTitle = inlineRef;
+		}
+		
+		var bulletPointsTokens = bulletsWithoutTitle.split(separatorBulletTokens);
+		for each (bullet in bulletPointsTokens){
+			//if(bullet.indexOf(separatorBulletAttributeMultiValues) >=0){
+				while(bullet.indexOf(separatorBulletAttributeMultiValues) >=0){
+					bullet = bullet.replace(separatorBulletAttributeMultiValues, ", "); 
+				}
+			 // }
+			/*			  
+			var hasAttributeName = false;
+			if(bullet.indexOf(separatorBulletAttributeNameValue) >=0) {
+				var bulletValues = bullet.split(separatorBulletAttributeNameValue);
+				hasAttributeName = true;
+			}
+			*/
+				
+			bullets = bullets.concat(bullet).concat("|") ;	
+		}
+	}
+
+	return bullets;
+}
+
+function getNoTitlePrefix():String{
+	return noTitlePrefix;
+}

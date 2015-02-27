@@ -1,0 +1,99 @@
+/**
+* @input TempFile : String
+* @output Message : String
+* @output dwFileName : String
+*/
+
+importPackage( dw.system );
+importPackage( dw.io );
+importPackage( dw.util );
+importScript('int_cybersource:cybersource/Date&TimeUtility.ds');
+importScript("int_bazaarvoice:/lib/libBazaarvoice.ds");
+importScript('int_bazaarvoice:lib/CustomLibBazaarVoice.ds');
+
+var bvHelper = getBazaarVoiceHelper();
+function execute(pdict: PipelineDictionary): Number {
+	    
+    //collect active country and and its associated language in countryLocaleMap
+    getcountryLocale();
+    
+    try {    	
+   		
+	    var date : Date = new Date();
+        var filename : String = Site.getCurrent().ID +"-DW-CalculatedInlineRatingsFeed-" + date.getFullYear() + bvHelper.insertLeadingZero(date.getMonth()+1) + bvHelper.insertLeadingZero(date.getDate()+1) + bvHelper.insertLeadingZero(date.getHours()+1) + bvHelper.insertLeadingZero(date.getMinutes()+1) + bvHelper.insertLeadingZero(date.getMilliseconds()) + ".xml"; 
+	    var file : File = new File(File.IMPEX + "/src" + File.SEPARATOR+ filename);
+	    pdict.dwFileName = filename;
+        var fw : FileWriter = new FileWriter(file, "UTF-8", false);           
+            xsw = new XMLStreamWriter(fw);
+            initFeed(xsw,file);
+        
+        //read bv feed file
+        var tempFile: String = File.IMPEX + "/src" + File.SEPARATOR + pdict.TempFile;
+        var file : File = new File(tempFile);
+        var fileReader : FileReader = new FileReader(file);            
+	    var xmlReader : XMLStreamReader = new XMLStreamReader(fileReader);		    
+	    var productXML : XML = null;
+	    var pid: String = "";
+	    var bvAverageRating: Number;
+	    var bvReviewCount:Number;
+	    var localeItemList : XMLList = null;
+   
+	    while(xmlReader.hasNext()){	  
+				xmlReader.next();	
+			  if (xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT && xmlReader.getLocalName() == "Product"){
+					productXML = xmlReader.getXMLObject();			
+					var ns = productXML.namespace();
+					
+					pid = productXML.ns::ExternalId.toString();			
+					if(!empty(pid)){
+						if ((productXML.ns::ReviewStatistics.ns::LocaleDistribution).length()>0) {
+							localeItemList = productXML.ns::ReviewStatistics.ns::LocaleDistribution.ns::LocaleDistributionItem;							
+							if (localeItemList.length() > 0){	
+									for each(var localeItem : XML in localeItemList){
+										var locale:String=localeItem.ns::DisplayLocale.toString();	
+										bvAverageRating = 0;						
+										bvReviewCount=0;	
+										var rrValidate : RegExp=/(^[1-4]{1}.\d{1,10}$)|(^[1-5]{1}.[0]{1,10}$)|(^[1-5]{1}$)/;						
+										if (rrValidate.test(localeItem.ns::ReviewStatistics.ns::AverageOverallRating.toString())){
+										    bvAverageRating = parseFloat(localeItem.ns::ReviewStatistics.ns::AverageOverallRating.toString());
+										}
+										rrValidate=/^[0-9]{1,10}$/;
+										if(rrValidate.test(localeItem.ns::ReviewStatistics.ns::TotalReviewCount.toString())){
+										bvReviewCount = parseInt(localeItem.ns::ReviewStatistics.ns::TotalReviewCount.toString());									
+										}
+										//calculate rating and review as rating=raiting1 X review1 + raiting2 X review2 +...... & review=review1 + review2 + .....
+										ratingReviewByCountry(locale,bvAverageRating,bvReviewCount);						
+							         }  
+								//calculate average rating as avgRating=(raiting1 X review1 + raiting2 X review2 +......)/(review1 + review2 + .....)
+								avgRatingCalculation(pid,xsw); 
+				    		}
+						} else {
+								bvAverageRating = 0;						
+								bvReviewCount=0;	
+								var rrValidate : RegExp=/(^[1-4]{1}.\d{1,10}$)|(^[1-5]{1}.[0]{1,10}$)|(^[1-5]{1}$)/;						
+								if (rrValidate.test(productXML.ns::ReviewStatistics.ns::AverageOverallRating.toString())){
+								    bvAverageRating = parseFloat(productXML.ns::ReviewStatistics.ns::AverageOverallRating.toString());
+								}
+								rrValidate=/^[0-9]{1,10}$/;
+								if(rrValidate.test(productXML.ns::ReviewStatistics.ns::TotalReviewCount.toString())){
+								bvReviewCount = parseInt(productXML.ns::ReviewStatistics.ns::TotalReviewCount.toString());									
+								}
+								//store rating and review as rating=raiting1 X review1 + raiting2 X review2 +...... & review=review1 + review2 + .....
+								calcualteRatingReview("IE",bvAverageRating,bvReviewCount);	
+								//calculate average rating as avgRating=(raiting1 X review1 + raiting2 X review2 +......)/(review1 + review2 + .....)
+								avgRatingCalculation(pid,xsw);
+						}
+		    	}
+		    }
+	    }	
+        finalizeFeed(xsw);    	        
+        fw.close();
+	}catch (ex){
+		Logger.error("Error Message:", ex.message);
+		pdict.Message ="Error Message:"+ ex.message;
+		finalizeFeed(xsw);    	        
+        fw.close();
+		return PIPELET_ERROR;
+	}
+return PIPELET_NEXT;
+}

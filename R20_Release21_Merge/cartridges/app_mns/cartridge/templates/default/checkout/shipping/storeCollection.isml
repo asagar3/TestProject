@@ -1,0 +1,77 @@
+				<div class="collapse store">
+					<div class="iRadio storeCol">
+						<input type="radio" id="storeCollection" value="${Resource.msg('shipping.deliverymethod.storecollection','checkout',null)}" name="nDelivery"/>
+					</div>
+					<h5 class="grey_block_header">
+						<span><strong class="content_grey_header">${Resource.msg('singleshipping.storecollection.name','checkout',null)}</strong></span>
+					</h5>
+				</div>
+				<div class="collapseContent">
+					<div class="storeListDiv">
+					<isscript>
+						var scDeliveryTime: Integer = dw.system.Site.getCurrent().getCustomPreferenceValue('SCDeliveryTime');
+					</isscript>
+						<p><isprint value="${StringUtils.format(Resource.msg('delivery.storecollection.header','checkout',null),scDeliveryTime)}"/></p>
+						<div id="multipleStores" class="hide">
+							<p>
+								<select id="storeList" name="storelist" class="selectStore" onchange="javascript: updateStoreDetails(this);">
+									<option value="" selected="selected">${Resource.msg('singleshipping.storecollection.select','checkout',null)}</option>
+								</select>
+							</p>
+						</div>
+						<div id="singleStores" class="hide singleStoreField">
+							
+						</div>	
+						<div class="storeContent">
+							<div class="slectedStoreDetails">
+								
+								<div class="sStoreMessage"></div> 
+								<div class="storeMap"><img src="" alt=""/></div>
+								<div class="sAddress">									
+									<div class="storeAddress">
+									<h2 class="sName"></h2>
+										<div class="sAddr1"></div>
+										<div class="sAddr2"></div>
+										<iscomment><div class="sAddr3"></div></iscomment>
+										<div class="sCity"></div>
+										<div class="sCountyCountry"></div>
+									</div>
+									<div class="sTiming"></div>
+								</div>								
+								<div class="clear"></div>
+							</div>
+						</div>
+						<div class="cl"></div>
+						<div class="storegiftmessagediv">
+						<div class="giftMessageDiv" style="display:none;">
+							<div class="formfield giftmessage">
+		    					<div class="label"><isprint value="${Resource.msg(pdict.CurrentForms.singleshipping.shippingAddress.isGift.label,'forms',null)}">:<span>${Resource.msg('forms.240character','forms',null)}</span></div>
+	    						<!--<div class="value radio">
+	    							<input class="isstoregiftyes" type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}" id="isstoregiftyes" value="true" <isif condition="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}">checked="checked"</isif> /> <label for="isstoregiftyes">${Resource.msg('global.yes','locale',null)}</label>
+	    							<input class="isstoregiftno" type="radio" name="${pdict.CurrentForms.singleshipping.shippingAddress.isGift.htmlName}" id="isstoregiftno" value="false" <isif condition="${!pdict.CurrentForms.singleshipping.shippingAddress.isGift.value}">checked="checked"</isif> /> <label for="isstoregiftno">${Resource.msg('global.no','locale',null)}</label>
+	    						</div> END: value -->
+	    						<div class="giftmessagetext">
+		    					<!-- <span class="giftmessagecaption">${Resource.msg('singleshipping.enteryourmessage','checkout',null)}</span> -->
+		    					<label for="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlName}" class="hideLabel">
+									${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage.htmlName}
+		        				</label>		    	
+		    					<isinputfield formfield="${pdict.CurrentForms.singleshipping.shippingAddress.giftMessage}" type="textarea" label="false" attribute1="rows" value1="4" attribute2="cols" value2="10" attribute3="onblur" value3="javascript:parseGiftMessage();"/>
+		    					<div class="clear"><!-- FLOAT CLEAR --></div>
+		    					</div><!-- END: giftmessagetext -->
+	    						<div class="formfieldtooltip">
+		    						<istooltip content_id="help-giftmessage"/>
+				 				</div>		
+		    					<div class="clear"><!-- FLOAT CLEAR --></div>
+		    				</div><!-- END: giftmessage -->
+		    				
+		   	 			</div>
+		   	 			</div>
+		   	 			<div class="clear" style="height:1px;"><!-- FLOAT CLEAR --></div>
+		   	 			<div class="continuecheckoutbutton floatright btn-green-flat" style="display:none;">
+				<button class="" type="button" onclick="setOmnitureVariablesForDeliveryPage(this); submitShippingForm();" name="${pdict.CurrentForms.singleshipping.shippingAddress.save.htmlName}" value="${Resource.msg('global.continue','locale',null)}">
+				<span class="btn-ic-lock">${Resource.msg('global.continue','locale',null)}</span><span class="forward-icon">&nbsp;</span></button>
+				
+			</div><!-- END: continuecheckoutbutton -->
+			<div class="clear"></div>
+					</div>
+				</div>

@@ -1,0 +1,149 @@
+<!--- TEMPLATENAME: vr_product.isml --->
+	<isset name="Product" value="${pdict.product}" scope="page"/>
+	
+	<isset name="image" value="${pdict.product.getImage('catlanding',0)}" scope="page"/>		
+	<iscomment>If image couldn't be determined, display a "no image" medium</iscomment>
+	<isif condition="${!empty(image)}">
+		<isset name="thumbnailUrl" value="${image.URL}" scope="page"/>
+	<iselse/>
+		<isset name="thumbnailUrl" value="${URLUtils.staticURL('/images/noimagemedium.png')}" scope="page"/>
+	</isif>
+	
+<div class="item" id="${pdict.product.ID}">
+	<img src="${thumbnailUrl}" class="itemImage" alt="${pdict.product.name}"/>
+	<p class="itemName">${pdict.product.name}</p>
+	<p class="itemPrice">	
+		<iscomment>Renders pricing information depending on the option or variation model, as well as scaled prices and so on.</iscomment>
+		<isset name="minListPrice" value="${Product.priceModel.getMinPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+		<isset name="maxListPrice" value="${Product.priceModel.getMaxPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+		<isif condition="${Product.productSet}">
+			<iscomment>Product set pricing</iscomment>
+			<isif condition="${Product.custom.productSetPriceIndicator != null }">
+							
+				<iscomment>INT-450 - PIM - New product set indicators - new logic for ind 3</iscomment>
+				<isif condition="${Product.custom.productSetPriceIndicator == '3'}">
+					<isprint value="${Product.getPriceModel().getMinPrice()}"/>
+				<iselseif condition="${Product.custom.productSetPriceIndicator == '2'}">
+					<iscomment>INT-448 - PIM calculate product set price for suits only - previous value from productSetPrice</iscomment>
+					<iscomment><isprint value="${Product.custom.productSetPrice}"/></iscomment>
+					<isscript>
+						importScript("app_mns:/product/ProductSetPriceCalculation.ds");
+						var setTotalPrices : HashMap = getProductSetPrice(Product);
+									
+						var minPriceTotal:Money =  setTotalPrices.get("setMinPriceTotal");
+						var listPriceTotal:Money =  setTotalPrices.get("setListPriceTotal");
+						var minProductPrice:Money = setTotalPrices.get("minProductPrice");
+					</isscript>
+					<isif condition="${listPriceTotal.isAvailable() && minPriceTotal.isAvailable() && !minPriceTotal.equals(listPriceTotal)}">
+						<div class="discountprice">
+							<div class="salesprice"><div class="accessibility">
+							${Resource.msg('product.nowPrice','product',null)}</div>
+							<isprint value="${minPriceTotal}"/></div>
+							<div class="standardprice"><div class="accessibility">
+							${Resource.msg('product.wasPrice','product',null)}</div>
+							<isprint value="${listPriceTotal}"/></div>
+						</div>
+					<iselseif condition="${!minProductPrice.equals(minListPrice)}" >
+						<div class="discountprice">
+							<div class="accessibility">
+							${Resource.msg('product.nowPrice','product',null)}</div>
+							<div class="salesprice">${Resource.msg('product.priceFrom','product',null)} <isprint value="${minProductPrice}"/></div>										
+						</div>																
+					<iselseif condition="${listPriceTotal.isAvailable()}">
+						<div class="salesprice"><isprint value="${listPriceTotal}"/></div>
+					<iselse>
+						<div class="salesprice">${Resource.msg('product.priceFrom','product',null)} <isprint value="${minListPrice}"/></div>
+					</isif>
+				</isif>
+			<iselse>	
+				${Resource.msg('global.buyall','locale',null)}
+			</isif>
+		<iselseif condition="${Product.master && ProductHit.priceRange}"/>
+			<iscomment>Praveen: Code changes for CR3007</iscomment>
+			<isscript>
+				//var masterProd : dw.catalog.Product = Product.getMasterProduct();
+			</isscript>
+			<iscomment>Praveen: Code changes for CR3007</iscomment>
+			
+			<iscomment>Product master price range depending on the represented variants</iscomment>
+			<iscomment>Praveen: Code change for displaying the list price</iscomment>					
+			<isif condition="${!ProductHit.minPrice.equals(minListPrice)}">
+				<div class="discountprice">
+			</isif>
+			${Resource.msg('product.nowPrice','product',null)} <isprint value="${ProductHit.minPrice}"/> - <isprint value="${ProductHit.maxPrice}"/>
+			${Resource.msg('product.wasPrice','product',null)}
+			<iscomment>Praveen: If list price is common for all variants</iscomment>
+			<isif condition="${minListPrice.equals(maxListPrice) && !minListPrice.equals(ProductHit.minPrice)}">
+				<isprint value="${minListPrice}"/>
+			<iscomment>Praveen: If list price is in range</iscomment>
+			<iselseif condition="${!minListPrice.equals(maxListPrice) && !minListPrice.equals(ProductHit.minPrice)}">
+				<isprint value="${minListPrice}"/>-<isprint value="${maxListPrice}"/>
+			</isif>				
+		<iselse/>						
+			<iscomment>For Product master without a price range get the pricing from firstRepresentedProduct </iscomment>
+			<isif condition="${Product.master && !ProductHit.priceRange}"/>
+				<iscomment>Preserve current product instance</iscomment>
+				<isset name="OrgProduct" value="${Product}" scope="page"/>
+				<isset name="Product" value="${ProductHit.firstRepresentedProduct}" scope="page"/>
+			</isif>
+			<iscomment>
+				Regular pricing through price model of the product. If the product is an option product,
+				we have to initialize the product price model with the option model.
+			</iscomment>
+			<isif condition="${Product.optionProduct}">
+				<isset name="PriceModel" value="${Product.getPriceModel(Product.getOptionModel())}" scope="page"/>
+			<iselse/>
+				<isset name="PriceModel" value="${Product.getPriceModel()}" scope="page"/>
+			</isif>
+
+			<iscomment>
+				Check whether the product has price in the sale pricebook. If so, then
+				display two prices: crossed-out standard price and sales price.
+			</iscomment>
+			<isinclude template="product/components/standardprice"/>
+			<isset name="SalesPrice" value="${PriceModel.getPrice()}" scope="page"/>
+			<isset name="ShowStandardPrice" value="${StandardPrice.available && SalesPrice.available && StandardPrice.compareTo(SalesPrice) == 1}" scope="page"/>
+		
+			<iscomment>Praveen: Code changes for CR3007</iscomment>
+			<isscript>
+				/* var masterProd : dw.catalog.Product = null;
+							//If for Abandon products & else for all other products
+							if(!Product.isMaster() && !Product.isVariant()){
+								var masterProd = Product;
+							}else{
+								var masterProd = Product.getMasterProduct();
+							}
+						*/
+							var masterProd : dw.catalog.Product = null;
+	//If for Abandon products & else for all other products
+	if(!Product.isMaster() && !Product.isVariant()){
+	var masterProd = Product;
+ 	}
+	else if (Product.isVariant())
+  {
+  var productVariant : dw.catalog.Variant = Product;
+  var masterProd = productVariant.getMasterProduct();
+  }
+	else
+  {
+    var masterProd = Product;
+  }
+			</isscript>
+			<isset name="minListPrice" value="${masterProd.priceModel.getMinPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+			<isset name="maxListPrice" value="${masterProd.priceModel.getMaxPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault)}" scope="page"/>
+	
+			<isif condition="${!minListPrice.equals(SalesPrice) || !maxListPrice.equals(SalesPrice)}">				
+					${Resource.msg('product.nowPrice','product',null)}<isprint value="${SalesPrice}"/>
+					${Resource.msg('product.wasPrice','product',null)} 
+						<isif condition="${!minListPrice.equals(maxListPrice)}">
+							<isprint value="${minListPrice}"/>-<isprint value="${maxListPrice}"/>
+						<iselse>
+							<isprint value="${minListPrice}"/>
+						</isif>
+			<iselse/>
+				<isprint value="${SalesPrice}"/>
+			</isif>
+		</isif>		
+	</p>	
+	<a class="deleteItem"></a>
+</div>

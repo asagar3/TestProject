@@ -1,0 +1,104 @@
+/**
+
+*   @input deviceID : String
+*   @input orderChannel : String
+*   @input orderPoint : String 
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+importPackage(dw.util);
+importPackage( dw.web );
+
+function execute( pdict : PipelineDictionary ) : Number
+{	
+	//var map : HashMap = new HashMap();
+	var basketList : dw.util.List = new ArrayList();
+	var basketIt :Iterator ;
+	var storeID : String = session.custom.orderPoint ;
+	
+	if(storeID == null){
+		storeID = pdict.orderPoint ;
+	}
+		
+	var sessionMap : Map = new LinkedHashMap();	
+	
+	var url : String = Site.getCurrent().getCustomPreferenceValue("VBServiceURL");
+	url = url.substr(0, url.length-1) + "?storeId="+storeID+"&device="+pdict.deviceID+"&channel="+pdict.orderChannel;
+	Logger.error("retrive VBServiceURL URL is "+url); 
+	var httpService : HTTPClient = new HTTPClient();	
+	try {		
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+		httpService.open('GET', url);
+		httpService.send();
+		if (httpService.statusCode == 200){			
+			for each(var basket in JSON.parse(httpService.text))
+		    {
+		    	basketList.push(basket);
+		    }			
+			basketIt = basketList.iterator();
+		   	while (basketIt.hasNext())
+		   	{
+		   		//basketList.push(basket);no
+		    	var basket : Object = basketIt.next();		    	
+		    	//Create the vbObject and Add in vbObject
+		    	var vbObject : Object = new Object();
+		    	//Get Modified Date and Add in vbObject
+		    	vbObject.modifiedDate = getEffectiveDate(basket.DateModified);
+		    	//Get Basket Id and Add in vbObject
+		    	vbObject.basketId = basket.BasketId;
+		    	//Create the Map for ProductId and Quantity
+		    	var prod_id_qty_map : HashMap = new HashMap(); 
+		    	for each(var item in basket.Items){
+			   		prod_id_qty_map.put(item.ProductUPC, item.Quantity);
+		        }		        
+		        //add ProdId & Qty Map in vbObject
+		    	vbObject.prodId_Qty_Map = prod_id_qty_map;		    	
+            	//Create Session Map
+		        if(!empty(prod_id_qty_map)){
+		        	sessionMap.put(basket.Email,vbObject);
+				}
+		    }		    	     
+		   	session.custom.emailMap = sessionMap;
+		} else {
+			Logger.error("Error in retreive_email.ds, "+" httpCode :" + httpService.statusCode+", errorMsg: "+httpService.text);
+		}
+	} catch ( ex ) {
+		Logger.error("Error in retreive_email.ds, " +  " error" + ex);
+	}
+    return PIPELET_NEXT;
+}
+
+function readCookie() : String {
+	var cookie :Cookie = request.httpCookies['channnelCookie'];
+	
+	var channnelCookieValue : String = "";
+	
+	var tempOrderPoint : String = "";
+	if(!empty(cookie)) 
+	{
+		channnelCookieValue=cookie.getValue(); 
+		var cookieAttr : Array = channnelCookieValue.split("|");
+		
+		for (var i=0; i < cookieAttr.length ; i++){
+			var cookieVal :String = cookieAttr[i];
+			if (cookieVal.indexOf("orderPoint=")>-1){
+				tempOrderPoint = cookieVal.substring(cookieVal.indexOf("=")+1);
+			}
+		}
+	}
+	return tempOrderPoint;
+}
+
+function getEffectiveDate(date : String ): Date{
+	var datePart : String = date.substring(0,10);
+	var timePart : String = date.substring(11,16);
+	var year = datePart.substring(0,4);
+	var month = datePart.substring(5,7);
+	var date1 = datePart.substring(8,10);
+	var hours = timePart.substring(0,2);
+	var min = timePart.substring(3,5);
+	var effectiveDate : Date = new Date(year, month-1 ,date1,hours,min,01);
+	return effectiveDate;
+}

@@ -1,0 +1,2 @@
+<iscache type="relative" minute="5"/>
+${JSON.stringify(pdict.customObject)}

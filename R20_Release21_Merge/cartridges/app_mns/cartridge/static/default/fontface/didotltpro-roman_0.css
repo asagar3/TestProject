@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'DidotLTProRoman';
+    src: url('didotltpro-roman_0.eot');
+    src: url('didotltpro-roman_0.eot') format('embedded-opentype'),
+         url('didotltpro-roman_0.woff') format('woff'),
+         url('didotltpro-roman_0.ttf') format('truetype'),
+         url('didotltpro-roman_0.svg#DidotLTProRoman') format('svg');
+}

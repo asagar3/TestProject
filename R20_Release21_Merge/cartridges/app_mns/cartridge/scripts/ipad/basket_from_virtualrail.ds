@@ -1,0 +1,79 @@
+/**
+*   @input email : String
+*   @input orderChannel : String
+*   @input deviceID : String
+*	@output productList : dw.util.ArrayList
+*
+*/
+importPackage( dw.system );
+importPackage(dw.net);
+importPackage(dw.util);
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	
+	var emailData: Object = new Object();
+    if(empty(pdict.email)){
+    	pdict.customObject= "VB_SE_001"; 
+    	return PIPELET_ERROR;
+    }
+    emailData.Email = pdict.email;
+    	
+	var basketList : Collection = new ArrayList();
+	var basketIt :Iterator ;
+	var url : String =Site.getCurrent().getCustomPreferenceValue("GetVBServiceURL");
+	url = url+"&device="+pdict.deviceID+"&channel="+pdict.orderChannel;
+	Logger.error("GetVBServiceURL URL is "+url);
+	var httpService : HTTPClient = new HTTPClient();	
+	try {		
+		httpService.setRequestHeader("Content-type", "application/json");
+		httpService.setRequestHeader("Authorization", Site.getCurrent().getCustomPreferenceValue("VBAuthorizationKey"));
+		httpService.setRequestHeader("x-mands-version", Site.getCurrent().getCustomPreferenceValue("VBCodeVersion"));
+		httpService.open('POST', url);
+		httpService.send(JSON.stringify(emailData));
+		if (httpService.statusCode == 200){
+			var basket : Object = JSON.parse(httpService.text);
+			//Praveen: calling 'setBasketObjectInSession', if email is not in emailMap
+			//setBasketObjectInSession(basket);
+			var productIds : Collection = new ArrayList();
+		   	for each(var item in basket.Items){
+		   		productIds.push(item.ProductUPC);
+	        }
+	        if(!empty(productIds)){
+	        	pdict.productList = productIds;
+			} else {
+				return PIPELET_ERROR;
+	        }
+		} else {
+			return PIPELET_ERROR;
+			Logger.error("Error in retreive_basket.ds, "+" httpCode :" + httpService.statusCode+", errorMsg: "+httpService.text);
+		}
+	} catch ( ex ) {
+		return PIPELET_ERROR;
+		Logger.error("Error in retreive_basket.ds, " +  " error" + ex);
+	}
+    return PIPELET_NEXT;
+}
+
+function setBasketObjectInSession(basket){
+	
+	var vbObject : Object = new Object();
+	//Get Modified Date and Add in vbObject
+	vbObject.modifiedDate = new Date (basket.DateModified);
+	//Get Basket Id and Add in vbObject
+	vbObject.basketId = basket.BasketId;
+	//Create the Map for ProductId and Quantity
+	var prod_id_qty_map : HashMap = new HashMap(); 
+	for each(var item in basket.Items){
+   		prod_id_qty_map.put(item.ProductUPC, item.Quantity);
+    }		        
+    //add ProdId & Qty Map in vbObject
+	vbObject.prodId_Qty_Map = prod_id_qty_map;		    	
+	//Create Session Map
+    if(!empty(prod_id_qty_map)){
+    	session.custom.emailMap.put(basket.Email,vbObject);
+	}
+}		    	     
+
+
+

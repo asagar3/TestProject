@@ -1,0 +1,11 @@
+<iscomponent pipeline="RichRelevance-IncludeCommon">
+<script chartset="utf-8" type="text/javascript">
+/* Remove this code until we are putting recommendations in the page
+var pts = "${dw.system.Site.current.preferences.custom.rrPlacementError}".split(',');
+for (var i = 0; i < pts.length; i++) {
+	R3_COMMON.addPlacementType(pts[i]);
+}*/
+var R3_ERROR = new r3_error();	
+r3();
+</script>
+

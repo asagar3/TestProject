@@ -1,0 +1,14 @@
+<!--- TEMPLATENAME: deliverypromo.isml --->
+<isdecorate template="content/pt_deliverypromo">
+<isinclude template="util/modules"/>
+
+<div class="customerservice">
+
+     <isset name="contentID" value="${pdict.CurrentHttpParameterMap.cid}" scope="page"/>
+
+	<div class="customerservice_directory">
+		<iscontentasset aid="${contentID}"/>
+	</div><!-- END: customerservice_directory -->
+	
+</div><!-- END: customerservice -->
+</isdecorate>

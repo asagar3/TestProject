@@ -1,0 +1,81 @@
+/**
+ * Script representation of the account transactions webservice
+ *
+ * If a Service implementation needs to override a method, the overridden method can always be
+ * called using this._super();
+ */
+
+importPackage(dw.system);
+importPackage(dw.object);
+importPackage(dw.util);
+
+importScript("util/libInheritance.ds");
+importScript("util/WebServiceUtils.ds");
+importScript("util/WebserviceConfiguration.ds");
+importScript("services/AbstractBaseService.ds");
+
+// Hack, because vars cannot be imported in DW, only functions
+function getAbstractHTTPService() {
+	return AbstractHTTPService;
+}
+
+var AbstractBaseService = getAbstractBaseService();  
+
+/**
+ * Base class of all web services.
+ *
+ * @class
+ * @augments AbstractBaseService
+ */
+var AbstractHTTPService = AbstractBaseService.extend(
+/** @lends AbstractHTTPService.prototype */
+{
+	/**
+	*	@constructs
+	*	Initialises the Base service and important properties for the HTTP Service 
+	*/
+	init : function(callFrom : String, serviceObject : Object) {
+		this._super(callFrom, serviceObject);
+		/**	Use this Array to push a key followed by a value to change the request headers	*/
+		this.requestHeader = new Array();
+		/**	You can change this in the createRequest Method to make a GET-Request */
+		this.requestType = "POST";
+		
+		this.initServiceClient();	
+	},
+	
+	/**
+	*	initialises the service object
+	*/
+	initServiceClient : function(){
+		/** the service object @type dw.net.HTTPClient */ 
+		this.serviceClient = new dw.net.HTTPClient();
+		this.serviceClient.setTimeout(this.configuration.getTimeout());
+		
+	},
+	/**
+	 * Sends XML request with the configured parameters
+     *
+     * It is assumed that a credentials object is present which defines url, username and password
+	 */
+	executeServiceCall : function() {
+		Logger.debug("AbstractHTTPService: try to connect " + this.serviceName + " calling " + this.credentials.url + " credentials " + this.credentials.username + " / " + this.credentials.password);
+		this.serviceClient.setRequestHeader.apply(this.serviceClient, this.requestHeader);
+		this.serviceClient.open(this.requestType, this.configuration.getCredentials().getUrl(), this.configuration.getCredentials().getUser(), this.configuration.getCredentials().getPassword());
+		this.serviceClient.send(this.request);
+		return this.serviceClient.text;
+	},
+	/**
+	*	uses the standard http status return code to determine whether the call was sucessful or not.
+	*/
+	initStatusFromResponse : function(){
+		if(this.serviceClient.statusCode == 200){
+			this.status.code = 'OK';
+		}else{
+			this.status.code = 'ERROR';
+			this.status.error = this.serviceClient.statusCode;
+		}
+		this.status.message = this.serviceClient.statusMessage;
+	}
+
+});

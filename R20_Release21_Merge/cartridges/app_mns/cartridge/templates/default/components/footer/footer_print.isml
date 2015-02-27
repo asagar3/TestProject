@@ -1,0 +1,7 @@
+<iscomment>
+	This is the footer for all print pages.
+</iscomment>
+<div id="footer">
+	<iscomment><!-- removing it as it not required on print pages --></iscomment>
+	<iscomment><iscontentasset aid="footer_copy_mns"/></iscomment>
+</div><!-- END: footer -->

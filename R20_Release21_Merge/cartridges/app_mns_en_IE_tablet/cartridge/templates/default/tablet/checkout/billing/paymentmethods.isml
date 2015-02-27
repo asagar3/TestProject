@@ -1,0 +1,860 @@
+<!--- TEMPLATENAME: paymentmethods.isml --->
+<isinclude template="tablet/util/modules"/>
+<div id="paymentmethodform" class="collapse accordionOpen">
+<div class="done-check">&nbsp;</div>
+	<h5 class="grey_block_header">
+		<span>
+			<strong class="content_grey_header">${Resource.msg('billing.paymentheadermobile','checkout',null)}</strong>
+			</span>
+		<div class="floatright btn-grey-flat">
+			<div class="link_button">
+				<a id="changePaymentMethod" href="#">${Resource.msg('minishipments.ChangeText','checkout',null)}</a>
+			</div>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div>
+		<div class="clear"><!-- FLOAT CLEAR --></div>
+	</h5>
+</div>
+<div class="collapseContent" id="newEnterCardDetails">
+	<div class="paymentmethodform">
+	<isset name="Decision"  value="${pdict.CurrentSession.custom.Decision}" scope="page"/>
+	<isset name="ReasonCode" value="${pdict.CurrentSession.custom.ReasonCode}" scope="page"/>
+	<isset name="error"  value="false" scope="page"/>
+		<isif condition="${(!empty(Decision) && (Decision.equals('REJECT'))) || (!pdict.CurrentForms.billing.paymentMethods.creditCard.month.valid || !pdict.CurrentForms.billing.paymentMethods.creditCard.year.valid)}">
+			<div class="newErrorContainer">
+			<span class="errorIcon"></span>
+				<span>
+				${Resource.msg('billing.invalidcreditcarddetails','checkout',null)}
+				</span>
+			</div>
+			<div class="clear"></div>
+			<isset name="error"  value="true" scope="page"/>
+		</isif>
+		<isif condition="${(!empty(Decision) && (Decision.equals('ERROR'))) ||(!empty(ReasonCode) && (ReasonCode==151))}">
+			<div class="newErrorContainer"><span class="errorIcon"></span><span>${Resource.msg('confirmerror.timeout','checkout',null)}</span></div>
+			<div class="clear"></div>
+			<isset name="error"  value="true" scope="page"/>
+		</isif>
+		<isif condition="${pdict.PlaceOrderError != null}">
+			<div class="newErrorContainer"><span class="errorIcon"></span><span>${Resource.msg(pdict.PlaceOrderError.code,'checkout',null)}</span></div>
+			<div class="clear"></div>
+			<isset name="error"  value="true" scope="page"/>
+		</isif>
+		<div class="formfield">
+			<label class="label marginTopZero">				
+				<span class="labeltext bold">${Resource.msg('billing.paybaycard','checkout',null)}</span> 
+			</label>
+			<div class="value card-img">
+				<iscontentasset aid="payment-card-images"/>
+				<div class="MasterCardSecure">
+					<div class="formfieldtooltip">
+						<div class="tooltip tooltiplink">
+							<img class="tooltip_icon" alt="${Resource.msg('billing.linkcvn','checkout',null)}" src="${URLUtils.staticURL('images/tablet/info_icon.png')}" />	          
+							<div class="tooltip-body" style="display:none">
+								<div class="tooltipcontainer">
+									<div class="tooltipcontent"><iscontentasset aid="payment-card-images-tooltip"/></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>			
+			<div class="clear"><!-- FOAT CLEAR --></div>
+		</div>
+		<isset name="Decision"  value="${pdict.CurrentSession.custom.Decision}" scope="page"/>
+		<isset name="ReasonCode" value="${pdict.CurrentSession.custom.ReasonCode}" scope="page"/>
+		
+		<isset name="ReasonCode" value="null" scope="session"/>
+		<isset name="Decision" value="null" scope="session"/>
+		<div id="paymentmethods">
+		<div class="paymentmethods hide">
+			<isloop items="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.options}" var="paymentMethodType">
+			
+				<!-- Ignore GIFT_CERTIFICATE method, GCs are handled separately before other payment methods. -->
+				<isif condition="${paymentMethodType.value.equals(dw.order.PaymentInstrument.METHOD_GIFT_CERTIFICATE)}"><iscontinue/></isif>
+				
+				<isset name="radioID" value="${paymentMethodType.value}" scope="page"/>
+				<label for="is-${radioID}"><isprint value="${Resource.msg(paymentMethodType.label,'forms',null)}"/>:</label>
+				<isif condition="${paymentMethodType.checked}">
+					<input type="radio" checked="checked" name="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}" value="${paymentMethodType.htmlValue}" id="is-${radioID}" />
+					
+				<iselse>
+					<input type="radio" name="${pdict.CurrentForms.billing.paymentMethods.selectedPaymentMethodID.htmlName}" value="${paymentMethodType.htmlValue}" id="is-${radioID}" />
+				</isif>
+			</isloop>
+		</div><!-- END: paymentmethods -->
+		
+	<iscomment>Praveen-Adding 'showMe' class for billing page late load issue</iscomment>
+	<div id="PaymentMethod_CREDIT_CARD" class="paymentform creditcardpayment showMe">
+		<iscomment>display select box with stored credit cards if customer is authenticated</iscomment>
+		<isif condition="${pdict.CurrentCustomer.authenticated}">
+			<isif condition="${!empty(pdict.ApplicableCreditCards)}">
+				<iscomment>user authenticated and has saved cards</iscomment>
+				<div class="formfield">
+					<label class="label">				
+						<span class="labeltext bold"></span> 
+					</label>
+					<div class="value">
+					 <span class="tablet-selectbox"> 
+						<select id="${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}" name="${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}">
+							<option value="" selected="selected">${Resource.msg('billing.creditcardlistselect','checkout',null)}</option>
+							<isloop items="${pdict.ApplicableCreditCards}" var="creditCardInstr">
+								<option value="${creditCardInstr.UUID}">(<isprint value="${creditCardInstr.creditCardType}"/>) <isprint value="${creditCardInstr.maskedCreditCardNumber}"/> - ${Resource.msg('billing.creditcardlistexp','checkout',null)} <isprint value="${creditCardInstr.creditCardExpirationMonth}" formatter="00" />.<isprint value="${creditCardInstr.creditCardExpirationYear}" formatter="0000" /></option>
+							</isloop>
+						</select>
+						</span>
+					</div>			
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<label class="label">				
+						<span class="labeltext bold"></span> 
+					</label>
+					<div class="label bold value">
+						${Resource.msg('billing.orText','checkout',null)}
+					</div>			
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<label class="label">				
+						<span class="labeltext bold"></span> 
+					</label>
+					<div class="value">
+						<div class="floatright btn-grey-flat">
+							<div class="link_button">
+								<a id="enterNewCard" href="#">${Resource.msg('billing.enteranewcard','checkout',null)}</a>
+							</div>
+							<div class="clear"><!-- FLOAT CLEAR --></div>
+						</div>
+					</div>			
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<label class="label">		
+						<span class="labeltext">&nbsp;</span> 
+					</label>
+					<div class="value">
+						&nbsp;
+					</div>			
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div>
+				<div class="formfield">
+					<label class="label">		
+						<span class="labeltext bold"></span> 
+					</label>
+					<div class="value">
+						<div class="floatright btn-green-flat">
+							<button value="Next" name="next" id="paymentMethodNext" type="button">
+								<span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+								<span class="forward-icon">&nbsp;</span>
+							</button>
+						</div>
+					</div>			
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div>
+				<div  id="hiddenCard" style="display: none;">
+					<div id="dialogcontainerCard" class="checkout">
+						<isinclude template="tablet/checkout/billing/carddetails"/>
+						<div class="formfield">
+							<label class="label">				
+								
+							</label>
+							<div class="value">
+								<div class="continuebutton btn-green-flat">
+								<button id="popupContinueCard" class="" type="button" name="${Resource.msg('global.continueText','locale',null)}" value="${Resource.msg('global.continueText','locale',null)}">
+									<span class="btn-ic-lock">${Resource.msg('global.continueText','locale',null)}</span>
+									<span class="forward-icon">&nbsp;</span>
+								</button>
+								<div class="clear"><!-- FLOAT CLEAR --></div>
+							</div>
+							</div>			
+							<div class="clear"><!-- FOAT CLEAR --></div>
+						</div>
+						
+					</div>
+				</div>
+				
+			<iselse>
+				<iscomment>user authenticated and has no saved cards</iscomment>
+				<div class="formfield">
+					<label class="label">				
+						<span class="labeltext bold">${Resource.msg('billing.enterdetailsbelow','checkout',null)}</span> 
+					</label>
+					<div class="value textValInput">
+						${Resource.msg('global.requiredfield','locale',null)} <span class="requiredindicator">*</span>
+					</div>			
+					<div class="clear"><!-- FOAT CLEAR --></div>
+				</div>
+				<isinclude template="tablet/checkout/billing/carddetails"/>
+				<div class="formfield">
+					<div class="label">&nbsp;</div>
+					<div class="value">
+						<div class="floatright btn-green-flat">
+							<button value="Next" name="next" id="paymentMethodNextNoCards" type="button">
+								<span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+								<span class="forward-icon">&nbsp;</span>
+							</button>
+						</div>
+					</div>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div>
+			</isif>
+		<iselse>
+			<iscomment>guest user</iscomment>
+			<div class="formfield">
+				<label class="label noopmargin">				
+					<span class="labeltext bold">${Resource.msg('billing.enterdetailsbelow','checkout',null)}</span> 
+				</label>
+				<div class="value marTop13">
+					${Resource.msg('global.requiredfield','locale',null)} <span class="requiredindicator">*</span>
+				</div>			
+				<div class="clear"><!-- FOAT CLEAR --></div>
+			</div>
+			<isinclude template="tablet/checkout/billing/carddetails"/>
+			<div class="formfield">
+				<div class="label">&nbsp;</div>
+				<div class="value">
+					<div class="floatright btn-green-flat">
+						<button value="Next" name="next" id="paymentMethodNext" type="button">
+							<span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+							<span class="forward-icon">&nbsp;</span>
+						</button>
+					</div>
+				</div>
+				<div class="clear"><!-- FLOAT CLEAR --></div>
+			</div>
+		</isif>
+	</div>
+<iscomment>
+	<div id="PaymentMethod_BML_commented" class="paymentform billmelater">
+		<div class="helptext">${Resource.msg('billing.bmlhelp','checkout',null)}</div>
+		<form action="${URLUtils.continueURL()}" method="post" id="${pdict.CurrentForms.billing.paymentMethods.bml.htmlName}">
+			<div class="bmlform">
+				<div class="formfield bmlbirthday">
+		    		<div class="label"><isif condition="${pdict.CurrentForms.billing.paymentMethods.bml.year.mandatory}"><span class="required">*</span></isif>Date of Birth:</div>
+					<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.year}" type="select" xhtmlclass="year"/>
+					<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.month}" type="select" xhtmlclass="month"/>
+					<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.day}" type="select" xhtmlclass="day"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div><!-- END: bmlbirthday -->
+				<div class="formfield bmlssn">
+		    		<div class="label">
+		    			<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.ssn}" type="input" value="false"/>
+		    		</div>
+					<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.ssn}" type="input" label="false" xhtmlclass="ssn"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div><!-- END: bmlssn -->
+				<div class="bmltermsandconditions">
+					<iscommnet>This content asset is not getting used by our site hence commenting it to remove the accessiblity issue present is this content asset<iscontentasset aid="bml-tc"/></iscommnet>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div><!-- END: bmltermsandconditions -->
+				<div class="bmliagree">
+					<isinputfield formfield="${pdict.CurrentForms.billing.paymentMethods.bml.termsandconditions}" type="checkbox" label="true"/>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+				</div><!-- END: bmliagree -->
+			</div><!-- END: bmlform -->
+           </form>
+	</div>
+	</iscomment>
+	<div id="PaymentMethod_Custom" class="paymentform">
+		<!-- Your custom payment method implementation goes here. -->
+		${Resource.msg('billing.custompaymentmethod','checkout',null)}
+	</div>
+	
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div>		
+<div class="giftcertused" style="display:none;"></div>
+		
+		
+		
+		
+	</div>
+</div>
+<div class="collapseContent2 hide" id="newShowCardDetails">
+	<div class="newaddressform" id="newCardDetailInfo">
+		<div class="formfield">
+			<div class="label">&nbsp;</div>
+			<div class="value">
+				<span id="selectedCardLogo" class="sprite blankCard"></span>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<div class="formfield">
+			<div class="label">&nbsp;</div>
+			<div class="value">
+				<span id="selectedCardNo"></span>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<div class="formfield">
+			<div class="label">&nbsp;</div>
+			<div class="value">
+				<span class="labeltext">${Resource.msg('billing.creditcardexpires','checkout',null)}</span>
+				<span id="selectedCardExpiry"></span>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<isif condition="${pdict.CurrentCustomer.authenticated && !empty(pdict.ApplicableCreditCards)}">
+		<div class="formfield">
+			<label class="label">
+				<span class="labeltext">${Resource.msg('creditcard.cvnlabel','forms',null)}</span>
+			</label>
+			<div class="value genericinputbox">
+				<input type="text" id="formCVVCode" maxlength="4"/>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<div class="formfield">
+			<label class="label">		
+				<span class="labeltext bold"></span> 
+			</label>
+			<div class="value">
+				<div class="floatright btn-green-flat">
+					<button type="button" id="creditCardNext" name="next" value="Next">
+						<span class="btn-ic-lock">${Resource.msg('billing.nextstep','checkout',null)}</span>
+						<span class="forward-icon">&nbsp;</span>
+					</button>
+				</div>
+			</div>			
+			<div class="clear"><!-- FOAT CLEAR --></div>
+		</div>
+		</isif>
+	</div>
+</div>
+
+
+
+
+
+
+
+<iscomment><!-- TODO: 22/03/2011 the array here maps to the order of credit cards in the dropdown. 
+true/false  applies to "Requires Valid From Date? true/false--></iscomment>
+<script type="text/javascript">
+//<![CDATA[
+/***** Remove comma from year field | 08-apr*****************/
+jQ(function(){
+	var dlgCardNew = jQuery('#dialogcontainerCard').dialog({
+		bgiframe: true,
+		autoOpen: false,
+		modal: true,
+		overlay: {
+    		opacity: 0.5,
+     		background: "black"
+		},
+    	height: "auto",
+    	width: 550,
+    	resizable: false
+	});
+	dlgCardNew.parent().appendTo(jQ("#PaymentMethod_CREDIT_CARD"));
+	jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]').val('');
+	
+	 jQ('#creditCardNext').on('click', function(){
+		 if(${pdict.CurrentCustomer.authenticated}){
+			if(jQ('#formCVVCode').is(':visible')){
+		 	var tempVal = jQ.trim(jQ('#formCVVCode').val()); 
+		 	 if(tempVal !=''){
+		 		jQ('#formCVVCode').removeClass('errorclient').parents(".formfield").find(".labeltext").removeClass("errorlabel");
+				 jQ('#formCVVCode').next('.errorIcon').addClass('successIcon');
+				 
+				 jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]').val(tempVal);
+				 jQ('#formCVVCode').val('');
+				 jQ('#cardholderform').addClass('accordionOpen');
+				 //next line commented for storecollect, saved card, saved address
+				 //jQ('#newAddressContainer').removeClass('hide');
+				 
+				 jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+				 jQ(this).parents('.formfield').addClass('hide');
+				 jQ(this).parents('.formfield').prev('.formfield').addClass('hide');
+				// if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+					// jQ('#changeBillingAddress').click();
+				// }else{
+					 jQ('#addressformOuter').removeClass('hide').show().find("div:first").removeClass('hide').slideDown();
+				// }
+			 }else{
+				 jQ('#formCVVCode').addClass('errorclient').parents(".formfield").find(".labeltext").addClass("errorlabel");
+				 if(!jQ('#formCVVCode').next().is('span.errorIcon')){
+					 jQ('#formCVVCode').after('<span class="errorIcon"></span>');	 
+				 }
+				 
+			 }
+		 }else{
+			// if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+				// jQ('#changeBillingAddress').click();
+			// }else{
+				 jQ('#addressformOuter').find("div:first").removeClass('hide').slideDown();
+			// }
+		 }
+		}else{
+			 //if("${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}" == "true"){
+				 //jQ('#changeBillingAddress').click();
+			 //}else{
+				 jQ('#addressformOuter').find("div:first").removeClass('hide').slideDown();
+			// }
+		 }
+		 
+	 });
+	 jQ('#popupContinueCard').on('click', function(e){
+		 
+		 e.preventDefault();
+			var payMethodForm = jQuery("${'#' + pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}");
+			removeValidFrom();
+			if(payMethodForm.valid()){
+				 jQ('#paymentmethods').slideUp();
+				 jQ('#cardholderform').addClass('accordionOpen');
+				 jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+				 jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+				 
+				 
+				 jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+				 
+				 var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+				 newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+				 jQ("#selectedCardNo").html(newMaskedNumber);
+				 
+				 jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+				 //jQ('#addressformOuter').find("div:first").slideDown();
+				 jQuery('#dialogcontainerCard').dialog('close');
+			    jQ('#creditCardNext').parents('.formfield').addClass('hide');
+			 	 jQ('#creditCardNext').parents('.formfield').prev('.formfield').addClass('hide');
+			 	jQ('#addressformOuter').removeClass('hide').slideDown();
+			 	jQ('#newDeliveryAddress').parents('.newaddressform').hide();
+				//jQ('#newAddressContainer').hide();
+				 jQ('#newDeliveryAddress').parents('.collapseContent2').addClass('hide');
+			}
+		 
+	 });
+	 jQ('#paymentMethodNext').on('click', function(e){
+		 e.preventDefault();
+		 if(!${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}){
+			 if(jQ("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").is(':visible')){
+				 removeValidFrom();
+				var tempValid = true;
+				 
+				 $("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").each(function(){
+					 if($(this).valid()==0){
+						 tempValid = false;
+					 }
+				 });
+				 
+				 if(jQ("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").is(":visible")){
+					 $("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").each(function(){
+						 if($(this).valid()==0){
+							 tempValid = false;
+						 }
+					 });
+				 }
+				 if(tempValid){
+					 jQ('#cardholderform').addClass('accordionOpen');
+					 jQ('#paymentmethodform').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+					 jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					 
+					 jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+					 var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+					 newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+					 jQ("#selectedCardNo").html(newMaskedNumber);
+					 jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+					 jQ('#addressformOuter').find("div:first").removeClass('hide').slideDown();
+					 jQ('#creditCardNext').parents('.formfield').removeClass('hide');
+					 jQ('#creditCardNext').parents('.formfield').prev('.formfield').removeClass('hide');
+					 jQ('#formCVVCode').val('');
+					 jQ('#newDeliveryAddress').parents('.newaddressform').hide();
+					//jQ('#newAddressContainer').hide();
+					 jQ('#newDeliveryAddress').parents('.collapseContent2').addClass('hide');
+					 jQ('#newAddressContainer').addClass('hide');
+					 jQ('#addressformOuter').removeClass('hide').slideDown();
+				 }
+			 }
+		 }else{
+			 var tempValid = true;
+			 
+			 $("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").each(function(){
+				 if($(this).valid()==0){
+					 tempValid = false;
+				 }
+			 });
+			 
+			 if(jQ("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").is(":visible")){
+				 $("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").each(function(){
+					 if($(this).valid()==0){
+						 tempValid = false;
+					 }
+				 });
+			 }
+			 if(tempValid){
+				 if((jQ('select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]').val()!='')||(jQ('#newCardDetailInfo').is(':visible'))){
+					 jQ('#cardholderform').addClass('accordionOpen');
+					 jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+					 jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					 
+					 jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+					 var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+					 newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+					 jQ("#selectedCardNo").html(newMaskedNumber);
+					 jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+					// jQ('#newDeliveryAddress').parents('.newaddressform').hide();
+					/* if(${pdict.CurrentCustomer.authenticated}){
+						 jQuery('#dialogcontainerNew').dialog('option', 'title', "${Resource.msg('billing.changedetails','checkout',null)}");
+					 }else{
+						 jQuery('#dialogcontainerNew').dialog('option', 'title', "${Resource.msg('billing.enterdetails','checkout',null)}");
+						 
+					 }
+					 jQuery('#dialogcontainerNew').dialog('open');
+				  	 jQuery('#dialogcontainerNew').parent().children().children(".ui-dialog-titlebar-close").hide();
+					 
+					 
+					 for all dialogue boxes - set to center in both orientations - Shahzad 
+				 	 var popupW = jQuery('#dialogcontainerNew').width();	
+				 	jQuery('#dialogcontainerNew').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%"});
+					 /* end */
+					jQ('#newAddressContainer').addClass('hide');
+					jQ('#addressformOuter').removeClass('hide').slideDown();
+					 //jQ('#billingAddressNext').click();
+				 }
+		 }
+		  
+		 
+	 }
+	 });
+	 jQ('#paymentMethodNextNoCards').on('click', function(e){
+		 e.preventDefault();
+		 if(!${pdict.Basket.defaultShipment.shippingMethod.ID.equalsIgnoreCase(Resource.msg('shipping.deliverymethod.storecollection','checkout',null))}){
+			 if(jQ("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").is(':visible')){
+				 removeValidFrom();
+				 var tempValid = true;
+				 $("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").each(function(){
+					 if($(this).valid()==0){
+						 tempValid = false;
+					 }
+				 });
+				 
+				 if(jQ("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").is(":visible")){
+					 $("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").each(function(){
+						 if($(this).valid()==0){
+							 tempValid = false;
+						 }
+					 });
+				 }
+				 
+				 
+				 if(tempValid){
+					 jQ('#cardholderform').addClass('accordionOpen');
+					 jQ('#paymentmethodform').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+					 jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					 
+					 jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+					 var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+					 newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+					 jQ("#selectedCardNo").html(newMaskedNumber);
+					 jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+					 jQ('#addressformOuter').find("div:first").removeClass('hide').slideDown();
+					 jQ('#newDeliveryAddress').parents('.newaddressform').hide();
+					 jQ('#newDeliveryAddress').parents('.collapseContent2').addClass('hide');
+					 jQ('#creditCardNext').parents('.formfield').addClass('hide');
+				 	 jQ('#creditCardNext').parents('.formfield').prev('.formfield').addClass('hide');
+				 	 jQ('#addressformOuter').removeClass('hide').show();
+				 }
+			 }
+		 }else{
+			 var tempValid = true;
+			 
+			 $("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.cvn.htmlName}]").each(function(){
+				 if($(this).valid()==0){
+					 tempValid = false;
+				 }
+			 });
+			 
+			 if(jQ("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").is(":visible")){
+				 $("input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}], input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").each(function(){
+					 if($(this).valid()==0){
+						 tempValid = false;
+					 }
+				 });
+			 }
+			 if(tempValid){
+				 if((jQ('select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]').val()!='')||(jQ('#newCardDetailInfo').is(':visible'))){
+					 jQ('#cardholderform').addClass('accordionOpen');
+					 jQ('#paymentmethodform').removeClass('accordionOpen').addClass('done').next('div.collapseContent').find('div:first').slideUp();
+					 jQ('#paymentmethodform').nextAll('div.collapseContent2').removeClass('hide').find('div:first').removeClass('hide').slideDown();
+					 
+					 jQ('#selectedCardLogo').removeClass('visa master amex blankCard').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+					 var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+					 newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+					 jQ("#selectedCardNo").html(newMaskedNumber);
+					 jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+					/*
+					 if(${pdict.CurrentCustomer.authenticated}){
+						 jQuery('#dialogcontainerNew').dialog('option', 'title', "${Resource.msg('billing.changedetails','checkout',null)}");
+					 }else{
+						jQuery('#dialogcontainerNew').dialog('option', 'title', "${Resource.msg('billing.enterdetails','checkout',null)}");
+						 
+					 }
+					 jQuery('#dialogcontainerNew').dialog('open');
+				  	 jQuery('#dialogcontainerNew').parent().children().children(".ui-dialog-titlebar-close").hide();*/
+					 
+					  
+					 /* for all dialogue boxes - set to center in both orientations - Shahzad 
+				 	 var popupW = jQuery('#dialogcontainerNew').width();	
+				 	 jQuery('#dialogcontainerNew').parent().css({ "marginLeft":-(popupW/2)+"px", "left":"50%"});
+					 
+					 /* end */
+					 //jQ('#popupContinueAddress')
+					// jQ('#billingAddressNext').click();
+					 jQ('#newAddressContainer').addClass('hide');
+						jQ('#addressformOuter').removeClass('hide').slideDown();
+				 }
+		 	}
+		 }
+	 });
+	 jQ('#changePaymentMethod').on('click', function(e){
+		 e.preventDefault();
+		 jQ('select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]').val('');
+		 jQ('#cardholderform').removeClass('accordionOpen').removeClass('done');
+		 jQ('#paymentmethodform').addClass('accordionOpen').next('div.collapseContent').find('div:first').removeClass('hide').slideDown();
+		 jQ('#paymentmethodform').nextAll('div.collapseContent2').addClass('hide').find('div:first').slideUp();
+		 jQ('#paymentmethods').removeClass('hide').show().slideDown();
+		 jQ('#newEnterCardDetails').removeClass('hide').slideDown();
+		 jQ('#newShowCardDetails').slideUp();
+		 jQ('#contactdetailsform').removeClass('accordionOpen');
+		 jQ('#newShowBillingAddress').slideUp();
+		 jQ('#newAddressContainer').addClass('hide');
+	 });
+	 jQ('#enterNewCard').on('click', function(e){
+		 e.preventDefault();
+		 
+			var dialogTitle = "${Resource.msg('billing.enteranewcard','checkout',null)}";
+			jQuery('#dialogcontainerCard').dialog('option', 'title', dialogTitle);
+			jQ('#dialogcontainerCard').find('input').not("input[type=checkbox]").val('');
+			
+			var validator = $("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").validate();
+    		validator.resetForm();//remove validation
+    		$("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").find('input, select').nextAll('.errorIcon, .errorclient').remove();
+    		$("form[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.htmlName}]").find('input, select').parents('.formfield').find('.errorlabel').removeClass('errorlabel');
+    		
+			jQuery('#dialogcontainerCard').dialog('open');
+			/* for all dialogue boxes - set to center in both orientations - Shahzad */
+		 	var popupW = jQuery('#dialogcontainerCard').width();	
+ 			jQuery('#dialogcontainerCard').parent().css({ "marginLeft":-(popupW/2)+"px","left":"50%"});
+ 			jQ('#dialogcontainerCard .expirationdate .month .value span input').attr("value","${Resource.msg('billing.month','checkout',null)}");
+			jQ('#dialogcontainerCard .expirationdate .year .value span input').attr("value","${Resource.msg('billing.year','checkout',null)}");
+			jQ('#dialogcontainerCard .validfromdate .month .value').append("<div class=\"month caption\">${Resource.msg('billing.month','checkout',null)}<\/div>");
+			jQ('#dialogcontainerCard .validfromdate .year .value').append("<div class=\"year caption leftspacer\">${Resource.msg('billing.year','checkout',null)}<\/div>");	
+	 
+ 			 	
+			 
+			 /* end */
+	 });
+	 jQ("select[id=${pdict.CurrentForms.billing.paymentMethods.creditCardList.htmlName}]").on('change', function(){
+	 	showValidFrom(this.value);
+	 	if(jQ(this).val()!=''){
+		 	jQ('#paymentmethods').slideUp();
+			//jQ('#cardholderform').addClass('accordionOpen');
+			jQ('#paymentmethodform').removeClass('accordionOpen');//.addClass('done').next('div.collapseContent').find('div:first').slideUp();
+			jQ('#paymentmethodform').nextAll('div.collapseContent2').first().removeClass('hide').find('div:first').removeClass('hide').slideDown();
+			 
+			/*
+			jQ('#selectedCardLogo').removeClass('visa master amex').addClass(jQ("select[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]").val().toLowerCase().replace(/\s/g, ''));
+			var newMaskedNumber = jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]").val();
+			newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+			jQ("#selectedCardNo").html(newMaskedNumber);
+			jQ('#selectedCardExpiry').html(jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]").val() + '<span class="datedivider">/</span>' + jQ("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]").val());
+			*/
+			
+			//jQ('#addressformOuter').find("div:first").slideDown();
+			var cardUUID = jQuery(this).val();
+			if(!cardUUID) return false;
+			populateCreditCardInfo(cardUUID);
+			jQ('#formCVVCode').val('');
+			jQ('#creditCardNext').parents('.formfield').removeClass('hide');
+		 	jQ('#creditCardNext').parents('.formfield').prev('.formfield').removeClass('hide');
+		 	jQ('#formCVVCode').val('');
+	 	}
+	 });
+	 
+	 selectboxvalue=jQ('.selectbox').val();
+	 showValidFrom(selectboxvalue);
+	 jQ('#paymentmethods').on('change', '.cardtype select', function(){
+		 showValidFrom(this.value); 
+	 });
+ });
+ function populateCreditCardInfo(cardID){
+		// load card details
+		var url = app.util.appendParamToURL("${URLUtils.https('COBilling-SelectCreditCard')}", "creditCardUUID", cardID);
+		var result = app.ajax.getJson({
+			url: url,
+			callback: function(data) {
+				if(!data || !data.creditCard) {
+					return false;
+				}
+				jQ('select[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}]').val(data.creditCard.type);
+				jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.owner.htmlName}]').val(data.creditCard.holder);
+				jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.number.htmlName}]').val(data.creditCard.number);
+				jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]').val(data.creditCard.startMonth);
+				jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]').val(data.creditCard.startYear);
+				jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.month.htmlName}]').val(data.creditCard.expirationMonth);
+				jQ('input[id=${pdict.CurrentForms.billing.paymentMethods.creditCard.year.htmlName}]').val(data.creditCard.expirationYear);
+				
+				jQ("#selectedCardLogo").removeClass('visa master amex blankCard').addClass((data.creditCard.type).toLowerCase().replace(/\s/g, ''));
+				var finalYearValue = "";
+				if(data.creditCard.expirationYear.indexOf(",") > -1){
+					finalYearValue = data.creditCard.expirationYear.replace(/,/g,'');
+				}
+				if(data.creditCard.expirationYear.indexOf(".") > -1){
+					finalYearValue = data.creditCard.expirationYear.replace(/\./g,'');
+				}
+				jQ("#selectedCardExpiry").html(data.creditCard.expirationMonth + '<span class="datedivider">/</span>' + finalYearValue);
+				var newMaskedNumber = data.creditCard.number;
+				newMaskedNumber = 'XXXX-XXXX-XXXX-X' + newMaskedNumber.toString().substring(13);
+				jQ("#selectedCardNo").html(newMaskedNumber);
+				
+			}
+		});
+	}
+  
+$(document).ready(function() {
+	 $('.expirylabel').click(function() {
+	     $('.expire_month').focus();
+	 });
+	 
+	 
+		
+			
+	 $('.expirationdate .month .value input , .expirationdate .year .value input').css("color","#999");
+	 
+	$('.expirationdate .month .value input').attr("value","${Resource.msg('billing.month','checkout',null)}");
+	$('.expirationdate .year .value input').attr("value","${Resource.msg('billing.year','checkout',null)}");
+	$('.validfromdate .month .value').append("<div class=\"month caption\">${Resource.msg('billing.month','checkout',null)}<\/div>");
+	$('.validfromdate .year .value').append("<div class=\"year caption leftspacer\">${Resource.msg('billing.year','checkout',null)}<\/div>");	
+
+	$("input.expire_year, input.expire_month").each(function(){
+		var storedVal = $(this).val();	
+		
+		$(this).focus(function(){
+			$(this).css("color","#333");				
+			var changedVal = $(this).val();
+			if(changedVal == storedVal){
+				$(this).val("");
+				$(this).css("color","#333");
+			}
+		});
+		$(this).blur(function(){
+			var changedVal = $(this).val();
+			if(changedVal == ""){
+				$(this).val(storedVal);
+				$(this).css("color","#999");
+			}
+		});
+	});
+	 
+	//Praveen:- fixed for QC defect - 163
+	if(${pdict.CurrentForms.billing.paymentMethods.creditCard.year.value} != null)
+	{
+		$('.expirationdate .year input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.year.value});
+	}
+	if(${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.value} != null)
+	{
+		$('.validfromdate .year input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.value});
+	}
+	
+	//aliddl : fix for month not loading
+	if(${pdict.CurrentForms.billing.paymentMethods.creditCard.month.value} != null)
+	{
+		$('.expirationdate .month input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.month.value});
+	}
+	if(${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.value} != null)
+	{
+		$('.validfromdate .month input:textbox').val(${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.value});
+	}
+	
+	/*
+	if($('.expirationdate .year input:textbox').val().indexOf(",") > -1)
+	{
+		$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/,/g,''));
+		$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/,/g,''));
+	}
+	if($('.expirationdate .year input:textbox').val().indexOf(".") > -1)
+	{
+		$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/\./g,''));	
+		$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/\./g,''));
+	}
+	*/
+	
+	//$('.expirationdate .year input:textbox').val($('.expirationdate .year input:textbox').val().replace(/,/g,''));	
+	//$('.validfromdate .year input:textbox').val($('.validfromdate .year input:textbox').val().replace(/,/g,''));	
+	
+	/*Praveen:-changed for '3954482', Credit Card Values | On Load*/
+	selectboxvalue=jQuery('.selectbox').val();
+	showValidFrom(selectboxvalue);
+	
+	jQuery(".cardtype select").change(function() {
+		showValidFrom(this.value);
+		clearCardFields();
+	}); 
+});
+
+/*Praveen:-changed for '3954482' */
+function showValidFrom(card){
+	for(i=0; i<paymentCardList.length; i++){
+		if(paymentCardList[i] == card){
+			if(null != lengthRestrictionList[i] && lengthRestrictionList[i] == "true"){
+				$(".creditcard_updated").addClass('creditcard_maestro');
+				$(".creditcard_maestro").removeClass('creditcard_updated');
+				//INC000006782556INC000006782459 by:DAMODAR,extend size of filed to accept 21 digit, earlier it was 19 -->
+				$(".creditcard_maestro").attr('maxlength','21');
+			}else{
+				$(".creditcard_maestro").addClass('creditcard_updated');
+				$(".creditcard_updated").removeClass('creditcard_maestro');
+				//INC000006782556INC000006782459 by:DAMODAR,extend size of filed to accept 19 digit, earlier it was 16 -->
+				$(".creditcard_updated").attr('maxlength','19');
+			}
+			break;
+		}
+	}
+}
+function removeValidFrom(){
+	var ccType = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.type.htmlName}').value;
+	if (ccType != "${Resource.msg('creditcard.amex','forms',null)}") {
+		var ccvalidFromMonth = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}');
+		if(ccvalidFromMonth != null && (ccvalidFromMonth.value == null|| ccvalidFromMonth.value == "")){
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromMonth.htmlName}]").remove();
+		}
+		var ccvalidFromYear = document.getElementById('${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}');
+		if(ccvalidFromYear != null && (ccvalidFromYear.value == null || ccvalidFromYear.value == "")){
+			jQuery("input[name=${pdict.CurrentForms.billing.paymentMethods.creditCard.ccValidFromYear.htmlName}]").remove();
+		}
+	}
+}
+function clearCardFields(){
+	$('#PaymentMethod_CREDIT_CARD input:textbox').each(
+		function(){
+			if (!$(this).hasClass("alpha_fr")){
+				$(this).val("");
+			}
+		}
+	)
+}
+
+/*
+app.resources["creditcard_validfrom_map"] = {
+
+	"0" : false,
+	"1" : true ,
+	"2" : false
+}
+
+
+
+$(document).ready(function() {
+	jQuery(".expirationdate .month input:textbox").val("MM");
+	jQuery(".expirationdate .year input:textbox").val("YYYY");
+
+	jQuery(".expirationdate .month input:textbox").click(function() {
+		jQuery(".expirationdate .month input:textbox").val("");
+	});
+	jQuery(".expirationdate .year input:textbox").click(function() {
+		jQuery(".expirationdate .year input:textbox").val("");
+	});
+});
+*/
+//]]>
+</script>

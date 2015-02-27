@@ -1,0 +1,104 @@
+<!--- TEMPLATENAME: basket_to_vr.isml --->
+<!-- ** Send Virtual Basket to Email Section ** -->
+<div id="emailVirtualBasket">
+	<div class="emailBasketSection">
+		<p class="emailBasketTitle">${Resource.msg('sendbasket.label.email','virtualbasket',null)}</p>
+		<p class="emailInputLabel">${Resource.msg('sendbasket.label.inputemail','virtualbasket',null)}</p>
+		<div class="inlineDiv">
+			<input type="email" name="txtEmail" class="email inputEmaiSendVirtualBasket deletable"/>
+			<div class="emailSubmitButton">
+				<a class="button hilightedNext" id="btn_send"><span>${Resource.msg('sendbasket.action.send','virtualbasket',null)}</span></a>
+			</div>
+		</div>
+		<div></div>
+		<br>
+		<p class="emailSubmitError">${Resource.msg('sendbasket.email.invalid','virtualbasket',null)}</p>
+	</div>
+	<div class="bottomCurve">
+		<div class="bottomCurveCenter"></div>
+		<div class="bottomCurveRight" ></div>
+	</div>
+</div>
+<!-- ** Confirmation of Send Virtual Basket to Email ** -->
+<div id="emailVirtualBasketSuccessful">
+	<div class="emailBasketSuccessSection" align="center">
+		<div class="sucessIcon"></div>
+		<p class="successTitleFirst">${Resource.msg('sendbasket.success.msg1','virtualbasket',null)}</p>
+		<p class="successTitleSecond">${Resource.msg('sendbasket.success.msg2','virtualbasket',null)} <span class="email" id="email">Email_Comes_Here</span></p>
+	</div>
+	<div class="emailSuccessOKButton">
+				<a class="button" id="btn_ok"><span>${Resource.msg('sendbasket.action.ok','virtualbasket',null)}</span></a>
+		</div>
+	<div class="bottomCurve">
+		<div class="bottomCurveCenter"></div>
+		<div class="bottomCurveRight" ></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	/* send the virtual basket */
+	$("#btn_send").click(function(){		
+		var obj = $(this);
+		var selectedEmailID = jQuery("input[name=txtEmail]").val();
+		if ((selectedEmailID != '') && /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/.test(selectedEmailID)) {	
+
+			var storeID = "${pdict.orderPoint}";
+			var deviceID = "${pdict.deviceID}";
+			var orderChannel = "${pdict.orderChannel}";
+			
+			var requestJSONObject = '{"Email":"' + selectedEmailID + '",'+'"storeID":"'+storeID+'",'+'"deviceID":"'+deviceID+'",'+'"orderChannel":"'+orderChannel+'"}';		
+			
+			jQuery.ajax({
+				dataType: "html",
+				url		: app.util.appendParamToURL("${URLUtils.url('VRMgr-SendBasketToEmail')}", "requestJSONObject", requestJSONObject),
+				cache	: true,
+				success	: function(response) {
+					//jQuery("#emailVirtualBasket").html(response);
+					$("#email").html(selectedEmailID);
+					$("#emailVirtualBasket").hide();
+					$("#emailVirtualBasketSuccessful").show();
+					
+					//Praveen :- Setting the Omniture variables only in case of success, when basket is successfully sent. 
+					s.linkTrackVars = "${Resource.msg('omniture.basketHeader.basketSent.linkTrackVars','omniture',null)}";
+					s.linkTrackEvents = "${Resource.msg('omniture.basketHeader.basketSent.linkTrackEvents','omniture',null)}";
+					s.events = "${Resource.msg('omniture.basketHeader.basketSent.event','omniture',null)}";			
+					s.tl(obj,'o', "value");	
+					//Omniture end
+				}
+			});	
+		} else {
+			$(".emailSubmitError").show();
+			$(".inputEmaiSendVirtualBasket").focus();
+		}
+		return false;
+	});	
+	
+	/* Close the Popup */
+	$("#btn_ok").click(function(){
+    	var dialogContainer = jQuery("#dialogcontainer");
+        dialogContainer = dialogContainer.eq(dialogContainer.length-1)
+        dialogContainer.dialog("close");
+        jQuery(document.body).trigger("dialogClosed");
+        return false;
+   	});	
+	
+	$(document).ready(function() {
+        $('#emailVirtualBasket input.deletable').wrap('<span class="deleteicon" />').after($('<span/>').click(function() {
+            $(this).prev('input').val('').focus();
+            $("#emailVirtualBasket span.deleteicon span").hide();
+        }));
+        
+        $('input.deletable').bind("keyup focus",function(event){
+        	if($(this).val() != ""){
+        		$("#emailVirtualBasket span.deleteicon span").show();
+        	}
+        	else{
+        		$("#emailVirtualBasket span.deleteicon span").hide();
+        	}
+        	if(event.keyCode == 13){
+        		$(this).blur();
+        		$("#btn_send").trigger("click");
+        	}
+        });
+    });
+</script>

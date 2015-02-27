@@ -1,0 +1,81 @@
+/**
+* Demandware Script File
+* Script file to call payPalAuthReversal service
+*
+* @<paramUsageType> <paramName> : <paramDataType> [<paramComment>]
+*
+* where
+*   <paramUsageType> can be either 'input' or 'output'
+*   <paramName> can be any valid parameter name
+*   <paramDataType> identifies the type of the parameter
+*   <paramComment> is an optional comment
+*
+* For example:
+*
+*   @input order : dw.order.Order
+*	@output ReasonCode : dw.util.BigInteger 
+*   @output Decision : String
+*/
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.rpc );
+importPackage( dw.util ); 
+importPackage( dw.customer );
+
+importScript('cybersource/libCybersource.ds');
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var order : String = pdict.order;
+	var paymentInstruments : Collection = order.getPaymentInstruments();
+	var paymentInstr : OrderPaymentInstrument = null;
+	for each (var paymentInstrument : OrderPaymentInstrument in paymentInstruments) {
+			if(paymentInstrument.getPaymentMethod().equals('PayPal')) {
+ 				paymentInstr = paymentInstrument;
+				break;	
+			}	
+		}
+	var orderPaymentTransaction : PaymentTransaction = paymentInstr.getPaymentTransaction();
+ 	var reservationNumber : String = orderPaymentTransaction.getTransactionID();
+	var CybersourceHelper = getCybersourceHelper();
+	var csReference : WebReference = webreferences.CyberSourceTransactionNew;//refers to the v 1.97 wsdl
+	var service : Stub = csReference.getService("TransactionProcessor", "portXML");
+	CybersourceHelper.setEndpoint(service);
+	if(!CybersourceHelper.createPayPalHeader(service)){
+			return PIPELET_ERROR;
+	}
+	var request = new csReference.RequestMessage();
+	request.payPalAuthReversalService = csReference.PayPalAuthReversalService(); 
+	request.payPalAuthReversalService.run = true;
+	request.payPalAuthReversalService.paypalAuthorizationId = orderPaymentTransaction.custom.paypalAuthorizationId; 
+	request.merchantID = orderPaymentTransaction.custom.merchantID;
+	request.merchantReferenceCode = orderPaymentTransaction.custom.merchantReferenceCode;
+	request.payPalAuthReversalService.paypalEcDoPaymentRequestID= reservationNumber;
+	request.payPalAuthReversalService.paypalEcDoPaymentRequestToken= orderPaymentTransaction.custom.requestToken;
+	
+	var response = null;
+	try{
+		response = service.runTransaction(request);
+	}catch(e){
+		Logger.error("[PayPalAuthReversalService.ds] Error in PayPal request ( {0} )",e.message);
+		if(e.message.indexOf("SocketTimeoutException") != -1) {
+            pdict.reasonCode = 999; //set timeout error code 999
+            return PIPELET_NEXT;
+		} 
+		if(empty(response) || response.decision == null || response.reasonCode == null) {	
+			pdict.Decision = "ERROR";
+		}      
+	}
+	if(response == null) {
+		Logger.getRootLogger().fatal("[PayPalAuthReversalService.ds] Error in PayPal request: null response");		
+		pdict.Decision = "ERROR";
+		return PIPELET_ERROR;
+	}
+	if(response.reasonCode != 100) {	
+			return PIPELET_ERROR;
+		}
+	pdict.ReasonCode=response.reasonCode;
+	pdict.Decision = response.decision;
+	
+    return PIPELET_NEXT;
+}

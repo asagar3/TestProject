@@ -1,0 +1,120 @@
+<!--- TEMPLATENAME: customobjectlisting.isml --->
+<isdecorate template="application/MenuFrame">
+
+<iscontent type="text/html" charset="UTF-8" compact="true">
+<isinclude template="util/bmmodules">
+<style type="text/css">
+   .LOG_INFO
+   {
+      background-color: #99bbff;
+   }
+   
+   .LOG_DEBUG 
+   {
+     background-color: #ccff99;
+   
+   }
+   
+   .LOG_ERROR
+   {
+     background-color: #ff9966;
+   
+   }
+
+   .LOG_CRITICAL
+   {
+     background-color: #ff9966;
+   
+   }
+
+   .LOG_WARN
+   {
+     background-color: #ffcc66;
+   } 
+  
+   .text_black
+   {
+     font-color: #000000;
+     color: #000000;
+   }     
+   
+    .strong {font-weight: bold;}
+    .pageBrowser{}
+	.pageBrowser .pagination ul {margin:auto;}
+	.pageBrowser .pagination li {list-style-type:none; float:left; margin-left:5px;}
+	.pageBrowser .pagination a {text-decoration:underline;}
+	.pageBrowser .pagination .nextpage a {text-decoration:none;}
+	.pageBrowser .pagination .previouspage a {text-decoration:none;}
+	.pageBrowser .labelPage {padding:3px;margin-right:20px;}
+	.pageBrowser .pageBrowserCell .pageBrowser {height:auto;}
+</style>
+		
+		<isif condition="${pdict.CurrentHttpParameterMap.action.value == 'create'}">
+			<isset name="mode" value="${'Create'}" scope="PAGE">
+		<iselse>
+			<isset name="mode" value="${'Edit'}" scope="PAGE">		
+		</isif>
+		
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+					<isscript>
+						
+						/*importScript('bc_utils:util/libUtils.ds');*/
+						
+						var typeDefinitions : dw.util.ArrayList =  new dw.util.ArrayList();
+						var typeGroups =  dw.object.CustomObjectMgr.describe(pdict.Type).getAttributeGroups();
+					</isscript>
+					<tr>
+						<td class="table_title aldi" width="100%">
+							<isprint value="${mode + ' ' + pdict.Type}">
+						</td>
+					</tr>
+					<tr>
+						<td class="table_title_description e s w" style="text-align: center; ">
+						<form action="${dw.web.URLUtils.continueURL()}" method="POST">
+						<isif condition="${Mode == 'Edit'}">
+							<input type="hidden" name="oid" value="${pdict.CurrentHttpParameterMap.oid.value}">
+						</isif>
+							<table class="n s e w" style="margin: auto;">
+								<isloop iterator="${typeGroups}" alias="typeGroup" status="loopstate">
+									<tr>
+										<td class="table_header aldi" colspan="2">${typeGroup.displayName}</td>
+									</tr>
+									<isloop iterator="${typeGroup.getAttributeDefinitions()}" alias="typeAttribute" status="loopstate">
+										<isif condition="${!(typeAttribute.isSystem())}">
+											<tr>
+												<td class="fielditem2">${typeAttribute.displayName}</td>
+												<isscript>
+													var value = '';
+													if (!empty(pdict.CustomObject)) {
+														value = pdict.CustomObject.custom[typeAttribute.ID];
+													}
+													var isReadOnly = "false";
+													
+													var fieldName = typeAttribute.ID;
+													if (mode == "Create" && typeAttribute.ID == pdict.Config.custom.primaryKey) {
+//														fieldName = 'oid';	
+														fieldName = typeAttribute.ID;
+													} else {
+														fieldName = typeAttribute.ID;
+													}
+												</isscript>
+												<td class="inputfield_en"><isbminputfield fieldtype="${typeAttribute.valueTypeCode}" fieldvalue="${value}" fieldname="${fieldName}" enumvalues="${typeAttribute.values}" readonly="${isReadOnly}"></td>
+											</tr>
+										</isif>
+									</isloop>
+										
+								</isloop>
+								<tr>
+									<td class="table_header aldi" colspan="2" style="text-align: right;">
+										<input type="submit" class="button" value="Cancel" name="cancel"> 
+										<input type="submit" id="apply" class="button" value="Apply changes" name="apply"> 
+										<input type="submit" class="button" value="Save & exit" name="save">
+									</td>
+								</tr>
+							</table>
+						</form>
+						</tr>
+					</table>
+   
+<!--- End: extension/exportresult.isml --->
+</isdecorate>

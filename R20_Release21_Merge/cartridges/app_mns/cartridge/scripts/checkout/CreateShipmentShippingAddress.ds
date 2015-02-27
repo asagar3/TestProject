@@ -1,0 +1,137 @@
+/**
+ * Creates a shipping address for the given shipment and copies
+ * the address details stored in the given address form to the
+ * created shipment address.
+ * The method additionally sets the given gift options to the 
+ * shipment.
+ *
+ * @input Shipment : dw.order.Shipment The shipment to create the address for.
+ * @input AddressForm : dw.web.FormGroup The address form.
+ * @input GiftOptionsForm : dw.web.FormGroup The gift options form.
+ * @input doorCode : String
+ * @input deliveryInstructions : String
+ * @output ShippingAddress : dw.order.OrderAddress The shipment's shipping address.
+ */
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.web );
+importScript('checkout/Utils.ds');
+
+var klarnaHouseNo : String = null;
+var klarnaStreetName: String = null;
+var klaraHouseExtension : String = null;
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	var shipment : Shipment = pdict.Shipment;
+	var addressFields : FormGroup = pdict.AddressForm.addressFields;
+	var giftOptions : FormGroup = pdict.GiftOptionsForm;
+	var shippingAddress : OrderAddress = shipment.shippingAddress;
+	var doorCode : String = pdict.doorCode;
+	var deliveryInstructions : String = pdict.deliveryInstructions;
+	var deliveryType = shipment.shippingMethodID;
+	//Praveen: Making a call for seprating the street name and klarnaHouseNo
+	
+	var splitedAddress : Array = splitAddress(addressFields.address1.htmlValue);
+	if(null != splitedAddress){
+		klarnaStreetName = splitedAddress[0];
+		klarnaHouseNo = splitedAddress[1];
+		klaraHouseExtension = splitedAddress[2];
+	}
+	
+	// if the shipment has no shipping address yet, create one
+	if( shippingAddress == null )
+	{
+		shippingAddress = shipment.createShippingAddress();	
+	}
+	
+	// copy the address details
+	shippingAddress.setFirstName( addressFields.firstName.value );
+	shippingAddress.setLastName( addressFields.lastName.value );
+	shippingAddress.setAddress1( addressFields.address1.value );
+	shippingAddress.custom.streetName =  addressFields.streetName.value ;
+	shippingAddress.setAddress2( addressFields.address2.value );
+	shippingAddress.setCity( addressFields.city.value );
+	shippingAddress.setPostalCode( addressFields.zip.value );
+	if (shippingAddress.postalCode == null)
+	{
+		shippingAddress.setPostalCode( addressFields.zip.htmlValue );
+	}
+	shippingAddress.setStateCode( addressFields.states.state.value );
+//	shippingAddress.setCountryCode( addressFields.country.value );
+	
+	if(!empty(addressFields.deliveryStoreID)){
+		shippingAddress.custom.deliveryStoreID = addressFields.deliveryStoreID.value;
+	}
+	if(deliveryType == "COLLECTION_POINT"){
+		shippingAddress.custom.deliveryStoreID = "COLP";
+		shippingAddress.setAddress1(addressFields.address1.value.substring(0, 35)); 
+	}
+	
+	// CR 810
+		if(addressFields.country.value=="" || addressFields.country.value==null)
+		{
+			shippingAddress.setCountryCode( dw.web.Resource.msg('country.code','forms',null) );
+			//address.setCountryCode(dw.web.Resource.msg('country.code','forms',null) );
+		}
+		else
+		{
+			shippingAddress.setCountryCode( addressFields.country.value );	
+		}
+	
+	var phone : String = "";
+	if (addressFields.phone.value!=null) {
+		phone = addressFields.phone.value.replace(/\s+/g, ""); 
+	} else {
+		phone = addressFields.phone.value;
+	}
+	shippingAddress.setPhone( phone );
+	shippingAddress.setPostBox( addressFields.postBox.value );
+	shippingAddress.setTitle( addressFields.title.value );
+	//populating the custom fields
+	
+	
+	shippingAddress.custom.residence = addressFields.residence.value;
+	var alternatePhone : String = "";
+	if (addressFields.alternateContactNumber.value!=null) {
+		alternatePhone = addressFields.alternateContactNumber.value.replace(/\s+/g, "");
+	} else {
+		alternatePhone = addressFields.alternateContactNumber.value;
+	}
+	shippingAddress.custom.alternateContactNumber = alternatePhone; 
+		
+	shipment.custom.doorCode = doorCode ;
+	shipment.custom.deliveryInstructions = deliveryInstructions ;
+	shipment.custom.shipmentStatus = "Not Shipped" ;
+	
+	//Praveen : Following code to be executed for EU only.
+	var siteID : String = Site.current.ID;
+	if("EUSite".equals(siteID)){
+		shippingAddress.custom.address3 =  addressFields.address3.value ;
+		
+		//Praveen: Setting the klarnaHouseNo and streetName in shippingAddress
+		if(!empty(klarnaHouseNo)){
+			shippingAddress.custom.klarnaHouseNo = klarnaHouseNo;
+		}
+		if(!empty(klarnaStreetName)){
+			shippingAddress.custom.klarnaStreetName = klarnaStreetName;
+		}	
+		if(!empty(klaraHouseExtension)){
+			shippingAddress.custom.klaraHouseExtension = klaraHouseExtension;
+		}
+		
+	}
+	
+	// copy the gift options
+	if( giftOptions != null)
+	{
+		shipment.setGift( giftOptions.isGift.value );
+		shipment.setGiftMessage( giftOptions.giftMessage.value );
+	}
+	
+	// output shipping address
+	pdict.ShippingAddress = shippingAddress;
+		
+    return PIPELET_NEXT;
+}
+
